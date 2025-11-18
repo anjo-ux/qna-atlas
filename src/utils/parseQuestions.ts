@@ -232,3 +232,68 @@ function createSectionStructure(sectionMap: Map<string, Map<string, Question[]>>
     return { id, title, subsections };
   }).filter(section => section.subsections.length > 0);
 }
+
+export function getSectionStructure() {
+  const sectionOrder = [
+    { id: 'comprehensive', title: 'Section 1: Comprehensive' },
+    { id: 'hand-lower-extremity', title: 'Section 2: Hand and Lower Extremity' },
+    { id: 'craniomaxillofacial', title: 'Section 3: Craniomaxillofacial' },
+    { id: 'breast-cosmetic', title: 'Section 4: Breast and Cosmetic' },
+    { id: 'core-surgical', title: 'Section 5: Core Surgical Principles' },
+  ];
+
+  const subsectionTitles: Record<string, string> = {
+    'wound-healing': 'Wound Healing',
+    'skin-lesions': 'Skin Lesions',
+    'flaps-and-grafts': 'Flaps and Grafts',
+    'microsurgery': 'Microsurgery',
+    'infections': 'Infections',
+    'burns': 'Burns',
+    'trunk': 'Trunk',
+    'gender-affirming-surgery': 'Gender-Affirming Surgery',
+    'vascular-anomalies': 'Vascular Anomalies',
+    'hand-digit-trauma': 'Hand and Digit Trauma',
+    'hand-nerves': 'Hand Nerves',
+    'hand-tendons': 'Hand Tendons',
+    'replantation-vascular': 'Replantation and Vascular',
+    'wrist-forearm-injuries': 'Wrist and Forearm Injuries',
+    'hand-tumors': 'Hand Tumors',
+    'hand-inflammation-infections': 'Hand Inflammation and Infections',
+    'congenital-pediatric-hand': 'Congenital and Pediatric Hand',
+    'lower-extremity': 'Lower Extremity',
+    'cleft-lip-palate': 'Cleft Lip and Palate',
+    'facial-fractures': 'Facial Fractures',
+    'facial-paralysis': 'Facial Paralysis',
+    'ear-reconstruction': 'Ear Reconstruction',
+    'mandible-dental-orthognathic': 'Mandible, Dental, and Orthognathic',
+    'head-neck-tumors': 'Head and Neck Tumors',
+    'congenital-syndromes': 'Congenital Syndromes',
+    'breast-augmentation': 'Breast Augmentation',
+    'breast-reduction-mastopexy': 'Breast Reduction and Mastopexy',
+    'breast-reconstruction': 'Breast Reconstruction',
+    'facial-rejuvenation': 'Facial Rejuvenation',
+    'rhinoplasty': 'Rhinoplasty',
+    'eye-aesthetic-reconstructive': 'Eye Aesthetic and Reconstructive',
+    'body-contouring': 'Body Contouring',
+    'anesthesia': 'Anesthesia',
+    'perioperative-care': 'Perioperative Care',
+    'critical-care': 'Critical Care',
+    'trauma': 'Trauma',
+    'transplantation': 'Transplantation',
+    'statistics-ethics-practice': 'Statistics, Ethics, and Practice Management',
+  };
+
+  return { sectionOrder, subsectionTitles };
+}
+
+export function updateSubsectionTitle(sectionId: string, subsectionId: string, newTitle: string) {
+  localStorage.setItem(`subsection-${sectionId}-${subsectionId}`, newTitle);
+}
+
+export function getSubsectionTitle(sectionId: string, subsectionId: string): string {
+  const saved = localStorage.getItem(`subsection-${sectionId}-${subsectionId}`);
+  if (saved) return saved;
+  
+  const { subsectionTitles } = getSectionStructure();
+  return subsectionTitles[subsectionId] || subsectionId;
+}
