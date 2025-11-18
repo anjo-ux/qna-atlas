@@ -1,12 +1,197 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { useEffect, useState, useRef } from 'react';
+import { loadQuestions } from '@/utils/parseQuestions';
+import { Section } from '@/types/question';
+import { Navigation } from '@/components/Navigation';
+import { QuestionCard } from '@/components/QuestionCard';
+import { Input } from '@/components/ui/input';
+import { Search, BookOpen } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const Index = () => {
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
+  const [sections, setSections] = useState<Section[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [activeSection, setActiveSection] = useState('');
+  const [activeSubsection, setActiveSubsection] = useState('');
+  const subsectionRefs = useRef<Map<string, HTMLElement>>(new Map());
+
+  useEffect(() => {
+    loadQuestions()
+      .then((data) => {
+        setSections(data);
+        if (data.length > 0 && data[0].subsections.length > 0) {
+          setActiveSection(data[0].id);
+          setActiveSubsection(data[0].subsections[0].id);
+        }
+      })
+      .catch((error) => console.error('Failed to load questions:', error))
+      .finally(() => setLoading(false));
+  }, []);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const [sectionId, subsectionId] = entry.target.id.split('::');
+            setActiveSection(sectionId);
+            setActiveSubsection(subsectionId);
+          }
+        });
+      },
+      { threshold: 0.3, rootMargin: '-100px 0px -60% 0px' }
+    );
+
+    subsectionRefs.current.forEach((ref) => {
+      if (ref) observer.observe(ref);
+    });
+
+    return () => observer.disconnect();
+  }, [sections]);
+
+  const handleNavigate = (sectionId: string, subsectionId: string) => {
+    const element = subsectionRefs.current.get(`${sectionId}::${subsectionId}`);
+    if (element) {
+      const offset = 100;
+      const elementPosition = element.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - offset;
+      
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth',
+      });
+    }
+  };
+
+  const filteredSections = sections.map((section) => ({
+    ...section,
+    subsections: section.subsections.map((subsection) => ({
+      ...subsection,
+      questions: subsection.questions.filter(
+        (q) =>
+          q.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          q.answer.toLowerCase().includes(searchQuery.toLowerCase())
+      ),
+    })).filter((subsection) => subsection.questions.length > 0),
+  })).filter((section) => section.subsections.length > 0);
+
+  const totalQuestions = sections.reduce(
+    (acc, section) => acc + section.subsections.reduce((acc2, sub) => acc2 + sub.questions.length, 0),
+    0
+  );
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <header className="sticky top-0 z-40 w-full border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60">
+          <div className="container flex h-16 items-center justify-between px-4">
+            <Skeleton className="h-8 w-64" />
+            <Skeleton className="h-10 w-80" />
+          </div>
+        </header>
+        <div className="container mx-auto px-4 lg:pl-84 py-8">
+          <div className="max-w-4xl mx-auto space-y-4">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <Skeleton key={i} className="h-32 w-full" />
+            ))}
+          </div>
+        </div>
       </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <header className="sticky top-0 z-40 w-full border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60 elevated-shadow">
+        <div className="container flex h-16 items-center justify-between px-4 lg:px-8">
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center">
+              <BookOpen className="h-5 w-5 text-white" />
+            </div>
+            <div>
+              <h1 className="text-xl font-bold text-foreground">Plastic Surgery Q&A</h1>
+              <p className="text-xs text-muted-foreground">{totalQuestions} Questions</p>
+            </div>
+          </div>
+          
+          <div className="relative w-full max-w-md hidden md:block">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder="Search questions..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9 bg-background"
+            />
+          </div>
+        </div>
+      </header>
+
+      {/* Navigation Sidebar */}
+      <Navigation
+        sections={sections}
+        activeSection={activeSection}
+        activeSubsection={activeSubsection}
+        onNavigate={handleNavigate}
+      />
+
+      {/* Main Content */}
+      <main className="container mx-auto px-4 lg:pl-84 py-8">
+        {/* Mobile Search */}
+        <div className="relative w-full mb-6 md:hidden">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            placeholder="Search questions..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-9"
+          />
+        </div>
+
+        <div className="max-w-4xl mx-auto space-y-12">
+          {filteredSections.map((section) => (
+            <div key={section.id} className="space-y-8">
+              <div className="space-y-2">
+                <h2 className="text-3xl font-bold text-foreground tracking-tight">
+                  {section.title}
+                </h2>
+                <div className="h-1 w-20 bg-gradient-to-r from-primary to-accent rounded-full" />
+              </div>
+
+              {section.subsections.map((subsection) => (
+                <div
+                  key={subsection.id}
+                  id={`${section.id}::${subsection.id}`}
+                  ref={(el) => {
+                    if (el) subsectionRefs.current.set(`${section.id}::${subsection.id}`, el);
+                  }}
+                  className="space-y-4"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="h-px flex-1 bg-border" />
+                    <h3 className="text-xl font-semibold text-foreground">
+                      {subsection.title}
+                    </h3>
+                    <div className="h-px flex-1 bg-border" />
+                  </div>
+
+                  <div className="space-y-4">
+                    {subsection.questions.map((question, idx) => (
+                      <QuestionCard key={question.id} question={question} index={idx} />
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ))}
+
+          {filteredSections.length === 0 && (
+            <div className="text-center py-12">
+              <p className="text-lg text-muted-foreground">No questions found matching your search.</p>
+            </div>
+          )}
+        </div>
+      </main>
     </div>
   );
 };
