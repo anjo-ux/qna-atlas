@@ -410,7 +410,165 @@ Survive off surrounding soft tissues until generate their own blood supply
 ## Vasodilators
 - Papaverine: Inhibits phosphodiesterase in vessel smooth muscle resulting in vasodilation
 - Lidocaine: Blocks sympathetic response in vessels
-- No evidence supports one topical vasodilator better than another`,
+  - No evidence supports one topical vasodilator better than another`,
+    
+    'trunk': `# Chest
+
+## Sternal wound infections
+- Arnold classification
+  - Acute: 0-2 weeks
+  - Subacute: 2-4 weeks, often with mediastinitis
+  - Chronic: >4 weeks often with osteomyelitis
+- Dx: CT scan, antibiotics (Abx), assess for mediastinitis
+- Tx: debridement, flap coverage
+  - Pectoralis major advancement flaps
+  - Pectoralis major turnover flap: alternative for dead space, inferior defects
+  - Need to know if internal mammary arteries (IMA) were used during cardiac bypass; can only perform if IMA is intact
+  - Alternatives: Pedicled rectus abdominus (need intact IMA), Omentum for sizable defects, dead space obliteration
+
+## Pectus excavatum
+- Dx: sunken anterior chest and sternum
+- Tx: chest wall reconstruction at age 6-12 if symptomatic
+  - Skeletal correction: Nuss external support bars, thoracoscopic retrosternal support bars
+  - Soft-tissue correction: custom silicone elastomer; augmentation mammaplasty
+
+## Pectus carinatum
+- Associated with connective tissue diseases (Marfan, Loeys-Dietz syndromes)
+- Dx: prominent sternum
+
+## Anterior thoracic hypoplasia
+- Dx: unilateral sunken chest with normal sternum, breast hypoplasia, normal pectoralis muscle, no associated extremity abnormalities
+
+## Poland syndrome
+- Absent sternal head of pectoralis major, concave chest, breast hypoplasia, absent anterior axillary fold, ipsilateral symbrachydactyly
+- Associated with lymphatopoetic, renal, and lung tumors; no increased breast cancer risk
+- Tx: breast reconstruction (DIEP, custom implant, staged implant reconstruction depending on anatomy)
+
+## Gynecomastia
+- Due to increased aromatization of androgen to estrogen
+- Majority idiopathic but many etiologies (medications, marijuana, and cancers)
+- RF: prostate medications (also can cause mastodynia)
+- Common in teenagers: Tx: observe, most regress in less than a year
+- Dx: testicular exam to evaluate for testicular cancer etiology
+- Rohrich grading
+  - I: Minimal hypertrophy
+  - II: Moderate hypertrophy
+  - III: Severe hypertrophy with mild ptosis
+  - IV: Severe hypertrophy, severe ptosis
+- Tx: liposuction
+- Tx: direct excision for central gland prominence
+- Nipple transposition for 250-500gm resection with skin redundancy; mastectomy with free nipple grafting for severe ptosis
+
+# Trunk
+
+## Abdominal-wall reconstruction
+- Anatomy
+  - Arcuate line: area below umbilicus that demarcates where the posterior sheath ends (formed by internal oblique and transversalis fascia); there is no defined posterior sheath inferior to this line
+  - Innervation of abdominal muscles: Transversalis abdominus plane (TAP) - nerve runs between transversus abdominus and internal oblique muscles (from intercostal nerves)
+- Tx: Prehabilitation: botulinum toxin injection to lateral musculature increases likelihood of primary closure of hernias
+- Anterior components separation
+  - Incise fascia lateral to semilunar line
+  - Excursion of 4cm to upper abdomen, 8cm mid abdomen, 3cm suprapubic (per side)
+- Posterior components separation
+  - Release of transversus abdominus (TAR) medial to semilunar line
+- Mesh usage
+  - Reduces recurrence compared to tissue repair
+  - Mesh options: Synthetic (better strength, cheaper), Biologic (potentially more resilient with infection/GI spillage and considered for high-risk, contaminated cases)
+  - Retrorectus position: lowest complication and recurrence rate
+  - Other mesh placements: intraperitoneal, onlay (over fascia)
+  - Bridge repair when unable to approximate fascia; highest recurrence risk compared to other mesh repairs
+- Complications: Abdominal compartment syndrome
+  - Increased compartment pressure causes diaphragm elevation, vascular compression, organ compression
+  - Dx: clinical exam, elevated bladder pressure (>20), peak inspiratory pressure (>30) on ventilator
+  - Tx: decompressive laparotomy
+
+## Congenital abdominal-wall diseases
+- Omphalocele
+  - Midline, partial-thickness defect with intestines covered by a membrane
+  - Commonly associated with a chromosome abnormality (e.g., trisomy 13)
+- Gastroschisis
+  - Right of umbilical cord, full-thickness defect with no intestinal coverage
+  - Dx: elevated AFP (maternal)
+  - Tx: direct closure +/- components separation, abdominal silo if large
+  - Silo protects viscera, allows progressive reduction
+
+## Desmoid tumors
+- Tend to occur in abdominal wall; associated with familial adenomatous polyposis syndrome
+
+## Chest wall reconstruction
+- Bony reconstruction for >4 ribs, >5cm, otherwise at risk for flail chest
+- XRT increases stiffness of chest wall, decreases need for bony reconstruction
+- Areas covered by the pectoralis major, posterior rib defects don't need bony reconstruction
+- Tx: alloplastic materials (PTFE/meshes, methylmethacrylate) for bony reconstruction, vascularized skin coverage
+
+## Perineal reconstruction
+- Post-oncologic defects
+  - Abdominoperineal resection (~50%) and pelvic exenteration (80%) have high complication rate with primary closure
+  - Commonly had neoadjuvant XRT to perineum
+  - Tx: vertical rectus abdominus musculocutaneous (VRAM), pedicled ALT, pedicled PAP flaps, gracilis (higher complication rate)
+- Vaginal reconstruction
+  - Agenesis associated with many conditions:
+    - Mayer Rokitansky Küster Hauser syndrome: 46XX with Müllerian duct aplasia, associated with renal, cardiac, hearing abnormalities; intact ovarian function, secondary-sex characteristics
+    - Partial and complete androgen insensitivity syndromes: 46XY, no development of male genitals, phenotypically female
+    - Tx: internal pudendal flaps; Complication: stenosis (manage with serial dilation)
+  - Posterior defects: VRAM
+  - Anterior and lateral defects: Superficial perineal artery (pudendal thigh) flap - maintains sensation (pudendal nerve)
+  - Total defects: Bilateral gracilis muscle flaps
+  - Rectovaginal fistula
+    - Control source/inflammation with diverting ostomy then staged reconstruction
+    - Tx: gracilis muscle flap
+
+## Spine reconstruction
+- Spine wound dehiscence
+  - Risk for cerebrospinal fluid leak if dura exposed
+  - Tx: vascularized tissue over dural repair (use local fascia, muscle flaps with skin coverage)
+- Myelomeningocele
+  - Congenital malformation of spine with outpouching of spinal cord at birth
+  - Due to failure of neural tube closure during 4th week of gestation
+  - Associated with folic acid deficiency
+  - Dx: high AFP, neonatal ultrasound
+  - Presence of hydrocephalus distinguishes from meningocele
+  - Can be associated with cardiac, renal, orthopaedic, other neurologic abnormalities
+  - Tx: antibiotics, neurosurgery to shunt, repair dura; prompt reconstruction/coverage of spine with local flaps (<48 hours due to risk of meningitis)
+  - RF for tethered cord syndrome
+
+# Gender Surgery
+
+## Head/neck
+- Facial feminization
+  - Dx: Ousterhout classification (MC type 3 80%)
+  - Tx: frontal sinus setback, burring supraorbital ridge, hairline reduction, brow lift
+- Chondrolaryngoplasty
+  - Addresses thyroid cartilage
+  - Complication: anterior commissure tendon injury
+  - Sx: decreased voice pitch without hoarseness
+
+## Chest ("top") surgery
+- WPATH guidelines: Adult (>18 years old), one mental health letter of support; Hormones not needed but recommended >1 year
+- Masculinizing
+  - Periareolar mastectomy for small breast volume, no ptosis
+  - Mastectomy with free nipple graft for ptosis
+- Feminizing
+  - Augmentation mammaplasty
+
+## Genital ("bottom") surgery
+- WPATH Recommendations: Informed consent, >12 months hormones, living in desired gender >12 months, two mental health providers' support
+- Feminizing
+  - Tx: estrogen
+  - DVT risk: highest with oral ethinyl estradiol, lowest with transdermal estradiol
+  - Penetrative options: penile-inversion vaginoplasty, intestinal vaginoplasty
+  - Penile-inversion vaginoplasty: Dissect in retroprostatic fascia (Denonvillier's); MC complication: neovaginal stenosis
+- Masculinizing
+  - Tx: testosterone
+  - Lowers voice, increases muscle mass, increases body hair, cessation of menses: effects take 6 months to 5 years
+  - Menses can return after d/c medication, other changes remain
+  - Tx: surgical
+    - Metoidioplasty: Uses local tissue to create neophallus
+    - Phalloplasty: Radial forearm free flap (MC complication: urethral strictures, urethral fistulas); Osteocutaneous flaps (does not require prosthesis for erection); Innervated flaps: ilioinguinal nerve for tactile sensation, dorsal clitoral nerve for erogenous sensation
+    - Urethral reconstruction: MC complication urethral stricture (highest with skin graft prelamination)
+- Penile replantation/transplantation
+  - Dominant artery: deep dorsal penis artery
+  - Skin also supplied by inferior external pudendal artery`,
     
     'skin-lesions': `# Skin
 
@@ -661,8 +819,7 @@ const subsectionTitles: Record<string, Record<string, string>> = {
     'microsurgery': 'Microsurgery',
     'infections': 'Infections',
     'burns': 'Burns',
-    'trunk': 'Trunk',
-    'gender-affirming-surgery': 'Gender-Affirming Surgery',
+    'trunk': 'Trunk & Gender-Affirming Surgery',
     'vascular-anomalies': 'Vascular Anomalies',
   },
   'hand-lower-extremity': {
