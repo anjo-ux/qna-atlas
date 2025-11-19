@@ -1,8 +1,9 @@
 import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { useQuestionStats } from '@/hooks/useQuestionStats';
 import { Section } from '@/types/question';
-import { BookOpen, CheckCircle2, XCircle, TrendingUp, Target } from 'lucide-react';
+import { BookOpen, CheckCircle2, XCircle, TrendingUp, Target, ChevronRight } from 'lucide-react';
 import { useMemo } from 'react';
 
 interface HomePageProps {
@@ -26,18 +27,35 @@ export function HomePage({ sections }: HomePageProps) {
     }, 0);
   }, [sections]);
 
-  // Calculate progress by section
+  // Calculate progress by section with subsection details
   const sectionProgress = useMemo(() => {
     return sections.map(section => {
       let totalSectionQuestions = 0;
       let answeredQuestions = 0;
       let correctQuestions = 0;
 
-      section.subsections.forEach(subsection => {
+      const subsectionDetails = section.subsections.map(subsection => {
         const stats = getSubsectionStats(section.id, subsection.id, subsection.questions.length);
         totalSectionQuestions += subsection.questions.length;
         answeredQuestions += stats.answered;
         correctQuestions += stats.correct;
+
+        const subsectionPercentage = subsection.questions.length > 0
+          ? Math.round((stats.answered / subsection.questions.length) * 100)
+          : 0;
+
+        const subsectionAccuracy = stats.answered > 0
+          ? Math.round((stats.correct / stats.answered) * 100)
+          : 0;
+
+        return {
+          subsection,
+          totalQuestions: subsection.questions.length,
+          answered: stats.answered,
+          correct: stats.correct,
+          percentage: subsectionPercentage,
+          accuracy: subsectionAccuracy,
+        };
       });
 
       const percentage = totalSectionQuestions > 0 
@@ -54,7 +72,8 @@ export function HomePage({ sections }: HomePageProps) {
         answeredQuestions,
         correctQuestions,
         percentage,
-        accuracy
+        accuracy,
+        subsectionDetails,
       };
     });
   }, [sections, getSubsectionStats]);
@@ -200,25 +219,62 @@ export function HomePage({ sections }: HomePageProps) {
       {/* Section Progress */}
       <Card className="p-6">
         <h2 className="text-xl font-semibold mb-6">Progress by Section</h2>
-        <div className="space-y-4">
-          {sectionProgress.map(({ section, totalSectionQuestions, answeredQuestions, percentage, accuracy }) => (
-            <div key={section.id} className="space-y-2">
-              <div className="flex justify-between items-center">
-                <h3 className="font-medium text-foreground">{section.title}</h3>
-                <div className="flex items-center gap-4">
-                  <span className="text-sm text-muted-foreground">
-                    {answeredQuestions} / {totalSectionQuestions}
-                  </span>
-                  <span className="text-sm font-semibold text-primary">{percentage}%</span>
-                  {answeredQuestions > 0 && (
-                    <span className="text-sm text-success">({accuracy}% accurate)</span>
-                  )}
+        <Accordion type="multiple" className="space-y-3">
+          {sectionProgress.map(({ section, totalSectionQuestions, answeredQuestions, percentage, accuracy, subsectionDetails }) => (
+            <AccordionItem key={section.id} value={section.id} className="border rounded-lg px-4">
+              <AccordionTrigger className="hover:no-underline py-4">
+                <div className="flex-1 space-y-2">
+                  <div className="flex justify-between items-center">
+                    <h3 className="font-medium text-foreground text-left">{section.title}</h3>
+                    <div className="flex items-center gap-4 mr-2">
+                      <span className="text-sm text-muted-foreground">
+                        {answeredQuestions} / {totalSectionQuestions}
+                      </span>
+                      <span className="text-sm font-semibold text-primary">{percentage}%</span>
+                      {answeredQuestions > 0 && (
+                        <span className="text-sm text-success">({accuracy}% accurate)</span>
+                      )}
+                    </div>
+                  </div>
+                  <Progress value={percentage} className="h-2" />
                 </div>
-              </div>
-              <Progress value={percentage} className="h-2" />
-            </div>
+              </AccordionTrigger>
+              <AccordionContent className="pb-4">
+                <div className="space-y-3 mt-2">
+                  {subsectionDetails.map(({ subsection, totalQuestions, answered, correct, percentage: subPercentage, accuracy: subAccuracy }) => (
+                    <div key={subsection.id} className="pl-4 space-y-2 border-l-2 border-muted">
+                      <div className="flex justify-between items-center">
+                        <div className="flex items-center gap-2">
+                          <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                          <span className="text-sm font-medium text-foreground">{subsection.title}</span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <span className="text-xs text-muted-foreground">
+                            {answered} / {totalQuestions}
+                          </span>
+                          <span className="text-xs font-semibold text-primary min-w-[35px] text-right">
+                            {subPercentage}%
+                          </span>
+                          {answered > 0 && (
+                            <span className="text-xs text-success min-w-[65px] text-right">
+                              {correct} correct ({subAccuracy}%)
+                            </span>
+                          )}
+                          {answered === 0 && (
+                            <span className="text-xs text-muted-foreground min-w-[65px] text-right">
+                              Not started
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <Progress value={subPercentage} className="h-1.5" />
+                    </div>
+                  ))}
+                </div>
+              </AccordionContent>
+            </AccordionItem>
           ))}
-        </div>
+        </Accordion>
       </Card>
 
       {/* Get Started Message */}
