@@ -57,11 +57,24 @@ export async function loadQuestions(): Promise<Section[]> {
   return Object.keys(sectionStructure).map(sectionId => {
     const subsectionMap = sectionMap.get(sectionId) || new Map();
     const subsections: Subsection[] = [];
-    Object.keys(sectionStructure[sectionId as keyof typeof sectionStructure].subsections).forEach(subsectionId => {
+    const sectionKey = sectionId as keyof typeof sectionStructure;
+    const section = sectionStructure[sectionKey];
+    
+    Object.keys(section.subsections).forEach(subsectionId => {
       const questionsForSubsection = subsectionMap.get(subsectionId) || [];
-      const content = reviewContent[sectionId]?.[subsectionId];
+      
+      // Get content from reviewContent with proper typing
+      const sectionContent = reviewContent[sectionKey as keyof typeof reviewContent];
+      const content = sectionContent?.subsections?.[subsectionId as keyof typeof sectionContent.subsections] as string | undefined;
+      
       if (content || questionsForSubsection.length > 0) {
-        subsections.push({ id: subsectionId, title: sectionStructure[sectionId as keyof typeof sectionStructure].subsections[subsectionId as keyof typeof sectionStructure[typeof sectionId]['subsections']], content, questions: questionsForSubsection });
+        const subsectionKey = subsectionId as keyof typeof section.subsections;
+        subsections.push({ 
+          id: subsectionId, 
+          title: section.subsections[subsectionKey], 
+          content, 
+          questions: questionsForSubsection 
+        });
       }
     });
     return { id: sectionId, title: sectionStructure[sectionId as keyof typeof sectionStructure].title, subsections };
