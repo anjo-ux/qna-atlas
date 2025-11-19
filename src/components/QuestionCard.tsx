@@ -67,8 +67,6 @@ export function QuestionCard({ question, index }: QuestionCardProps) {
               <RadioGroup value={selectedAnswer || ''} onValueChange={setSelectedAnswer}>
                 <div className="space-y-2">
                   {parsed.choices.map((choice) => {
-                    const isCorrect = correctAnswer === choice.letter;
-                    const isSelected = selectedAnswer === choice.letter;
                     const showResult = selectedAnswer && showExplanation;
                     
                     return (
@@ -76,8 +74,7 @@ export function QuestionCard({ question, index }: QuestionCardProps) {
                         key={choice.letter}
                         className={cn(
                           "flex items-start space-x-3 p-3 rounded-lg border transition-colors",
-                          showResult && isCorrect && "bg-green-50 border-green-500 dark:bg-green-950/20",
-                          showResult && isSelected && !isCorrect && "bg-red-50 border-red-500 dark:bg-red-950/20",
+                          showResult && "bg-primary/10 border-primary/30",
                           !showResult && "hover:bg-accent/5"
                         )}
                       >
