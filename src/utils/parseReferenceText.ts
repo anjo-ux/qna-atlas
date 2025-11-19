@@ -1813,6 +1813,127 @@ Survive off surrounding soft tissues until generate their own blood supply
 
 ## Calf augmentation
 - Submuscular position for implant associated with lowest complication rate`
+  },
+
+  // Section 3: Craniomaxillofacial
+  'craniomaxillofacial': {
+    'cleft-lip-palate': `## Cleft Lip and Palate
+
+### Embryology, Epidemiology, and Genetics
+**Embryology**: Cleft lip (median nasal prominences don't fuse), Cleft palate (medial and lateral palatine processes don't fuse)
+**Genetics**: One sibling affected: 2.5% risk, Two siblings: 10%, Parent and sibling: 17%, Van der Woude (autosomal dominant): 50% risk
+**Epidemiology**: Cleft lip/palate 1:700 (M:F 2:1, 15% syndromic), Cleft palate only 1:1500 (M:F 1:2, 50% syndromic)
+
+### Cleft Care
+**Cleft Lip**: Repair at 3-6 months, establish muscular continuity
+**Cleft Palate**: Repair at ~1 year, worse speech with delayed repair
+**VPI**: Tx: buccal musculomucosal flaps, sphincter pharyngoplasty (highest OSA risk), pharyngeal flap
+**Alveolar Bone Grafting**: Time with permanent canine (~age 8-12)
+**Orthognathic**: LeFort I for Class III occlusion
+**CHARGE syndrome**: #2 syndromic cleft (Coloboma, Heart, Atresia, Retardation, Genital, Ear)`,
+
+    'facial-fractures': `## Facial Fractures and Skull
+
+### Fractures
+**Frontal Sinus**: Posterior table fractures risk CSF leak (Dx: beta-2 transferrin)
+**Orbital**: Floor fractures MC, repair for sizable defects/persistent diplopia; Entrapment MC in pediatrics (prompt repair needed)
+**NOE Fractures**: Risk telecanthus (Markowitz classification), canalicular injury, CSF leak
+**ZMC Fracture**: 2-point fixation (simple), 3-point (complex)
+**Base of Skull**: Contraindication to nasotracheal intubation
+
+### Reconstruction
+**Scalp**: Flap if exposed cranium, tissue expansion between galea and temporalis
+**Cranioplasty**: >6 sq cm defect; PEEK (MC complication: infection), Methylmethacrylate (exothermic), Hydroxyapatite
+**Positional Plagiocephaly**: Tx: repositioning, helmet molding >3 months`,
+
+    'facial-paralysis': `## Facial Paralysis
+
+### Anatomy
+**Main trunk**: 6-8mm distal to tympanomastoid suture
+**Frontal branch**: Pitanguy's line (0.5cm below tragus to 1.5cm above lateral brow)
+
+### Etiologies
+**Bell's palsy**: 80-90% resolve, Tx: steroids if early
+**Möbius**: CN VI, VII absence; Tx: temporalis transfer or free gracilis
+**Parry-Romberg**: Progressive hemifacial atrophy, starts late teens; Tx: methotrexate, volume replacement
+
+### Reanimation
+**Dynamic**: Free muscle transfer (cross-facial graft vs masseteric nerve), temporalis turnover
+**Static**: Autologous slings (lowest complication rate)`,
+
+    'ear-reconstruction': `## Ear Reconstruction
+
+### Congenital
+**Embryology**: 1st cleft (EAC), 1st/2nd arches (helix - 6 hillocks), Preauricular sinus (incomplete fusion)
+**Anomalies**: Microtia, Cryptotia (upper 1/3 adherent), Stahl ear (accessory 3rd crus), Lop ear
+
+### Reconstruction
+**Neonatal Molding**: Start by 2 weeks (up to 3 months), MC complication: skin ulceration
+**Autologous**: Rib cartilage framework, Nagata (2-stage), Brent (3-stage)
+**TPF flap**: Based on superficial temporal artery, workhorse for coverage
+**Replantation**: Venous repair doesn't change success, leech therapy if no vein anastomosis
+
+### Aesthetic
+**Prominent ear**: Otoplasty age 6-7, Mustardé suture (antihelical fold), Furnas suture (conchal-mastoid angle)`,
+
+    'mandible-dental-orthognathic': `## Mandible, Orthognathic, and Dental
+
+### Mandible Fractures
+**Locations**: Parasymphyseal (ORIF +/- MMF), Angle (ORIF, intra-oral approach), Condylar (generally closed with MMF)
+**Fixation**: Champy technique (external oblique ridge), Reconstruction plate (load-bearing)
+**Free flap**: Fibula for >5cm defects or XRT setting
+
+### Tumors
+**Ameloblastoma**: MC mandibular tumor, Tx: segmental mandibulectomy
+**OKC**: #2 benign, associated with Gorlin syndrome (PTCH1)
+**Periapical cyst**: MC cyst, from necrotic pulp
+
+### TMJ
+**TMD**: MC women 20-40, pain on palpation of mastication muscles
+**Masseteric Hypertrophy**: MC from bruxism, Tx: botulinum toxin
+
+### Orthognathic
+**Class II**: BSSO for mandibular advancement
+**Class III**: LeFort I for maxillary advancement
+**Vertical Maxillary Excess**: "Gummy smile", Tx: LeFort I impaction`,
+
+    'head-neck-tumors': `## Head and Neck Tumors
+
+### Embryology
+**Pharyngeal Arches**: 1(CN V-mastication), 2(CN VII-facial), 3(CN IX-stylopharyngeus), 4(CN X-pharyngeal/laryngeal), 6(CN XI-SCM/trapezius)
+
+### Oral Cancer
+**SCC**: Neck dissection for T2+ tumors, Chyle leak MC complication (triglycerides >110 mg/dL)
+**Reconstruction**: Free flaps, Total laryngopharyngeal (ALT better speech, jejunum easier inset)
+**Oropharyngeal**: HPV associated with better outcomes
+
+### Glandular
+**Parotid**: 80% of salivary tumors, 80% benign
+- Pleomorphic adenoma (80% of benign), Warthin tumors (cystic, bilateral, smokers)
+- Mucoepidermoid (MC malignant, MC in children), Adenoid cystic (perineural invasion)
+**Minor Salivary**: 50% malignant, MC in palate, Adenoid cystic MC
+
+### Lip Reconstruction
+Primary closure (≤1/3), Lip switch flaps (1/3-1/2: Abbe, Estlander), Regional (>1/2: Karapandzic, Bernard-Webster)`,
+
+    'congenital-syndromes': `## Congenital Syndromes
+
+### Craniosynostosis
+**Apert**: Bicoronal, complex syndactyly, FGFR2
+**Crouzon**: Complex craniosynostosis, midface retrusion, normal extremities, FGFR2
+**Pfeiffer**: Cloverleaf skull, exorbitism, broad thumbs, FGFR2
+**Saethre-Chotzen**: Bilateral coronal, low ears, ptosis, TWIST
+**Sagittal**: Scaphocephaly, Tx: endoscopic (early) vs open vault (late)
+
+### Cleft Syndromes
+**Treacher Collins**: Microtia, colobomas, cleft palate, retrognathia, TCOF1
+**Robin Sequence**: Cleft palate, micrognathia, glossoptosis, Tx: prone positioning, mandibular distraction
+**Van der Woude**: Lower lip pits, cleft palate, IRF6 (50% transmission)
+**Velocardiofacial**: 22q11.2 deletion, cleft (submucous), cardiac, hypocalcemia
+
+### Other
+**Goldenhar**: #2 congenital facial malformation, hemifacial microsomia, epibulbar dermoids
+**Beckwith-Wiedemann**: Macrosomia, omphalocele, macroglossia, chromosome 11`
   }
 };
 
