@@ -210,6 +210,8 @@ export default function Index() {
                   <ReferenceTextPanel 
                     content={currentReferenceContent}
                     subsectionTitle={currentReferenceTitle}
+                    sectionId={selectedSection || ''}
+                    subsectionId={selectedSubsection || ''}
                   />
                 </div>
               )}
@@ -248,6 +250,8 @@ export default function Index() {
                             key={question.id}
                             question={question}
                             index={index}
+                            sectionId={selectedSection || ''}
+                            subsectionId={selectedSubsection || ''}
                           />
                         ))
                       )}

@@ -5,10 +5,15 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Question } from '@/types/question';
 import { cn } from '@/lib/utils';
+import { useHighlights } from '@/hooks/useHighlights';
+import { HighlightToolbar } from '@/components/HighlightToolbar';
+import { StickyNote } from '@/components/StickyNote';
 
 interface QuestionCardProps {
   question: Question;
   index: number;
+  sectionId: string;
+  subsectionId: string;
 }
 
 interface ParsedQuestion {
@@ -16,9 +21,24 @@ interface ParsedQuestion {
   choices: { letter: string; text: string }[];
 }
 
-export function QuestionCard({ question, index }: QuestionCardProps) {
+export function QuestionCard({ question, index, sectionId, subsectionId }: QuestionCardProps) {
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [showExplanation, setShowExplanation] = useState(false);
+
+  const {
+    activeColor,
+    setActiveColor,
+    addHighlight,
+    removeHighlight,
+    addNote,
+    updateNote,
+    removeNote,
+    getHighlightsForSection,
+    getNotesForSection,
+  } = useHighlights();
+
+  const highlights = getHighlightsForSection(sectionId, subsectionId, 'question', question.id);
+  const notes = getNotesForSection(sectionId, subsectionId, 'question', question.id);
 
   const parsed = useMemo((): ParsedQuestion => {
     const lines = question.question.split('\n');
@@ -48,13 +68,60 @@ export function QuestionCard({ question, index }: QuestionCardProps) {
     }
   };
 
+  const handleTextSelection = () => {
+    const selection = window.getSelection();
+    if (!selection || selection.isCollapsed) return;
+
+    const selectedText = selection.toString().trim();
+    if (!selectedText) return;
+
+    const range = selection.getRangeAt(0);
+    const startOffset = range.startOffset;
+    const endOffset = startOffset + selectedText.length;
+
+    addHighlight({
+      text: selectedText,
+      color: activeColor,
+      sectionId,
+      subsectionId,
+      location: 'question',
+      questionId: question.id,
+      startOffset,
+      endOffset,
+    });
+
+    selection.removeAllRanges();
+  };
+
+  const handleAddNote = () => {
+    addNote({
+      content: '',
+      sectionId,
+      subsectionId,
+      location: 'question',
+      questionId: question.id,
+      position: { x: 100, y: 100 },
+    });
+  };
+
+  const handleClearHighlights = () => {
+    highlights.forEach(h => removeHighlight(h.id));
+  };
+
   return (
     <Card className={cn(
-      "card-shadow transition-smooth overflow-hidden",
+      "card-shadow transition-smooth overflow-hidden relative",
       "hover:elevated-shadow hover:border-primary/20"
     )}>
-      <div className="p-6">
-        <div className="flex items-start gap-4">
+      <div className="p-6 space-y-4">
+        <HighlightToolbar
+          activeColor={activeColor}
+          onColorChange={setActiveColor}
+          onAddNote={handleAddNote}
+          onClearHighlights={handleClearHighlights}
+        />
+        
+        <div className="flex items-start gap-4" onMouseUp={handleTextSelection}>
           <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
             <span className="text-sm font-semibold text-primary">{index + 1}</span>
           </div>
@@ -115,6 +182,17 @@ export function QuestionCard({ question, index }: QuestionCardProps) {
           </div>
         </div>
       </div>
+      
+      {notes.map(note => (
+        <StickyNote
+          key={note.id}
+          id={note.id}
+          content={note.content}
+          position={note.position}
+          onUpdate={updateNote}
+          onDelete={removeNote}
+        />
+      ))}
     </Card>
   );
 }
