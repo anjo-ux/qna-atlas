@@ -3086,6 +3086,505 @@ Primary closure (≤1/3), Lip switch flaps (1/3-1/2: Abbe, Estlander), Regional 
 - **Treatment**:
   - Face: Fat grafting, poly-L-lactic acid filler
   - Buffalo hump: Liposuction`
+  },
+  'core-surgical': {
+    'anesthesia': `# Anesthesia
+
+## Medications
+
+### Local anesthetics
+- Shown to reduce post-operative opioid use
+- **Local anesthetic toxicity**
+  - Lidocaine maximum dose: 7mg/kg with epinephrine, 4mg/kg plain
+    - Can be higher (35-55mg/kg) as wetting solution in liposuction
+  - Sx: lip numbness, metallic taste, slurred speech, nausea, anxiety, disorientation
+    - Can progress to cardiac problems
+  - Tx: secure airway first if unstable, fat emulsion (intra lipid) bolus then infusion
+- **Local with epinephrine**
+  - Peak vasoconstriction effect: about 20-30 minutes
+    - Reversal agent: phentolamine (alpha-1 and -2 antagonist)
+- **Liposomal bupivacaine**
+  - Can combine with saline or non-liposomal bupivacaine to dilute
+  - Can give 20 minutes after injection of lidocaine
+  - Maximum dose 20cc (266mg)
+
+### Conscious sedation
+- Patients with reduced awareness but respond to verbal commands, protect airway
+- IV agents (e.g., propofol, opioids, benzodiazepines)
+  - Midazolam and fentanyl better for anxiety/pain than single agents
+- Requirements: oxygen, ventilator support/intubation support available
+- **Complication**
+  - Hypotension
+    - Tx: IV fluids (1st line)
+
+### Corticosteroids
+- Single perioperative dose associated with transient hyperglycemia, no change in wound healing
+- Corticosteroid-related wound healing deficiency with use >30 days
+  - Increased wound-healing complicated by 2-3x, impedes all phases of wound healing
+  - Tx: vitamin A (oral)
+
+### Tranexamic Acid (TXA)
+- Blocks plasminogen to plasmin (prevents clot degradation)
+- Perioperative use associated with reduced EBL across multiple specialties and operations including plastic surgery (orthognathic, craniosynostosis surgery, reduction mammaplasty)
+
+## Risk Assessment
+
+### ASA Classification
+- I: no comorbidities, normal weight, no smoking
+- II: mild, controlled comorbidities
+- III: one or more moderate to severe comorbidities
+- IV: comorbidity that is a constant threat to life (recent cardiovascular disease (<3 months), uncontrolled ESRD)
+- V: not expected to survive >24 hours without an emergency operation
+- VI: brain dead patient donating organs
+
+## Regional Anesthesia
+
+### Specific nerve blocks
+- **Infraorbital nerve block**
+  - Landmark: infraorbital foramen of orbital rim
+  - Ipsilateral central incisor to premolars
+- **Mental nerve block**
+  - Landmark: second premolar
+- **Pectoral nerve block**
+  - PECS 1: between pectoralis major and minor
+  - PECS 2: between pectoralis minor and serratus anterior
+- **TAP (transversalis abdominus plane)**
+  - Block abdominal nerves between internal oblique and transversus abdominus
+    - Landmarks: latissimus dorsi, external oblique, and iliac crest (lumbar triangle)
+  - T7-L1 carries abdominal wall innervation
+    - T10 highest nerve fiber density to abdomen
+
+## Anesthetic Complications
+
+### Malignant hyperthermia
+- Autosomal dominant myopathy
+- Due to inhaled anesthetics, succinylcholine
+- Pathophysiology: calcium release into skeletal muscle
+- **Dx:**
+  - Early signs: tachycardia, hypercapnia (increased end tidal CO2)
+  - Late signs: metabolic acidosis, hyperphosphatemia, fever, ECG changes/hyperkalemia, myoglobinuria
+- Tx: discontinue agent, supportive care, dantrolene
+  - Can use propofol for future anesthesia
+
+### Muscle Relaxants
+- **Succinylcholine**
+  - Associated with acute hyperkalemia
+
+### Post-operative nausea and vomiting
+- RF: nonsmoking, female, history of postoperative nausea/vomiting, age >50, obesity (BMI >30)
+- Tx: aprepitant before induction
+- Tx: propofol has lower association than other IV agents
+
+### Post-operative urinary retention
+- MC from anesthetic medications
+
+### Operating room fire
+- RF: nasal cannula and open oxygen sources
+- Tx: remove endotracheal tube, interrupt all gases, remove all flammables (e.g., sponges), reestablish airway once fire put out`,
+
+    'perioperative-care': `# Perioperative Care
+
+## Perioperative Optimization
+
+### Medication management
+- **Aspirin**
+  - Increases bleeding time
+  - Continue perioperatively for low-risk procedures
+    - No change in bleeding risk in minor skin surgeries
+- **Ketorolac**
+  - MOA: COX-1 and -2 inhibitor
+  - Increased bleeding time by thromboxane A2 inhibition
+  - No increased bleeding risk in breast surgery
+- **Acetaminophen**
+  - No platelet effects
+- **Gabapentinoids**
+  - Block voltage-gated calcium channels
+  - Used in multi-modal analgesia
+- **Dual antiplatelet therapy**
+  - Prescribed after cardiac stents
+  - Recommend continuation for >6 months after drug-eluting stent placement, bridge with an antiplatelet gtt if needed to be held for an emergency
+- **Warfarin**
+  - Monitoring: PT/INR (target 2-3 for most indications)
+  - Assess risk of perioperative thrombosis
+  - If high risk: bridge with heparin or LMWH
+  - If low risk: stop 5 days before surgery
+- **Direct oral anticoagulants (DOACs)**
+  - Hold 24-48 hours before surgery depending on renal function
+  - No routine monitoring required
+- **Antibiotic prophylaxis**
+  - Timing: within 1 hour of incision (2 hours for vancomycin)
+  - Cefazolin most common (covers skin flora)
+  - Use in all breast cases, clean/contaminated, contaminated, and dirty cases
+    - Implant-based breast reconstruction: no evidence for courses >24 hours
+  - Not needed for clean hand surgery <2 hours, clean skin surgery
+  - **Penicillin allergy**
+    - Associated with <5% cephalosporin cross-reactivity
+
+### Perioperative pain management
+- **Opioid abuse**
+  - RF: younger age, bone procedures, psychiatric comorbidities, substance use history, and chronic pain history
+
+## OR Complications
+
+### Blood loss estimates
+- **Normal circulating blood volumes:**
+  - Neonate: 85cc/kg
+  - Child: 75cc/kg
+  - Adult (70kg): 5500cc
+
+### Patient positioning in OR
+- Reduce peripheral neuropathy compression risk
+- **Dorsal lithotomy**
+  - Heel protection
+- **Supine**
+  - Forearm supinated
+    - Reduce risk of ulnar neuropathy
+- **Tucked arms**
+  - Neutral forearm rotation
+- **Prone**
+  - Neck neutral
+
+### Retained foreign body
+- RF: MC incorrect final count (but most cases with retained objects had a normal final count), increased with change of surgical teams, emergency case
+
+### Radiation exposure
+- Low (<10Gy): transient erythema
+- Moderate (10-20Gy): recurring erythema
+- High (>20Gy): prone to tissue necrosis
+
+### Near-miss events
+- Potential to cause harm from an error but caught before affects patient`,
+
+    'critical-care': `# Critical Care
+
+## Neurologic
+
+### Postoperative delirium
+- Tx: avoid benzodiazepines, diphenhydramine
+
+### Diabetes insipidus
+- Elevated serum sodium after head injury
+  - MOA: vasopressin via posterior pituitary
+
+### Cerebral edema
+- Tx: hypertonic saline
+
+### Brain death examination
+- Need cause that is permanent and irreversible
+- Dx: absent brainstem reflexes (e.g., pupillary response to light)
+- Contraindications: hypothermia, neuromuscular blockade
+
+### Organ donation
+- Contraindications: lack of next-of-kin consent, minors (age <18), prion disease, metastatic disease
+
+### Autonomic dysreflexia
+- Exaggerated sympathetic response due to a triggering cause seen in spinal cord patients
+- RF: T6 or higher paralysis
+- Sx: hypertension, bradycardia, flushing, sweating, headache
+- Tx: remove clothing/cooling, place foley catheter to empty bladder
+
+## Cardiac
+
+### Cardiopulmonary resuscitation
+- High-quality chest compressions for 2 minutes then check pulse
+- **Ventricular dysrhythmias**
+  - Tx: compressions, automated defibrillator
+- **Pulseless electrical activity**
+  - Tx: compressions, epinephrine
+
+### Rapid response team
+- Assesses floor patients with major vital-sign changes, evaluate need for ICU transfer
+  - Common triggers: rapid heart rate, hypotension, altered consciousness
+
+### Acute coronary syndrome
+- Sx: chest pain, shortness of breath
+- Dx: ECG (1st), troponin
+
+### Cardiac tamponade
+- Beck's triad: tachycardia, hypotension, jugular distention
+- Dx: pericardial rub on auscultation, then US/echo
+- Tx: drainage (percutaneous or pericardial window)
+
+### Atrial fibrillation
+- Acute, unstable: attempt cardioversion (<48 hours onset)
+  - If longer >48 hours, need to assess for left thrombus clot, consider anticoagulation
+- Acute, stable: medical management with beta blockers (1st line), calcium-channel blockers (2nd line), amiodarone for rhythm control
+
+## Respiratory
+
+### Pulmonary function
+- Minute ventilation: respiratory rate x tidal volume
+
+### Tension pneumothorax
+- Sx: hypotension, tachypneic, decreased oxygen saturation
+- Tx: needle decompression then tube thoracostomy
+
+### Obstructive sleep apnea
+- Tx: CPAP support preoperatively and immediately postoperatively
+
+## Gastrointestinal
+
+### Nutrition
+- **Perioperative protein recommendation**
+  - 1gm/kg (about 60-70gm/day) 1 month before to 2 months after major surgery
+- **Respiratory quotient**
+  - <0.7: fat oxidation, underfeeding
+  - 0.7-1: utilize protein then carbohydrate
+  - >1.3: lipogenesis, overfeeding
+
+## Renal
+
+### Contrast-induced nephropathy
+- Reduce risk with isotonic fluid volume before contrast bolus with imaging studies
+
+### Acute kidney injury
+- Dx: fractional excretion of sodium (FeNa) for etiology
+  - Formula: (urine sodium x plasma creatinine) / (plasma sodium x urine creatinine)
+  - <1%: pre renal (hypovolemia or decreased perfusion)
+  - 1-3%: renal (MC acute tubular necrosis)
+  - >3%: post-renal (obstruction)
+- Tx: targeted glucose control, isotonic fluids, provide protein-based nutrition
+
+### Hyperkalemia
+- ECG with peaked T waves
+- Tx: calcium gluconate to protect heart, insulin and D50 to shift potassium intracellular, then furosemide/kayexalate/sodium polystyrene binders/dialysis to excrete
+
+### Cerebral salt wasting
+- Renal and fluid loss associated with intra-cranial injury
+
+### Syndrome of inappropriate anti-diuretic hormone (SIADH)
+- Hyponatremia in setting of volume expansion
+
+### Free water deficit
+- Water deficit = normal body water x (1-(serum Na/140))
+
+## Inflammatory/Infectious
+
+### Septic shock
+- Decreased peripheral vascular resistance due to vasodilation from pro-inflammatory mediators (e.g., TNF-alpha, histamine)
+- Dx: vasopressor requirement and serum lactate > 2 in absence of hypovolemia
+- Tx: blood cultures, early antibiotics (within 1 hour of presentation when suspected), volume resuscitation, pressors, supportive care
+  - Can trend lactate levels to assess resuscitation
+
+### Bacterial resistance
+- Changes to cell membrane (increased esterification, decreased carotenoids), increased protease, increased binding proteins, increased biofilm
+
+### Anaphylaxis reaction
+- Sx: itchy eyes, rhinorrhea, anxiety, skin erythema, respiratory stridor
+- Tx: intra-muscular epinephrine
+- **Isosulfane blue allergy**
+  - Dye used in sentinel lymph node biopsies
+  - 1-3% of population have allergy
+  - Tx: pressors
+
+### COVID infection
+- Increased cardiovascular complications post-operatively
+
+## Hematology
+
+### Bleeding diseases
+- **Von Willebrand**: MC congenital bleeding disorder
+  - Abnormal factor VIII binding
+  - Tx: DDAVP`,
+
+    'trauma': `# Trauma
+
+## Trauma Evaluation
+
+### Advanced trauma life support (ABCDEs)
+- **Airway**
+  - Includes cervical spine immobilization depending on mechanism
+- **Breathing**
+- **Circulation, control hemorrhage**
+- **Disability**
+- **Exposure/environment**
+- **Secondary survey**
+- Ensure tetanus immunization up to date for dirty, devitalized wounds in setting of trauma
+
+## Trauma Management
+
+### Hemorrhagic shock
+- Dx: increased pulse rate (early sign) in setting of known blood loss, vasoconstriction
+- Tx: massive transfusion protocol
+  - ~1:1 ratio of pRBC, FFP, avoid crystalloid
+- **Tranexamic acid (TXA)**
+  - Inhibits fibrinolysis (blocks conversion of plasminogen)
+  - Reduces traumatic blood loss
+  - Monitor for color-vision changes with prolonged use
+
+### Trauma in pregnancy
+- **Early pregnancy**
+  - Minimize CT scans on stable patients, if possible
+  - Dx: Rh status, 4 hours of fetal monitoring
+- **Late pregnancy**
+  - Asymptomatic hypotension
+    - Logroll to left side
+      - Offload IVC compression from fetus
+
+### Neck injuries
+- **Zone I**: inferior neck from clavicles to thyroid cartilage
+- **Zone II**: thyroid cartilage to angle of the mandible
+  - Most likely to require operative exploration
+  - Dx: CT angiogram if stable
+- **Zone III**: above angle of the mandible
+  - Dx: CT angiogram
+  - Tx: IR procedures (e.g., stent, coil embolization)`,
+
+    'transplantation': `# Transplantation
+
+## Allotransplantation in Plastic Surgery
+
+### Facial transplantation
+- **Facial changes after transplantation**
+  - Accelerated aging
+    - Facial volume loss occurs due to loss of bone and non-fat elements of subcutaneous tissue
+    - Occur in first three years, theorized to be from denervation changes
+- **Complications**
+  - Candidal mouth infection
+    - Sx: white papules of oral mucosa
+    - Tx: topical nystatin
+
+### Hand transplantation
+- Skin is the most immunogenic soft-tissue component
+- Risk of reperfusion injury after transplantation
+  - Dx: elevated potassium, CPK levels
+
+## Transplant Management
+
+### Rejection
+- **Hyperacute**: 0-2 days from preformed antibodies
+- **Accelerated**: 2-5 days
+- **Acute**: first 6 months, T cell mediated, newly formed. Organ dysfunction.
+- **Chronic**: >6 months, T and B cells, progressive arterial disease
+
+### Immunosuppression
+- **Tacrolimus**
+  - Side effect: nephrotoxicity
+
+### Antibiotics
+- Taken prophylactically due to decreased immunity
+- Opportunistic infections most likely to occur between months 1-12`,
+
+    'statistics-ethics-practice': `# Statistics, Ethics, and Practice Management
+
+## Statistics
+
+### Quantitative
+- **Student's t-test**
+  - Compares means of independent quantitative data in 2 groups
+- **ANOVA**
+  - Compares variance of independent quantitative data in > 2 groups
+- **Paired-sample t-test**
+  - Compares means of dependent quantitative data in same group at different times
+- **Linear regression**
+  - Determines relationship between dependent and independent variables
+
+### Qualitative
+- **Chi-square test**
+  - Compares categorical data in 2+ groups
+- **Fisher exact test**
+  - Used when sample sizes are small (<5 in any cell)
+
+### Study Design
+- **Prospective cohort**
+  - Follow subjects forward in time
+  - Can establish temporal relationship
+- **Retrospective cohort**
+  - Look back at historical data
+- **Case-control**
+  - Compare subjects with disease to those without
+- **Randomized controlled trial (RCT)**
+  - Gold standard for establishing causation
+  - Subjects randomly assigned to treatment/control
+- **Meta-analysis**
+  - Statistical combination of multiple studies
+
+### Measures
+- **Sensitivity**: True positive / (True positive + False negative)
+  - Ability to detect disease when present
+- **Specificity**: True negative / (True negative + False positive)
+  - Ability to rule out disease when absent
+- **Positive predictive value (PPV)**: True positive / (True positive + False positive)
+  - Probability disease present when test positive
+- **Negative predictive value (NPV)**: True negative / (True negative + False negative)
+  - Probability disease absent when test negative
+- **Number needed to treat (NNT)**: 1 / Absolute risk reduction
+  - Number of patients needed to treat to prevent one adverse outcome
+
+### Statistical Significance
+- **P-value**: Probability results occurred by chance
+  - P<0.05 typically considered statistically significant
+- **Confidence interval (CI)**: Range likely to contain true population parameter
+  - 95% CI most common
+- **Type I error (alpha)**: False positive, rejecting null when true
+- **Type II error (beta)**: False negative, accepting null when false
+- **Power**: 1 - beta, ability to detect true difference
+
+## Practice Management
+
+### Coding
+- **Global period**
+  - 90 days after operation (10 days after some simple skin procedures)
+    - Includes professional services for all disease-related care after operation, including complications
+      - Staged components excluded (e.g., division of a forehead flap)
+      - Includes subsequent tissue expander after device placement
+    - Can bill initial consultation in addition to operation (but not additional visits needed for consent, photos, markings)
+- **New patient clinic visit**
+  - First visit to practice or established patient not seen by you or a partner in the same practice in >36 months
+- **CPT modifiers:**
+  - 22: added time/complexity
+  - 50: bilateral procedure (e.g., breast reduction)
+  - 57: evaluation/management of an urgent/emergent procedures with surgery planned within 24 hours
+  - 58: planned, staged operation (e.g., breast tissue expander to implant exchange)
+- **CPT coding for skin lesions**
+  - Can code the excision or the closure but can't code both (if performed by same surgeon)
+
+### Government and regulations
+- **Medicare**
+  - Federally funded insurance generally for age >65
+  - Consists of 4 components
+    - A: inpatient and nursing facility fees
+    - B: outpatient services
+    - C: add-on private coinsurance option (combines parts A, B, C)
+    - D: drug benefits
+  - Physician contracting
+    - Obligated to offer the same cost (pre-negotiated fee schedule) for the same surgical service to all covered patients by that insurer
+- **Medicaid**
+  - Federally subsidized, state-run insurance offered to low-income individuals
+- **Affordable Care Act**
+  - Many components largely related to health insurance expansion of coverage
+    - Does not include dental care
+  - Mandates electronic health record system (EHR) to receive full federal payments for services
+    - Small, incremental penalty per year if no EHR
+    - Meaningful use
+      - Encourages practices to use EHR components: electronic prescribing, patient portal access for health records, quality
+- **Health Insurance Privacy Accountability Act (HIPAA)**
+  - Allows individuals to transfer health coverage from one employer to another
+  - Includes regulations covering patient privacy and data privacy in healthcare
+  - Protects individually identifiable information (name, address, date of birth), including its use in research
+    - Email communications must be encrypted
+    - Privacy official: serves as privacy officer for a practice
+    - If any breach, report to Department of Health and Human Services within 60 days
+      - Report to local media for large breach (>500 patients affected)
+- **Americans with Disability Act**
+  - Provider/health system needs to provide necessary services for patients to access care (e.g., interpretation)
+- **Certificate of Need**
+  - State-level approval needed before building or expanding healthcare facilities
+  - Allows geographic coordination of new services and construction
+- **Sunshine Act**
+  - Medical device, supply, and drug companies must disclose all payments and gifts > $10 to an individual provider to the federal government
+    - Exception for continuing medical education events
+- **American Board of Plastic Surgery**
+  - Requires unrestricted state medical license for eligibility
+  - Can revoke privileges for unethical or unprofessional behavior
+  - Requires 125 total hours of continuing medical education every 5 years (25 hours in patient safety)
+- **In-office operating rooms and procedure rooms**
+  - AAAASF
+    - Private entity that certifies in-office operating and procedural rooms
+      - Must have admitting/operating privileges at an acute hospital within 30 minutes' drive
+      - Recommend overnight observation for high-volume liposuction (>5L)
+  - ASPS
+    - Recommends operations less than 6-hour cases at in-office OR`
   }
 };
 
