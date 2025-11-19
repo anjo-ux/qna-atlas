@@ -51,13 +51,13 @@ export function SearchResults({ results, query, onResultClick }: SearchResultsPr
 
   return (
     <div className="absolute top-full left-0 right-0 mt-2 z-50">
-      <Card className="shadow-elevated max-h-[500px] overflow-hidden">
+      <Card className="shadow-elevated overflow-hidden">
         <div className="p-3 border-b border-border bg-accent/5">
           <p className="text-sm font-semibold text-foreground">
             {results.length} {results.length === 1 ? 'result' : 'results'} found
           </p>
         </div>
-        <ScrollArea className="max-h-[450px]">
+        <ScrollArea className="h-[450px]">
           <div className="p-2 space-y-4">
             {Object.entries(groupedResults).map(([type, typeResults]) => {
               if (typeResults.length === 0) return null;
