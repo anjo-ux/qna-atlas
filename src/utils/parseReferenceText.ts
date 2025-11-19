@@ -1687,7 +1687,132 @@ Survive off surrounding soft tissues until generate their own blood supply
 # Pediatric Brachial Plexopathy
 
 - Observe ~6 months for development of upper extremity motor function
-- Dx: MRI to evaluate for nerve-root level injury`
+- Dx: MRI to evaluate for nerve-root level injury`,
+
+    'lower-extremity': `# Anatomy
+
+## Lower extremity nerves
+- Tibial: gastrocnemius, soleus, plantaris, popliteus, flexor digitorum longus, flexor hallucis longus (FHL)
+  - Dx: plantarflexion, sensation to plantar surface of the foot
+- Femoral: anterior thighs muscles
+  - Dx: leg extension
+- Obturator: medial thigh muscles
+  - Dx: thigh adduction
+- Peroneal nerve: lateral and anterior compartments
+  - Associated with proximal tibiofibular joint dislocation
+  - Dx: absent dorsiflexion of the foot, sensation to lateral foot
+  - Tx: nerve repair, nerve grafting, nerve transfer FHL (tibial nerve) to AT if severe injury
+- Medial plantar nerve
+  - Continuation of the tibial nerve
+
+## Lower extremity muscles
+- Superficial posterior: gastrocnemius and soleus
+  - Dx: plantarflexion
+- Deep posterior: toe flexors
+  - Dx: FHL with flexion of great toe
+- Anterior: anterior tibial, toe extenders
+  - Dx: dorsiflexion, inversion
+- Lateral: peroneus muscles
+  - Dx: ankle eversion
+- Plantaris tendon
+  - Located between medial gastrocnemius muscle and soleus, medial to Achilles tendon
+  - Used as a tendon autograft
+
+## Popliteal fossa
+- Contain popliteal artery, tibial nerve, common popliteal nerve
+- Bordered by medial head of gastrocnemius, semimembranosus, lateral head of gastrocnemius, and biceps femoris
+
+## Toe anatomy
+- Perfusion with dominant dorsal system in 70% of patients, plantar system in 30%, equivocal 10%
+- Dx: lateral angiogram before toe-to-thumb transfer
+
+# Lower Extremity Trauma
+
+## Fracture fixation
+- Bony stabilization increases with interfragmentary compression
+- Primary bone healing: compression plates, lag screws, tension bands
+- Secondary bone healing: intramedullary nailing, bridge plating, external fixation, K wires support relative stability
+
+## Open fractures
+- IV cephalosporin (in first 3 hours) or equivalent x 72 hours
+- Restore length with reduction, splinting
+- Assess pulses
+
+## Gustilo classification
+- I: Clean wound, <1cm
+- II: Clean wound, >1cm
+- III:
+  - A: Adequate soft tissue for coverage
+  - B: Inadequate soft tissue for coverage, periosteal stripping
+  - C: Arterial injury requiring repair
+
+## Secondary-bone reconstruction
+- Masquelet: two-stage reconstruction
+  - 1st stage: antibiotic spacer placement, allow 4-8 weeks for pseudomembrane to form
+  - 2nd stage: replace antibiotic spacer with cancellous bone graft into pseudomembrane
+- Ilizarov/bone transport
+  - Perform osteotomy away from fracture site, then distraction osteogenesis
+  - Bone forms by intramembranous ossification
+- Capanna technique
+  - Free fibula free flap inside bone allograft
+  - Used for large-gap sarcoma bony reconstruction
+
+## Limb salvage
+- RF for failure: popliteal artery injury, ankle/foot fractures
+- Ideally, soft-tissue coverage within 10 days from injury
+- Can be performed with tibial nerve injury (if nerve is reparable)
+- Traumatic amputations occur MC due to ischemia; good functional outcomes in appropriately selected patients
+
+## Morel-Lavallée lesion
+- Soft-tissue fascial shear injury with intact skin
+- Prone to seroma, lymphatic disruption
+- Dx: MRI for chronic injuries
+- Tx: compression bandaging, percutaneous aspiration, +/- sclerosing agents
+
+# Lower Extremity Reconstruction
+
+## Flaps
+- Pedicled
+  - Propeller
+    - Identify subcutaneous perforator to island of skin
+    - MC failure due to venous congestion from kinking
+- Free tissue transfer
+  - Muscle flaps: Fill dead space better
+  - Fasciocutaneous flaps: Decreased donor-site morbidity
+
+## Tissue Expansion
+- Lower extremity placement has highest complication rate in the body
+
+# Vascular Diseases
+
+## Lower extremity
+- Peripheral arterial disease
+  - Claudication that progresses from rest pain to tissue loss
+  - Dx: palpate pulses, Doppler exam
+  - Dx: ankle-brachial index
+    - >1: normal
+    - 0.7-0.9: claudication
+    - <0.5: rest pain, tissue loss
+  - Dx: toe-brachial index for non-compressible vessels (diabetes mellitus)
+- Venous insufficiency ulcers
+  - Tx: elevate, serial compression dressings (Unna boot)
+- Lymphedema
+  - MC cause obesity (U.S.), filiarsis infection (worldwide)
+  - Dx: Staging:
+    - 0: clinically normal, identified on lymphoscintigraphy
+    - 1: clinically apparent, improves with limb elevation
+    - 2: pitting edema, does not improve with elevation
+    - 3: fibrosis of soft tissues
+- Neuropathic foot ulcers
+  - Treat non-infected, non-ischemic ulcers with contact casting
+  - Tx: granulocyte-stimulating factor use associated with decreased need for below-knee amputation
+  - Tx: medical honey draws fluid from deep to superficial by osmosis
+  - Tx: hyberbaric oxygen indicated for exposed bone
+
+# Aesthetic
+
+## Calf augmentation
+- Submuscular position for implant associated with lowest complication rate`
   }
 };
 
