@@ -344,6 +344,74 @@ Survive off surrounding soft tissues until generate their own blood supply
   - Cortical: osteoconduction
   - Bone cortical allografts have greater mechanical strength than cancellous autograft`,
     
+    'microsurgery': `# Free Flap
+
+## Complications
+- MC microsurgical problem: venous congestion
+  - Dx: fast capillary refill, purple flap color
+  - RF: <2mm venous coupler
+  - Hand-sewn anastomosis for smaller veins to reduce risk
+  - Tx: prompt return to OR
+- MC cause acute flap loss: arterial thrombosis
+  - White clot: platelet aggregation, often from technical problem
+  - Dx: ischemia of flap, pale, cool, no capillary refill
+  - Tx: revise anastomosis, local heparin
+
+## Flap salvage
+- Highest likelihood of salvage with prompt return to OR (1st 48 hours)
+  - Mechanical causes (e.g., vessel kinking) favorable to thrombosis
+- Decreased with multiple repeat explorations, irradiated fields
+
+## Vasopressor medications during free tissue transfer
+- No effect on flap survival
+
+## Monitoring
+- Clinical: Doppler, color, capillary refill, turgor, warmth
+- Near-infrared spectroscopy
+  - Measures tissue oxygen saturation (arterial and venous components)
+  - Shown to improve deep inferior epigastric (DIEP) flap breast reconstruction salvage rate compared to clinical monitoring due to earlier detection of microvascular problems
+
+# Hypercoagulable States
+
+- Virchow's triad: vessel injury, venous stasis, hypercoagulable state
+  - RF: personal history of DVT/PE, family history
+  - Risk persists for several weeks after operation
+- Inherited disorders
+  - Factor V Leiden (MC genetic cause)
+  - Resistance to activated protein C
+  - Others: antiphospholipid syndrome, antithrombin deficiency
+- MC medication associated with increased risk in plastic surgery: tamoxifen
+
+# Medicines and Adjuncts
+
+## Antiplatelet
+- Aspirin: Thromboxane A2, irreversible platelet inhibition
+
+## Anticoagulation
+- Heparin: Antithrombin III
+
+## Fibrinolytics
+- tPA (e.g., alteplase)
+  - Activate plasminogen to plasmin (degrades clot)
+  - Use for fibrinolysis of microsurgical arterial thrombosis
+  - Inject locally into flap via artery, allow to drain out a flap vein that is not anastomosed
+  - Associated with reduced fat necrosis, not associated with increased salvage in DIEP flaps
+
+## Glycoprotein IIIa/IIb inhibitors
+- Anti-platelet agents
+- Some support for use in setting of reactive thrombocythemia (>1 million) with free flaps
+
+## Leeches
+- Used to treat focal venous congestion (e.g., finger replant)
+- Secretes hirudin (anticoagulant)
+- Prophylaxis with ciprofloxacin (~15% patients develop infection, 80% of infections are aeromonas)
+- Alternatives: ceftriaxone, doxycycline (not for pediatrics)
+
+## Vasodilators
+- Papaverine: Inhibits phosphodiesterase in vessel smooth muscle resulting in vasodilation
+- Lidocaine: Blocks sympathetic response in vessels
+- No evidence supports one topical vasodilator better than another`,
+    
     'skin-lesions': `# Skin
 
 ## Epidermis
