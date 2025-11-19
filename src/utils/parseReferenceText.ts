@@ -138,8 +138,211 @@ const referenceData: Record<string, Record<string, string>> = {
   - Sacral: Gluteal flap, VY advancement
   - Trochanteric: Tensor fascia lata myocutaneous flap (allows readvancement)
 - Complications: Recurrence (50-70%)
-- RF: hyperglycemia/uncontrolled diabetes (#1), osteomyelitis, paraplegic, age >70, immobility, poor nutrition, low BMI, anemia, ESRD, CVA, hip fracture
-- Re-advance previous flaps when possible`,
+  - RF: hyperglycemia/uncontrolled diabetes (#1), osteomyelitis, paraplegic, age >70, immobility, poor nutrition, low BMI, anemia, ESRD, CVA, hip fracture
+  - Re-advance previous flaps when possible`,
+    
+    'flaps-and-grafts': `# Flap Basics
+- Axial: carries own blood supply
+- Random: survives off subdermal plexus
+  - Often 3:1 length-to-width ratio
+  - Bipedicled: can go down to 2:1 length-to-width ratio
+
+## Z plasty
+- Used commonly in scar contracture releases
+- Gain length by rearranging width
+  - 30 degrees: 25% gain in length
+  - 45 degrees: 50%
+  - 60 degrees: 75%
+  - 75 degrees: 100%
+  - 90 degrees: 125%
+- 5-flap Z plasty: Includes a V to Y advancement to the central limb for lengthening
+
+## Keystone flap
+- Perforator island fasciocutaneous local flap
+- Design with same width as defect, double V to Y donor closure
+- No undermining performed to the flap
+
+# Flap Anatomy
+
+## Neck
+- Submental fasciocutaneous flap
+  - Vascular: submental artery off cervical branch of facial artery
+  - Traverses level I lymph nodes in neck
+  - Use in intra-oral and lower face soft-tissue reconstruction
+
+## Trunk
+- Latissimus dorsi muscle/musculocutaneous flap
+  - Vascular: thoracodorsal artery
+  - Function: shoulder adduction, extension, internal rotation
+  - Donor site has decreased shoulder range of motion that improves by one year
+  - Versatile flap used mostly in breast reconstruction and trunk reconstruction; is the largest single muscle available for free flap
+- Trapezius flap
+  - Vascular: transverse cervical artery
+  - Used in cervical-spine reconstruction
+- Scapula bone flap
+  - Vascular: circumflex scapular artery off subscapular artery
+  - Traverses triangular space (teres minor, teres major, long head of triceps)
+  - Tip of scapula, can be chimeric flap with other tissues from subscapular system (latissimus dorsi, parascapular flaps)
+  - Used for shoulder, back of neck, axilla reconstruction
+- Paraspinous flap
+  - Type IV segmental blood supply
+  - Used in spinal coverage
+- Omentum flap
+  - Vascular: right and left gastroepiploic arteries (only need one side)
+  - Used in sternal reconstruction, lymphatic surgery; needs subsequent skin coverage
+- Lumbar artery perforator flap
+  - Vascular: L4 lumbar artery perforator
+  - Runs between erector spinae and quadratus lumborum
+  - Innervation: cluneal nerve
+  - Used as a secondary breast free flap option
+- Groin flap
+  - Vascular: superficial circumflex iliac artery
+  - Used as a distant (non-microsurgical) flap for hand coverage
+- Superficial circumflex iliac perforator
+  - Thin, pliable flap; improved donor morbidity compared to radial forearm flap
+- Iliac crest osteocutaneous flap
+  - Vascular: deep circumflex iliac
+  - Used as an alternative bone flap in mandibular reconstruction; better vertical height than fibula
+
+## Upper Extremity
+- Lateral arm flap
+  - Vascular: posterior radial collateral artery
+  - Runs between lateral triceps and brachialis
+  - Used in forearm and hand reconstruction as a thin fasciocutaneous free flap
+- Reverse lateral arm flap
+  - Vascular: radial recurrent artery
+  - Used for elbow coverage as a pedicled flap
+- Radial forearm flap
+  - Vascular: radial artery
+  - Need normal Allen's test (intact palmar arch)
+  - Thin, pliable fasciocutaneous flap; can be innervated flap using lateral antebrachial cutaneous nerve
+  - Used as pedicled (anterograde) for elbow coverage, reversed for hand coverage (to level of proximal interphalangeal joints), or free flap for head and neck reconstruction (e.g., hemiglossectomy defects), phalloplasty
+- Ulnar artery flap
+  - Vascular: ulnar artery
+  - Less tendon exposure risk than radial forearm flap
+  - Shorter pedicle, smaller diameter vessel than radial forearm flap
+- Posterior interosseous artery flap
+  - Vascular: pedicle between 5th/6th extensor compartments
+  - Can be reversed and inset as distally as level of metacarpophalangeal joints
+- Reverse homodigital island flap
+  - Vascular: retrograde from contralateral digital artery with crossing vessel proximal to distal interphalangeal joint
+  - Used for finger-tip injuries, sensate flap
+
+## Lower Extremity
+- Anterolateral thigh flap
+  - Vascular: lateral descending circumflex artery
+  - Passes through lateral inguinal ligament
+  - Donor site morbidity: weak knee extension
+  - Used as pedicled or free flap, fasciocutaneous or musculocutaneous flap
+  - Can cover large defects: up to 35x25cm; can be innervated using lateral femoral cutaneous nerve
+- Profunda artery perforator flap
+  - Vascular: pedicle traverses through adductor magnus
+  - Includes posteromedial thigh with superior border at gluteal crease
+  - Used as secondary breast free flap option; favorable donor site, supine positioning
+- Posterior thigh fasciocutaneous flap
+  - Vascular: inferior gluteal artery descending branch
+- Medial femoral condyle/trochlea bone/periosteal flap
+  - Vascular: descending geniculate artery
+  - Passes posterior to vastus medialis and anterior to adductor
+  - Can be used for defects up to 7cm
+  - Used in scaphoid nonunion surgery
+- Gracilis flap
+  - Vascular: medial circumflex artery
+  - Travels between adductor magnus and adductor longus
+  - Pedicle enters muscle laterally
+  - Innervation: obturator nerve
+  - Can be used as a free functional muscle flap, pedicled for perineal defects
+- Rectus femoris flap
+  - Vascular: descending branch of the lateral femoral circumflex artery
+  - Function: hip flexion, knee extension
+  - Used in groin coverage
+- Gastrocnemius flap
+  - Vascular: sural arteries
+  - Used in upper 1/3rd tibia, knee wounds
+- Medial sural artery perforator
+  - Vascular: perforators can be traced to the popliteal artery
+  - Thin, pliable fasciocutaneous flap
+- Soleus flap
+  - Vascular: proximal from posterior tibial, distal from peroneal
+- Fibula bone flap
+  - Vascular: peroneal artery
+  - Anterior approach between extensor hallucis longus and interosseous septum, pedicle between flexor hallucis longus (FHL) and posterior tibial muscles
+  - Skin island based on perforator from distal 1/3rd of the leg
+  - Donor morbidity: decreased great toe flexion strength (due to harvest of flexor hallucis longus)
+  - Used for large bony defects, mandibular reconstruction; thick cortical bone stock
+  - Up to 20cm of bone stock available; can perform multiple osteotomies
+  - Preserve 5-6cm proximal and distal aspect of fibula
+  - Can be performed with previous distal fibula fracture
+- Reverse sural artery flap
+  - Vascular: peroneal artery perforators artery, lesser saphenous vein
+  - Used as a reversed pedicled flap for heel defects
+  - MC cause flap loss: venous insufficiency
+  - Improve with surgical delay: Incise flap to produce ischemia-induced hyperplasia and hypertrophy of blood vessels; complete elevation/inset of flap 2-3 weeks later
+- Posterior tibial artery perforator propeller flap
+  - Vascular: perforators from between soleus and flexor digitorum longus
+  - Used as a regional option for lower extremity
+
+## Foot
+- Medial plantar artery flap
+  - Vascular: continuation from posterior tibial artery
+  - Perforator between flexor hallucis brevis and abductor hallucis muscles
+  - Innervation: medial plantar nerve from tibial nerve
+  - Used in heel reconstruction
+
+# Grafts
+
+Survive off surrounding soft tissues until generate their own blood supply
+
+## Skin grafts
+- Three phases of initial healing, occur over first 5-6 days
+  - Plasmatic imbibition: graft survives off nutrients from wound bed
+  - Inosculation: new capillaries form
+  - Revascularization: new blood vessels form
+- Split-thickness grafts:
+  - Less primary contracture (20% compared to 40% for FTSG), more secondary contraction than full-thickness grafts
+  - Secondary contraction is inversely related to amount of dermis
+  - Meshing, fascial placement increases secondary contraction
+  - Lower metabolic demand than full-thickness grafts
+- Bolster: Negative-pressure wound therapy (NPWT) improves skin graft take over other bolster options
+- Donor-site management: Moist dressings less painful (occlusive clear dressings, hydrocolloid), similar healing to other dressings
+- Lower survival in XRT wounds
+
+## Dermal substitutes
+- Dermal regenerative matrix template
+  - Can be used over less vascularized wound beds
+  - Requires debrided wound, no infection
+  - Increase in matrix take with NWPT as bolster
+  - Perform skin graft 3 weeks after placement
+
+## Fat grafts
+- Graft take usually around 50-60%
+- Related to harvest, processing, injection
+- Injection with low-shear device (#1), small aliquots improve graft viability
+
+## Tendon grafts
+- Donors: palmaris longus, plantaris (longest length), extensor digitorum longus
+
+## Cartilage grafts
+- Donors: septum, ear, rib (5-7)
+- MC complication: warping
+- Gibson principle: remove perichondrium and cartilage warps to opposite side
+
+## Fascial grafts
+- Tensor fascia lata
+- Temporoparietal fascia
+  - MC complication: alopecia
+
+## Bone grafts
+- Bone healing:
+  - Osteogenesis: formation of new bone by cells
+  - Osteoinduction: differentiate cells to bone healing (e.g., bone morphogenic protein [BMP])
+  - Osteoconduction: vessels grow into mechanical scaffold (e.g., hydroxyapatite)
+- Bone flaps/vascularized bone graft
+  - Osteogenesis: osteoblasts
+- Bone grafts
+  - Cancellous: osteoinduction
+  - Cortical: osteoconduction
+  - Bone cortical allografts have greater mechanical strength than cancellous autograft`,
     
     'skin-lesions': `# Skin
 
