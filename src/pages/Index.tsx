@@ -3,6 +3,7 @@ import { loadQuestions, getSubsectionTitle, updateSubsectionTitle } from '@/util
 import { Section } from '@/types/question';
 import { Navigation } from '@/components/Navigation';
 import { QuestionCard } from '@/components/QuestionCard';
+import { SubsectionContent } from '@/components/SubsectionContent';
 import { Input } from '@/components/ui/input';
 import { Search, BookOpen } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -217,6 +218,7 @@ const Index = () => {
                   </div>
 
                   <div className="space-y-4">
+                    <SubsectionContent content={subsection.content} />
                     {subsection.questions.map((question, idx) => (
                       <QuestionCard key={question.id} question={question} index={idx} />
                     ))}
