@@ -166,7 +166,219 @@ const referenceData: Record<string, Record<string, string>> = {
 ## Cylindromas
 - Benign adnexal tumors
 - Dx: firm, nodular, pink-colored scalp lesions
-- Tx: excision`
+- Tx: excision
+
+## Pilomatricoma
+- Slow-growing blue nodule associated with hair follicle, calcific features
+- Dx: firm to touch, tender
+- RF: teenagers
+- Tx: excision
+
+## Spiradenomas
+- Benign dermal neoplasms
+- Dx: small, painful, bluish nodules
+- Tx: excision
+
+# Malignant Skin Diseases
+
+## Basal cell carcinoma
+- Pearly round nodules
+- RF: xeroderma pigmentosum
+  - X-linked recessive gene impairing nucleotide excision repair
+  - Dx: extreme sun sensitivity, extensive photoaging, dry skin
+- Tx: non-surgical: topical creams (5-FU, imatinib), electrodesiccation and curettage for superficial lesions, XRT for high-risk patients (non-surgical candidates)
+- Tx: Moh's excision
+  - Involves real-time circumferential skin lesion sectioning with frozen section review
+  - Associated with high cure rate (>95% for basal and squamous cell carcinomas)
+- Tx surgery: excision with 4mm margins
+
+## Squamous cell carcinoma
+- Arises from stratum basale
+  - Histology: poorly differentiated cords of spindle cells from keratinocytes
+- Aggressive subtypes: adenoid, adenosquamous, desmoid
+- Actinic keratosis: ~10% malignant risk
+  - Tx: cryotherapy, imiquimod (acts on skin immune system), topical 5-FU
+- Most-common primary malignant skin tumor of the hand
+- Tx: Moh's
+- Tx surgery: wide local excision with 6mm margins for low risk, 1cm for aggressive tumors, XRT for non-surgical candidates (efficacy better for smaller lesions)
+
+## Melanoma
+- Arises from stratum basale
+- Clinical features (ABCDs): Asymmetry, irregular Border, heterogenous Color, Diameter > 6mm
+- Ulceration has worse prognosis
+- Types: superficial spreading (#1), nodular (grows more vertically, lowest disease-specific survival)
+- Lentigo maligna: melanoma in situ variant
+  - Tx: excision, XRT, topical imiquimod (upregulates immunomodulation)
+- Neurocutaneous melanosis
+  - Midline involvement, >20 satellite lesions
+  - Dx: MRI central nervous system screening before 6 months
+- Dx: punch biopsy for depth, labs (LDH), imaging (CXR, possible PET/CT)
+- Tx:
+  - Wide local excision:
+    - Margins: <1mm depth – 1cm, 1-2mm – 1-2cm, >2mm – 2cm
+  - Lymph node management:
+    - Sentinel lymph node biopsy (SLNB): indicated for >0.7mm primary lesion depth
+    - Completion lymph node dissection: high nodal burden (>3), extracapsular extension
+  - Systemic therapy (immunotherapy): indications include positive nodal disease, distant metastases
+
+## Merkel cell carcinoma
+- Neuroendocrine tumor
+- Histology: nuclear molding, small blue cells, salt-and-pepper chromatin on Hematoxylin and Eosin
+- Risk of development: Merkel cell polyomavirus (>80% of cases)
+- Tx: surgery with 1-2cm margins + XRT, SLNB
+- Poor prognosis
+
+## Angiosarcoma
+- Rapidly-growing red or purple macules or nodules; usually in head and neck
+- Associated with prior XRT or lymphedema
+- Tx: surgery, XRT, chemotherapy; poor prognosis
+
+
+## Split-thickness skin graft (STSG)
+- More forgiving to recipient site than full-thickness skin graft
+- First-intention failure: inadequate recipient site vascularity, infection, seroma, hematoma
+- Seroma/hematoma: can prevent graft from taking; avoid by messengering, pie-crusting
+- Requires immobilization/bolster to prevent shearing
+- Less secondary contracture than full-thickness skin graft
+- Thinner grafts: lower metabolic demand, higher skin contracture rate, requires less vascular bed
+- Heals by secondary intention
+
+## Full-thickness skin graft (FTSG)
+- Less secondary contracture than split-thickness skin graft
+- Requires higher quality recipient site
+- Heals by primary intention
+- Better pigmentation match
+- Thicker grafts: more durable, less re-epithelialization
+
+## Composite graft
+- Multiple tissue types taken together from donor site; requires meticulous recipient bed
+- Example: ear cartilage + skin, dermal-fat graft
+
+# Flap Classification
+
+- Mathes and Nahai muscle flap blood supply classification:
+  - Type I: single vascular pedicle (gastrocnemius, tensor fascia lata)
+  - Type II: dominant pedicle, minor pedicles (gracilis, soleus, trapezius)
+  - Type III: two dominant pedicles (gluteus maximus, rectus abdominus)
+  - Type IV: segmental pedicles (sartorius, external oblique)
+  - Type V: single dominant pedicle, secondary segmental pedicles (latissimus, pectoralis major)
+
+## Flap types
+- Axial: carries own blood supply
+- Random: survives off subdermal plexus
+  - Often 3:1 length-to-width ratio
+  - Bipedicled: can go down to 2:1 length-to-width ratio
+
+## Z plasty
+- Used commonly in scar contracture releases
+- Gain length by rearranging width
+- 30 degrees: 25% gain in length
+- 45 degrees: 50%
+- 60 degrees: 75%
+- 75 degrees: 100%
+- 90 degrees: 125%
+- 5-flap Z plasty: Includes a V to Y advancement to the central limb for lengthening
+
+## Keystone flap
+- Perforator island fasciocutaneous local flap
+- Design with same width as defect, double V to Y donor closure
+- No undermining performed to the flap
+
+# Flap Anatomy
+
+## Neck
+- Submental fasciocutaneous flap
+  - Vascular: submental artery off cervical branch of facial artery
+  - Traverses level I lymph nodes in neck
+  - Use in intra-oral and lower face soft-tissue reconstruction
+
+## Trunk
+- Latissimus dorsi muscle/musculocutaneous flap
+  - Vascular: thoracodorsal artery
+  - Function: shoulder adduction, extension, internal rotation
+  - Donor site has decreased shoulder range of motion that improves by one year
+  - Versatile flap used mostly in breast reconstruction and trunk reconstruction; is the largest single muscle available for free flap
+- Trapezius flap
+  - Vascular: transverse cervical artery
+  - Used in cervical-spine reconstruction
+- Scapula bone flap
+  - Vascular: circumflex scapular artery off subscapular artery
+  - Traverses triangular space (teres minor, teres major, long head of triceps)
+  - Tip of scapula, can be chimeric flap with other tissues from subscapular system (latissimus dorsi, parascapular flaps)
+  - Used for shoulder, back of neck, axilla reconstruction
+- Paraspinous flap
+  - Type IV segmental blood supply
+  - Used in spinal coverage
+- Omentum flap
+  - Vascular: right and left gastroepiploic arteries (only need one side)
+  - Used in sternal reconstruction, lymphatic surgery; needs subsequent skin coverage
+- Lumbar artery perforator flap
+  - Vascular: L4 lumbar artery perforator
+  - Runs between erector spinae and quadratus lumborum
+  - Innervation: cluneal nerve
+  - Used as a secondary breast free flap option
+- Groin flap
+  - Vascular: superficial circumflex iliac artery
+  - Used as a distant (non-microsurgical) flap for hand coverage
+- Superficial circumflex iliac perforator
+  - Thin, pliable flap; improved donor morbidity compared to radial forearm flap
+- Iliac crest osteocutaneous flap
+  - Vascular: deep circumflex iliac
+  - Used as an alternative bone flap in mandibular reconstruction; better vertical height than fibula
+
+## Upper Extremity
+- Lateral arm flap
+  - Vascular: posterior radial collateral artery
+  - Runs between lateral triceps and brachialis
+  - Used in forearm and hand reconstruction as a thin fasciocutaneous free flap
+- Reverse lateral arm flap
+  - Vascular: radial recurrent artery
+  - Used for elbow coverage as a pedicled flap
+- Radial forearm flap
+  - Vascular: radial artery
+  - Need normal Allen's test (intact palmar arch)
+  - Thin, pliable fasciocutaneous flap; can be innervated flap using lateral antebrachial cutaneous nerve
+  - Used as pedicled (anterograde) for elbow coverage, reversed for hand coverage (to level of proximal interphalangeal joints), or free flap for head and neck reconstruction (e.g., hemiglossectomy defects), phalloplasty
+- Ulnar artery flap
+  - Vascular: ulnar artery
+  - Less tendon exposure risk than radial forearm flap
+  - Shorter pedicle, smaller diameter vessel than radial forearm flap
+- Posterior interosseous artery flap
+  - Vascular: posterior interosseous artery
+  - Runs between extensor digiti minimi and extensor carpi ulnaris
+  - Used for hand and elbow coverage; pedicle length limits free flap use
+
+## Lower Extremity
+- Medial sural artery perforator flap
+  - Vascular: medial sural artery perforator
+  - Used for heel coverage, Achilles coverage
+- Sural artery flap
+  - Vascular: lesser saphenous vein and sural nerve
+  - Used for heel and Achilles coverage; pedicled flap
+- Fibula bone flap
+  - Vascular: peroneal artery
+  - Segmental bone flap
+  - Skin paddle: posterior/lateral leg
+  - Used in mandibular reconstruction; donor site has increased ankle fracture risk
+- Anterolateral thigh flap
+  - Vascular: descending branch of lateral circumflex femoral artery
+  - Innervation: lateral femoral cutaneous nerve
+  - Muscle perforator or septocutaneous
+  - Versatile flap with long pedicle, large donor site
+  - Used in head and neck reconstruction, trunk reconstruction, extremity coverage
+- Profunda artery perforator flap
+  - Vascular: 1st or 2nd perforator of profunda femoris artery
+  - Innervation: posterior femoral cutaneous nerve
+  - Used in perineal reconstruction, breast reconstruction; disadvantage is prone position for flap harvest
+- Gracilis flap
+  - Vascular: medial circumflex femoral artery
+  - Used in perineal reconstruction, breast reconstruction, functional muscle transfer
+- Tensor fascia lata flap
+  - Vascular: ascending branch of lateral circumflex femoral artery
+  - Used in trochanteric coverage, abdominal-wall defects
+- Rectus femoris flap
+  - Vascular: descending branch of lateral circumflex femoral artery
+  - Used for pelvic and groin coverage`
   }
 };
 
