@@ -63,6 +63,17 @@ export default {
           blue: "hsl(var(--highlight-blue))",
           pink: "hsl(var(--highlight-pink))",
         },
+        success: {
+          DEFAULT: "hsl(var(--success))",
+          foreground: "hsl(var(--success-foreground))",
+        },
+        chart: {
+          "1": "hsl(var(--chart-1))",
+          "2": "hsl(var(--chart-2))",
+          "3": "hsl(var(--chart-3))",
+          "4": "hsl(var(--chart-4))",
+          "5": "hsl(var(--chart-5))",
+        },
         green: {
           50: '#f0fdf4',
           100: '#dcfce7',

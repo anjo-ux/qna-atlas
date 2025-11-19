@@ -63,6 +63,19 @@ All colors MUST be HSL.
     --highlight-green: 142 76% 73%;
     --highlight-blue: 199 89% 78%;
     --highlight-pink: 330 81% 85%;
+    
+    --nav-gradient-start: 210 85% 50%;
+    --nav-gradient-end: 195 85% 55%;
+    --nav-hover-gradient-start: 210 90% 55%;
+    --nav-hover-gradient-end: 195 90% 60%;
+    
+    --success: 142 76% 50%;
+    --success-foreground: 0 0% 100%;
+    --chart-1: 210 85% 55%;
+    --chart-2: 195 85% 60%;
+    --chart-3: 142 76% 55%;
+    --chart-4: 48 95% 60%;
+    --chart-5: 330 81% 70%;
   }
 
   .dark {
@@ -109,6 +122,19 @@ All colors MUST be HSL.
     --highlight-green: 142 76% 73%;
     --highlight-blue: 199 89% 78%;
     --highlight-pink: 330 81% 85%;
+    
+    --nav-gradient-start: 210 85% 55%;
+    --nav-gradient-end: 195 85% 60%;
+    --nav-hover-gradient-start: 210 90% 60%;
+    --nav-hover-gradient-end: 195 90% 65%;
+    
+    --success: 142 76% 55%;
+    --success-foreground: 0 0% 100%;
+    --chart-1: 210 85% 60%;
+    --chart-2: 195 85% 65%;
+    --chart-3: 142 76% 60%;
+    --chart-4: 48 95% 65%;
+    --chart-5: 330 81% 75%;
   }
 }
 

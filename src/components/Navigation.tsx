@@ -26,7 +26,7 @@ export function Navigation({
       <div className="space-y-6 p-6">
         {sections.map((section) => (
           <div key={section.id} className="space-y-2">
-            <h3 className="font-semibold text-sm text-foreground mb-3">
+            <h3 className="font-semibold text-sm text-foreground mb-3 px-2">
               {section.title}
             </h3>
             <div className="space-y-1">
@@ -37,14 +37,14 @@ export function Navigation({
                   size="sm"
                   onClick={() => onNavigate(section.id, subsection.id)}
                   className={cn(
-                    "w-full justify-start text-left font-normal transition-smooth",
+                    "w-full justify-start text-left font-normal transition-smooth relative overflow-hidden",
                     selectedSection === section.id && selectedSubsection === subsection.id
-                      ? "bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                      ? "bg-gradient-to-r from-primary to-accent text-primary-foreground hover:from-primary/90 hover:to-accent/90 shadow-md"
+                      : "text-muted-foreground hover:text-foreground hover:bg-gradient-to-r hover:from-primary/10 hover:to-accent/10"
                   )}
                 >
-                  <span className="truncate text-xs">{subsection.title}</span>
-                  <span className="ml-auto text-xs opacity-60">
+                  <span className="truncate text-xs relative z-10">{subsection.title}</span>
+                  <span className="ml-auto text-xs opacity-80 relative z-10">
                     {subsection.questions.length}
                   </span>
                 </Button>
@@ -59,8 +59,8 @@ export function Navigation({
   return (
     <>
       {/* Desktop Navigation */}
-      <aside className="hidden lg:flex w-80 border-r border-border bg-card flex-col">
-        <div className="p-6 border-b border-border">
+      <aside className="hidden lg:flex w-80 border-r border-border bg-gradient-to-b from-card via-card to-muted/30 flex-col shadow-lg">
+        <div className="p-6 border-b border-border bg-gradient-to-r from-primary/10 to-accent/10">
           <h2 className="text-lg font-semibold text-foreground">Sections</h2>
           <p className="text-sm text-muted-foreground mt-1">
             {sections.reduce((acc, s) => acc + s.subsections.length, 0)} subsections
@@ -76,8 +76,8 @@ export function Navigation({
             className="lg:hidden fixed inset-0 bg-background/80 backdrop-blur-sm z-40"
             onClick={onClose}
           />
-          <aside className="lg:hidden fixed left-0 top-0 bottom-0 w-80 border-r border-border bg-card z-50 flex flex-col">
-            <div className="p-6 border-b border-border flex items-center justify-between">
+          <aside className="lg:hidden fixed left-0 top-0 bottom-0 w-80 border-r border-border bg-gradient-to-b from-card via-card to-muted/30 z-50 flex flex-col shadow-xl">
+            <div className="p-6 border-b border-border bg-gradient-to-r from-primary/10 to-accent/10 flex items-center justify-between">
               <div>
                 <h2 className="text-lg font-semibold text-foreground">Sections</h2>
                 <p className="text-sm text-muted-foreground mt-1">

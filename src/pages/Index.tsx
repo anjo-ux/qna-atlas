@@ -9,8 +9,9 @@ import { ReferenceTextPanel } from '@/components/ReferenceTextPanel';
 import { QuestionStats } from '@/components/QuestionStats';
 import { QuestionFilters } from '@/components/QuestionFilters';
 import { SearchResults } from '@/components/SearchResults';
+import { HomePage } from '@/components/HomePage';
 import { Input } from '@/components/ui/input';
-import { Search, Menu, X, BookOpen, FileQuestion, Columns2 } from 'lucide-react';
+import { Search, Menu, X, BookOpen, FileQuestion, Columns2, Home } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useQuestionStats } from '@/hooks/useQuestionStats';
@@ -142,6 +143,12 @@ export default function Index() {
     setShowSearchResults(false);
   };
 
+  const handleGoHome = () => {
+    setSelectedSection(null);
+    setSelectedSubsection(null);
+    setIsNavOpen(false);
+  };
+
   const handleSearchResultClick = (
     sectionId: string, 
     subsectionId: string, 
@@ -220,6 +227,16 @@ export default function Index() {
                 onClick={() => setIsNavOpen(!isNavOpen)}
               >
                 {isNavOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+              </Button>
+              
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleGoHome}
+                className="hover:bg-primary/10"
+                title="Go to Dashboard"
+              >
+                <Home className="h-5 w-5" />
               </Button>
               
               <div className="flex-1">
@@ -329,17 +346,7 @@ export default function Index() {
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
             </div>
           ) : !currentSubsection ? (
-            <div className="flex-1 flex flex-col items-center justify-center min-h-[400px] text-center p-8">
-              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                <Search className="h-8 w-8 text-primary" />
-              </div>
-              <h2 className="text-2xl font-semibold text-foreground mb-2">
-                Get Started
-              </h2>
-              <p className="text-muted-foreground max-w-md">
-                Select a section from the navigation to view questions and start studying
-              </p>
-            </div>
+            <HomePage sections={sections} />
           ) : (
             <div className={cn(
               "flex-1 flex flex-col sm:flex-row",
