@@ -1,13 +1,11 @@
 import { useEffect, useState, useRef } from 'react';
-import { loadQuestions, getSubsectionTitle, updateSubsectionTitle } from '@/utils/parseQuestions';
+import { loadQuestions } from '@/utils/parseQuestions';
 import { Section } from '@/types/question';
 import { Navigation } from '@/components/Navigation';
 import { QuestionCard } from '@/components/QuestionCard';
-import { SubsectionContent } from '@/components/SubsectionContent';
 import { Input } from '@/components/ui/input';
 import { Search, BookOpen } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
-import { toast } from 'sonner';
 
 const Index = () => {
   const [sections, setSections] = useState<Section[]>([]);
@@ -17,34 +15,17 @@ const Index = () => {
   const [activeSubsection, setActiveSubsection] = useState('');
   const subsectionRefs = useRef<Map<string, HTMLElement>>(new Map());
 
-  const loadData = async () => {
-    try {
-      const data = await loadQuestions();
-      
-      // Apply any custom titles from localStorage
-      const updatedData = data.map(section => ({
-        ...section,
-        subsections: section.subsections.map(subsection => ({
-          ...subsection,
-          title: getSubsectionTitle(section.id, subsection.id),
-        })),
-      }));
-      
-      setSections(updatedData);
-      if (updatedData.length > 0 && updatedData[0].subsections.length > 0) {
-        setActiveSection(updatedData[0].id);
-        setActiveSubsection(updatedData[0].subsections[0].id);
-      }
-    } catch (error) {
-      console.error('Failed to load questions:', error);
-      toast.error('Failed to load questions');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    loadData();
+    loadQuestions()
+      .then((data) => {
+        setSections(data);
+        if (data.length > 0 && data[0].subsections.length > 0) {
+          setActiveSection(data[0].id);
+          setActiveSubsection(data[0].subsections[0].id);
+        }
+      })
+      .catch((error) => console.error('Failed to load questions:', error))
+      .finally(() => setLoading(false));
   }, []);
 
   useEffect(() => {
@@ -80,28 +61,6 @@ const Index = () => {
         behavior: 'smooth',
       });
     }
-  };
-
-  const handleSubsectionTitleChange = (sectionId: string, subsectionId: string, newTitle: string) => {
-    updateSubsectionTitle(sectionId, subsectionId, newTitle);
-    
-    // Update local state
-    setSections(prevSections =>
-      prevSections.map(section =>
-        section.id === sectionId
-          ? {
-              ...section,
-              subsections: section.subsections.map(subsection =>
-                subsection.id === subsectionId
-                  ? { ...subsection, title: newTitle }
-                  : subsection
-              ),
-            }
-          : section
-      )
-    );
-    
-    toast.success('Subsection title updated');
   };
 
   const filteredSections = sections.map((section) => ({
@@ -174,7 +133,6 @@ const Index = () => {
         activeSection={activeSection}
         activeSubsection={activeSubsection}
         onNavigate={handleNavigate}
-        onSubsectionTitleChange={handleSubsectionTitleChange}
       />
 
       {/* Main Content */}
@@ -218,7 +176,6 @@ const Index = () => {
                   </div>
 
                   <div className="space-y-4">
-                    <SubsectionContent content={subsection.content} />
                     {subsection.questions.map((question, idx) => (
                       <QuestionCard key={question.id} question={question} index={idx} />
                     ))}

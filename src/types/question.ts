@@ -16,6 +16,5 @@ export interface Section {
 export interface Subsection {
   id: string;
   title: string;
-  content?: string; // Review content in markdown format
   questions: Question[];
 }
