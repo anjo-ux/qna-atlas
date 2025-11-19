@@ -2,21 +2,25 @@ import { Section } from '@/types/question';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import {
-  Sheet,
-  SheetContent,
-  SheetTrigger,
-} from '@/components/ui/sheet';
-import { Menu } from 'lucide-react';
+import { X } from 'lucide-react';
 
 interface NavigationProps {
   sections: Section[];
-  activeSection: string;
-  activeSubsection: string;
+  selectedSection: string | null;
+  selectedSubsection: string | null;
   onNavigate: (sectionId: string, subsectionId: string) => void;
+  isOpen: boolean;
+  onClose: () => void;
 }
 
-export function Navigation({ sections, activeSection, activeSubsection, onNavigate }: NavigationProps) {
+export function Navigation({ 
+  sections, 
+  selectedSection, 
+  selectedSubsection, 
+  onNavigate, 
+  isOpen, 
+  onClose 
+}: NavigationProps) {
   const NavContent = () => (
     <ScrollArea className="h-full">
       <div className="space-y-6 p-6">
@@ -34,7 +38,7 @@ export function Navigation({ sections, activeSection, activeSubsection, onNaviga
                   onClick={() => onNavigate(section.id, subsection.id)}
                   className={cn(
                     "w-full justify-start text-left font-normal transition-smooth",
-                    activeSection === section.id && activeSubsection === subsection.id
+                    selectedSection === section.id && selectedSubsection === subsection.id
                       ? "bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground"
                       : "text-muted-foreground hover:text-foreground hover:bg-muted"
                   )}
@@ -55,25 +59,39 @@ export function Navigation({ sections, activeSection, activeSubsection, onNaviga
   return (
     <>
       {/* Desktop Navigation */}
-      <aside className="hidden lg:block fixed left-0 top-16 bottom-0 w-80 border-r border-border bg-card">
+      <aside className="hidden lg:flex w-80 border-r border-border bg-card flex-col">
+        <div className="p-6 border-b border-border">
+          <h2 className="text-lg font-semibold text-foreground">Sections</h2>
+          <p className="text-sm text-muted-foreground mt-1">
+            {sections.reduce((acc, s) => acc + s.subsections.length, 0)} subsections
+          </p>
+        </div>
         <NavContent />
       </aside>
 
       {/* Mobile Navigation */}
-      <Sheet>
-        <SheetTrigger asChild>
-          <Button
-            variant="outline"
-            size="icon"
-            className="lg:hidden fixed top-4 left-4 z-50 elevated-shadow"
-          >
-            <Menu className="h-5 w-5" />
-          </Button>
-        </SheetTrigger>
-        <SheetContent side="left" className="w-80 p-0">
-          <NavContent />
-        </SheetContent>
-      </Sheet>
+      {isOpen && (
+        <>
+          <div 
+            className="lg:hidden fixed inset-0 bg-background/80 backdrop-blur-sm z-40"
+            onClick={onClose}
+          />
+          <aside className="lg:hidden fixed left-0 top-0 bottom-0 w-80 border-r border-border bg-card z-50 flex flex-col">
+            <div className="p-6 border-b border-border flex items-center justify-between">
+              <div>
+                <h2 className="text-lg font-semibold text-foreground">Sections</h2>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {sections.reduce((acc, s) => acc + s.subsections.length, 0)} subsections
+                </p>
+              </div>
+              <Button variant="ghost" size="icon" onClick={onClose}>
+                <X className="h-5 w-5" />
+              </Button>
+            </div>
+            <NavContent />
+          </aside>
+        </>
+      )}
     </>
   );
 }
