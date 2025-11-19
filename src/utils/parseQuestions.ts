@@ -4,7 +4,7 @@ import { Question, Section, Subsection } from '@/types/question';
 // Category mapping from file categories to our structure
 const categoryMapping: Record<string, { section: string; subsection: string }> = {
   // Comprehensive
-  'wound': { section: 'comprehensive', subsection: 'wound-healing' },
+  'wound': { section: 'comprehensive', subsection: 'anatomy' },
   'skin': { section: 'comprehensive', subsection: 'skin-lesions' },
   'flap': { section: 'comprehensive', subsection: 'flaps-and-grafts' },
   'graft': { section: 'comprehensive', subsection: 'flaps-and-grafts' },
@@ -94,7 +94,7 @@ function categorizeQuestion(category: string, subcategory: string): { section: s
   }
   
   // Default to comprehensive if no match
-  return { section: 'comprehensive', subsection: 'wound-healing' };
+  return { section: 'comprehensive', subsection: 'anatomy' };
 }
 
 function stripHtml(html: string): string {
@@ -171,7 +171,7 @@ function createSectionStructure(sectionMap: Map<string, Map<string, Question[]>>
   ];
 
   const subsectionTitles: Record<string, string> = {
-    'wound-healing': 'Wound Healing',
+    'anatomy': 'Anatomy',
     'skin-lesions': 'Skin Lesions',
     'flaps-and-grafts': 'Flaps and Grafts',
     'microsurgery': 'Microsurgery',
