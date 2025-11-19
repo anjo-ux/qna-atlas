@@ -808,6 +808,886 @@ Survive off surrounding soft tissues until generate their own blood supply
 - Rectus femoris flap
   - Vascular: descending branch of lateral circumflex femoral artery
   - Used for pelvic and groin coverage`
+  },
+  'hand-lower-extremity': {
+    'hand-digit-trauma': `# Dislocations
+
+## Thumb
+- Anatomy: MC dislocation dorsally through dorsoradial ligament
+- CMC stabilizers: Volar oblique, ulnar collateral, intermetacarpal, dorsoradial (most important), posterior oblique, anterior oblique (prevents radial subluxation)
+- Occurs with axial force, flexion of the wrist
+- Dx: XR with anteroposterior and lateral views in 30 degrees of pronation
+
+## Finger dislocations
+- Proximal interphalangeal (PIPJ) joint dislocation
+  - Simple: reduce
+  - Complex: unable to reduce due to interposed soft tissue
+  - Dorsal (MC): interposed volar plate
+  - Volar: interposed extensor tendon
+  - Dx: Elson test to assess central slip integrity
+- Metacarpophalangeal (MCP) joint dislocations
+  - Rare, often complex due to volar plate interposition
+  - Tx: surgical
+  - Volar: higher risk of digital nerve injury
+  - Dorsal: unable to repair volar plate
+
+# Phalangeal, metacarpal fractures
+
+## Bennett fracture
+- Thumb metacarpal base intra-articular fracture
+- Reduce with axial traction, pronation, and palmar abduction
+
+## 5th metacarpal neck (Boxer's) fracture
+- Can tolerate up to 70 degrees of angulation
+- Tx: buddy tapes (ring to small finger)/active range of motion
+- Tx surgery: MC for malrotation
+
+## Metacarpal fractures
+- Interosseous muscles most likely to incarcerate in fracture line
+- Open fractures: Minor soft tissue injury can be irrigated, closed, splinted in ER with short-course antibiotics, outpatient follow up
+- Tx: multiple operative techniques (pinning, plating, intramedullary screw fixation, lag screw)
+- Lag-screw fixation: used for oblique fractures, allows primary bone healing
+
+## Proximal interphalangeal joint (PIPJ) fracture/dislocation
+- Simple, stable (<30% joint surface)
+  - Dx: assess stability of joint with up to 30 degrees of PIPJ flexion
+  - Tx: extension-block splinting or pinning (maintain in slight flexion)
+- Pilon base fractures, unstable fractures: Tx: dynamic external fixation
+- 30-50% volar base fractures: Tx: hemi-hamate arthroplasty, volar plate arthroplasty
+
+# Ligament Injuries
+
+## Intrinsic-plus splint position
+- Wrist extended (30 degrees), metacarpophalangeal joints (MCPJs) flexed (75-90 degrees), interphalangeal joints (IPJs) extended (0 degrees)
+- Maintains MCPJ collateral ligaments at full length
+
+## Intrinsic tightness
+- Intrinsic tightness: passive flexion of proximal interphalangeal joint (PIPJ) tight with MCPJ hyperextended
+- Extrinsic tightness: PIPJ flexion tight with MCPJ flexed
+
+## Ulnar collateral ligament injury
+- Instability of thumb MCPJ with radial-directed force
+- Sx: weakness, pain with pinch tasks
+- Dx: increased laxity >30 degrees of radial-directed stress to thumb, compare to contralateral thumb
+- Dx: stress view XR
+- US (or MRI) evaluates for Stener lesion (UCL retracts into adductor muscle)
+- Tx: splinting (1st line)
+- Tx: ulnar collateral ligament reconstruction for failure of non-operative treatment, Stener lesion
+
+# Digit Reconstruction
+
+## Thumb reconstruction
+- Thumb is 40-50% of overall hand function, favor functional reconstructions
+- Volar defects: First dorsal metacarpal artery flap (larger defects), Moberg flap (defects <1.5cm, up to 2cm with islandization)
+- Volar and dorsal defects: Great toe wraparound flap at proximal phalanx level
+- Total thumb reconstruction
+  - CMC and metacarpal base present: toe-to-thumb transfer
+  - CMC or metacarpal base absent: pollicization
+- 1st webspace contracture
+  - Skin only: Z plasties (four-flap), skin grafts
+  - Deep structures: flap coverage (e.g., posterior interosseous reverse flap)
+
+## IPJ arthroplasty
+- Silicone arthroplasty: Improves pain, not motion
+
+## Fillet of finger flaps
+- Useful to provide coverage and reduce returns to OR
+- Consider when otherwise unsalvageable bone stock of injured finger
+
+## Nailbed injuries
+- Germinal matrix produces nail, sterile matrix is adherent to nail
+- Tx (large subungual hematoma or laceration):
+  - Acute: repair nail bed (2-octyl cyanoacrylate with similar outcomes, less time-consuming than suture repair)
+  - Chronic: split thickness nail matrix graft from toe, nail ablation
+- Hook nail: soft tissue defect from loss of distal sterile matrix, inadequate bone/soft tissue support for nail
+  - Tx: release scar with soft-tissue augmentation, excision of distal sterile matrix
+- Nail ridging from untreated nail bed injury: Tx: attempt direct closure of nail bed at re-repair
+
+## Fingertip Injuries
+- Secondary intention healing for <1.5cm, no exposed bone
+  - Tx: moist wound healing, petroleum jelly
+  - Better sensation than flaps or skin grafts; associated with longer healing time
+
+## Finger soft-tissue reconstruction
+- Cross-finger flap: uses dorsal skin from adjacent digit for a volar wound
+- Reverse cross-finger flap: uses dorsal skin from adjacent digit for a dorsal wound`,
+
+    'hand-nerves': `# Anatomy
+
+## Brachial plexus
+- Upper roots (C5-7) proximal functions (shoulder function, elbow flexion)
+  - Sx: shoulder adducted/internally rotated, elbow extended, forearm pronated, fingers flexed
+- Lower roots (C8-T1) distal functions (wrist, hand)
+- Posterior cord
+  - Axillary nerve: From upper roots (C5-C6); innervates deltoid (shoulder abduction), some of triceps
+  - C7 root: Contributes innervation to triceps
+  - Radial nerve: From lower roots (C8 to T1); innervates wrist and digital extension, some of triceps
+- Lateral cord
+  - Musculocutaneous nerve: From upper roots (C5-7); innervates biceps, brachialis for elbow flexion
+- Medial cord
+  - Median nerve: Innervates thumb intrinsics, flexor carpi radialis (FCR), flexor pollicis longus (FPL), flexor digitorum superficialis (FDS), flexor digitorum profundus (FDP) [index, middle fingers], pronator teres
+  - Ulnar nerve: Innervates hand intrinsics (interosseous), flexor carpi ulnaris (FCU), FDP (ring and small fingers)
+
+## Superficial nerves
+- Medial antebrachial cutaneous nerve: Follows basilic vein on ulnar aspect of forearm
+- Lateral antebrachial cutaneous nerve: Follows cephalic vein on radial aspect of forearm; musculocutaneous nerve branch
+- Intercostobrachial nerve: Innervates medial upper arm; nerve pierces through serratus anterior
+- Dorsal sensory branch of ulnar nerve: Supplies dorsal/ulnar hand sensation
+- Saphenous nerve: Innervates medial malleolus; travels along with greater saphenous vein
+
+# Compression Neuropathies
+
+## Carpal tunnel syndrome
+- Sx: numbness to thumb, index, middle fingers, worse at night; can progress to affect thumb intrinsic/thenar muscles
+- Dx: clinical or electrodiagnostic testing
+  - Nerve conduction studies: median nerve sensory peak latency >3.5ms, motor >4.5ms
+  - Dx: US or MRI with increased cross-sectional area of median nerve
+  - Dx: amyloidosis (~10% of bilateral carpal tunnel); congo red stain on tenosynovium biopsy
+- Tx: night splinting (mild), corticosteroid injection for short-term relief
+- Tx surgical: carpal tunnel release for symptoms >3 months, failure of conservative measures
+  - No difference between open and endoscopic approaches long-term
+
+## Cubital tunnel syndrome
+- Sx: ring and small finger numbness; can progress to finger weakness due to affecting finger intrinsics
+- Dx: Froment sign: pull a paper from a patient pinching, look for compensation with thumb flexion (FPL)
+- Dx: clinical or electrodiagnostic test (velocity decrease ~10m/s around elbow)
+- Tx: elbow extension splint
+- Tx surgical: cubital tunnel release in situ
+  - Anterior transposition (submuscular or subcutaneous) if ulnar nerve subluxation, recurrence
+  - Areas of compression: Osbourne ligament (near medial epicondyle), medial intermuscular septum and arcade of Struthers in upper arm, FDP heads in forearm, anconeus epitrochlearis (congenital anomalous muscle in medial elbow)
+
+## Guyon's canal
+- 3rd most-common compressive neuropathy site (2nd most-common ulnar nerve compression site)
+- Borders: hypothenar muscle, transverse carpal ligament, volar carpal ligament, pisiform
+
+## Anterior interosseous nerve syndrome
+- Motor only: affects FPL, FDP index finger
+
+## Pronator/lacertus fibrosis compression
+- Motor and sensory to median nerve at forearm
+- Includes anterior interosseous nerve weakness, thumb intrinsic weakness motor changes
+
+## Radial tunnel syndrome
+- Sx: lateral forearm pain
+- Dx: tenderness 5cm distal to lateral epicondyle, no motor symptoms
+- Dx: MRI
+
+## Posterior interosseous palsy
+- Dx: intact tenodesis effect (tendons intact), no active extension of digits
+
+## Superficial branch of radial nerve compression
+- Sx: numbness over dorsal thumb and index finger
+- Tx: splinting, rest
+- Tx surgery: release fascia between brachioradialis and extensor carpi radialis longus (ECRL)
+  - Pierces ECRL at 8cm proximal to radial styloid
+
+# Nerve Injuries
+
+## Sunderland classification
+- I: Neurapraxia: segmental demyelination
+- II: Axonotmesis: intrafascicular injury (mild)
+- III: Axonotmesis (moderate)
+- IV: Axonotmesis (severe)
+- V: Neurotmesis: transection of nerve
+- VI: Mixed components
+
+## Electrodiagnostic testing
+- EMG: May see some changes as early as 10 days from injury
+- Complete denervation: positive sharp waves, fibrillation potentials, decreased motor unit recruitment
+- Nerve recovery: nascent potentials
+
+## Brachial plexus injury
+- Dx: MRI a few weeks from injury to evaluate for root avulsions
+- Nerve root injury can affect diaphragm (C3-5)
+- Tx: nerve transfers if no functional or EMG recovery at 3-6 months
+
+## Radial nerve injury
+- Early reinnervation: brachioradialis, extensor carpi longus and brevis (ECRL, ECRB)
+- Last reinnervation: extensor indicus proprius
+
+## Ulnar nerve injury
+- Innervates FDP ring and small fingers, FCU proximally in forearm, digital intrinsic muscles distally in hand
+- Weak digital abduction/adduction, thumb adduction (adductor pollicis)
+
+## Complex regional pain syndrome
+- Sx: burning pain, stiffness
+- RF: smokers, female
+- Dx: shiny, swollen, warm skin, hypersensitivity on exam
+- Dx: Normal EMG/NCS, bone scan with increased area intake
+- Pathophysiology: changes to C nerve fibers
+- Types: I: no identifiable nerve; II: identifiable nerve
+
+## Parsonage-Turner
+- Acute brachial neuritis, can occur after viral infection
+- Dx: multiple peripheral nerves involved on EMG/NCS, hourglass constriction of the brachial plexus on MRI
+
+# Nerve Repairs
+
+## Repair and reconstruction
+- Tension-free coaptation (#1 technical factor)
+- Use nerve grafts for gaps >1cm
+- Nerve autografts: sural, lateral antebrachial cutaneous, medial antebrachial cutaneous
+- Age (#1) most predictive of outcome, more distal injury favorable to proximal injury
+- Nerve regenerates at ~1mm/day, can reinnervate muscle 12-18 months from injury
+
+## Nerve transfers
+- Consider when distance from injury to motor end plates unlikely to reinnervate
+- Anterior interosseous (intrinsic) nerve transfer
+  - Used to reestablish hand intrinsic function after proximal ulnar nerve injury (around elbow)
+  - Tx: anterior interosseous nerve from pronator quadratus transferred to ulnar motor branch at distal forearm
+  - Ulnar nerve topography at distal forearm: sensory/motor/sensory
+- Elbow flexion nerve transfer
+  - Tx: FCU fascicle of ulnar nerve to brachialis (Oberlin) +/- FCR of median (McKinnon) to biceps branches
+
+## Free functional muscle transfer
+- Role in complete plexopathy
+- Use extra-plexus donor nerve (e.g., spinal accessory, intercostals)
+- Spinal accessory nerve: runs in posterior triangle of the neck, innervates sternocleidomastoid, trapezius muscles
+- MC gracilis flap used to restore elbow flexion
+
+## Neuroma in continuity
+- Tx: excise, repair with nerve graft
+
+# Tendon Transfers
+
+- Need supple joints, soft tissue equilibrium, donor of adequate excursion, adequate strength donor, expendable donor, straight line of pull, synergy, single function per transfer
+- Tendon transfers: PT to ECRB, FCR to extensor digitorum communis (EDC), FDS IV to extensor pollicis longus (EPL)
+
+## Targeted muscle reinnervation
+- Major peripheral nerve to selective motor branch nerve transfer
+- Select synergistic transfers: e.g., median nerve to flex digits
+- Decreases phantom pain, improved ability to use myoelectric prosthetics
+- Billed as a pedicled nerve transfer
+- Primary TMR: performed at amputation
+- Secondary TMR: performed after amputation for pain or phantom sensation
+  - Pain initially worse for first 6 weeks, then plateaus and decreases over following 6 months
+
+## Myoelectric prosthesis
+- Senses surface EMG signals
+- Targeted muscle reinnervation creates stronger signals
+- More complex motions than body-powered prosthesis
+- Synergistic functions: Above-elbow amputation: median nerve to biceps (short head) for hand closure`,
+
+    'hand-tendons': `# Flexor Tendons
+
+## Exam
+- Flexor digitorum superficialis (FDS)
+  - Actively flexes proximal interphalangeal joint (PIPJ) with other digits in extension
+  - Orientation of tendons (wrist level): middle and ring finger tendons volar to index and small finger tendons
+  - Small finger FDS absent in ~15% of people
+- Flexor digitorum profundus (FDP)
+  - Actively flexes distal interphalangeal joint (DIPJ) with other digits in extension
+  - Linburg-Comstock anomaly: congenital adhesion between FPL and FDP index finger proximal to carpal tunnel
+- Tenodesis effect
+  - Passively extend wrist, assess digital cascade for abnormalities
+- Lumbrical muscle
+  - Actively flexes MCPJ
+  - Originates from FDP in proximal palm, insert on radial lateral band
+
+## Injuries
+- 5 zones from distal to proximal
+  - I: distal to FDS insertion
+  - II: between FDS insertion to A1 pulley/distal palmar crease
+  - III: between A1 pulley and carpal tunnel
+  - IV: carpal tunnel
+  - V: forearm
+
+## Zone II
+- Tx surgery: repair within 2 weeks
+  - Strength of repair related to # of core strands, suture size, locking suture, suture location (should be dorsal)
+  - 1cm bites optimal suture distance for repair
+  - Repair of one FDS associated with decreased tendon resistance compared to both FDS slips
+- Post-operative care: occupational therapy for 3-6 months
+  - Early active motion: begins first few days after repair (same rupture risk, better range of motion compared to other protocols)
+  - Modified Duran: early passive motion protocol, typically don't start active motion until 3-4 weeks after repair
+
+## Staged flexor tendon repair
+- Necessary after >2 weeks from injury or significant damage to pulleys
+- Attritional changes occur to flexor tendon over time
+- Tx: 2-stage reconstruction
+  - Stage 1: place silicone rod from DIPJ to central palm or distal forearm, allow capsule to recreate pulley system for 12 weeks
+  - Stage 2: exchange silicone rod for tendon autograft
+- Tx: Paneva-Holevich (2-stage reconstruction variation): suture FDS to FDP, place silicone rod distally at stage 1, use FDS as tendon autograft to distal FDP stump at stage 2
+
+## Secondary flexor tendon surgery
+- e.g., tenolysis: need passive greater than active motion, stable soft tissues
+- Wait at least 6 months after initial repair
+
+## Partial lacerations
+- Can trial conservative therapy up to 90% laceration (unless there's triggering)
+
+## Jersey finger
+- Flexor zone I (FDP) distal rupture
+- Classification:
+  - I: avulsion to palm
+  - II: retraction to PIPJ with bone segment
+  - III: retraction to DIPJ with bone segment
+  - IV: fracture, tendon avulsion
+  - V: comminuted distal phalanx fracture
+- Tx: types I: repair <1 week, II, III repair <3 weeks
+
+## Pulley injuries
+
+### A1 pulley
+- Odd numbered pulleys originate from volar plate
+- Stenosing tenosynovitis (trigger finger)
+  - Flexed posture of digit, usually able to manually reduce
+  - RF: diabetes
+  - Tx: steroid injection
+  - Tx: A1 pulley release if recurrent, advanced disease
+  - Wait 12 weeks after steroid injection before surgery
+
+### A2 pulley
+- Arises from bone
+- 50% of pulley needed to prevent tendon bowstringing
+- Closed rupture of pulley
+  - Associated with rock climbing positions
+  - Tx: rest, ice, ring splint
+  - Tx: tendon autograft pulley reconstruction
+
+# Extensor Tendons
+
+## Anatomy
+- VIII zones: Progress from distal to proximal (odd over joints, even over bones)
+- Zone VII: Extensor retinaculum
+- Zone VIII: forearm
+- Most distal forearm muscle belly for extensor tendons: extensor indicis proprius (EIP)
+
+## Exam
+- Central slip (extensor zone III) injury
+  - Main tendon for PIPJ extension
+  - Dx: Elson test: cannot actively extend DIPJ in flexed MCPJ and PIPJ position with intact central slip due to lateral bands (but can extend PIPJ due to intrinsics)
+  - Tx: PIPJ extension splinting for 4-6 weeks or surgical repair
+- Intubated/non-cooperative patient: Assess tenodesis effect (passively flex the wrist, assess digital extension)
+
+## Injuries
+
+### Zone III-V lacerations
+- Tx: repair and relative motion extension splint (better motion outcomes compared to traditional splint/motion protocols)
+
+### Proximal interphalangeal joint flexion contracture
+- Test intrinsic/extrinsic tightness with Bunnell test
+- Tx: release volar plate, checkrein ligaments
+
+### Boutonierre deformity
+- Central slip injury: PIPJ flexes, DIPJ extends in collapse pattern
+- Can be traumatic or inflammatory
+- Dx: loss of active IPJ extension against force, abnormal Elson's test
+- Tx: splint with PIPJ extended, DIPJ free
+
+### Swan neck deformity
+- PIPJ extends, DIPJ flexes (extensor lag)
+- MC from distal phalanx injury with nonunion (bony mallet), then zone I extensor tendon injury (soft tissue mallet)
+- Acute/subacute mallet finger (extensor zone I)
+  - Tx: splint in extension x 6-8 weeks
+  - Tx: pin DIPJ in extension if unable to tolerate splint or volar subluxation of distal phalanx
+
+### Sagittal band injury
+- Maintains position of extensor tendon over the metacarpal head
+- Sx: swelling, inability to extend MCPJ from flexed position
+- Tx: relative extension splinting; direct repair (acute) or reconstruction (chronic)
+
+### Extensor pollicis longus rupture
+- Inability to extend thumb IPJ or retropulse thumb
+- 3rd extensor compartment, ulnar to Lister's tubercle in distal radius
+- Attritional ruptures occur with closed management of non-displaced distal radius fractures
+- Tx: tendon transfer: EIP to extensor pollicis longus
+
+### 1st extensor compartment tendinopathy (De Quervain's)
+- Sx: radial styloid pain, swelling of radial/distal forearm, worse with thumb movements
+- Dx: Eichoff test with pain to radial styloid with ulnar deviation of wrist with thumb flexed in palm
+- Tx: steroid injection, immobilization, surgical release
+- Non-surgical treatment less effective when septum between abductor pollicis longus and extensor pollicis brevis exists
+
+### Intersection syndrome
+- Dx: pain 4-5cm proximal to Lister's tubercle, swelling, worse with wrist extension
+- Tx: splint, steroid injection; 2nd extensor compartment release
+
+### Lumbrical-plus deformity
+- Paradoxical extension of the IPJ with active flexion of remaining digits
+- Due to shortening of the FDP and lumbrical muscle`,
+
+    'replantation-vascular': `# Replantation
+
+- MC cause: table saws (#1) for adults
+- Relative indications: Thumb, child, multiple digits, flexor zone I, proximal amputations (e.g., wrist, forearm)
+- Relative contraindications: Ring avulsion, single-digit flexor zone II, multi-segmental injury
+
+## Timing of replantation
+- Digits: no muscle tissue, more tolerant of ischemia
+  - Cold ischemia time: 24 hours (case reports with longer ischemic times)
+  - Warm ischemia time: up to 12 hours
+- Proximal amputations
+  - Cold ischemia time: 12 hours
+  - Warm ischemia time: 6 hours
+  - Consider arterial shunts to restore blood flow within 6 hours (may need to prioritize reperfusion over bony stabilization pending time from injury); muscle most susceptible to ischemia
+
+## Repair
+- Options: digit-by-digit sequence (one digit at a time) vs structure-by-structure (bone, tendon, microsurgical repairs)
+- Favorable factors: mechanism of injury (#1), number of veins repaired, better outcomes at high-volume centers
+- Use vein grafts for large gap arterial injuries (>2cm)
+
+## Prostheses
+- Forearm-level amputation
+  - Wrist disarticulation: preserves forearm rotation
+  - Transradial: better prosthetic fitting (need 5cm of ulna length distal to elbow to fit prosthesis)
+
+# Other Vascular Diseases
+
+## Hypothenar hammer syndrome
+- Sx: ischemic changes to ring and small finger, cold sensitivity, coolness, finger ulceration, distal emoblization
+- Dx: digital-brachial index (<0.7 abnormal, <0.5 associated with tissue loss)
+- Dx: angiogram with tortuous ulnar artery at proximal hand level
+- Tx: aspirin, calcium-channel blockers (1st line if mild)
+- Tx: surgery: ulnar artery segment with vascular reconstruction (if moderate/severe symptoms), ligation if fingers perfused
+
+## Acute upper extremity arterial embolism
+- Dx: Doppler US, CT or MR angiography, formal angiography
+- Tx: heparin gtt (1st), then surgery if amenable location of clot
+
+## IV extravasation
+- Tx: surgery: full-thickness skin necrosis, chronic ulceration, persistent pain, known caustic agent (e.g., certain chemotherapeutics)
+
+## Pseudoaneurysm
+- Sx: pulsatile, rapidly enlarging mass
+- Tx: IR if small, otherwise explore and repair vessel
+
+## Supracondylar humerus fractures
+- Associated with distal ischemia from brachial artery involvement
+- Tx: closed reduction, reassess pulses
+- If no return of pulses, angiographic imaging
+
+## Brachial arterial line
+- MC complication: median nerve injury
+
+# Other Hand Emergencies
+
+## High-pressure injection injury
+- Paint solvents, oils at >2,000 psi
+- Can cause vascular compromise, severe damage to soft tissues, compartment syndrome, infections
+- Dx: XR if radiopaque material injected
+- Tx: emergent debridement
+- High amputation rate (30%), worse with treatment delays`,
+
+    'wrist-forearm-injuries': `# Carpal Injuries
+
+## Scaphoid fracture
+- MC carpal fracture
+- Dx: anatomic snuff box tenderness
+- Dx: XR (scaphoid view: wrist 20 degrees ulnar deviation, 20 degrees extension)
+- Dx: MRI best test for occult fractures or evaluate for union
+- Tx surgery:
+  - Distal pole: cast x 6-12 weeks or surgery for displacement, faster return to activities
+  - Waist and proximal pole: consider screw fixation
+  - Retrograde blood supply, proximal pole most prone to nonunion
+  - Scaphoid nonunion advanced collapse (SNAC): arthritic pattern from scaphoid nonunion
+  - Tx: scaphoidectomy and 4-corner fusion vs proximal row carpectomy
+
+## Hamate
+- Hook of hamate fracture
+  - Sx: ulnar nerve symptoms, pain, flexor tendon injuries (decreased grip strength)
+  - MC tendon rupture: small finger flexor
+  - Dx: XR (carpal tunnel view), CT scan
+
+## Wrist ligament injuries
+
+### Scapholunate ligament injuries
+- Scapholunate advanced collapse (SLAC) arthritic pattern
+  - Starts as a dorsal intersegmental instability (DISI) deformity; scaphoid flexes, lunate extends
+  - Arthritis develops proximal row then midcarpal (radioscaphoid, scaphocapitate, capitolunate, then radiolunate)
+  - Dx: XR with scapholunate gap >3mm, scapholunate angle >70 degrees on lateral, contralateral side with clenched fist view (axial loading of wrist)
+  - Dx: arthroscopy (most accurate)
+  - Tx: scaphoidectomy and four-corner fusion or proximal row carpectomy
+
+### Lunate dislocation
+- Mayfield classification: predictable progression of intrinsic ligament injuries
+  - I: Scapholunate ligament (SL) injury
+  - II: lunocapitate ligament injury
+  - III: lunotriquetral ligament injury
+  - IV: volar dislocation of lunate out of fossa
+- Short radiolunate ligament generally remains intact
+- Sx: acute median nerve sensation changes (acute carpal tunnel syndrome)
+- Dx: XR with changes in Gilula's lines on PA; spilled teacup or volar lunate laterally
+- Tx: immediate closed reduction followed by ORIF +/- carpal tunnel release (urgent if irreducible or persistent median-nerve symptoms after reduction)
+- Preserves 65-70% wrist flexion/extension, 80% grip strength compared to uninjured side
+- XR shows post-traumatic arthritis
+
+### Volar intersegmental instability (VISI)
+- Triquetrum extends, lunate flexes
+
+## Distal radius fractures
+- Similar functional and radiographic outcomes with short- vs long-arm casting; with less shoulder pain with short-arm cast
+
+# Wrist Kinematics
+
+- Proximal row: scaphoid flexes the wrist, triquetrum extends, kept neutral by lunate
+- Distal row: allows dart thrower's motion (radial inclination in extension and moves to ulnar inclination in flexion)
+- Ulnar variance: Dx: lateral XR most accurate view
+
+# Compartment Syndrome
+
+## Acute
+- Sx: severe pain, possible numbness
+- RF: obtunded, crush injury, reperfusion injury (TNF alpha release)
+- Dx: pain with passive stretch, paresthesia, paralysis, pallor, pulselessness (late) on exam
+- Dx: compartment manometry (compartment pressure >30 or within 30 of diastolic blood pressure)
+- Dx: lab changes (hyperkalemia, metabolic acidosis, hypocalcemia)
+- Rhabdomyolysis can progress to acute kidney injury
+- Tx: compartment release
+
+## Chronic
+- Volkmann ischemic contracture
+  - Affects deep volar compartment 1st
+  - Tx: occupational therapy
+  - Tx: surgical: tendon lengthening (mild), flexor pronator slide (moderate), superficialis to profundus (severe), free functional muscle transfer (severe)
+
+# Elbow and Forearm Pathology
+
+## Extensor carpi radialis brevis (ECRB) enthesopathy (lateral epicondylitis)
+- Degenerative changes at attachment of ECRB to lateral epicondyle
+- Dx: lateral elbow tenderness with hyperextension of middle finger (ECRB inserts on base of third metacarpal)
+- Tx: occupational therapy/activity modification/stretching exercises, corticosteroid injection, surgical debridement (outcomes the same regardless of treatment)
+
+## Distal radioulnar joint instability
+- Associated with Essex Lopresti, Galeazzi injuries affecting the interosseous membrane`,
+
+    'hand-tumors': `# Cysts
+
+## Digital mucous cyst
+- Secondary to distal interphalangeal osteoarthritis, can involve nail fold
+- Dx: XR with osteophyte at distal interphalangeal joint
+- Tx: excise cyst cavity, remove osteophyte
+
+## Ganglion cyst
+- MC dorsal wrist (~60% of all ganglion cysts) from scapholunate area; volar cysts possible (MC radioscaphoid area)
+- Sx: wax/wane in size
+- Dx: transilluminates on exam
+- Tx: excision (~50% recurrence risk)
+
+# Benign Soft-Tissue Masses
+
+## Glomus tumor
+- MC: subungual
+- Sx: blueish appearance, severe pain with localized pressure, sensitive to cold, pinpoint sensitivity, paroxysmal pain
+- Dx: cold-water test, pain decreases with inflation of blood-pressure cuff
+- Dx: MRI T2 (lesion is bright)
+- Tx: complete surgical excision
+
+## Giant cell tumor of tendon sheath
+- Tan, multi-lobulated mass
+- Dx: does not transilluminate on exam
+- Dx: XR can invade bone cortex, MRI decreased T1/T2 intensity
+- Dx: histiocytoid mononuclear cells on pathology
+- Tx: marginal excision
+- Can invade into digital nerve
+- MC complication: recurrence
+
+## Extensor digitorum brevis manus
+- 2-3% of population
+- Near radiocarpal joint just distal to extensor retinaculum
+- No transillumination
+
+## Schwannoma
+- MC nerve tumor
+- Benign (with rare malignancy potential) peripheral nerve tumor from glial cells
+- Dx: painless smooth, non-adherent mass, + Tinel sign in nerve distribution on exam
+- Dx: MRI
+- Tx: excision (intra fascicular)
+
+## Enchondroma
+- MC bone tumor of hand
+- Abnormal cartilage deposit in bone; prone to pathologic fractures
+- Rare syndromic associations (Mafucci: venous malformations, Ollier disease: can progress to chondrosarcoma)
+- Tx: observe if asymptomatic
+- Tx surgical: curettage and bone grafting
+
+## Giant cell tumors of the bone
+- Benign, locally aggressive
+- Dx: CT chest (rare pulmonary metastasis)
+- Tx: curettage and bone grafting for early, resection and bone reconstruction for late
+
+## Osteoid osteoma
+- Benign bone tumor arising from osteoblasts
+- Sx: focal bony pain relieved by NSAIDs
+- Dx: CT
+- Tx: NSAIDs
+
+# Malignancies
+
+## Melonychia
+- Biopsy for >3mm streak crossing eponychial fold (risk of acral lentiginous melanoma)
+- Tx: wide local excision with local flap or FTSG reconstruction, amputation for advanced cases
+- Prognosis related to tumor stage
+
+## Soft-tissue sarcomas
+- Can be in upper or lower extremity
+- Dx: imaging or incisional biopsy (longitudinal)
+- Dx: anaplastic cells on histopathology
+- Tx: wide-local excision (1cm margin or more) and radiation therapy for limb salvage
+- Amputation to above nearest proximal joint for advanced cases, older patients
+- No routine lymph node sampling unless clinical evidence of nodal involvement
+
+## Bony sarcomas
+- Chondrosarcoma: MC malignant non-skin tumor of the hand (SCC is most common overall)
+- Osteosarcoma: can metastasize to lung
+
+## Nerve tumors
+- Malignant peripheral nerve sheath tumors: metastasizes to lung`,
+
+    'hand-inflammation-infections': `# Osteoarthritis
+
+## Thumb carpometacarpal (CMC) arthritis
+- MC site of hand arthritis
+- Dx: XR
+  - Eaton classification: symptoms don't correlate with imaging
+  - I: joint space narrowing
+  - II: small osteophytes
+  - III: large osteophytes
+  - IV: collapse changes: scapho-trapezoid-trapezium (STT) joint
+  - Eaton stress view: thumbs pushed together, assess laxity/subluxation
+  - Roberts view: hyperpronated thumb to evaluate trapeziometacarpal joint
+- Tx: trapeziectomy
+  - Ligament reconstruction with tendon interposition (LRTI) commonly performed; associated with higher complication rate than trapeziectomy alone
+  - Thumb metacarpophalangeal joint (MCPJ) hyperextends to compensate for advanced collapse; need to correct >30 degrees MCPJ hyperextension
+  - Tx: MCPJ fusion
+
+## Scaphotrapeziotrapezoidal (STT) arthritis
+- Can occur in isolation or with CMC arthritis
+- Dx: no axial thumb pain or subluxation of thumb differentiates from CMC arthritis
+- Dx: XR
+- Tx: OT, steroid injection; STT arthrodesis
+
+## Flexor tendon rupture
+- Attritional from radiocarpal arthritis
+- Dx: imaging to assess for osteophytes
+- Tx: resect osteophyte, tendon graft reconstruction
+
+# Inflammatory Arthritis
+
+## Rheumatoid arthritis
+- Can progress to advanced wrist arthritis, attritional extensor tendon ruptures, digital deformities (e.g., Boutonniere, swan neck deformities)
+- Wrist collapse
+  - Loss of carpal height, weakening of intrinsic ligaments
+  - Causes ulnar subluxation of carpus, radial deviation of metacarpals
+  - Digits go into ulnar drift and attenuate radial sagittal bands
+- Extensor tendon ruptures
+  - Attritional ruptures from chronic inflammatory tenosynovitis
+  - Extensor pollicis longus rupture: MC tendon rupture, occurs around Lister's tubercle
+  - Caput ulna (Vaughan-Jackson syndrome): ruptures of extensor digitorum communis and digit minimi around ulna due to arthritis, progresses radial to ulnar
+  - Tx: Darrach (distal ulna head resection); Sauve-Kapandji (distal radioulnar joint fusion) for arthritis without caput ulna
+- Digital deformities
+  - Boutonniere (Digits): PIPJ flexes, DIPJ extends; PIPJ synovitis attenuates central slip, stretches volar plate; lateral bands compensate with volar translocation
+  - Tx: OT/splinting; Fowler tenotomy (release terminal extensor tendon)
+  - Boutonniere (Thumb): Due to metacarpophalangeal joint (MCPJ) synovitis
+  - Swan neck: PIPJ extends, DIPJ flexes
+  - Tx: OT/splinting; spiral oblique retinacular ligament reconstruction
+
+## Gout
+- Deposition of crystals in joint spaces (common to wrist, elbow)
+- Dx: negatively birefringent crystals on wrist aspirate
+- Tx: colchicine
+
+## Pseudogout
+- Dx: + birefringent crystals on wrist aspirate
+
+## Psoriatic arthritis
+- Preferentially affects DIPJ, nail bed
+
+# Other Inflammatory Conditions
+
+## Raynaud's disease
+- Idiopathic peripheral vasoconstriction of the digits
+- Due to overactive alpha-2 receptors
+
+## Raynaud's phenomenon
+- Associated with underlying rheumatologic disease (MC sclerodermia/CREST)
+- Sx: small, non-healing ulcers at fingertips, color changes, chronic pain
+- Tx: calcium-channel blockers, then botulinum toxin
+- Botulinum toxin: inhibits Rho/Rho kinase, decrease substance P secretion, decrease C-fiber receptors
+- Inject botulinum toxin to perivascular area at distal palm
+- Tx surgery: wrist, arch, and digital sympathectomy (severe, intractable cases)
+
+## Digital clubbing
+- Due to increased vascular connective tissue
+
+## Dupuytren's contracture
+- Progressive palmar fascia contracture
+- Largely genetic etiology
+- Due to myofibroblasts
+- Central cord: pretendinous cord extension, affects metacarpophalangeal joint (MCPJ)
+- Spiral cord: at proximal phalanx, displaces neurovascular bundle volarly and centrally
+- Natatory cord: webspace
+- Retrovascular cord: dorsal to neurovascular bundle at DIPJ
+- PIPJ contracture most associated with recurrence after surgical treatment
+- Tx: clostridium histolyticum (CCH) injection (inject then break cord 1-3 days later; Complications: skin breakdown #1, transient numbness)
+- Tx: needle aponeurotomy +/- fat grafting (fat grafting inhibits myofibroblast proliferation)
+- Tx: surgical aponeurectemy (Complications: flare reaction, complex regional pain syndrome; Tx: conservative)
+
+# Infections
+
+## Bacterial
+
+### Fight bite
+- Human tooth to the extensor hood of the MCPJ from punching someone
+- High rate of deep infection (MCPJ septic arthritis), extensor tendon injury
+- Tx: amoxicillin/clavulanic acid, MCPJ exploration, joint irrigation
+- MC organisms: group-A strep, staph aureus, eikenella
+
+### Animal bites
+- Cat bites tend to cause deep injury, dog bites tend to be avulsive
+- Dog bites (unprovoked attacks): Assess dog rabies vaccine status; contact local authorities, quarantine/observe dog for 10 days if rabies vaccine up to date, otherwise testing needed
+- Rabies treatment: repair lacerations after immunoglobulin injected into wound
+- MC organisms: staph aureus, Pasteurella
+- Tx: antibiotics; incision and drainage, loosely close wounds
+  - 1st line: Amoxicillin/clavulanic acid
+  - 2nd line (PCN allergy): clindamycin, TMP/SMZ
+  - 3rd line: fluoroquinolones, doxycycline
+
+### Flexor tenosynovitis
+- Inoculation of flexor tendon sheath by direct puncture or bacteremia
+- Dx: Kanavel signs: diffuse swelling, flexed posture of digit, tenderness over flexor sheath (#1), and pain with passive extension
+- Tx: antibiotics; irrigation of flexor tendon sheath between A1 and A5 pulleys
+
+### IV drug use
+- MC organism: staph (MRSA)
+- Tx: vancomycin
+
+### Deep-space hand infections
+- Radial to ulnar spread via radial bursa communicating to Parona's space then going to ulnar bursa (horseshoe abscess)
+
+## Viral
+
+### Human papilloma virus
+- MC warts in children, most spontaneously resolve
+
+### Herpetic whitlow
+- Small vesicular rash, then blisters
+- Dx: Tzank smear, antibodies titers
+- Tx: observation, anti-viral (acyclovir) if diagnosed within first 72 hours`,
+
+    'congenital-pediatric-hand': `# Embryology
+
+## Extremity development
+- Occurs during gestational weeks 4-8
+- Proximal distal: apical epidermal ridge (formed from FGFR proteins; cause of amelia)
+- Anteroposterior axis: Zone of polarizing activity (mirror foot: duplication of zone of polarizing activity)
+- Radio ulnar: Formed from sonic hedgehog protein (responsible for mirror hand)
+- Volar: BMP and Engrailed-1
+- Dorsal: Formed from Wnt7a → LMX1B (Nail-patella syndrome: autosomal dominant LMX1B defect)
+
+## Bone ossification
+- Clavicle and femur first long bones to ossify at 8 weeks
+
+# Diseases
+
+## Syndactyly
+- Due to failure of apoptosis of web spaces
+- Classification: Simple or complex (based on bone involvement), complete or incomplete (based on skin involvement)
+- Tx: surgical release
+  - Dorsal flap for webspace, full-thickness skin grafts for digits
+  - Perform at 1 year of age
+  - Release one webspace at a time
+
+## Polydactyly
+- Post axial (ulnar)
+- Pre-axial (thumb duplication)
+  - Wassel classification: I to VII (IV most common)
+  - Numbering goes from distal to proximal
+  - Odd have a bifid bone, even have two independent bones at same bony level
+  - VII: anything else not otherwise classified
+
+## Congenital trigger thumb
+- Sx: thumb IPJ held in flexion
+- Dx: Notta nodule to A1 pulley
+- Tx: pulley release for fixed deformity > 1 year old
+
+## Amniotic-band syndrome
+- Associated with cleft lip, body wall defects, equinovarus, imperforate anus
+- Dx: ranges from mild skin depression to severe proximal edema on exam, acrosyndactyly
+- Patterson classification
+  - I: simple constriction ring
+  - II: constriction ring with lymphedema
+  - III: constriction ring with acrosyndactyly
+  - IV: amputation at any level
+- Tx: surgical release of band for worsening swelling, distal discoloration of limb
+- Staged releases (one half at a time for circumferential bands)
+- Edema improves in a few weeks
+
+## Congenital compartment syndrome
+- RF: amniotic bands, oligohydramnios
+- Sx: unilateral edema, bullae formation
+- Tx: compartment release
+
+## Camptodactyly
+- Painless proximal interphalangeal joint flexion contracture; MC small finger
+
+## Clinodactyly
+- Painless radial inclination of distal phalanx; MC small finger
+
+## Thumb hypoplasia
+- Blauth classification
+  - Type I: no treatment needed
+  - Type II (mild): first-webspace deepening (e.g., 4-flap Z plasty), UCL repair for instability
+  - Type III:
+    - A: stable carpometacarpal (CMC) joint; Tx (if needed): flexor digitorum superficialis (FDS) tendon transfer to ulnar collateral ligament (UCL)
+    - B: unstable CMC, and type IV and V: Pollicization: index finger placed into thumb ray position
+      - extensor indicis → proprius extensor pollicis longus
+      - extensor digitorum communis → abductor pollicis longus
+      - palmar interosseous → adductor pollicis
+      - dorsal interosseous → abductor pollicis brevis
+      - flexor digitorum profundus → flexor pollicis longus
+
+# Trauma
+
+## Pediatric fractures
+- Can involve epiphysis (growth plate)
+- Salter-Harris fractures for epiphyseal fractures (involve the growth plate)
+  - I: S - Same level
+  - II: A - Above
+  - III: L - Lower
+  - IV: T - Through
+  - V: R - Rest
+
+## Seymour fracture
+- Open epiphyseal fracture of distal phalanx with nail bed transection, germinal matrix gets entrapped
+- Tx: irrigation, open reduction; pinning if unstable
+
+## Pediatric supracondylar fractures
+- Common in ages 5-7
+- Dx: assess perfusion; if compromised, first perform closed reduction, observe for mild cases
+- Brachial artery exploration if perfusion compromised after closed reduction
+
+## Amputations
+- MC male
+- MC crush in door (crush in window #2)
+
+# Congenital Syndromes
+
+## Radial longitudinal deficiency
+- Most are associated with syndromes
+- Can have thumb hypoplasia/absence
+
+## Fanconi's anemia
+- Absent radius, sometimes thumb hypoplasia
+- Progresses to aplastic anemia at age 4-5 (can be life threatening)
+- Dx: CBC, then chromosomal breakage testing
+- Tx: refer to hematologist
+
+## Thrombocytopenia/absent radius
+- Dx: CBC
+
+## Holt Oram
+- Autosomal Dominant
+- Radial longitudinal deficiency, cardiac abnormality (VSD)
+
+## VACTERL
+- Vertebral, anorectal, cardiac, trachea-esophageal, renal, limb abnormalities
+- Dx: renal US
+
+# Pediatric Brachial Plexopathy
+
+- Observe ~6 months for development of upper extremity motor function
+- Dx: MRI to evaluate for nerve-root level injury`
   }
 };
 
