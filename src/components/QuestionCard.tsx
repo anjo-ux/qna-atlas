@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Label } from '@/components/ui/label';
 import { Question } from '@/types/question';
 import { cn } from '@/lib/utils';
 
@@ -10,8 +11,42 @@ interface QuestionCardProps {
   index: number;
 }
 
+interface ParsedQuestion {
+  text: string;
+  choices: { letter: string; text: string }[];
+}
+
 export function QuestionCard({ question, index }: QuestionCardProps) {
-  const [isOpen, setIsOpen] = useState(false);
+  const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
+  const [showExplanation, setShowExplanation] = useState(false);
+
+  const parsed = useMemo((): ParsedQuestion => {
+    const lines = question.question.split('\n');
+    const choices: { letter: string; text: string }[] = [];
+    const textLines: string[] = [];
+    
+    for (const line of lines) {
+      const match = line.match(/^([A-E])[.)]\s*(.+)$/);
+      if (match) {
+        choices.push({ letter: match[1], text: match[2].trim() });
+      } else if (line.trim()) {
+        textLines.push(line);
+      }
+    }
+    
+    return { text: textLines.join('\n'), choices };
+  }, [question.question]);
+
+  const correctAnswer = useMemo(() => {
+    const match = question.answer.match(/(?:correct answer is|answer is)\s*([A-E])/i);
+    return match ? match[1].toUpperCase() : null;
+  }, [question.answer]);
+
+  const handleAnswerClick = () => {
+    if (selectedAnswer && !showExplanation) {
+      setShowExplanation(true);
+    }
+  };
 
   return (
     <Card className={cn(
@@ -24,28 +59,53 @@ export function QuestionCard({ question, index }: QuestionCardProps) {
             <span className="text-sm font-semibold text-primary">{index + 1}</span>
           </div>
           <div className="flex-1">
-            <p className="text-base leading-relaxed text-foreground whitespace-pre-wrap">
-              {question.question}
+            <p className="text-base leading-relaxed text-foreground whitespace-pre-wrap mb-4">
+              {parsed.text}
             </p>
             
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setIsOpen(!isOpen)}
-              className="mt-4 text-primary hover:text-primary hover:bg-primary/5 gap-2"
-            >
-              {isOpen ? (
-                <>
-                  Hide Answer <ChevronUp className="h-4 w-4" />
-                </>
-              ) : (
-                <>
-                  Show Answer <ChevronDown className="h-4 w-4" />
-                </>
-              )}
-            </Button>
+            {parsed.choices.length > 0 && (
+              <RadioGroup value={selectedAnswer || ''} onValueChange={setSelectedAnswer}>
+                <div className="space-y-2">
+                  {parsed.choices.map((choice) => {
+                    const isCorrect = correctAnswer === choice.letter;
+                    const isSelected = selectedAnswer === choice.letter;
+                    const showResult = selectedAnswer && showExplanation;
+                    
+                    return (
+                      <div
+                        key={choice.letter}
+                        className={cn(
+                          "flex items-start space-x-3 p-3 rounded-lg border transition-colors",
+                          showResult && isCorrect && "bg-green-50 border-green-500 dark:bg-green-950/20",
+                          showResult && isSelected && !isCorrect && "bg-red-50 border-red-500 dark:bg-red-950/20",
+                          !showResult && "hover:bg-accent/5"
+                        )}
+                      >
+                        <RadioGroupItem value={choice.letter} id={`${question.id}-${choice.letter}`} />
+                        <Label
+                          htmlFor={`${question.id}-${choice.letter}`}
+                          className="flex-1 cursor-pointer font-normal"
+                        >
+                          <span className="font-semibold">{choice.letter}.</span> {choice.text}
+                        </Label>
+                      </div>
+                    );
+                  })}
+                </div>
+              </RadioGroup>
+            )}
+            
+            {selectedAnswer && !showExplanation && (
+              <Button
+                onClick={handleAnswerClick}
+                className="mt-4"
+                size="sm"
+              >
+                Show Answer
+              </Button>
+            )}
 
-            {isOpen && (
+            {showExplanation && (
               <div className="mt-4 pt-4 border-t border-border animate-in slide-in-from-top-2 duration-300">
                 <div className="bg-accent/5 border-l-4 border-accent rounded-r-lg p-4">
                   <p className="text-sm font-semibold text-accent mb-2">Answer & Explanation</p>
