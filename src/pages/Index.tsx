@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { loadQuestions } from '@/utils/parseQuestions';
 import { loadReferenceText } from '@/utils/parseReferenceText';
 import { Section } from '@/types/question';
@@ -8,11 +8,14 @@ import { QuestionCard } from '@/components/QuestionCard';
 import { ReferenceTextPanel } from '@/components/ReferenceTextPanel';
 import { QuestionStats } from '@/components/QuestionStats';
 import { QuestionFilters } from '@/components/QuestionFilters';
+import { SearchResults } from '@/components/SearchResults';
 import { Input } from '@/components/ui/input';
 import { Search, Menu, X, BookOpen, FileQuestion, Columns2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useQuestionStats } from '@/hooks/useQuestionStats';
+import { useHighlights } from '@/hooks/useHighlights';
+import { useGlobalSearch } from '@/hooks/useGlobalSearch';
 import { toast } from 'sonner';
 
 type ViewMode = 'questions' | 'reference' | 'split';
@@ -28,6 +31,8 @@ export default function Index() {
   const [isLoading, setIsLoading] = useState(true);
   const [viewMode, setViewMode] = useState<ViewMode>('split');
   const [filterMode, setFilterMode] = useState<FilterMode>('all');
+  const [showSearchResults, setShowSearchResults] = useState(false);
+  const searchRef = useRef<HTMLDivElement>(null);
 
   const {
     recordResponse,
@@ -37,6 +42,11 @@ export default function Index() {
     resetSubsection,
     resetAll,
   } = useQuestionStats();
+
+  const { notes } = useHighlights();
+  
+  // Global search across questions, reference, and notes
+  const searchResults = useGlobalSearch(sections, referenceSections, notes, searchQuery);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -55,6 +65,18 @@ export default function Index() {
     };
 
     fetchData();
+  }, []);
+
+  // Close search results when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        setShowSearchResults(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   const currentSection = sections.find(s => s.id === selectedSection);
@@ -78,8 +100,8 @@ export default function Index() {
     filteredQuestions = filteredQuestions.filter(q => incorrectQuestionIds.includes(q.id));
   }
   
-  // Apply search filter
-  if (searchQuery) {
+  // Apply search filter only when in a subsection (local search)
+  if (searchQuery && selectedSubsection) {
     filteredQuestions = filteredQuestions.filter(q =>
       q.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
       q.answer.toLowerCase().includes(searchQuery.toLowerCase())
@@ -117,6 +139,20 @@ export default function Index() {
     setSearchQuery('');
     setIsNavOpen(false);
     setFilterMode('all'); // Reset filter when navigating
+    setShowSearchResults(false);
+  };
+
+  const handleSearchResultClick = (sectionId: string, subsectionId: string) => {
+    handleNavigate(sectionId, subsectionId);
+  };
+
+  const handleSearchChange = (value: string) => {
+    setSearchQuery(value);
+    if (value.trim().length >= 2) {
+      setShowSearchResults(true);
+    } else {
+      setShowSearchResults(false);
+    }
   };
 
   const currentReferenceContent = referenceSections
@@ -228,15 +264,27 @@ export default function Index() {
 
             {/* Search Bar */}
             {currentSubsection && viewMode !== 'reference' && (
-              <div className="mt-4 relative">
+              <div className="mt-4 relative" ref={searchRef}>
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                 <Input
                   type="text"
-                  placeholder="Search questions..."
+                  placeholder="Search questions, reference text, and notes..."
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={(e) => handleSearchChange(e.target.value)}
+                  onFocus={() => {
+                    if (searchQuery.trim().length >= 2) {
+                      setShowSearchResults(true);
+                    }
+                  }}
                   className="pl-10"
                 />
+                {showSearchResults && searchQuery.trim().length >= 2 && (
+                  <SearchResults
+                    results={searchResults}
+                    query={searchQuery}
+                    onResultClick={handleSearchResultClick}
+                  />
+                )}
               </div>
             )}
           </div>
