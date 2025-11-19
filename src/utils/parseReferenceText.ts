@@ -1988,8 +1988,8 @@ Primary closure (≤1/3), Lip switch flaps (1/3-1/2: Abbe, Estlander), Regional 
     - IV: Painful
   - MC cause: biofilm
     - Subclinical infection associated with indwelling medical devices
-    - Forms due to extracellular polymeric substance matrix causing a surface for bacterial adherence
-    - Slow bacterial growth rate reduces antibiotic efficacy
+      - Forms due to extracellular polymeric substance matrix causing a surface for bacterial adherence
+      - Slow bacterial growth rate reduces antibiotic efficacy
     - Reduced risk with IMF incision, subpectoral placement, and textured implants
   - No evidence to support extended antibiotic courses to prevent
 - **Double capsule**
@@ -2016,7 +2016,7 @@ Primary closure (≤1/3), Lip switch flaps (1/3-1/2: Abbe, Estlander), Regional 
     - Doesn't respond to antibiotics, causes non-healing wounds
     - Dx: acid-fast stain and mycobacterial culture
     - Tx: remove implant, debride
-- **Breast-implant-associated-ALCL (BIA-ALCL)**: See breast reconstruction section
+- **Breast-implant-associated-ALCL (BIA-ALCL)**: See chapter 3: breast reconstruction
 - **Breast implant illness**
   - Sx: vague systemic symptoms (fatigue, brain fog, headaches, anxiety)
   - Dx: clinical diagnosis, no definitive laboratory or imaging test, consider work up for autoimmune disease
