@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils';
 interface SearchResultsProps {
   results: SearchResult[];
   query: string;
-  onResultClick: (sectionId: string, subsectionId: string) => void;
+  onResultClick: (sectionId: string, subsectionId: string, questionId?: string, noteId?: string) => void;
 }
 
 const TYPE_CONFIG = {
@@ -77,7 +77,12 @@ export function SearchResults({ results, query, onResultClick }: SearchResultsPr
                     {typeResults.map((result, index) => (
                       <button
                         key={`${result.type}-${result.subsectionId}-${index}`}
-                        onClick={() => onResultClick(result.sectionId, result.subsectionId)}
+                        onClick={() => onResultClick(
+                          result.sectionId, 
+                          result.subsectionId, 
+                          result.questionId, 
+                          result.noteId
+                        )}
                         className={cn(
                           "w-full text-left p-3 rounded-lg border transition-colors hover:bg-accent/5",
                           "focus:outline-none focus:ring-2 focus:ring-ring"

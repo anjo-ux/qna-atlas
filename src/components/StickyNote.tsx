@@ -53,6 +53,7 @@ export function StickyNote({
 
   return (
     <Card
+      data-note-id={id}
       className={cn(
         "absolute w-64 shadow-lg border-2 bg-highlight-yellow/30 backdrop-blur-sm",
         "hover:shadow-xl transition-shadow z-50"

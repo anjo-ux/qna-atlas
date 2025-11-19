@@ -142,8 +142,40 @@ export default function Index() {
     setShowSearchResults(false);
   };
 
-  const handleSearchResultClick = (sectionId: string, subsectionId: string) => {
+  const handleSearchResultClick = (
+    sectionId: string, 
+    subsectionId: string, 
+    questionId?: string, 
+    noteId?: string
+  ) => {
     handleNavigate(sectionId, subsectionId);
+    
+    // Scroll to specific element after navigation
+    setTimeout(() => {
+      if (questionId) {
+        // Scroll to specific question
+        const questionElement = document.querySelector(`[data-question-id="${questionId}"]`);
+        if (questionElement) {
+          questionElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          // Add highlight effect
+          questionElement.classList.add('ring-2', 'ring-primary', 'ring-offset-2');
+          setTimeout(() => {
+            questionElement.classList.remove('ring-2', 'ring-primary', 'ring-offset-2');
+          }, 2000);
+        }
+      } else if (noteId) {
+        // Scroll to specific note
+        const noteElement = document.querySelector(`[data-note-id="${noteId}"]`);
+        if (noteElement) {
+          noteElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          // Add highlight effect
+          noteElement.classList.add('ring-2', 'ring-primary');
+          setTimeout(() => {
+            noteElement.classList.remove('ring-2', 'ring-primary');
+          }, 2000);
+        }
+      }
+    }, 300); // Wait for navigation and render
   };
 
   const handleSearchChange = (value: string) => {
