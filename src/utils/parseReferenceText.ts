@@ -1817,868 +1817,129 @@ Survive off surrounding soft tissues until generate their own blood supply
 
   // Section 3: Craniomaxillofacial
   'craniomaxillofacial': {
-    'cleft-lip-palate': `# Cleft Lip and Palate
-
-## Embryology, Epidemiology, and Genetics
-
-### Embryology
-- **Cleft lip**: Median nasal prominences don't fuse
-- **Cleft palate**: Medial and lateral palatine processes don't fuse
-- **Tessier clefts** (rare): proceed from medial to lateral
-  - #3: medial to infraorbital nerve, involves nose, orbit, lip
-  - #4: lateral to nose, extends to medial eye
-  - #5: lateral to infraorbital nerve, involves cheek
-  - #7: most common, corner of mouth
-
-### Genetics
-- One sibling affected: 2.5% risk for next child
-- Two siblings affected: 10% risk
-- Parent and sibling affected: 17% risk
-- **Syndromic**
-  - Van der Woude: risk 50% (autosomal dominant)
-    - Dx: lower lip pits, cleft palate
-    - Dx: IRF6
-
-### Epidemiology
-- **Cleft lip and palate**: 1:700
-  - Ethnicity: Asian:Caucasian:African 4:2:1
-  - Gender: M:F 2:1
-  - Syndromic: 15%
-- **Cleft palate only**: 1:1500
-  - Ethnicity: No difference
-  - Gender: M:F 1:2
-  - Syndromic: 50%
-
-## Cleft Care
-
-### Cleft Lip
-- **Nasoalveolar molding**
-  - Begin in first three months
-  - Improves position of alveolar segments, lengthens columella
-  - Decreased patient compliance compared to lip adhesion
-- **Tx**: repair at 3-6 months of age
-  - Functional goal of repair is to establish muscular continuity of upper lip
-
-### Cleft Palate
-- **Anatomy**:
-  - Tensor veli palatini
-    - 90% of patients have eustachian tube dysfunction due to weak muscle function
-  - Levator veli palatini
-    - Originates from medial Eustachian tube, runs transversely in middle of velum, embryology from the 4th pharyngeal arch (CN X)
-    - Elevates soft palate
-- **Tx**: ENT evaluation for tympanostomy tubes
-- **Tx**: palate repair at around 1 year
-  - Buccal fat flaps can be used to help close nasal lining defects
-  - Worse speech outcomes with delayed repair
-
-### Velopharyngeal Insufficiency (VPI)
-- Sx: hypernasal speech from air escape
-- Dx: refer to speech language pathologist ~age 3-4
-- **Tx**: buccal musculomucosal flaps
-  - Lengthen palate
-  - Based off internal maxillary vessels
-- **Poor lateral wall motion, coronal closure pattern**
-  - Tx: sphincter pharyngoplasty
-    - Includes palatopharyngeal muscles
-    - Secondary speech operation with highest rate of obstructive sleep apnea
-- **Lateral wall motion intact, central gap**
-  - Tx: superiorly based pharyngeal flap
-    - Includes mucosa, superior constrictor, buccopharyngeal fascia (all above prevertebral fascia)
-    - Complication: obstructive sleep apnea
-      - Dx: polysomnography
-    - Complication: wound dehiscence
-      - Observation, local wound care initially
-- **Hypotonia of muscles/neurogenic cause**
-  - Tx: custom palatal obturator
-
-### Submucous Cleft
-- Dx: bifid uvula, notched palate, zona pellucida on exam
-- Tx: reassess at 1 year, consider repair if speech problems (~2.5 years)
-  - Furlow double-opposing palatoplasty
-    - Elongates a functioning velum
-      - Musculomucosal flap contains levator palatini muscle
-    - Fistula rate ~5%
-
-### Alveolar Bone Grafting
-- Time with crowning of permanent canine (~age 8-12)
-- **Tx**: bone grafting
-  - Iliac crest bone autograft versus demineralized bone matrix: same healing rate, different donor-site morbidity
-  - Bone morphogenetic protein (BMP)
-    - BMP-2: Higher risk of severe edema compared to autologous bone graft in alveolar clefts
-  - Agenesis of lateral incisor common (~60%)
-    - RF for maxillary hypoplasia
-
-### Orthognathic Surgery
-- Class III occlusion: MC with cleft lip/palate
-  - Tx: LeFort I (maxillary advancement)
-    - Conventional: can advance up to 1cm, more predictable occlusion
-    - Distraction: can advance more but less predictable occlusion
-    - Increases midfacial projection, increases alar base width
-    - Complication: VPI
-      - Tx: Furlow for 5mm velopharyngeal gap, pharyngeal flap for >6mm
-
-### Congenital Associations
-- **CHARGE syndrome**
-  - Coloboma of eye, Heart defect, Atresia of nasal airway, Retardation of growth, Genital abnormalities, Ear abnormalities
-  - #2 syndromic cleft lip and palate (Van der Woude #1)`,
-
-    'facial-fractures': `# Facial Fractures and Skull
-
-## Fractures
-
-### Craniofacial Trauma
-- Intra-operative CT scan improves plate positioning
-
-### Frontal Sinus
-- First seen on XR at 6 years old
-- Intracranial injuries occur ~55% of frontal fractures
-- **Posterior table fractures** at risk for cerebrospinal fluid (CSF) leak
-  - Dx: beta-2 transferrin
-  - Tx: conservative management, ventricular drainage, head of bed elevation first for a week before surgery (e.g., cranialization)
-    - Increased infection risk if surgery delayed >48 hours in setting of persistent leak
-
-### Nasal Bone Fractures
-- Assess for concomitant septal fracture, septal hematoma
-  - Septal hematoma: immediate drainage otherwise causes pressure necrosis of septal cartilage or thickening of cartilage with obstruction
-- Tx: closed nasal reduction, septal reduction
-
-### Orbital Fractures
-- **Orbital floor fractures**
-  - Most common orbital fracture
-  - Repair for sizable defects, persistent diplopia
-    - Unrepaired large fractures at risk for enophthalmos and vertical dystopia from change in globe position
-    - Oculocardiac reflex: bradycardia from orbital trauma
-      - Improves after orbital floor plating
-  - Bones of orbit: sphenoid, maxilla, palatine, zygoma, ethmoid, lacrimal, frontal
-- **Orbital entrapment**
-  - Orbital floor fracture with potential for ischemic change to inferior rectus muscle, progresses to fibrosis in >24 hours, risk for persistent diplopia
-  - More common in pediatrics
-  - Dx: assess ability to look up compared to uninjured side
-    - Forced duction test: range extra-ocular muscles by moving capsulopalpebral fascia in OR or intubated patient
-  - Tx: prompt reduction and repair
-- Get ophthalmology consult to evaluate for globe trauma
-  - Hyphemia: blood in anterior chamber
-    - Emergency that can cause loss of vision if untreated
-  - Relative afferent optic nerve injury
-    - Dx: flashlight to unaffected eye has consensual pupillary reflex to both eyes, affected eye has paradoxical pupillary dilation and contralateral normal pupillary reflex
-  - Optic nerve injury
-    - Occurs from direct injury or traction on globe during surgery
-    - Sx: acute loss of vision with preserved light and dark perception
-    - Dx: imaging
-    - Tx: high-dose steroids
-- **Orbital prosthesis**
-  - Reconstruction option for ruptured globe with loss of upper and lower eyelids
-
-### Naso-Orbito-Ethmoidal Fractures
-- Risk for telecanthus
-  - Markowitz classification:
-    - I: canthus attached to large bony fragment
-    - II: canthus attached to small bony fragment, comminuted
-    - III: canthus detached
-      - Tx: trans-nasal wiring of medial canthal tendon
-- Risk for canalicular injury
-  - Evaluate with Jones test (see eyelid chapter in section 4)
-- Risk of CSF leak
-  - Tx: head of bed elevation, bed rest
-
-### Zygomaticomaxillary Complex Fracture
-- Points of reduction: zygomaticofrontal suture, lateral buttress, infraorbital rim
-  - Lateral orbital wall (zygomaticosphenoid) best to assess reduction
-- 2-point fixation (lateral buttress, ZF) for simple fractures
-- 3-point fixation (lateral buttress, ZF, orbital rim) for complex fractures, poor reference points
-- Swelling common and takes several months to improve
-- MC in elderly
-- LeFort I fracture: anterior open bite due to pterygoid muscle pull of maxilla
-
-### Temporal Bone Fractures
-- Complications: CSF leak (#1), facial nerve injury, hearing loss
-
-### Base of Skull Fracture
-- Contraindication to nasotracheal intubation
-
-## Scalp Reconstruction
-
-### Scalp Defect
-- Flap (rotation) if exposed cranium
-  - Limitations of local flaps are defect size, quality of adjacent scalp tissues
-- Can skin graft if intact pericranium
-- Free tissue transfer for large, exposed cranium defects
-
-### Scalp Tissue Expansion
-- Replaces hair-bearing skin (up to 50% of scalp can be covered)
-- Place between galea and temporalis muscle
-- Increased risk of complications with multiple expanders
-
-## Cranial Reconstruction/Cranioplasty
-
-- Frontal bone associated with highest infection risk after craniectomy
-- **Pediatric cranial reconstruction**
-  - Tx: bone autograft
-    - Need diploic space to perform split cranial bone graft (occurs at 5 years old)
-- **Cranioplasty**
-  - Tx surgery: >6 sq cm craniectomy defect
-    - Pediatric: split calvarial bone graft (after age 3)
-  - Biomaterials:
-    - **PEEK**
-      - Used in custom implants, radiolucent, similar stiffness characteristic to cranial bone
-        - Must be milled or 3d printed
-      - MC complication: infection
-    - **Methylmethacrylate**
-      - Polymerizes via exothermic reaction
-      - Use saline irrigation to reduce risk of tissue necrosis
-    - **Hydroxyapatite**
-      - Calcium-based allograft
-      - Heals by osteoconduction
-
-## Pediatric Cranial Diseases
-
-### Positional Plagiocephaly
-- Scaphocephaly without craniosynostosis
-- RF: prematurity, intrauterine position, torticollis, hypotonia, male sex, first born
-  - **Torticollis**
-    - Dx: abnormal head tilt (flexion of head to contralateral shoulder, lack of lateral flexion toward contralateral shoulder), limited neck ROM on exam
-      - Often involves sternocleidomastoid
-    - Tx: physical therapy
-- Tx: repositioning, helmet molding (>3 months)`,
-
-    'facial-paralysis': `# Facial Paralysis
-
-## Anatomy
-
-### Main Facial Nerve Trunk
-- 6-8mm distal to tympanomastoid suture
-
-### Frontal Branch
-- Pitanguy's line: 0.5cm below tragus to 1.5cm above lateral eyebrow
-- Nerve runs between superficial temporal fascia (temporoparietal fascia) and superficial deep temporal fascia
-
-### Marginal Mandibular Nerve
-- Dx: eversion of lip, able to purse lips, whistle, abnormal contralateral lower lip depression if injured
-
-### Cervical Branch
-- Dx: loss of lower lip depression on affected side if injured
-
-## Nerve Injury
-
-### Facial Nerve Injury
-- **Acute**
-  - Tx: distal nerve target neurotransmitter stores available to perform intra-operative nerve stimulation within 72 hours from injury
-- **Delayed**
-  - Attempt repair before 12 months
-    - Motor end plates can be reinnervated up to 18 months from injury
-  - Nerve graft (autograft or allograft) if unable to perform primary repair
-
-### Facial Paralysis
-
-**Etiologies**:
-
-**Traumatic**
-
-**Idiopathic**:
-- **Bell's palsy**
-  - Generally due to acute infection (otitis media sequelae)
-  - 80-90% resolve
-  - Sx: ipsilateral facial paralysis, hyperacusis
-  - Dx: post-auricular pain, sudden unilateral facial weakness, excess tear production
-  - Tx: steroids if diagnosed in first few days (controversial)
-  - Tx: botulinum toxin for >1 year synkinesis symptoms
-
-**Infectious**:
-- **Lyme's disease**
-  - MC after insect bite
-  - Dx: bull's eye rash
-  - Tx: doxycycline
-- **Ramsay-Hunt syndrome**
-  - Due to herpes zoster
-  - Dx: unilateral facial rash, intense ear pain, ipsilateral facial paralysis
-
-**Congenital**:
-- **Möbius**
-  - Congenital CN VI, VII absence
-  - Tx: in-line temporalis transfer
-  - Tx: free gracilis with masseteric branch innervation (CN V)
-    - Located between deep and middle lobes of masseter
-- **Progressive hemifacial atrophy (Parry-Romberg Syndrome)**
-  - Idiopathic, generally starts in late teenage years
-    - Begins with morphea with vertical forehead furrow
-    - Progresses to atrophy of upper lip, hypoplasia of midfacial bones and mandible
-    - No change to innervation (sensation, facial muscles)
-  - Often plateaus, await stabilization for 2 years
-  - Tx: refer to ophthalmology for eye screening
-  - Tx: methotrexate IV x 2 years
-    - Induces partial remission
-  - Tx: volume replacement
-    - Fillers, fat grafting or parascapular free flap/ALT depending on amount of volume needed
-    - Parascapular flap
-      - MC complication: hematoma
-- **Temporal bone abnormality**
-  - Can cause facial nerve injury
-  - Dx: CT scan
-- **Congenital trigeminal neuropathy**
-  - Sx: recurrent corneal ulceration
-  - Tx: neurotization from left supratrochlear nerve
-
-## Facial Reanimation
-
-### Dynamic
-- **Free functional muscle transfer**
-  - Nerve donors:
-    - **Cross-facial grafting**
-      - Use contralateral functioning facial nerve
-      - +/- hypoglossal nerve as "babysitter" nerve transfer
-      - 2-stage reconstruction with nerve repair 1st then muscle transfer
-    - **Masseteric nerve (CN V branch) as donor**
-      - Less spontaneous smile, requires biofeedback training
-  - Donor axon count has highest impact on success of animation
-  - Complications:
-    - Hyperkinesis
-      - Tx: botulinum toxin, mirror biofeedback therapy
-- **Regional**
-  - Temporalis turnover
-  - Labbé Procedure: lengthening temporalis myoplasty, used for dynamic smile
-
-### Static
-- **Autologous grafts for slings**
-  - Lowest complication rate
-- **Forehead ptosis**
-  - Tx: frontalis sling
-    - Place superficial to levator and tarsal plate
-  - Tx: lateral canthoplasty, possible tarsal strip
-- **Oral incompetence**
-  - Tx: modiolus suspension sling`,
-
-    'ear-reconstruction': `# Ear Reconstruction
-
-## Anatomy
-
-### Ear Innervation
-- Lesser occipital: upper ear
-- Greater auricular: lower ear
-- Arnold's branch of CN X: external auditory canal, conchal bowl
-
-## Congenital Ear
-
-### Embryology
-- 1st pharyngeal cleft: external auditory canal
-- 1st and 2nd pharyngeal arches: develop helix (formation of 6 hillocks)
-  - Preauricular sinus: due to incomplete fusion
-
-### Anotia
-- Missing all helical components
-
-### Microtia
-- Absent components of ear, often unilateral
-- Tx: autologous ear reconstruction
-
-### Cryptotia
-- Upper 1/3rd of helical rim adherent to post-auricular skin
-- Anomaly of the intrinsic oblique and transverse auricular muscles
-- Tx: release pocket, resurface posterior auricular defect
-
-### Stahl Ear
-- Accessory third crus of antihelix
-- Tx: excision abnormal cartilage
-
-### Lop Ear
-- Overhanging helix
-
-### Pre-auricular Skin Tags
-- Often idiopathic, can be associated with Goldenhar syndrome
-- Can be associated with renal, cardiac, and hearing anomalies (but normal vestibular function)
-
-### Branchio-oto-renal Syndrome
-- Autosomal dominant
-- Dx: auricular malformations, preauricular skin pits, healing loss, renal abnormalities
-- Dx: renal US
-
-## Ear Reconstruction
-
-### Neonatal Ear Molding
-- Increased ear pliability due to circulating maternal estrogen
-- Ideally start by 2 weeks of age, can be started up to 3 months
-  - Better success when started earlier
-  - Better outcomes for Stahl ear, lop ear
-- MC complication: skin ulceration
-
-### Autologous Technique
-- Involves harvesting rib cartilage to create a framework
-- If concomitant hearing loss, place bone-anchored hearing aid after completion of reconstruction (don't disrupt post-auricular skin)
-- **Nagata Technique**
-  - Two-stage reconstruction
-    - Lobular reconstruction at time of construct elevation
-- **Brent Technique**
-  - Three-stage reconstruction
-    - Lobular reconstruction during separate 2nd stage
-- **Helical reconstruction**
-  - Upper 1/3rd: chondrocutaneous advancement flap for small/medium defects
-  - Middle 1/3rd: conchal cartilage graft, cover with postauricular flap
-- **Temporoparietal fascia flap**
-  - Based on superficial temporal artery
-  - Workhorse for coverage of alloplastic and autograft constructs
-
-### Alloplastic Technique
-- Increased complications with XRT
-
-## Ear Replantation
-
-- Venous repair doesn't change success rate
-- Tx: leech therapy if unable to perform vein anastomosis
-
-## Aesthetic Ear
-
-### Prominent Ear
-- Widened chonchal-mastoid angle, absence/effaced antihelical fold
-- Otoplasty at age 6-7 if persists
-  - Mustardé suture: recreates antihelical fold by adjusting scapha to concha bowl with mattress sutures
-  - Furnas suture: reduces conchal mastoid angle`,
-
-    'mandible-dental-orthognathic': `# Mandible, Orthognathic, and Dental
-
-## Mandible Fractures
-
-### Risk for Cervical Spine Injury
-- 5-10%
-  - RF: concomitant trunk injuries
-
-### RF Infection
-- Increasing number of fractures, intra-oral fixation approach
-
-### Fracture Locations
-- **Parasymphyseal**: unstable due to multiple muscles (genioglossus, mylohyoid) pull in opposite directions
-  - Tx: ORIF, +/- maxillomandibular fixation (MMF)
-- **Angle**: displaces due to masseter, medial pterygoid
-  - Tx: ORIF, cannot treat with MMF alone due to location
-  - Lower complications with intra-oral approach
-- **Condylar/subcondylar**:
-  - Lateral pterygoid distracts condyle, creates loss of vertical height
-  - Dx: ipsilateral crossbite, contralateral open bite on exam
-  - Tx: generally treated closed with MMF
-  - **Condylar fractures in pediatric patients**
-    - Condyles contain the growth center of the mandible
-    - Tx: MMF x 3-4 weeks
-  - **Bilateral intra-capsular condylar fractures**
-    - Tx: MMF x 2 weeks
-  - **Bilateral subcondylar fractures**
-    - Tx: MMF x 4-6 weeks
-- **Pathologic fractures and osteoradionecrosis**
-  - Tx: free fibula bone flap mandibular reconstruction
-- **Edentulous mandible fracture**
-  - Tx: conservative management unless at risk for malunion, nonunion
-  - Tx: reconstruction bar via extra-oral approach, if needed
-
-### Fixation
-- Need to reduce with MMF, establish centric occlusion (teeth contact) and centric relation (condyles seated in glenoid fossa) prior to plating
-- **Champy technique**
-  - Plate placed along external oblique ridge of mandible
-  - Load-sharing osteosynthesis
-- **Plating (AO technique)**
-  - Dissect in superficial layer of deep cervical fascia and location (tension band or MMF)
-- **Reconstruction plate**
-  - Only load-bearing fixation option (plate handles the majority of muscle forces instead of the bone)
-- **Resorbable plates**
-  - Role in pediatric fractures
-  - Increased cost compared to metallic plates
-- **Indications for tooth extraction**
-  - Fractured root, luxated from socket, interferes with fracture reduction, advanced caries, advanced periodontal disease, pre-existing abnormalities
-- **Free flap reconstruction**
-  - Fibula for defects >5cm or in setting of XRT
-    - Osseointegrated dental implants can be placed at the same time as free fibula flap
-  - Virtual surgical planning: decreases ischemia time
-
-## Mandibular Tumors
-
-### Masses
-- **Ameloblastoma**
-  - MC mandibular tumor
-  - MC develops in middle age
-  - Sx: unilateral expansion of lower face near molars
-  - Dx: benign odontogenic tumor from epithelium of tooth gum with palisading-basaloid cells on pathology
-  - Dx: cortical expansion near mandibular 3rd molar on imaging
-  - Tx: segmental mandibulectomy, reconstruction
-- **Odontogenic keratocystic tumors (OKC)**
-  - #2 benign jaw tumor, more aggressive
-  - Arises from odontogenic epithelium
-  - Tx: enucleation and chemoablation
-  - Associated with Gorlin syndrome (basal nevus syndrome)
-    - OKCs, multiple basal cell carcinomas, medulloblastoma
-    - Autosomal dominant, PTCH1 gene
-
-### Cysts
-- **Periapical cyst (MC cyst)**
-  - Due to necrotic pulp after tooth infection
-  - Dx: lucency at apex of tooth on imaging
-- **Dentigerous cyst**
-  - Dental follicle from unerupted tooth, specialized epithelium
-  - Sx: painless bone expansion
-  - Dx: lucency at acute angle to unerupted tooth on imaging
-- **Aneurysmal bone cyst**
-  - Sx: painless, firm enlargement
-  - Dx: multinucleated giant cells on pathology
-  - Dx: radiolucent bone lesion with expanded cortex on imaging
-  - Tx: resection and curettage
-
-### Other Diseases
-- **Bisphosphonate-associated osteonecrosis**
-  - Tx: chlorhexidine, oral care (mild cases)
-  - Tx: superficial debridement for exposed bone
-  - Tx: bone reconstruction and plating for pathologic fractures
-- **Head and neck squamous cell carcinoma with mandibular involvement**
-  - Tx: segmental resection, free fibula bone flap
-
-## Temporomandibular Joint
-
-### Temporomandibular Dysfunction (TMD)
-- MC women 20-40
-- Sx: preauricular pain, pain on palpation of mastication muscles
-- Tx: conservative management
-
-### Masseteric Hypertrophy
-- MC from bruxism
-- Tx: botulinum toxin
-
-## Dental
-
-### Tooth Anatomy
-- One root: mandibular incisors, premolars
-- Two roots: maxillary first premolar and mandibular molars
-- Three roots: maxillary molars
-
-### Tooth Injuries
-- Dentin (yellow substance): causes cold and air sensitivity
-- Enamel: not associated with pain
-- Dental root: covered by cementum, anchors to alveolar bone via periodontal ligament
-  - Tooth replant: needs to be performed quickly (~30 minutes) before periodontal ligament desiccates
-
-### Tooth Numbering
-- #1-32, order starts with right maxillary 3rd molar toward left maxillary 3rd molar, then goes left mandibular 3rd molar to right mandibular 3rd molar
-
-### Abnormal Number of Teeth
-- **Hyperdontia**
-  - MC in maxilla
-- **Hypodontia**
-  - MC cause: ectodermal dysplasia
-
-### Dental Reconstruction/Maxillofacial Prosthodontics
-- Used in congenital defects, trauma, cancer deformities
-- Osseointegrated implant: MC titanium
-  - Best appearance, function, and longevity
-
-## Orthognathic
-
-### Angle Class Occlusion
-- Relationship of maxillary first molar to mandibular first molar contact
-- Normal
-- **Class I malocclusion**: normal relationship of molars but crowding, positional problems
-- **Class II (underbite)**: maxilla anterior to mandible
-  - Division I: overjet of maxillary incisors
-  - Division II: underjet
-- **Class III (overbite)**: maxilla posterior to mandible
-
-### Orthognathic Planning
-- Consider when patient skeletally mature
-- Refer to orthodontist
-- Obtain cephalogram
-  - SNA: assesses maxillary position
-    - Below-reference value: needs maxillary advancement
-  - SNB: assesses mandibular position
-    - Below-reference value: needs mandibular advancement
-  - May need to move both simultaneously
-  - Frankfurt horizontal plane: line from external auditory canal to the orbital rim
-- >1cm of movement: needs distraction osteogenesis
-
-### Class III
-- LeFort I advancement
-  - MC vascular injury: descending palatine artery
-    - Palate remains perfused due to ascending palatine artery, palatine branch of ascending pharyngeal artery
-
-### Class II
-- Tx: sagittal split mandibular osteotomy (BSSO)
-  - Glossopharyngeal area increases with advancement
-
-### Vertical Maxillary Excess
-- Sx: mentalis strain, anterior open bite
-- Dx: long vertical facial height, constricted alar bases, excessive gingival show ("gummy smile")
-- Tx: botulinum toxin to upper lip
-- Tx: Lefort I osteotomy/impaction
-  - MC complication: nerve injury
-  - Involves vascular injury to nasopalatine and descending palatine arteries, ascending palatine and ascending pharyngeal arteries become dominant supply afterwards
-
-### Maxillary Transverse Deficiency
-- Tx: orthodontics referral (pediatric)
-- Tx: surgically assisted rapid palatal expansion (adult)`,
-
-    'head-neck-tumors': `# Head and Neck Tumors
-
-## Embryology
-
-### Branchial Arch and Clefts
-- 1st branchial arch: mandible, tragus, anterior helix
-- 1st branchial cleft: external auditory canal
-- 2nd branchial arch: remaining external ear
-- 2nd branchial cleft: obliterates, can become cyst at sternocleidomastoid
-
-### Pharyngeal Arches
-
-| Arch | Nerve | Muscle | Bone |
-|------|-------|--------|------|
-| 1 | CN V | Mastication | Inner ear (malleus, incus) |
-| 2 | CN VII | Facial expression, posterior digastric | Lesser hyoid, inner ear (stapes) |
-| 3 | CN IX | Stylopharyngeus (only pharyngeal muscle not CN X) | Greater hyoid |
-| 4 | CN X | Pharyngeal, extrinsic laryngeal, soft palate | Larynx |
-| 6 | CN XI | Sternocleidomastoid, trapezius, intrinsic laryngeal | None |
-
-### Pharyngeal Pouches
-- 1: external auditory canal
-- 2: tonsillar fossa
-- 3: thymus, inferior parathyroid
-
-## Oral Cancer
-
-### Squamous Cell Carcinoma
-- RF: leukoplakia 10% malignant progression
-- **Lymph nodes**
-  - Anatomy:
-    - I: lips, gums, teeth, tongue, anterior palate
-    - II: pharynx
-    - III: larynx
-    - IV: cervical esophagus
-    - V: naso oropharynx
-    - VI: thyroid
-  - **Tx: neck dissection**
-    - Indicated for T2 tumors or higher
-      - Associated with increased survival
-    - Radical neck dissection: all zones and includes sternocleidomastoid, spinal accessory nerve, and internal jugular vein
-    - Modified radical neck dissection: removal of lymph nodes, preservation of non-lymph-node structures
-    - Selective neck dissection: zones I-IV only
-    - **Complication**:
-      - **Chyle leak**
-        - Milky drainage from neck wound due to thoracic duct injury
-        - Dx: high triglyceride level from drainage (>110 mg/dL)
-        - Tx: low-fat dietary modification/TPN (1st line), octreotide (2nd line, more successful when low output)
-        - Tx: duct ligation (high output)
-- **Tx: reconstruction**
-  - Free flaps
-    - Venous couplers associated with improved flap survival
-  - Total laryngopharangeal reconstruction
-    - Anterolateral thigh flap: better speech outcomes, jejunum: easier inset
-- **Trans-oral robotic surgery**
-  - Higher disease-free survival compared to open surgery
-
-### Oropharyngeal Cancer
-- Dx: HPV (p16 expression testing)
-  - Associated with better outcomes than tobacco/alcohol etiologies
-
-### Esophageal Reconstruction
-- **Jejunal flap**
-  - MC complication: abdominal wound infection (#1), fistula formation
-
-## Glandular Disease
+    'cleft-lip-palate': `## Cleft Lip and Palate
+
+### Embryology, Epidemiology, and Genetics
+**Embryology**: Cleft lip (median nasal prominences don't fuse), Cleft palate (medial and lateral palatine processes don't fuse)
+**Genetics**: One sibling affected: 2.5% risk, Two siblings: 10%, Parent and sibling: 17%, Van der Woude (autosomal dominant): 50% risk
+**Epidemiology**: Cleft lip/palate 1:700 (M:F 2:1, 15% syndromic), Cleft palate only 1:1500 (M:F 1:2, 50% syndromic)
+
+### Cleft Care
+**Cleft Lip**: Repair at 3-6 months, establish muscular continuity
+**Cleft Palate**: Repair at ~1 year, worse speech with delayed repair
+**VPI**: Tx: buccal musculomucosal flaps, sphincter pharyngoplasty (highest OSA risk), pharyngeal flap
+**Alveolar Bone Grafting**: Time with permanent canine (~age 8-12)
+**Orthognathic**: LeFort I for Class III occlusion
+**CHARGE syndrome**: #2 syndromic cleft (Coloboma, Heart, Atresia, Retardation, Genital, Ear)`,
+
+    'facial-fractures': `## Facial Fractures and Skull
+
+### Fractures
+**Frontal Sinus**: Posterior table fractures risk CSF leak (Dx: beta-2 transferrin)
+**Orbital**: Floor fractures MC, repair for sizable defects/persistent diplopia; Entrapment MC in pediatrics (prompt repair needed)
+**NOE Fractures**: Risk telecanthus (Markowitz classification), canalicular injury, CSF leak
+**ZMC Fracture**: 2-point fixation (simple), 3-point (complex)
+**Base of Skull**: Contraindication to nasotracheal intubation
+
+### Reconstruction
+**Scalp**: Flap if exposed cranium, tissue expansion between galea and temporalis
+**Cranioplasty**: >6 sq cm defect; PEEK (MC complication: infection), Methylmethacrylate (exothermic), Hydroxyapatite
+**Positional Plagiocephaly**: Tx: repositioning, helmet molding >3 months`,
+
+    'facial-paralysis': `## Facial Paralysis
 
 ### Anatomy
-- **Submandibular gland**
-  - Located at floor of mouth
-  - Responsible for 80% of basal salivary production
-  - Can obstruct from cancer and become painful
+**Main trunk**: 6-8mm distal to tympanomastoid suture
+**Frontal branch**: Pitanguy's line (0.5cm below tragus to 1.5cm above lateral brow)
 
-### Glandular Tumors
+### Etiologies
+**Bell's palsy**: 80-90% resolve, Tx: steroids if early
+**Möbius**: CN VI, VII absence; Tx: temporalis transfer or free gracilis
+**Parry-Romberg**: Progressive hemifacial atrophy, starts late teens; Tx: methotrexate, volume replacement
 
-**Benign**:
-- **Parotid gland** (80% of all salivary tumors)
-  - Superficial lobe lies anterior to the masseteric fascia
-  - 80% of parotid tumors are benign
-    - **Pleomorphic adenoma** (80% of benign parotid tumors)
-      - Dx: stellate, spindle cells, mixoid background on pathology
-      - RF: XRT
-      - Tx: resection
-        - Recurrence ~10%
-    - **Warthin tumors**
-      - Cystic, more likely to be bilateral
-      - MC men, smokers
-      - Dx: mucoid fluid, papillary cysts, lymphoid tissue on pathology
-      - Tx: enucleation
-    - **Sialadenitis**
-      - Increased risk for post-operative salivary fistula
+### Reanimation
+**Dynamic**: Free muscle transfer (cross-facial graft vs masseteric nerve), temporalis turnover
+**Static**: Autologous slings (lowest complication rate)`,
 
-**Malignant**:
-- **Mucoepidermoid carcinoma**
-  - MC malignant parotid tumor
-  - MC in children
-- **Adenoid cystic adenocarcinoma**
-  - More aggressive
-  - Invades perineural structures
-  - Tx: depends on depth/invasion
-    - Superficial parotidectomy preserves facial nerve: for low-grade tumors
-    - Total parotidectomy facial nerve dissection
-    - Radial parotidectomy with facial nerve sacrifice, neck dissection
-      - Likely needs lymph node dissection
-      - Adjuvant XRT for lymph node involvement
-  - **Complications**
-    - **Frey syndrome**
-      - Sx: flushing, sweating, neuralgia, burning due to gustatory stimulus
-      - Dx: minor-starch test
-    - **Bogorad syndrome**
-      - Gustatory hyperlacrimation
+    'ear-reconstruction': `## Ear Reconstruction
 
-**Minor Salivary Tumors**:
-- 50% malignant, most commonly in palate
-- Adenoid cystic adenocarcinoma: MC minor salivary tumor
-- Dx: CT, MRI for concern of perineural invasion
-- Tx: excision with wide margins (up to 2cm) +/- XRT
+### Congenital
+**Embryology**: 1st cleft (EAC), 1st/2nd arches (helix - 6 hillocks), Preauricular sinus (incomplete fusion)
+**Anomalies**: Microtia, Cryptotia (upper 1/3 adherent), Stahl ear (accessory 3rd crus), Lop ear
 
-## Nasal Tumors
+### Reconstruction
+**Neonatal Molding**: Start by 2 weeks (up to 3 months), MC complication: skin ulceration
+**Autologous**: Rib cartilage framework, Nagata (2-stage), Brent (3-stage)
+**TPF flap**: Based on superficial temporal artery, workhorse for coverage
+**Replantation**: Venous repair doesn't change success, leech therapy if no vein anastomosis
 
-### Benign
-- **Nasopharyngeal angiofibroma**
-  - MC teenage males
-  - Sx: nasal obstruction, epistaxis
-- **Hereditary hemorrhagic telangiectasia (Osler Webber Rendu)**
-  - Arteriovenous shunting in oral/nasal mucosa, solid organs
-  - Sx: frequent nose bleeds, anemia
-  - Dx: END (endoglin gene)
+### Aesthetic
+**Prominent ear**: Otoplasty age 6-7, Mustardé suture (antihelical fold), Furnas suture (conchal-mastoid angle)`,
 
-### Malignant
-- **Nasopharyngeal cancers**: associated with Epstein-Barr virus
+    'mandible-dental-orthognathic': `## Mandible, Orthognathic, and Dental
 
-## Cheek Reconstruction
+### Mandible Fractures
+**Locations**: Parasymphyseal (ORIF +/- MMF), Angle (ORIF, intra-oral approach), Condylar (generally closed with MMF)
+**Fixation**: Champy technique (external oblique ridge), Reconstruction plate (load-bearing)
+**Free flap**: Fibula for >5cm defects or XRT setting
 
-- Cervicofacial flap best color/texture match for large areas of reconstruction
+### Tumors
+**Ameloblastoma**: MC mandibular tumor, Tx: segmental mandibulectomy
+**OKC**: #2 benign, associated with Gorlin syndrome (PTCH1)
+**Periapical cyst**: MC cyst, from necrotic pulp
 
-## Lip Tumors
+### TMJ
+**TMD**: MC women 20-40, pain on palpation of mastication muscles
+**Masseteric Hypertrophy**: MC from bruxism, Tx: botulinum toxin
 
-### Mucocele
-- Minor salivary gland lesion, occurs on lower lip
-- Tx: excision
+### Orthognathic
+**Class II**: BSSO for mandibular advancement
+**Class III**: LeFort I for maxillary advancement
+**Vertical Maxillary Excess**: "Gummy smile", Tx: LeFort I impaction`,
+
+    'head-neck-tumors': `## Head and Neck Tumors
+
+### Embryology
+**Pharyngeal Arches**: 1(CN V-mastication), 2(CN VII-facial), 3(CN IX-stylopharyngeus), 4(CN X-pharyngeal/laryngeal), 6(CN XI-SCM/trapezius)
+
+### Oral Cancer
+**SCC**: Neck dissection for T2+ tumors, Chyle leak MC complication (triglycerides >110 mg/dL)
+**Reconstruction**: Free flaps, Total laryngopharyngeal (ALT better speech, jejunum easier inset)
+**Oropharyngeal**: HPV associated with better outcomes
+
+### Glandular
+**Parotid**: 80% of salivary tumors, 80% benign
+- Pleomorphic adenoma (80% of benign), Warthin tumors (cystic, bilateral, smokers)
+- Mucoepidermoid (MC malignant, MC in children), Adenoid cystic (perineural invasion)
+**Minor Salivary**: 50% malignant, MC in palate, Adenoid cystic MC
 
 ### Lip Reconstruction
-- **Primary closure**: up to 1/3rd defect
-- **Lip switch flaps**: 1/3 to ½ defects
-  - Abbe: central lower lip to upper lip
-  - Estlander: upper commissure to lower commissure
-- **Regional flaps**: > ½ defects
-  - Karapandzic: up to 2/3 lip defect, neurotized flaps
-  - Bernard-Webster: lip-cheek advancement for larger defects
-- **Free tissue transfer**
-  - Radial forearm free flap with palmaris longus sling`,
+Primary closure (≤1/3), Lip switch flaps (1/3-1/2: Abbe, Estlander), Regional (>1/2: Karapandzic, Bernard-Webster)`,
 
-    'congenital-syndromes': `# Congenital Syndromes
+    'congenital-syndromes': `## Congenital Syndromes
 
-## Craniosynostosis-Related Syndromes
+### Craniosynostosis
+**Apert**: Bicoronal, complex syndactyly, FGFR2
+**Crouzon**: Complex craniosynostosis, midface retrusion, normal extremities, FGFR2
+**Pfeiffer**: Cloverleaf skull, exorbitism, broad thumbs, FGFR2
+**Saethre-Chotzen**: Bilateral coronal, low ears, ptosis, TWIST
+**Sagittal**: Scaphocephaly, Tx: endoscopic (early) vs open vault (late)
 
-### Apert Syndrome
-- Bicoronal craniosynostosis, complex syndactyly of hands and feet (e.g., rosebud hand)
-- Dx: FGFR2
+### Cleft Syndromes
+**Treacher Collins**: Microtia, colobomas, cleft palate, retrognathia, TCOF1
+**Robin Sequence**: Cleft palate, micrognathia, glossoptosis, Tx: prone positioning, mandibular distraction
+**Van der Woude**: Lower lip pits, cleft palate, IRF6 (50% transmission)
+**Velocardiofacial**: 22q11.2 deletion, cleft (submucous), cardiac, hypocalcemia
 
-### Crouzon Syndrome
-- Complex craniosynostosis, midface retrusion, central sleep apnea, normal extremities
-- Dx: FGFR2
-- **Malocclusion**
-  - Tx: LeFort III advancement (complications 20%)
-- **Increased intracranial pressure**
-  - Tx: monoblock advancement
-- **Increased intercanthal distance (hypotelorism)**
-  - Inferior orbital fissure is boundary of lateral wall osteotomy
-- Rare synostosis with normal head shape but restricted growth
-- Tx: cranial vault expansion
-
-### Pfeiffer Syndrome
-- Sx: cloverleaf skull (Kleeblattschädel), exorbitism, midface retrusion, broad thumbs (deviate away), no syndactyly
-- Dx: FGFR2
-- Tx initial: tracheostomy for respiratory compromise, temporary tarsorrhaphy, decompressive craniectomies
-
-### Muenke Syndrome
-- Dx: FGFR3
-
-### Saethre-Chotzen Syndrome
-- Bilateral coronal synostosis, low-set ears, eyelid ptosis
-- Dx: TWIST gene
-
-### Carpenter Syndrome
-- Craniosynostosis (lambdoid), low-set ears, symbrachydactyly, pre-axial polydactyly
-- Dx: RAB23
-
-### Multi-suture Synostosis
-- RF for high intracranial pressure, exposure keratopathy
-- Tx: strip craniectomy (sagittal), front-orbital advancement (trigonocephaly), posterior cranial vault expansion
-
-## Non-Syndromic Craniosynostosis
-
-### Sagittal (Scaphocephaly)
-- Sx: boat-shaped, elongated skull due to premature sagittal suture fusion
-- Tx:
-  - Early: endoscopic suturectomy, spring placement, helmet molding
-  - Late: open vault remodeling
-
-### Coronal Synostosis
-- Sx: asymmetric orbit with strabismus, asymmetric ear position
-- Tx: cranial vault remodeling
-  - Serial ophthalmology screening afterwards for risk of strabismus
-
-## Syndromic Cleft Lip and Palate
-
-### Treacher Collins
-- Dx: ear microtia, eyelid colobomas, cleft palate (soft palate), normal intelligence, bilateral bony hypoplasia of zygoma, retrognathia
-- Dx: TCOF1
-- **Absent mandibular condyles**
-  - Tx: costochondral graft reconstruction
-
-### Robin Sequence
-- Can be part of Stickler syndrome
-  - Eye problems (epicanthal folds, cataracts), flat nasal bridge due to abnormal formation of collagen
-- Dx: cleft palate, micrognathia, glossoptosis, respiratory problems
-- Tx initial: prone positioning, early tracheostomy for respiratory distress
-- Tx surgical: mandibular distraction osteogenesis
-  - Complication: 1st and 2nd molar injury from osteotomy site
-    - Molars originate from general dental lamina (all other teeth from successional laminae)
-
-### Van der Woude
-- Lower-lip pits, cleft palate, popliteal pterygium
-- Dx: IRF6
-  - Autosomal dominant (50% transmission)
-
-## Facial Syndromes
-
-### Velocardiofacial Syndrome
-- Cleft palate (submucous), cardiac, hypocalcemia, immune deficiencies, learning disability
-- Increased risk of VPI: needs MRA head/neck to assess medialization of internal carotid prior to pharyngeal surgery (e.g., posterior pharyngeal flap)
-- Dx: 22q11.2 deletion (FISH)
-- Tx: refer to cardiology (Tetralogy of Fallot), immunology (thymic hypoplasia), endocrinology (hypoparathyroidism with hypocalcemia)
-
-### Beckwith-Wiedemann Syndrome
-- Macrosomia, omphaocele, macroglossia, ear fold abnormalities
-- Dx: chromosome 11
-
-### Binder Syndrome
-- Flat nose and midfacial retrusion
-
-### Congenital Facial Paralysis
-- **Möbius syndrome**
-  - CN VI and VII palsy, congenital
-  - Tx: facial reanimation
-    - Masseteric nerve (trigeminal) is available
-
-## Other Syndromes
-
-### Neurofibromatosis I
-- Dx: multiple tan macule >5mms, axillary freckles, pigmented nodules on iris, raised soft tissue lesions
-- Dx: MRI
-
-### McCune-Albright
-- Dx: polyostotic fibrous dysplasia/pathologic fracture, precocious puberty, café au lait spots
-
-## Ear Syndromes
-
-### Goldenhar Syndrome
-- Second-most common congenital facial malformation (cleft lip/palate #1)
-- Caused by faulty neural crest cell migration
-- Dx: hemifacial microsomia, epibulbar dermoids, mandibular hypoplasia, eye colobomas, accessory auricle
-- Tx: refer to ophthalmology`,
-  },
+### Other
+**Goldenhar**: #2 congenital facial malformation, hemifacial microsomia, epibulbar dermoids
+**Beckwith-Wiedemann**: Macrosomia, omphalocele, macroglossia, chromosome 11`,
 
     'breast-augmentation': `# Breast Augmentation
 
 ## Breast Implants
 
-### Aesthetic Ideal
+### Aesthetic ideal
 - 45:55 upper pole to lower pole volume
 
 ### FDA Approval
@@ -2752,15 +2013,15 @@ Survive off surrounding soft tissues until generate their own blood supply
 - **Infection**
   - Atypical mycobacterial infections
     - More common with cosmetic tourism
-    - Does not respond to antibiotics, causes non-healing wounds
+    - Doesn't respond to antibiotics, causes non-healing wounds
     - Dx: acid-fast stain and mycobacterial culture
     - Tx: remove implant, debride
-- **Breast-implant-associated-ALCL (BIA-ALCL)**: See chapter 3: breast reconstruction
+- **Breast-implant-associated-ALCL (BIA-ALCL)**: See breast reconstruction section
 - **Breast implant illness**
   - Sx: vague systemic symptoms (fatigue, brain fog, headaches, anxiety)
   - Dx: clinical diagnosis, no definitive laboratory or imaging test, consider work up for autoimmune disease
   - Tx: explantation (widely variable outcomes reported)
-    - +/- capsulectomy: studies do not show a difference in outcomes
+    - +/- capsulectomy: studies don't show a difference in outcomes
     - Worse outcomes when known autoimmune disease`,
 
     'breast-reduction-mastopexy': `# Breast Reduction and Mastopexy
@@ -2791,76 +2052,103 @@ Survive off surrounding soft tissues until generate their own blood supply
 
 ## Breast Aging
 
-### Puberty Breast Development
+### Puberty breast development
 - Surge of insulin-like growth factor 1 (IGF-1) from breast tissue stimulates pituitary gland
 - Estrogen: duct growth
-- Progesterone: glandular bud growth
+- Progesterone: lobular development
+- Tanner staging: ages 8-13
 
-### Postpartum Breast Changes
-- Dx: involution with decrease in differentiated lobules on pathology
+### Menopause
+- Decrease in progesterone and estrogen
+- Breast involution: replacement of parenchyma with fat
+- Cooper ligaments laxity
+- Decreased elasticity: increased ptosis
 
-### Menopause Breast Changes
-- Glandular involution due to decreased estrogen
+## Breast Reduction
 
-### Regnault Ptosis Classification
-- I: nipple above inframammary fold (IMF)
-- II: nipple below IMF
-- III: nipple at most dependent aspect of breast
-- Pseudoptosis: nipple at or above IMF, majority of breast volume is below IMF
+### Anatomic Considerations
+- **Blood supply**:
+  - Superior: internal mammary perforators (60%)
+  - Lateral: lateral thoracic artery
+  - Medial: internal mammary perforators
+  - Inferior: external mammary perforators
+- **Nerve supply**:
+  - Sensation: intercostal nerves (lateral and anterior cutaneous branches)
+  - Nipple-areola complex (NAC): T4 anterolateral and anteromedial branches
 
-## Anatomy
+### Planning
+- Sternal notch to nipple distance: 19-21cm ideal
+- Nipple to inframammary fold: 5-7cm
+- Regnault ptosis classification:
+  - Grade 0: no ptosis
+  - Grade I: nipple at level of IMF
+  - Grade II: nipple below IMF but above lower pole
+  - Grade III: nipple below lower pole (points downward)
+  - Pseudoptosis: gland below IMF but nipple above
 
-### Nipple Areola Complex
-- Vascular: branches from internal mammary
-- Nerve: anterior branch of fourth intercostal nerve
-- Montgomery glands: affect skin lubrication
+### Pedicle Selection
+- **Inferior pedicle**
+  - MC used
+  - Maintains inferior blood supply and sensation
+  - Better for large reductions
+  - Can accommodate up to 1500g resection
+- **Superior pedicle**
+  - Better nipple projection
+  - Good for moderate reductions (<1000g)
+  - Better upper pole fullness
+- **Superomedial pedicle**
+  - Based on internal mammary perforators
+  - Good projection and sensation
+- **Free nipple graft**
+  - For massive reductions (>1500g) or compromised vascularity
+  - Loss of sensation and inability to breastfeed
 
-### Breast Reduction Vascular Pedicles
+### Incision Patterns
+- **Wise pattern (anchor/inverted T)**
+  - MC used
+  - Better for larger reductions
+  - Visible scar in IMF
+- **Vertical (lollipop)**
+  - Better aesthetics with less scar
+  - Good for moderate reductions
+  - Technique: Lejour, Hall-Findlay
+- **Periareolar (Benelli)**
+  - Minimal scar
+  - Limited resection
+  - Higher risk of areolar spreading, nipple flattening
 
-**Inferior**:
-- 6th intercostal artery supplies nipple
+### Complications
+- **Nipple necrosis**
+  - RF: smoking, diabetes, large reduction, tension
+  - Tx: local wound care, observation for demarcation
+- **Fat necrosis**
+  - Firm mass, oil cysts
+  - Dx: mammography, ultrasound
+  - Tx: observation, excision if symptomatic
+- **Infection**
+  - Tx: antibiotics, drainage if abscess
+- **Hematoma**
+  - Early: <24 hours, evacuation needed
+  - Late: observation
+- **Wound dehiscence**
+  - MC at T-junction
+  - Tx: local wound care, secondary closure if needed
+- **Hypertrophic scarring**
+  - Tx: silicone, steroids, revision
+- **Loss of sensation**
+  - Usually temporary, can be permanent
+- **Inability to breastfeed**
+  - Higher with free nipple graft, superior pedicle
 
-**Superomedial**:
-- 2nd intercostal/IMA
+## Mastopexy
 
-## Techniques
+### Indications
+- Breast ptosis without volume excess
+- Can combine with augmentation
 
-### Periareolar Mastopexy
-- Less projection compared to other techniques
-- **Complications**:
-  - Scar/areolar widening
-
-### Vertical Mastopexy/Reduction
-
-### Wise Mastopexy/Reduction
-- Indicated for grade III ptosis, long nipple:IMF
-  - Angle of vertical limbs affects lower-pole shape
-    - Wide angles: boxy lower pole
-
-## Reduction Mammaplasty
-
-- No improvement in outcomes with drain placement
-- **Complications**:
-  - Wound-healing issues (#1): associated with higher resection weights
-  - Hematoma: same risk with intra-operative tumescence (but lower EBL)
-  - Hypertrophic scarring
-  - Fat necrosis
-    - Associated with increased resection weights, increased BMI
-    - Dx: round, smooth, firm nodules, can be tender
-    - Dx: mammogram (MMG), ultrasound (US)
-      - Can mimic concerning findings on breast imaging
-  - Abnormal pathology
-    - High-risk lesions: atypical ductal/lobular hyperplasia, ductal carcinoma in situ, papilloma with atypical features
-      - Intra-operative malignancy: complete reduction, orient specimen for pathology
-      - Incidental malignancy on pathology: Obtain MRI breast to look for more masses
-        - May need re excision or radiation pending tissue diagnosis and margins
-
-## Mastopexy/Augmentation
-
-- Often needed for augmentation candidates with grade II, III ptosis
-- Can perform as single stage or two stages
-  - Single stage: place implant, perform mastopexy
-    - Higher rate of revisions than two-stage approach
+### Augmentation-Mastopexy
+- Two options:
+  - Single stage: higher revision rate
   - Two stages: perform mastopexy then return later to perform augmentation
 
 ## Benign Breast Diseases
@@ -2871,126 +2159,81 @@ Survive off surrounding soft tissues until generate their own blood supply
 - Dx: US
 - Dx: epithelial and stromal proliferation on pathology
 
-### Juvenile Breast Hypertrophy
+### Juvenile breast hypertrophy
 - Breast enlargement >3.3 lbs. during puberty
 - Dx: stromal tissue hypertrophy on pathology
 
-### Phyllodes Tumor
+### Phyllodes tumor
 - Generally benign, high recurrence, rare risk of metastasis
 - Sx: painless breast mass
 - Tx: wide surgical margins (>1cm)
 
-### Tuberous Breast Deformity
+### Tuberous breast deformity
 - Hypomastia/asymmetry, elevated IMF, constricted base, herniated/widened areola
 - Tx: periareolar radial scoring, tissue expander versus implant
 
-### Symptomatic Galactocele/Galactorrhea
+### Symptomatic galactocele/galactorrhea
 - Swelling of breasts, milky discharge, no signs of infection or fever
 - Thought to be secondary to breast denervation after surgery
 - Dx: prolactin
 - Tx: bromocriptine (dopamine agonist)
 
-### Mondor Disease
+### Mondor disease
 - Dx: superficial thrombophlebitis with erythematous, tender cord in the breast
 - Tx: self-resolves in 4-6 weeks, NSAIDs/pain control
 
 ## Breast Cancer Screening
 
-### Palpable Mass on Exam
+### Palpable mass on exam
 - Dx: diagnostic MMG with US
 
-### Breast Cancer Screening Prior to Reduction
+### Breast cancer screening prior to reduction
 - Screening MMG should be performed if age >40
 
-### Occult Breast Cancer in Reduction Mammaplasty Specimen
+### Occult breast cancer in reduction mammaplasty specimen
 - Occurs 0.4% overall, increased to 5.5% with personal history of cancer`,
 
     'breast-reconstruction': `# Breast Reconstruction
 
-## Oncologic Management
-
-### Breast Cancer
-- MC female cancer (affects 1/8 females)
-- Most commonly originates from glandular tissues (ducts, lobules)
-  - Inflammatory breast cancer
-    - Dermal involvement
-    - Relative contraindication to immediate reconstruction
-  - Lobular carcinoma in situ: observation or chemoprevention
-    - Pleomorphic lobular carcinoma in situ: higher risk lesion
-      - Tx: partial mastectomy
-
-### Risk Factors for Breast Cancer
-- Longer exposure to estrogen, hormone replacement therapy
-  - Early menarche, late menopause, older age of pregnancy/nulliparity, lack of breastfeeding
-  - OCPs increase atypical ductal hyperplasia (RF for cancer)
-- High genetic risk: 2 direct family members diagnosed <45 years old
-  - Tx: genetics referral
-    - BRCA1: 60% cancer risk
-    - BRCA2: 50% cancer risk
-
-### Screening
-- Screening mammogram beginning at age 35, annually from 35-55, then 55+ biennially
-- BIRADS classification of MMG
-  - 0: insufficient study
-  - 1: normal
-  - 2: benign features
-  - 3: probably benign (<2% malignancy risk)
-  - 4: suspicious features
-  - 5: probably malignant (>95% of malignancy)
-  - 6: biopsy-proven malignancy
-
-### Staging
-- Tumor: T1 <2cm, T2 2-5cm, T3 >5cm, T4 skin involvement
-- Lymph Node:
-  - Clinical: N1 mobile nodes, N2 fixed or matted nodes, N3 axillary level III involvement
-  - Pathologic: N1 <3 nodes, N2 4-9 nodes, N3 >10 nodes
-- Metastasis: Distant disease
-  - Mechanism of brain metastasis via intercostal to Batson's plexus (vertebral system)
-
-## Mastectomy
-
-- Removal of breast tissue from sternum to anterior border of latissimus dorsi, clavicle to inframammary fold
+## Breast Cancer Overview
 
 ### Mastectomy Types
+- **Total (simple) mastectomy**
+  - Removal of breast tissue, nipple-areola complex
+  - Preserves pectoralis major muscle
+- **Modified radical mastectomy**
+  - Total mastectomy + axillary lymph node dissection
+  - Preserves pectoralis muscles
+- **Skin-sparing mastectomy**
+  - Preserves breast skin envelope
+  - Removes nipple-areola complex
+  - Better aesthetic outcomes
+- **Nipple-sparing mastectomy**
+  - Preserves nipple-areola complex and breast skin
+  - Relative indications: no ptosis, tumor <5cm, tumor >1cm from nipple, no multi-centric disease
+  - Contraindications: axillary disease, lymphovascular invasion, HER2/neu (H2N)+ on pathology
+  - Nipple necrosis rate associated with incision
+    - Lateral inframammary is lowest, periareolar is highest
+- **Contralateral prophylactic mastectomy**
+  - Indications: genetic predisposition, high family risk, patient preference
+  - Increases overall surgical risks compared to unilateral mastectomy
+- **Breast-conserving therapy (partial mastectomy [lumpectomy]/XRT)**
+  - Removal of mass with margins, generally with adjuvant XRT
+  - Contraindications: multi-centric disease, diffuse calcifications on imaging, history of chest radiation, current pregnancy
+  - Reconstruction after breast-conserving therapy not covered by all insurers
 
-**Radical mastectomy**: removes breast tissue, pectoralis, axillary lymph nodes
-
-**Modified radical mastectomy**: removes breast tissue, axillary lymph node dissection
-
-**Total mastectomy**: removes breast tissue and skin
-
-**Skin-sparing mastectomy**: removes breast tissue while preserving amount of skin excision
-
-**Nipple-sparing mastectomy**:
-- Relative indications: no ptosis, tumor <5cm, Tumor >1cm from nipple, no multi-centric disease
-- Contraindications: axillary disease, lymphovascular invasion, HER2/neu (H2N)+ on pathology
-- Nipple necrosis rate associated with incision
-  - Lateral inframammary is lowest, periareolar is highest
-
-**Contralateral prophylactic mastectomy**:
-- Indications: genetic predisposition, high family risk, patient preference
-- Increases overall surgical risks compared to unilateral mastectomy
-
-**Breast-conserving therapy (partial mastectomy [lumpectomy]/XRT)**:
-- Removal of mass with margins, generally with adjuvant XRT
-- Contraindications: multi-centric disease, diffuse calcifications on imaging, history of chest radiation, current pregnancy
-- Reconstruction after breast-conserving therapy not covered by all insurers
-
-### Neoadjuvant Chemotherapy
+### Neoadjuvant chemotherapy
 - Can shrink tumor to allow partial mastectomy instead of total mastectomy
 
-### Hormonal Therapy
-
-**Tamoxifen (pre-menopausal)**:
-- Selective estrogen receptor modifier
-- Consider holding perioperatively due to possible increased thrombosis risk
-
-**Aromatase inhibitors (post-menopausal)**:
-- Prevents peripheral conversion of estrogen
-- Does not need to be held perioperatively for elective surgery
+### Hormonal therapy
+- **Tamoxifen (pre-menopausal)**
+  - Selective estrogen receptor modifier
+  - Consider holding perioperatively due to possible increased thrombosis risk
+- **Aromatase inhibitors (post-menopausal)**
+  - Prevents peripheral conversion of estrogen
+  - Does not need to be held perioperatively for elective surgery
 
 ### Radiation (XRT)
-
 - Indications for post-mastectomy XRT: tumor >5cm, >3 lymph nodes, + margin
 - Indicated in nearly all partial mastectomies (breast-conserving therapy) for cancer
   - Absolute contraindications for breast-conserving therapy: early pregnancy, multi-centric tumor, diffuse microcalcifications, inflammatory breast cancer, persistently positive margins
@@ -3005,53 +2248,45 @@ Survive off surrounding soft tissues until generate their own blood supply
 
 ### Pocket Positions
 - Pre-pectoral and subpectoral pocket positions MC
-  - Pre-pectoral pocket
-    - Better medial placement, decreased risk of animation deformity
-    - Higher implant rippling, higher upper pole contour deformity, higher cost
+- **Pre-pectoral pocket**
+  - Better medial placement, decreased risk of animation deformity
+  - Higher implant rippling, higher upper pole contour deformity, higher cost
 
 ### Antibiotics Management
-- Antibiotics management after implant-based breast reconstruction
-  - Perioperative (prophylactic dose then 24 hours post op) use only, higher infection risk with prolonged courses
+- Perioperative (prophylactic dose then 24 hours post op) use only, higher infection risk with prolonged courses
 
 ### Types of Tissue Expanders
 - MC: saline filled via integrated port
-- Others: air, carbon dioxide: rapid expansion, cannot deflate
+- Others: air, carbon dioxide: rapid expansion, can't deflate
 - Not MRI compatible (due to magnet on port)
 
 ### Complications
-
-**Post-mastectomy XRT effects on implant**:
-- MC cause of explantation
-- Increases capsular contracture (#1 risk factor), seroma, wound-healing problems, infections
-- Implant/TE exposure in setting of XRT: explant device in OR
-
-**RF for salvage failure**: deep infection (#1), XRT, obesity, seroma, diabetes mellitus
-
-**Infected tissue expander, implant**:
-- MC organism: staph aureus (overall), MC gram negative: pseudomonas
-- Breast implant funnels decrease risk of bacterial contamination
-
-**Mastectomy skin necrosis**:
-- Tx: nitroglycerin ointment initially
-
-**Breast-implant-associated ALCL (BIA-ALCL)**:
-- RF: history of textured implant (or tissue expander)
-  - Contralateral side affected 5% of cases
-- Sx: delayed seroma
-- Dx: ultrasound, fine-needle aspiration for cytology
-  - Fluid cytometry: CD30+, ALK-
-  - Wright-Giemsa stain
-  - MC bacteria: ralstonia
-- Tx: bilateral explantation (risk of contralateral involvement ~5%), total capsulectomy, oncology referral
-
-**Cyanoacrylate contact dermatitis**:
-- 10-15% incidence, erythema limited to area of incision
-- Type IV immune response (T-cell mediated to foreign agent)
-- Tx: remove offending agent, topical steroids
-
-**Post-mastectomy pain syndrome**:
-- Sx: unilateral chest wall, axilla, upper arm pain from intercostobrachial nerve
-- Tx: gabapentin
+- **Post-mastectomy XRT effects on implant**
+  - MC cause of explantation
+  - Increases capsular contracture (#1 risk factor), seroma, wound-healing problems, infections
+  - Implant/TE exposure in setting of XRT: explant device in OR
+- **RF for salvage failure**: deep infection (#1), XRT, obesity, seroma, diabetes mellitus
+- **Infected tissue expander, implant**
+  - MC organism: staph aureus (overall), MC gram negative: pseudomonas
+  - Breast implant funnels decrease risk of bacterial contamination
+- **Mastectomy skin necrosis**
+  - Tx: nitroglycerin ointment initially
+- **Breast-implant-associated ALCL (BIA-ALCL)**
+  - RF: history of textured implant (or tissue expander)
+    - Contralateral side affected 5% of cases
+  - Sx: delayed seroma
+  - Dx: ultrasound, fine-needle aspiration for cytology
+    - Fluid cytometry: CD30+, ALK-
+    - Wright-Giemsa stain
+    - MC bacteria: ralstonia
+  - Tx: bilateral explantation (risk of contralateral involvement ~5%), total capsulectomy, oncology referral
+- **Cyanoacrylate contact dermatitis**
+  - 10-15% incidence, erythema limited to area of incision
+  - Type IV immune response (T-cell mediated to foreign agent)
+  - Tx: remove offending agent, topical steroids
+- **Post-mastectomy pain syndrome**
+  - Sx: unilateral chest wall, axilla, upper arm pain from intercostobrachial nerve
+  - Tx: gabapentin
 
 ## Autologous Reconstruction
 
@@ -3059,12 +2294,12 @@ Survive off surrounding soft tissues until generate their own blood supply
 
 **Pre-existing scars**:
 - Subcostal scar worst for flap perfusion
-- Pfannenstiel incision: sacrifices superficial drainage of flap, reduces venous congestion of the flap
+- Pffanenstiel incision: sacrifices superficial drainage of flap, reduces venous congestion of the flap
 
 **Transverse rectus abdominus musculocutaneous (TRAM) flap**:
 - Often pedicled, can be ipsilateral or contralateral
 - Arterial supply: superior epigastric artery (need intact internal mammary artery [IMA])
-  - Hartrampf zones (from better to worse perfusion)
+  - Hartrampf zones (from better to worse perfusion):
     - I: ipsilateral rectus abdominus skin
     - II: contralateral rectus abdominus skin
     - III: ipsilateral lateral abdominal skin
@@ -3074,89 +2309,101 @@ Survive off surrounding soft tissues until generate their own blood supply
 
 **Deep inferior epigastric artery perforator (DIEP) free tissue transfer**:
 - Modified Hartrampf zones
-  - Medial row perforators (best to worse perfusion): medial, contralateral medial, ipsilateral lateral, contralateral lateral
-  - Lateral row perforators: medial, ipsilateral lateral, contralateral medial, contralateral lateral
-- Complications
-  - Wound-healing problems: associated with higher BMI (#1)
-  - Venous insufficiency after deep system anastomosis
-    - Tx: superficial inferior epigastric vein anastomosis (MC due to superficial dominant system)
-  - Intra-operative pneumothorax
-    - Tx: repair pleura with ventilator maintaining maximum inspiration pressure
+- Perforators through rectus abdominus muscle
+- Pedicle: deep inferior epigastric artery and vein
+- Spares rectus muscle (lower donor morbidity than TRAM)
+- Imaging: CTA to map perforators pre-operatively
+- Complications:
+  - Abdominal bulge, hernia: lower than TRAM but still possible
+  - Fat necrosis: peripheral zones III and IV at risk
+  - Flap loss: <5%
+  - Donor site seroma
 
-**Superficial inferior epigastric artery perforator (SIEA) free tissue transfer**:
-- Lowest abdominal donor-site morbidity
-- Higher flap-loss rate than DIEPs
+**Superficial inferior epigastric artery (SIEA) flap**:
+- Rare use due to small, inconsistent vessels
+- Pedicle: superficial inferior epigastric artery
+- Advantage: no fascial violation
+- Present in only ~30% of patients with adequate caliber
 
-**Stacked reconstruction**: two free flaps to same breast for higher-volume reconstructions
-- Uses both anterograde and retrograde internal mammary artery (IMA)
+### Other Autologous Options
 
-**Lumbar artery perforator flaps**:
-- Higher flap-loss rate than DIEPs
+**Latissimus dorsi flap**:
+- Pedicled flap based on thoracodorsal artery
+- Often needs implant for volume
+- Good for partial defects, salvage reconstruction
+- Donor site: back contour deformity, seroma
+- Advantage: reliable, well-vascularized tissue
 
-## Secondary Procedures
+**Transverse upper gracilis (TUG) flap**:
+- Free flap from medial thigh
+- Pedicle: medial circumflex femoral artery (ascending branch)
+- Good for small to moderate breasts
+- Donor site: medial thigh scar
 
-### NAC Reconstruction
-- NAC reconstruction
-  - Increases patient satisfaction
-- Nipple reconstruction
-  - MC CV flap
-    - Based on subdermal plexus/random pattern
-    - Complication: Loses projection over time
+**Profunda artery perforator (PAP) flap**:
+- Free flap from posterior thigh
+- Pedicle: profunda femoris perforators
+- Alternative to DIEP for patients without adequate abdominal tissue
+- Can be harvested in prone position simultaneously with mastectomy
 
-### Fat Grafting in Breast Reconstruction
-- Viability ~50-60% graft take (similar to fat graft take in other body areas)
-  - Improve take by grafting soon after harvesting
-- MC after grafting: benign cysts and calcifications
+**Stacked flaps**:
+- Two flaps anastomosed to single recipient vessels
+- For larger volume needs
+- Common: bilateral PAP, bilateral TUG
 
-### Symmetry Operations
-- Mastopexy: lift, maintains volume
-- Reduction: removes volume`,
+### Timing of Reconstruction
+- **Immediate**: At time of mastectomy
+  - Advantages: Single surgery, better aesthetics, psychological benefit
+  - Disadvantages: Longer surgery, may delay adjuvant therapy if complications
+- **Delayed**: After mastectomy and adjuvant therapy complete
+  - Advantages: Staging procedures, all cancer treatment complete
+  - Disadvantages: Additional surgery, chest wall changes from XRT
+
+### Nipple-Areola Reconstruction
+- Timing: 3-6 months after breast mound reconstruction
+- **Nipple techniques**:
+  - Local flaps: C-V flap, skate flap, star flap
+  - Nipple sharing from contralateral
+  - 3D tattooing (non-surgical)
+- **Areola techniques**:
+  - Tattooing (most common)
+  - Skin graft from inner thigh, labia
+- Expected flattening of reconstructed nipple over time`,
 
     'facial-rejuvenation': `# Facial Rejuvenation
 
-## Facial Aging
-
-### Pathology
-- Volume loss with deflation of the fat compartments and attenuation of the facial retaining ligaments
-  - Superficial fat pads: forehead, periorbital, mid face, lower face
-  - Deep: medial and lateral sub orbicular oculi fat, deep medial cheek fat, medial buccal fat pad
-- Skin changes from photodamage: thinning epidermis and dermis, dermis collagen loss, flattening dermal-epidermal junction, increased elastin, increased ground substance
-- Tx: retinoic acid
-  - MOA: activated protein-1 to breakdown collagen
-    - Improves quality, organization of collagen and elastin in skin
-
-### Facial Analysis
+## Facial Analysis
 - Divide face into vertical thirds (upper, mid, lower) and horizontal fifths
 
 ## Non-Surgical Rejuvenation
 
 ### Botulinum Toxin A
-- MOA: SNAP-25 blocks acetylcholine at pre-synapse neurotransmitter terminal
-- FDA aesthetic indications: forehead, glabella, lateral eye rhytids
-  - Glabellar lines
+- **MOA**: SNAP-25 blocks acetylcholine at pre-synapse neurotransmitter terminal
+- **FDA aesthetic indications**: forehead, glabella, lateral eye rhytids
+  - **Glabellar lines**
     - Procerus: horizontal rhytids between nose and medial eyebrow
     - Corrugator: vertical rhytids between nose and eyebrow
     - Usual dose: ~20 units
-  - Frontalis: horizontal forehead lines, brow elevator
-- Many non-aesthetic indications: migraines, hemifacial dyskinesia, blepharospasm, cervical dystonia, post-stroke upper limb spasticity, urinary problems, etc.
-  - Hyperhidrosis
+  - **Frontalis**: horizontal forehead lines, brow elevator
+- **Many non-aesthetic indications**: migraines, hemifacial dyskinesia, blepharospasm, cervical dystonia, post-stroke upper limb spasticity, urinary problems, etc.
+  - **Hyperhidrosis**
     - Sx: bilateral symmetrical sweating, occurs >6 months, onset <25 years, occurs >1 week
     - Tx: ~50 units/axilla
-- Complications
+- **Complications**
   - LD50 (lethal dose for 50% of patients): ~3000 units for a 70kg patient
   - Eyelid ptosis occurs due to spread to levator palpebrae superioris
     - Tx: apraclonidine (alpha-adrenergic agonist) eye gtts (acts on Muller's muscle)
 - Unknown use in pregnancy
 
 ### Hyaluronic Acid Fillers
-- Characteristics
-  - G prime (modulus): higher value increases stiffness of product
-- Complications
-  - Acute arterial compromise/tissue necrosis
+- **Characteristics**
+  - G' (modulus): higher value increases stiffness of product
+- **Complications**
+  - **Acute arterial compromise/tissue necrosis**
     - RF: glabella, nasolabial area near ala
     - Sx: skin discoloration, worsening pain
     - Tx: inject hyaluronidase
-  - Blindness
+  - **Blindness**
     - Intra-vascular occlusion of central retinal artery
       - Due to embolism from dorsal nasal artery to internal carotid
     - Tx: immediate retrobulbar injection of hyaluronidase (within 60 minutes)
@@ -3164,116 +2411,51 @@ Survive off surrounding soft tissues until generate their own blood supply
 ### Chemical Peels
 
 **Superficial**:
-
-Glycolic acid peel:
-- Affects epidermis
-- Endpoint: transparent frosting
-  - Can neutralize with 1% sodium bicarbonate
-
-Salicylic acid/Jessner:
-- Superficial peel
+- **Glycolic acid peel**
+  - Affects epidermis
+  - Endpoint: transparent frosting
+    - Can neutralize with 1% sodium bicarbonate
+- **Salicylic acid/Jessner**
+  - Superficial peel
   - Epidermis (basal layer)
 
 **Intermediate**:
-
-TCA:
-- Reaches upper (papillary) dermis
-- Endpoint: white frosting
-- Complication: hyperpigmentation
-  - RF: higher Fitzpatrick skin types (IV, V, VI)
-  - Tx: hydroquinone
+- **TCA**
+  - Reaches upper (papillary) dermis
+  - Endpoint: white frosting
+  - Complication: hyperpigmentation
+    - RF: higher Fitzpatrick skin types (IV, V, VI)
+    - Tx: hydroquinone
 
 **Deep**:
-
-Phenol Croton:
-- Reaches mid dermis (upper reticular dermis)
-- Need cardiac monitoring, electrolyte monitoring
-- Complication: ventricular dysrhythmia
-  - Related to speed of application
-  - Monitor for 15 minutes after application
-
-Chemical peels safe to apply to non-undermined areas at same time as rhytidectomy
+- **Phenol Croton**
+  - Reaches mid dermis (upper reticular dermis)
+  - Need cardiac monitoring, electrolyte monitoring
+  - Complication: ventricular dysrhythmia
+    - Related to speed of application
+    - Monitor for 15 minutes after application
+- Chemical peels safe to apply to non-undermined areas at same time as rhytidectomy
 
 ### Laser
-
-**CO2, Erbium ablative lasers MC for skin resurfacing**:
-- Chromophore: water (erbium has higher affinity)
-- Prophylaxis with antiviral for HSV due to risk of reactivation
-- Pretreat for post-inflammatory hyperpigmentation in higher Fitzpatrick skin types (>IV)
-  - Tx: hydroquinone
-    - MOA: blocks conversion of tyrosine to dihydroxyphenylalanine to decrease melanin production
-- Complication:
-  - Hypertrophic scarring
-    - Decrease fluence (energy density), smaller treatment area, avoiding multiple passes
-    - Need to be off isotretinoin for >6 months to reduce risk of abnormal scarring
-  - Hyperpigmentation
-    - More common with higher Fitzpatrick score (IV, V)
-    - Lowering fluence reduces risk
-    - Non-ablative lasers: better for higher Fitzpatrick scores
-  - Hypopigmentation
-    - Decrease dwell time for future treatments
-
-**Pulsed dye laser**:
-- Chromophore: hemoglobin
-- Tx: burn scars, capillary malformations
-
-**Q-switched laser**:
-- Chromophore: melanin
-- Tx: benign pigmented lesions
-
-**Intermittent pulsed light laser**:
-- Improves pigmentation, small blood vessels, fine rhytids
-
-**Varicose veins**:
-- Tx: Nd:YAG laser
-
-**Tattoo removal with matching wavelength of laser to pigment**:
-- Ultraviolet spectrum: ROY G BIV (red orange yellow green blue indigo violet)
-  - 600nm: reds
-  - 1064nm: dark blues, black
-
-### Dermabrasion
-
-**Microdermabrasion**:
-- Endpoint: papillary dermis with pinpoint, punctate bleeding
-
-**Dermabrasion**:
-- Endpoint: reticular dermis with robust bleeding
-
-### Radiofrequency Facial Rejuvenation
-- Delivers energy deep to skin, promotes collagen contraction and remodeling
-
-### Microneedling
-- Used in acne scars, traumatic scars, melasma, striae
-  - Decreases post-inflammatory pigmentation changes in high Fitzpatrick skin types
-- Causes collagen and elastin induction
-
-### Deoxycholic Acid
-- Inject preplatsysmal fat
-  - MOA: disruption of cellular membrane
-- Lateral limit defined by line from lateral canthus to antegonial notch
-- Complication: hair loss from superficial injection
-  - Tx: observation
+- **CO2, Erbium ablative lasers** MC for skin resurfacing
+  - Chromophore: water (erbium has higher affinity)
+  - Prophylaxis with antiviral for HSV due to risk of reactivation
+  - Pretreat for post-inflammatory hyperpigmentation in higher Fitzpatrick skin types (>IV)
+    - Tx: hydroquinone
+      - MOA: blocks conversion of tyrosine to dihydroxyphenylalanine to decrease melanin production
+  - **Complications**:
+    - Hypertrophic scarring
+      - Decrease fluence (energy density), smaller treatment area, avoiding multiple passes
+      - Need to be off isotretinoin for >6 months to reduce risk of abnormal scarring
+    - Hyperpigmentation
 
 ## Surgical Rejuvenation
 
-### Hair Restoration
+### Hair Disorders
 
-**Hair cycle phases**:
-- Anogen (growth)
-- Catagen (transitional)
-- Telogen (shedding)
-
-**Male-pattern hair loss**:
-- Tx: finasteride (block 5-alpha reductase)
-  - Contraindicated in pregnancy
-
-**Female-pattern hair loss**:
-- Diffuse thinning of hair with preservation of frontal hairline
-  - Ludwig classification
-    - I: mild
-    - II: vertex thinning
-    - III: extensive, visible
+**Male pattern alopecia (androgenic alopecia)**:
+- MC cause of hair loss
+- Norwood-Hamilton classification (I-VII)
 - Tx: minoxidil
 
 **Alopecia areata**:
@@ -3295,9 +2477,9 @@ Chemical peels safe to apply to non-undermined areas at same time as rhytidectom
   - Can take several months before new hairs appear
 
 ### Browlift
-- Pretrichial: shortens forehead length
-- Transcoronal: short forehead
-- Endoscopic
+- **Pretrichial**: shortens forehead length
+- **Transcoronal**: short forehead
+- **Endoscopic**
   - Higher risk of supraorbital nerve injury (numbness to forehead)
 
 ### Rhytidectomy
@@ -3306,54 +2488,42 @@ Chemical peels safe to apply to non-undermined areas at same time as rhytidectom
 - Superficial musculoaponeuotic system (SMAS) contiguous with temperoparietal fascia and platysma
 
 **Techniques**:
-
-Posterior incision:
-- Excision of skin to improve neck skin
-- Curving along hairline will not distort it
-
-SMAS tightening:
-- Decreases tension on skin closure
-
-Minimal access cranial suspension (MACS lift):
-- Less skin excision than other techniques; need to extend postauricular incision if needed to remove more skin
-
-Short-scar rhytidectomy: similar jawline changes but worse neck management than full-scar rhytidectomy
+- **Posterior incision**
+  - Excision of skin to improve neck skin
+  - Curving along hairline won't distort it
+- **SMAS tightening**
+  - Decreases tension on skin closure
+- **Minimal access cranial suspension (MACS lift)**
+  - Less skin excision than other techniques; need to extend postauricular incision if needed to remove more skin
+- **Short-scar rhytidectomy**: similar jawline changes but worse neck management than full-scar rhytidectomy
 
 **Complications**:
-
-Hematoma:
-- RF: hypertension, male
-- Tx: blood-pressure control with clonidine
-
-Skin loss:
-- Tx: observe, let demarcate, heal by secondary intention
-
-Nerve injuries:
-- Often self-resolve
-- Immediate post-operative changes MC from local injection
-- In clinic, usually nerve injuries are a neuropraxia
-  - Tx: observe for up to 6 months
-- Highest risk area: sub-SMAS near lateral malar eminence
-
-Marginal mandibular nerve injury:
-- Innervates depressor labii inferioris, depressor anguli oris, mentalis
-  - Location: deep to platysma and superficial to the facial vein
-- Dx: unable to evert lower lip, purse lips, whistle
-
-Cervical branch:
-- Dx: lower teeth less visible with full smile on affected side
-
-Great auricular nerve injury:
-- Sensation to ear lobe
-- McKinney's point: becomes superficial at midpoint of the sternocleidomastoid (SCM) 6.5cm inferior to the external auditory canal
-- Over resection of skin adjacent to earlobe
-
-Parotid duct injury:
-- Conservative management: bland diet, percutaneous drainage, scopolamine patch, glycopyrrolate, botulinum toxin injection
-
-Sialocele:
-- Injury to submandibular gland
-- Sx: Unilateral facial swelling, pain
+- **Hematoma**
+  - RF: hypertension, male
+  - Tx: blood-pressure control with clonidine
+- **Skin loss**
+  - Tx: observe, let demarcate, heal by secondary intention
+- **Nerve injuries**
+  - Often self-resolve
+  - Immediate post-operative changes MC from local injection
+  - In clinic, usually nerve injuries are a neuropraxia
+    - Tx: observe for up to 6 months
+  - Highest risk area: sub-SMAS near lateral malar eminence
+- **Marginal mandibular nerve injury**
+  - Innervates depressor labii inferioris, depressor anguli oris, mentalis
+    - Location: deep to platysma and superficial to the facial vein
+  - Dx: unable to evert lower lip, purse lips, whistle
+- **Cervical branch**
+  - Dx: lower teeth less visible with full smile on affected side
+- **Great auricular nerve injury**
+  - Sensation to ear lobe
+  - McKinney's point: becomes superficial at midpoint of the sternocleidomastoid (SCM) 6.5cm inferior to the external auditory of SCM
+  - Over resection of skin adjacent to earlobe
+- **Parotid duct injury**
+  - Conservative management: bland diet, percutaneous drainage, scopolamine patch, glycopyrrolate, botulinum toxin injection
+- **Sialocele**
+  - Injury to submandibular gland
+  - Sx: Unilateral facial swelling, pain
 
 ### Buccal Fat Reduction
 - Three lobes: anterior, intermediate, and posterior
@@ -3362,8 +2532,8 @@ Sialocele:
 ### Genioplasty
 
 **Anatomy**:
-- Genioglossus
-  - Nerve: hypoglossal (CN VII)
+- **Genioglossus**
+  - Nerve: hypoglossal (CN XII)
     - Runs parallel with the posterior digastric muscle
     - Injury affects ipsilateral tongue paralysis
 
@@ -3382,12 +2552,12 @@ Sialocele:
 - Assess skin quality, location of excess (e.g., central, lateral), platysma banding, skin excess
 - Tx: cryolipolysis, suction-assisted lipectomy, direct excision, lower rhytidectomy`,
 
-    'rhinoplasty': `# Rhinoplasty, Nasal Reconstruction
+    'rhinoplasty': `# Rhinoplasty and Nasal Reconstruction
 
 ## Anatomy
 
 ### Upper Lateral Cartilages
-- Keystone area: junction to nasal bones
+- **Keystone area**: junction to nasal bones
   - Cartilage is posterior to nasal bones
   - Inverted-V deformity if disrupted and not corrected
 
@@ -3402,8 +2572,8 @@ Sialocele:
 ## Nasal Analysis
 
 ### Assess Patency of Internal Nasal Valves
-- Cottle maneuver: distract cheek laterally, ask if nasal breathing improves
-- Rhinomonometry: objective measurement
+- **Cottle maneuver**: distract cheek laterally, ask if nasal breathing improves
+- **Rhinomonometry**: objective measurement
 
 ### Bulbous Tip
 - Convex lower lateral cartilages, wide domal width (less than 4mm), wide angle of divergence
@@ -3414,72 +2584,40 @@ Sialocele:
 - Sidewalls, ala, soft triangles, dorsum, nasal tip, columella
 
 ### Reconstruction
-- Need to provide lining, support, coverage
 
-### Alar Rim Defect
-- <1.5cm: helical rim composite graft
-  - Best for vestibular lining defects (provides trilaminar reconstruction)
-- >1.5cm: forehead flap
+**<1.5cm defects**:
+- Healing by secondary intention, primary closure, local flaps (e.g., bilobed)
 
-### Flaps for Coverage
-- Local flaps: bilobed flap (up to 1cm), glabellar/Miter flap (up to 2.5cm defects)
-- Regional flaps: nasolabial flap, forehead flap
-- Free flaps: radial forearm flap for lining in complete nasal reconstructions
+**1.5-2.5cm defects**:
+- Local flaps (e.g., bilobed)
 
-### Rhinophyma
-- Associated with acne rosacea
-- Tx: isotretinoin (mild)
-- Tx surgical: dermabrasion/tangential excision
+**>2.5cm or full-thickness defects**:
+- Paramedian forehead flap
+  - Pedicle: supratrochlear artery
+  - Three stages: transfer, intermediate debulking (optional), pedicle division at 3 weeks
+  - Excellent color and texture match
+  - Frontalis muscle: orbicularis oris innervated by facial nerve
+    - Can develop forehead paralysis without reinnervation
 
-## Septoplasty
+**Nasal lining**:
+- Septal mucosal flap, folded forehead flap, free mucosal graft, full-thickness skin graft
 
-### Incisions
-- Killian: 1-2cm posterior to caudal edge of septum
-- Hemitransfixtion: membranous septum anterior to caudal edge (one side)
-- Transfixion: both sides
-  - Improves hanging columella
-- Mucoperiosteal elevation
-  - Risk of bleeding from anterior ethmoid artery
+**Nasal support**:
+- Cartilage grafts: septum, ear, rib
+- Bone grafts: calvarium, iliac crest
 
-### Septal Cartilage Graft Harvest
-- Leave L strut of dorsal and caudal septum of >1cm each to prevent collapse
+## Rhinoplasty Techniques
 
-### Inferior Turbinate
+### Dorsal Hump Reduction
+- Rasp for bony hump
+- Scalpel or scissors for cartilaginous hump
+- May need osteotomies to close open roof
 
-**Mucosal thickening**:
-- Tx: outfracture, cauterization, submucous resection
-
-**Bony hypertrophy**:
-- Tx: submucous resection
-
-**Complications**:
-
-Empty nose syndrome:
-- Nasal obstruction despite patent airways on exam
-- RF: inferior turbinate resection
-  - Submucous resection has best mucosal protection for management of inferior turbinates
-
-Cerebrospinal rhinorrhea from injury to cribriform plate:
-- Dx: beta-2 transferrin
-
-## Rhinoplasty
-
-### Anatomy
-- Transcollumelar approach
-  - Injures columellar artery, perfusion off lateral nasal artery
-
-### Cephalic Trim
-- Increases tip rotation
-- Decreases vertical height of the lateral crura
-- Leave 6-10mm
-
-### Bulbous Tip
-- Tx: lateral crural strut graft
-
-### Pinched Tip
-- Tx: interdomal sutures
-- Tx: subdomal graft: controls genu angle, interdomal position
-  - 1x1.5cm graft placed under domes of lower lateral cartilages between nasal lining and domal cartilages
+### Tip Refinement
+- Cephalic trim of lower lateral cartilages
+  - Leave at least 6mm strip to maintain support
+- Interdomal and intradomal sutures
+- Tip grafts: shield, cap, onlay
 
 ### Nasal Dorsal Hump Augmentation
 - Tx: septal cartilage or alloplastic materials (acellular dermal matrix, silicone, ePTFE)
@@ -3503,17 +2641,17 @@ Cerebrospinal rhinorrhea from injury to cribriform plate:
 - Tx: spreader grafts or auto spreader flaps
   - Increase radius of internal nasal valve
 
-**External nasal valve from over resection of lower lateral cartilages**:
+**External nasal valve** from over resection of lower lateral cartilages:
 - Dx: inward rotation and malposition of lower lateral crura
 - Tx: lateral crural strut graft`,
 
-    'eye-aesthetic-reconstructive': `# Eyelid Aesthetic and Reconstructive
+    'eye-aesthetic-reconstructive': `# Eye Aesthetic and Reconstructive
 
 ## Pre-Operative Evaluation
 
 ### Ptosis
-- Marginal reflex distance (MRD)-1: light reflex on cornea to upper eyelid margin in primary gaze, usual 4-5mm
-- Hering's law: equal innervation of bilateral levator palpebral muscles
+- **Marginal reflex distance (MRD)-1**: light reflex on cornea to upper eyelid margin in primary gaze, usual 4-5mm
+- **Hering's law**: equal innervation of bilateral levator palpebral muscles
   - Test: phenylephrine to stimulate Muller muscle to raise more ptotic eyelid and decrease levator innervation and observe if contralateral eyelid falls
 
 ### Horizontal Laxity
@@ -3528,17 +2666,17 @@ Cerebrospinal rhinorrhea from injury to cribriform plate:
   - Tx: canthopexy or canthoplasty
 
 ### Canalicular/Lacrimal Injury
-- RF: medial canthus injuries
+- **RF**: medial canthus injuries
   - Associated with epiphora, telecanthus, ptosis
   - Anterior displacement of eye punctum affects lacrimal drainage
   - Commonly in setting of naso-orbito-ethmoidal fractures
-- Dx: Jones tests
+- **Dx: Jones tests**
   - I: inject fluorescein to medial canaliculus, observe for drainage through the nose (through inferior meatus) for 5 minutes
   - II: if no drainage, irrigate medial canaliculus with saline, observe for drainage to diagnose a partial obstruction
-- Tx: silicone stent x 3-6 months (acute), dacrocystorhinostomy (chronic, salvage)
+- **Tx**: silicone stent x 3-6 months (acute), dacrocystorhinostomy (chronic, salvage)
 
 ### Refractory Surgery
-- Timing of blepharoplasty after corneal surgery (e.g., LASIK)
+- **Timing of blepharoplasty after corneal surgery (e.g., LASIK)**
   - 6 months
   - Increased risk for dry eyes via change to corneal reflex arc
     - Eye tear film production:
@@ -3548,25 +2686,25 @@ Cerebrospinal rhinorrhea from injury to cribriform plate:
         - Produced by Meibomian glands
 
 ### Rheumatologic Disease
-- Sjogren's syndrome
+- **Sjogren's syndrome**
   - Sx: dry eyes, dry mouth, polyarthritis
   - Dx: anti-SSA and anti-SSB serum test
 
 ## Ptosis Repair
 
 ### Pre-operative Evaluation
-- Levator function (downward to upward gaze)
+- **Levator function** (downward to upward gaze):
   - Normal: >12mm
-  - Good: 8-12
-  - Fair: 5-7
-  - Poor: <4
+  - Good: 8-12mm
+  - Fair: 5-7mm
+  - Poor: <4mm
 
 ### Options
-- Fasanella-Servat (tarsus/Muller resection): minimal ptosis, good levator function
-- Levator advancement: fair levator function
+- **Fasanella-Servat** (tarsus/Muller resection): minimal ptosis, good levator function
+- **Levator advancement**: fair levator function
   - Senile levator dehiscence: suture levator aponeurosis to tarsal plate
   - Levator is located deep to pre-aponeurotic central fat pad
-- Frontalis sling: poor levator function, use non-absorbable biomaterials
+- **Frontalis sling**: poor levator function, use non-absorbable biomaterials
 
 ## Eyelid Reconstruction
 
@@ -3575,50 +2713,39 @@ Cerebrospinal rhinorrhea from injury to cribriform plate:
   - Tx: pentagonal excision and closure
 
 ### Lamella
+- **Anterior**: skin
+  - Can be skin grafts, flaps (e.g., Tripier)
+  - Post-burn contracture
+    - Tx: contracture release, skin grafting
+- **Middle**: tarsus
+  - Cartilage grafts (e.g., ear) or acellular dermal matrix
+- **Posterior**: conjunctival
+  - Can be oral mucosa grafts (e.g., palate) or lid-switch flaps
 
-**Anterior: skin**:
-- Can be skin grafts, flaps (e.g., Tripier)
-- Post-burn contracture
-  - Tx: contracture release, skin grafting
+### Upper Eyelid Flaps
+- **Cutler-Beard flap**
+  - Lower to upper eyelid switch
+  - Full thickness upper eyelid defects >2/3
 
-**Middle: tarsus**:
-- Cartilage grafts (e.g., ear) or acellular dermal matrix
-
-**Posterior: conjunctival**:
-- Can be oral mucosa grafts (e.g., palate) or lid-switch flaps
-
-### Larger Defects
-
-**Tenzel semicircular flap with lateral cantholysis**:
-- Lateral eye skin advancement
-- Anterior lamella defects
-
-**Upper eyelid**:
-
-Cutler-Beard flap:
-- Lower to upper eyelid switch
-- Full thickness upper eyelid defects >2/3
-
-**Lower eyelid**:
-
-Hughes tarsoconjunctival flap:
+### Lower Eyelid Flaps
+- **Hughes tarsoconjunctival flap**
 - Upper to lower lid switch
 
 ## Aesthetic Eyelid Surgery
 
 ### Upper Blepharoplasty
 - Skin excision up to medial punctum
-- Complications
+- **Complications**
   - Nasal skin webbing from excessive medial skin resection
-  - Lagophthalmos: incomplete eyelid closure
+  - **Lagophthalmos**: incomplete eyelid closure
     - Tx: taping, observation
-  - Transient ptosis
+  - **Transient ptosis**
     - Caused by swelling, bruising
     - Tx: observe, usually resolves in a few days
-  - Lacrimal gland injury: dry eye
-  - Meibomian gland injury: dry eyes, can be injured with skin-only excision
+  - **Lacrimal gland injury**: dry eye
+  - **Meibomian gland injury**: dry eyes, can be injured with skin-only excision
     - Produce oil that reduce tear evaporation
-  - Loss of ocular protection
+  - **Loss of ocular protection**
     - Injury to extra-canthal orbicularis oculi muscle innervated by zygomatic branch
 
 ### Lower Lid Blepharoplasty
@@ -3633,26 +2760,21 @@ Hughes tarsoconjunctival flap:
 - Anatomic landmark: levator labii superioris
 
 **Complications**:
-
-Lower lid malposition:
-- MC: horizontal laxity of tarsoligamentous sling
-  - Dx: snap-back test (distract 8mm)
-- Tx: tarsal strip
-
-Injury to inferior oblique, divides medial/central fat compartments:
-- Sx: elevate, abduct the eye
-
-Retrobulbar hematoma:
-- Sx: pain, diminished visual acuity (decreased perception of red light initially), bruising, proptosis, decreased ocular movements
-- Tx: immediate lateral canthotomy, STAT ophthalmology consult, then mannitol, furosemide and then OR for orbital decompression
-
-Chemosis:
-- Prolapse of conjunctiva
-- Tx: lubrication, eye patching
-- Tx: conjunctivotomy for severe or refractory
-
-Lateral scleral show:
-- Inadequate canthal support
+- **Lower lid malposition**
+  - MC: horizontal laxity of tarsoligamentous sling
+    - Dx: snap-back test (distract 8mm)
+  - Tx: tarsal strip
+- **Injury to inferior oblique**, divides medial/central fat compartments
+  - Sx: elevate, abduct the eye
+- **Retrobulbar hematoma**
+  - Sx: pain, diminished visual acuity (decreased perception of red light initially), bruising, proptosis, decreased ocular movements
+  - Tx: immediate lateral canthotomy, STAT ophthalmology consult, then mannitol, furosemide and then OR for orbital decompression
+- **Chemosis**
+  - Prolapse of conjunctiva
+  - Tx: lubrication, eye patching
+  - Tx: conjunctivotomy for severe or refractory
+- **Lateral scleral show**
+  - Inadequate canthal support
 
 ### Eyelid Fat
 
@@ -3688,7 +2810,7 @@ Lateral scleral show:
   - Max dose lidocaine: 35mg/kg (some studies suggest up to 55)
   - Fluid present in 10-30% of aspirate
   - Peak lidocaine levels reached at 8-18 hours from injection, quicker above the clavicles
-- **Techniques**:
+- **Techniques**
   - **Dry**: no tumescence
     - Estimated blood loss (EBL): 20-40% of aspirate
   - **Wet**: 200-300cc tumescence per area
@@ -3700,14 +2822,18 @@ Lateral scleral show:
 - >5000cc, should be performed with overnight observation due to risk for volume shifts
 
 ### Devices
-- **Suction-assisted versus ultrasound-assisted**:
+- **Suction-assisted versus ultrasound-assisted**
   - No change in outcome
   - Less surgeon fatigue with ultrasound
 - **Laser-assisted**: less post-operative pain
 - Length of cannula related to flow resistance
+- Cannula size related to efficiency and risk of contour abnormality
+
+### Lymphedema
+- Relative contraindication for aesthetic indications if pitting edema
 
 ### Complications
-- **Contour abnormalities**:
+- **Contour abnormalities**
   - Avoid zones of adherence (e.g., lateral gluteal depression)
   - Use crisscrossing cannula passes with multiple vectors
 
@@ -3760,7 +2886,7 @@ Lateral scleral show:
 ### Variations
 - **Mini-abdominoplasty**: Limited undermining, no umbilical transposition
 - **Extended abdominoplasty**: Includes flanks
-- **Circumferential abdominoplasty (lower body lift)**:
+- **Circumferential abdominoplasty (lower body lift)**
   - Addresses: abdomen, flanks, back, buttocks, lateral thighs
 - **Belt lipectomy**: Similar to lower body lift
 
@@ -3776,9 +2902,10 @@ Lateral scleral show:
 - Addresses: Abdomen, flanks, back, buttocks, lateral thighs
 - Lifts buttocks and lateral thighs
 - Higher complication rate than isolated abdominoplasty
-- Excision of lateral redundant tissue
-- Scars hidden under swimwear
-- Addresses back rolls
+
+### Corset Abdominoplasty
+- Addresses both vertical and horizontal excess
+- Trim torso circumferentially
 
 ### Panniculectomy
 - Removal of pannus only

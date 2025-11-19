@@ -5,13 +5,10 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Question } from '@/types/question';
 import { cn } from '@/lib/utils';
-import { HighlightableText } from './HighlightableText';
 
 interface QuestionCardProps {
   question: Question;
   index: number;
-  sectionId: string;
-  subsectionId: string;
 }
 
 interface ParsedQuestion {
@@ -19,7 +16,7 @@ interface ParsedQuestion {
   choices: { letter: string; text: string }[];
 }
 
-export function QuestionCard({ question, index, sectionId, subsectionId }: QuestionCardProps) {
+export function QuestionCard({ question, index }: QuestionCardProps) {
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [showExplanation, setShowExplanation] = useState(false);
 
@@ -62,19 +59,9 @@ export function QuestionCard({ question, index, sectionId, subsectionId }: Quest
             <span className="text-sm font-semibold text-primary">{index + 1}</span>
           </div>
           <div className="flex-1">
-            <HighlightableText
-              content={parsed.text}
-              sectionId={sectionId}
-              subsectionId={subsectionId}
-              containerType="question"
-              questionId={question.id}
-            >
-              {(highlightedContent) => (
-                <div className="text-base leading-relaxed text-foreground whitespace-pre-wrap mb-4">
-                  {highlightedContent}
-                </div>
-              )}
-            </HighlightableText>
+            <p className="text-base leading-relaxed text-foreground whitespace-pre-wrap mb-4">
+              {parsed.text}
+            </p>
             
             {parsed.choices.length > 0 && (
               <RadioGroup value={selectedAnswer || ''} onValueChange={setSelectedAnswer}>

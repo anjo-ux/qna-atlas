@@ -207,12 +207,10 @@ export default function Index() {
                   "overflow-hidden bg-background",
                   viewMode === 'split' ? "h-1/2 sm:h-auto sm:w-1/2" : "flex-1"
                 )}>
-              <ReferenceTextPanel
-                content={currentReferenceContent}
-                subsectionTitle={currentReferenceTitle}
-                sectionId={selectedSection || ''}
-                subsectionId={selectedSubsection || ''}
-              />
+                  <ReferenceTextPanel 
+                    content={currentReferenceContent}
+                    subsectionTitle={currentReferenceTitle}
+                  />
                 </div>
               )}
 
@@ -250,8 +248,6 @@ export default function Index() {
                             key={question.id}
                             question={question}
                             index={index}
-                            sectionId={selectedSection || ''}
-                            subsectionId={selectedSubsection || ''}
                           />
                         ))
                       )}
