@@ -1,199 +1,264 @@
-import { useEffect, useState, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { loadQuestions } from '@/utils/parseQuestions';
+import { loadReferenceText } from '@/utils/parseReferenceText';
 import { Section } from '@/types/question';
+import { ReferenceSection } from '@/utils/parseReferenceText';
 import { Navigation } from '@/components/Navigation';
 import { QuestionCard } from '@/components/QuestionCard';
+import { ReferenceTextPanel } from '@/components/ReferenceTextPanel';
 import { Input } from '@/components/ui/input';
-import { Search, BookOpen } from 'lucide-react';
-import { Skeleton } from '@/components/ui/skeleton';
+import { Search, Menu, X, BookOpen, FileQuestion, Columns2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
-const Index = () => {
+type ViewMode = 'questions' | 'reference' | 'split';
+
+export default function Index() {
   const [sections, setSections] = useState<Section[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [referenceSections, setReferenceSections] = useState<ReferenceSection[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeSection, setActiveSection] = useState('');
-  const [activeSubsection, setActiveSubsection] = useState('');
-  const subsectionRefs = useRef<Map<string, HTMLElement>>(new Map());
+  const [selectedSection, setSelectedSection] = useState<string | null>(null);
+  const [selectedSubsection, setSelectedSubsection] = useState<string | null>(null);
+  const [isNavOpen, setIsNavOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [viewMode, setViewMode] = useState<ViewMode>('split');
 
   useEffect(() => {
-    loadQuestions()
-      .then((data) => {
-        setSections(data);
-        if (data.length > 0 && data[0].subsections.length > 0) {
-          setActiveSection(data[0].id);
-          setActiveSubsection(data[0].subsections[0].id);
-        }
-      })
-      .catch((error) => console.error('Failed to load questions:', error))
-      .finally(() => setLoading(false));
+    const fetchData = async () => {
+      try {
+        const [questionsData, referenceData] = await Promise.all([
+          loadQuestions(),
+          Promise.resolve(loadReferenceText())
+        ]);
+        setSections(questionsData);
+        setReferenceSections(referenceData);
+      } catch (error) {
+        console.error('Error loading data:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
   }, []);
 
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            const [sectionId, subsectionId] = entry.target.id.split('::');
-            setActiveSection(sectionId);
-            setActiveSubsection(subsectionId);
-          }
-        });
-      },
-      { threshold: 0.3, rootMargin: '-100px 0px -60% 0px' }
-    );
+  const currentSection = sections.find(s => s.id === selectedSection);
+  const currentSubsection = currentSection?.subsections.find(ss => ss.id === selectedSubsection);
 
-    subsectionRefs.current.forEach((ref) => {
-      if (ref) observer.observe(ref);
-    });
+  const filteredQuestions = currentSubsection?.questions.filter(q =>
+    q.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    q.answer.toLowerCase().includes(searchQuery.toLowerCase())
+  ) || [];
 
-    return () => observer.disconnect();
-  }, [sections]);
-
-  const handleNavigate = (sectionId: string, subsectionId: string) => {
-    const element = subsectionRefs.current.get(`${sectionId}::${subsectionId}`);
-    if (element) {
-      const offset = 100;
-      const elementPosition = element.getBoundingClientRect().top;
-      const offsetPosition = elementPosition + window.pageYOffset - offset;
-      
-      window.scrollTo({
-        top: offsetPosition,
-        behavior: 'smooth',
-      });
-    }
-  };
-
-  const filteredSections = sections.map((section) => ({
-    ...section,
-    subsections: section.subsections.map((subsection) => ({
-      ...subsection,
-      questions: subsection.questions.filter(
-        (q) =>
-          q.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          q.answer.toLowerCase().includes(searchQuery.toLowerCase())
-      ),
-    })).filter((subsection) => subsection.questions.length > 0),
-  })).filter((section) => section.subsections.length > 0);
-
-  const totalQuestions = sections.reduce(
-    (acc, section) => acc + section.subsections.reduce((acc2, sub) => acc2 + sub.questions.length, 0),
-    0
-  );
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-background">
-        <header className="sticky top-0 z-40 w-full border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60">
-          <div className="container flex h-16 items-center justify-between px-4">
-            <Skeleton className="h-8 w-64" />
-            <Skeleton className="h-10 w-80" />
-          </div>
-        </header>
-        <div className="container mx-auto px-4 lg:pl-84 py-8">
-          <div className="max-w-4xl mx-auto space-y-4">
-            {[1, 2, 3, 4, 5].map((i) => (
-              <Skeleton key={i} className="h-32 w-full" />
-            ))}
-          </div>
-        </div>
-      </div>
-    );
-  }
+  const currentReferenceContent = referenceSections
+    .find(s => s.id === selectedSection)
+    ?.subsections.find(ss => ss.id === selectedSubsection)?.content || '';
+  
+  const currentReferenceTitle = referenceSections
+    .find(s => s.id === selectedSection)
+    ?.subsections.find(ss => ss.id === selectedSubsection)?.title || '';
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="sticky top-0 z-40 w-full border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60 elevated-shadow">
-        <div className="container flex h-16 items-center justify-between px-4 lg:px-8">
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-              <BookOpen className="h-5 w-5 text-white" />
-            </div>
-            <div>
-              <h1 className="text-xl font-bold text-foreground">Plastic Surgery Q&A</h1>
-              <p className="text-xs text-muted-foreground">{totalQuestions} Questions</p>
-            </div>
-          </div>
-          
-          <div className="relative w-full max-w-md hidden md:block">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              placeholder="Search questions..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9 bg-background"
-            />
-          </div>
-        </div>
-      </header>
-
+    <div className="flex h-screen overflow-hidden bg-background">
       {/* Navigation Sidebar */}
       <Navigation
         sections={sections}
-        activeSection={activeSection}
-        activeSubsection={activeSubsection}
-        onNavigate={handleNavigate}
+        selectedSection={selectedSection}
+        selectedSubsection={selectedSubsection}
+        onNavigate={(sectionId, subsectionId) => {
+          setSelectedSection(sectionId);
+          setSelectedSubsection(subsectionId);
+          setSearchQuery('');
+          setIsNavOpen(false);
+        }}
+        isOpen={isNavOpen}
+        onClose={() => setIsNavOpen(false)}
       />
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 lg:pl-84 py-8">
-        {/* Mobile Search */}
-        <div className="relative w-full mb-6 md:hidden">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            placeholder="Search questions..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9"
-          />
-        </div>
-
-        <div className="max-w-4xl mx-auto space-y-12">
-          {filteredSections.map((section) => (
-            <div key={section.id} className="space-y-8">
-              <div className="space-y-2">
-                <h2 className="text-3xl font-bold text-foreground tracking-tight">
-                  {section.title}
-                </h2>
-                <div className="h-1 w-20 bg-gradient-to-r from-primary to-accent rounded-full" />
+      <div className="flex-1 flex flex-col min-h-screen overflow-hidden">
+        {/* Header */}
+        <header className="sticky top-0 z-10 backdrop-blur-lg bg-background/80 border-b border-border">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div className="flex items-center gap-4">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="lg:hidden"
+                onClick={() => setIsNavOpen(!isNavOpen)}
+              >
+                {isNavOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+              </Button>
+              
+              <div className="flex-1">
+                <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
+                  PSITE Review
+                </h1>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {currentSubsection ? currentSubsection.title : 'Select a section to begin'}
+                </p>
               </div>
 
-              {section.subsections.map((subsection) => (
-                <div
-                  key={subsection.id}
-                  id={`${section.id}::${subsection.id}`}
-                  ref={(el) => {
-                    if (el) subsectionRefs.current.set(`${section.id}::${subsection.id}`, el);
-                  }}
-                  className="space-y-4"
+              {/* View Mode Toggle */}
+              <div className="hidden sm:flex items-center gap-2 bg-accent/5 rounded-lg p-1">
+                <Button
+                  variant={viewMode === 'reference' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setViewMode('reference')}
+                  className="gap-2"
                 >
-                  <div className="flex items-center gap-3">
-                    <div className="h-px flex-1 bg-border" />
-                    <h3 className="text-xl font-semibold text-foreground">
-                      {subsection.title}
-                    </h3>
-                    <div className="h-px flex-1 bg-border" />
-                  </div>
+                  <BookOpen className="h-4 w-4" />
+                  <span className="hidden md:inline">Reference</span>
+                </Button>
+                <Button
+                  variant={viewMode === 'split' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setViewMode('split')}
+                  className="gap-2"
+                >
+                  <Columns2 className="h-4 w-4" />
+                  <span className="hidden md:inline">Split</span>
+                </Button>
+                <Button
+                  variant={viewMode === 'questions' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setViewMode('questions')}
+                  className="gap-2"
+                >
+                  <FileQuestion className="h-4 w-4" />
+                  <span className="hidden md:inline">Questions</span>
+                </Button>
+              </div>
+            </div>
 
-                  <div className="space-y-4">
-                    {subsection.questions.map((question, idx) => (
-                      <QuestionCard key={question.id} question={question} index={idx} />
-                    ))}
+            {/* Mobile View Toggle */}
+            <div className="flex sm:hidden items-center gap-2 mt-4 bg-accent/5 rounded-lg p-1">
+              <Button
+                variant={viewMode === 'reference' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setViewMode('reference')}
+                className="gap-2 flex-1"
+              >
+                <BookOpen className="h-4 w-4" />
+                Reference
+              </Button>
+              <Button
+                variant={viewMode === 'split' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setViewMode('split')}
+                className="gap-2 flex-1"
+              >
+                <Columns2 className="h-4 w-4" />
+                Split
+              </Button>
+              <Button
+                variant={viewMode === 'questions' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setViewMode('questions')}
+                className="gap-2 flex-1"
+              >
+                <FileQuestion className="h-4 w-4" />
+                Questions
+              </Button>
+            </div>
+
+            {/* Search Bar */}
+            {currentSubsection && viewMode !== 'reference' && (
+              <div className="mt-4 relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                <Input
+                  type="text"
+                  placeholder="Search questions..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+            )}
+          </div>
+        </header>
+
+        {/* Main Content Area */}
+        <main className="flex-1 flex overflow-hidden">
+          {isLoading ? (
+            <div className="flex-1 flex items-center justify-center min-h-[400px]">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+            </div>
+          ) : !currentSubsection ? (
+            <div className="flex-1 flex flex-col items-center justify-center min-h-[400px] text-center p-8">
+              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                <Search className="h-8 w-8 text-primary" />
+              </div>
+              <h2 className="text-2xl font-semibold text-foreground mb-2">
+                Get Started
+              </h2>
+              <p className="text-muted-foreground max-w-md">
+                Select a section from the navigation to view questions and start studying
+              </p>
+            </div>
+          ) : (
+            <div className={cn(
+              "flex-1 flex flex-col sm:flex-row",
+              viewMode === 'split' ? "divide-y sm:divide-y-0 sm:divide-x divide-border" : ""
+            )}>
+              {/* Reference Text Panel */}
+              {(viewMode === 'reference' || viewMode === 'split') && (
+                <div className={cn(
+                  "overflow-hidden bg-background",
+                  viewMode === 'split' ? "h-1/2 sm:h-auto sm:w-1/2" : "flex-1"
+                )}>
+                  <ReferenceTextPanel 
+                    content={currentReferenceContent}
+                    subsectionTitle={currentReferenceTitle}
+                  />
+                </div>
+              )}
+
+              {/* Questions Panel */}
+              {(viewMode === 'questions' || viewMode === 'split') && (
+                <div className={cn(
+                  "overflow-auto",
+                  viewMode === 'split' ? "h-1/2 sm:h-auto sm:w-1/2" : "flex-1"
+                )}>
+                  <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between mb-6">
+                        <div>
+                          <h2 className="text-xl font-semibold text-foreground">
+                            {currentSubsection.title}
+                          </h2>
+                          <p className="text-sm text-muted-foreground mt-1">
+                            {searchQuery
+                              ? `${filteredQuestions.length} ${filteredQuestions.length === 1 ? 'result' : 'results'} found`
+                              : `${currentSubsection.questions.length} ${currentSubsection.questions.length === 1 ? 'question' : 'questions'}`
+                            }
+                          </p>
+                        </div>
+                      </div>
+
+                      {filteredQuestions.length === 0 ? (
+                        <div className="text-center py-12">
+                          <p className="text-muted-foreground">
+                            {searchQuery ? 'No questions match your search.' : 'No questions available.'}
+                          </p>
+                        </div>
+                      ) : (
+                        filteredQuestions.map((question, index) => (
+                          <QuestionCard
+                            key={question.id}
+                            question={question}
+                            index={index}
+                          />
+                        ))
+                      )}
+                    </div>
                   </div>
                 </div>
-              ))}
-            </div>
-          ))}
-
-          {filteredSections.length === 0 && (
-            <div className="text-center py-12">
-              <p className="text-lg text-muted-foreground">No questions found matching your search.</p>
+              )}
             </div>
           )}
-        </div>
-      </main>
+        </main>
+      </div>
     </div>
   );
-};
-
-export default Index;
+}
