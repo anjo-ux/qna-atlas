@@ -1934,7 +1934,8 @@ Primary closure (≤1/3), Lip switch flaps (1/3-1/2: Abbe, Estlander), Regional 
 ### Other
 **Goldenhar**: #2 congenital facial malformation, hemifacial microsomia, epibulbar dermoids
 **Beckwith-Wiedemann**: Macrosomia, omphalocele, macroglossia, chromosome 11`,
-
+  },
+  'breast-cosmetic': {
     'breast-augmentation': `# Breast Augmentation
 
 ## Breast Implants
@@ -2972,7 +2973,7 @@ Primary closure (≤1/3), Lip switch flaps (1/3-1/2: Abbe, Estlander), Regional 
 
 ### HIV-Associated Lipodystrophy
 - Dx: atrophy of malar and temporal fat, development of buffalo hump/cervical fat deposits associated with use of HAART medications
-- Tx: fat grafting, poly-l-lactic acid filler to face, liposuction to buffalo hump`
+- Tx: fat grafting, poly-l-lactic acid filler to face, liposuction to buffalo hump`,
   },
   'core-surgical': {
     'anesthesia': `# Anesthesia
