@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import ReactMarkdown from 'react-markdown';
 import { HighlightToolbar } from '@/components/HighlightToolbar';
 import { StickyNote } from '@/components/StickyNote';
 import { useHighlights } from '@/hooks/useHighlights';
+import { useTextHighlight } from '@/hooks/useTextHighlight';
 
 interface ReferenceTextPanelProps {
   content: string;
@@ -33,17 +34,26 @@ export function ReferenceTextPanel({
   const [highlightedContent, setHighlightedContent] = useState(content);
   const highlights = getHighlightsForSection(sectionId, subsectionId, 'reference');
   const notes = getNotesForSection(sectionId, subsectionId, 'reference');
+  const contentRef = useRef<HTMLDivElement>(null);
+
+  // Apply highlights to rendered content
+  useTextHighlight(contentRef, highlights, content);
 
   const handleTextSelection = () => {
     const selection = window.getSelection();
     if (!selection || selection.isCollapsed) return;
 
     const selectedText = selection.toString().trim();
-    if (!selectedText) return;
+    if (!selectedText || selectedText.length < 2) return;
 
-    const range = selection.getRangeAt(0);
-    const startOffset = range.startOffset;
-    const endOffset = startOffset + selectedText.length;
+    // Get the full text content to calculate proper offsets
+    const container = document.querySelector('[data-reference-content]');
+    if (!container) return;
+
+    const fullText = container.textContent || '';
+    const selectedIndex = fullText.indexOf(selectedText);
+    
+    if (selectedIndex === -1) return;
 
     addHighlight({
       text: selectedText,
@@ -51,8 +61,8 @@ export function ReferenceTextPanel({
       sectionId,
       subsectionId,
       location: 'reference',
-      startOffset,
-      endOffset,
+      startOffset: selectedIndex,
+      endOffset: selectedIndex + selectedText.length,
     });
 
     selection.removeAllRanges();
@@ -70,21 +80,6 @@ export function ReferenceTextPanel({
 
   const handleClearHighlights = () => {
     highlights.forEach(h => removeHighlight(h.id));
-  };
-
-  const renderHighlightedMarkdown = (text: string) => {
-    let result = text;
-    const sortedHighlights = [...highlights].sort((a, b) => b.startOffset - a.startOffset);
-
-    sortedHighlights.forEach(highlight => {
-      const before = result.slice(0, highlight.startOffset);
-      const highlighted = result.slice(highlight.startOffset, highlight.endOffset);
-      const after = result.slice(highlight.endOffset);
-      
-      result = `${before}<mark class="bg-highlight-${highlight.color}/50 px-0.5 rounded cursor-pointer" data-highlight-id="${highlight.id}">${highlighted}</mark>${after}`;
-    });
-
-    return result;
   };
 
   if (!content) {
@@ -113,8 +108,19 @@ export function ReferenceTextPanel({
       </div>
       <ScrollArea className="flex-1">
         <div 
+          ref={contentRef}
           className="p-6 prose prose-sm dark:prose-invert max-w-none"
+          data-reference-content
           onMouseUp={handleTextSelection}
+          onDoubleClick={(e) => {
+            const target = e.target as HTMLElement;
+            if (target.tagName === 'MARK') {
+              const highlightId = target.getAttribute('data-highlight-id');
+              if (highlightId) {
+                removeHighlight(highlightId);
+              }
+            }
+          }}
         >
           <ReactMarkdown
             components={{
