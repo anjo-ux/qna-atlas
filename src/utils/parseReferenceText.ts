@@ -3643,8 +3643,9 @@ Survive off surrounding soft tissues until generate their own blood supply
 - Higher complication rate than isolated abdominoplasty
 
 ### Corset Abdominoplasty
-- Addresses both vertical and horizontal excess
-- Trim torso circumferentially
+- Excision of lateral redundant tissue
+- Scars hidden under swimwear
+- Addresses back rolls
 
 ### Panniculectomy
 - Removal of pannus only
