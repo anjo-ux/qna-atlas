@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -9,12 +9,15 @@ import { useHighlights } from '@/hooks/useHighlights';
 import { HighlightToolbar } from '@/components/HighlightToolbar';
 import { StickyNote } from '@/components/StickyNote';
 import { useTextHighlight } from '@/hooks/useTextHighlight';
+import { QuestionResponse } from '@/hooks/useQuestionStats';
 
 interface QuestionCardProps {
   question: Question;
   index: number;
   sectionId: string;
   subsectionId: string;
+  savedResponse?: QuestionResponse;
+  onAnswerSubmit: (questionId: string, selectedAnswer: string, correctAnswer: string, isCorrect: boolean) => void;
 }
 
 interface ParsedQuestion {
@@ -22,9 +25,16 @@ interface ParsedQuestion {
   choices: { letter: string; text: string }[];
 }
 
-export function QuestionCard({ question, index, sectionId, subsectionId }: QuestionCardProps) {
-  const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
-  const [showExplanation, setShowExplanation] = useState(false);
+export function QuestionCard({ 
+  question, 
+  index, 
+  sectionId, 
+  subsectionId, 
+  savedResponse,
+  onAnswerSubmit 
+}: QuestionCardProps) {
+  const [selectedAnswer, setSelectedAnswer] = useState<string | null>(savedResponse?.selectedAnswer || null);
+  const [showExplanation, setShowExplanation] = useState(!!savedResponse);
 
   const {
     activeColor,
@@ -74,11 +84,22 @@ export function QuestionCard({ question, index, sectionId, subsectionId }: Quest
     return selectedAnswer.toUpperCase() === correctAnswer;
   }, [selectedAnswer, correctAnswer]);
 
-  const handleAnswerClick = () => {
-    if (selectedAnswer && !showExplanation) {
+  // Load saved response
+  useEffect(() => {
+    if (savedResponse) {
+      setSelectedAnswer(savedResponse.selectedAnswer);
       setShowExplanation(true);
     }
+  }, [savedResponse]);
+
+  const handleAnswerClick = () => {
+    if (selectedAnswer && !showExplanation && correctAnswer) {
+      const correct = selectedAnswer.toUpperCase() === correctAnswer;
+      setShowExplanation(true);
+      onAnswerSubmit(question.id, selectedAnswer, correctAnswer, correct);
+    }
   };
+
 
   const handleTextSelection = () => {
     const selection = window.getSelection();

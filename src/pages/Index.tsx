@@ -6,12 +6,17 @@ import { ReferenceSection } from '@/utils/parseReferenceText';
 import { Navigation } from '@/components/Navigation';
 import { QuestionCard } from '@/components/QuestionCard';
 import { ReferenceTextPanel } from '@/components/ReferenceTextPanel';
+import { QuestionStats } from '@/components/QuestionStats';
+import { QuestionFilters } from '@/components/QuestionFilters';
 import { Input } from '@/components/ui/input';
 import { Search, Menu, X, BookOpen, FileQuestion, Columns2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { useQuestionStats } from '@/hooks/useQuestionStats';
+import { toast } from 'sonner';
 
 type ViewMode = 'questions' | 'reference' | 'split';
+type FilterMode = 'all' | 'incorrect';
 
 export default function Index() {
   const [sections, setSections] = useState<Section[]>([]);
@@ -22,6 +27,16 @@ export default function Index() {
   const [isNavOpen, setIsNavOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [viewMode, setViewMode] = useState<ViewMode>('split');
+  const [filterMode, setFilterMode] = useState<FilterMode>('all');
+
+  const {
+    recordResponse,
+    getQuestionResponse,
+    getSubsectionStats,
+    getIncorrectQuestionIds,
+    resetSubsection,
+    resetAll,
+  } = useQuestionStats();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -45,10 +60,64 @@ export default function Index() {
   const currentSection = sections.find(s => s.id === selectedSection);
   const currentSubsection = currentSection?.subsections.find(ss => ss.id === selectedSubsection);
 
-  const filteredQuestions = currentSubsection?.questions.filter(q =>
-    q.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    q.answer.toLowerCase().includes(searchQuery.toLowerCase())
-  ) || [];
+  // Get stats for current subsection
+  const subsectionStats = currentSubsection && selectedSection && selectedSubsection
+    ? getSubsectionStats(selectedSection, selectedSubsection, currentSubsection.questions.length)
+    : { total: 0, answered: 0, correct: 0, incorrect: 0 };
+
+  // Get incorrect question IDs for filtering
+  const incorrectQuestionIds = selectedSection && selectedSubsection
+    ? getIncorrectQuestionIds(selectedSection, selectedSubsection)
+    : [];
+
+  // Apply search and filter
+  let filteredQuestions = currentSubsection?.questions || [];
+  
+  // Apply incorrect filter
+  if (filterMode === 'incorrect') {
+    filteredQuestions = filteredQuestions.filter(q => incorrectQuestionIds.includes(q.id));
+  }
+  
+  // Apply search filter
+  if (searchQuery) {
+    filteredQuestions = filteredQuestions.filter(q =>
+      q.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      q.answer.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }
+
+  const handleAnswerSubmit = (questionId: string, selectedAnswer: string, correctAnswer: string, isCorrect: boolean) => {
+    if (selectedSection && selectedSubsection) {
+      recordResponse({
+        questionId,
+        sectionId: selectedSection,
+        subsectionId: selectedSubsection,
+        selectedAnswer,
+        correctAnswer,
+        isCorrect,
+      });
+    }
+  };
+
+  const handleResetSubsection = () => {
+    if (selectedSection && selectedSubsection) {
+      resetSubsection(selectedSection, selectedSubsection);
+      toast.success('Section progress reset');
+    }
+  };
+
+  const handleResetAll = () => {
+    resetAll();
+    toast.success('All progress reset');
+  };
+
+  const handleNavigate = (sectionId: string, subsectionId: string) => {
+    setSelectedSection(sectionId);
+    setSelectedSubsection(subsectionId);
+    setSearchQuery('');
+    setIsNavOpen(false);
+    setFilterMode('all'); // Reset filter when navigating
+  };
 
   const currentReferenceContent = referenceSections
     .find(s => s.id === selectedSection)
@@ -65,12 +134,7 @@ export default function Index() {
         sections={sections}
         selectedSection={selectedSection}
         selectedSubsection={selectedSubsection}
-        onNavigate={(sectionId, subsectionId) => {
-          setSelectedSection(sectionId);
-          setSelectedSubsection(subsectionId);
-          setSearchQuery('');
-          setIsNavOpen(false);
-        }}
+        onNavigate={handleNavigate}
         isOpen={isNavOpen}
         onClose={() => setIsNavOpen(false)}
       />
@@ -224,36 +288,63 @@ export default function Index() {
                 )}>
                   <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
                     <div className="space-y-4">
-                      <div className="flex items-center justify-between mb-6">
-                        <div>
-                          <h2 className="text-xl font-semibold text-foreground">
-                            {currentSubsection.title}
-                          </h2>
-                          <p className="text-sm text-muted-foreground mt-1">
-                            {searchQuery
-                              ? `${filteredQuestions.length} ${filteredQuestions.length === 1 ? 'result' : 'results'} found`
-                              : `${currentSubsection.questions.length} ${currentSubsection.questions.length === 1 ? 'question' : 'questions'}`
-                            }
-                          </p>
+                      <div className="space-y-4 mb-6">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                          <div>
+                            <h2 className="text-xl font-semibold text-foreground">
+                              {currentSubsection.title}
+                            </h2>
+                            <p className="text-sm text-muted-foreground mt-1">
+                              {searchQuery
+                                ? `${filteredQuestions.length} ${filteredQuestions.length === 1 ? 'result' : 'results'} found`
+                                : filterMode === 'incorrect'
+                                ? `${filteredQuestions.length} incorrect ${filteredQuestions.length === 1 ? 'question' : 'questions'}`
+                                : `${currentSubsection.questions.length} ${currentSubsection.questions.length === 1 ? 'question' : 'questions'}`
+                              }
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Stats and Filters */}
+                        <div className="flex flex-col lg:flex-row gap-4">
+                          <QuestionStats stats={subsectionStats} className="lg:flex-shrink-0 lg:w-64" />
+                          <div className="flex-1">
+                            <QuestionFilters
+                              filterMode={filterMode}
+                              onFilterChange={setFilterMode}
+                              onResetSubsection={handleResetSubsection}
+                              onResetAll={handleResetAll}
+                              incorrectCount={subsectionStats.incorrect}
+                            />
+                          </div>
                         </div>
                       </div>
 
                       {filteredQuestions.length === 0 ? (
                         <div className="text-center py-12">
                           <p className="text-muted-foreground">
-                            {searchQuery ? 'No questions match your search.' : 'No questions available.'}
+                            {searchQuery 
+                              ? 'No questions match your search.' 
+                              : filterMode === 'incorrect'
+                              ? 'No incorrect answers yet. Start answering questions!'
+                              : 'No questions available.'}
                           </p>
                         </div>
                       ) : (
-                        filteredQuestions.map((question, index) => (
-                          <QuestionCard
-                            key={question.id}
-                            question={question}
-                            index={index}
-                            sectionId={selectedSection || ''}
-                            subsectionId={selectedSubsection || ''}
-                          />
-                        ))
+                        filteredQuestions.map((question, index) => {
+                          const savedResponse = getQuestionResponse(question.id);
+                          return (
+                            <QuestionCard
+                              key={question.id}
+                              question={question}
+                              index={index}
+                              sectionId={selectedSection || ''}
+                              subsectionId={selectedSubsection || ''}
+                              savedResponse={savedResponse}
+                              onAnswerSubmit={handleAnswerSubmit}
+                            />
+                          );
+                        })
                       )}
                     </div>
                   </div>
