@@ -84,11 +84,14 @@ export function QuestionCard({
     return selectedAnswer.toUpperCase() === correctAnswer;
   }, [selectedAnswer, correctAnswer]);
 
-  // Load saved response
+  // Load saved response and clear state when reset
   useEffect(() => {
     if (savedResponse) {
       setSelectedAnswer(savedResponse.selectedAnswer);
       setShowExplanation(true);
+    } else {
+      setSelectedAnswer(null);
+      setShowExplanation(false);
     }
   }, [savedResponse]);
 
