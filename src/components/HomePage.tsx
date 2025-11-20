@@ -1,17 +1,20 @@
 import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Button } from '@/components/ui/button';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { useQuestionStats } from '@/hooks/useQuestionStats';
 import { Section } from '@/types/question';
-import { BookOpen, CheckCircle2, XCircle, TrendingUp, Target, ChevronRight } from 'lucide-react';
+import { BookOpen, CheckCircle2, XCircle, TrendingUp, Target, ChevronRight, RotateCcw, AlertCircle } from 'lucide-react';
 import { useMemo } from 'react';
 
 interface HomePageProps {
   sections: Section[];
+  onReviewIncorrect?: () => void;
 }
 
-export function HomePage({ sections }: HomePageProps) {
-  const { getAllStats, responses, getSubsectionStats } = useQuestionStats();
+export function HomePage({ sections, onReviewIncorrect }: HomePageProps) {
+  const { getAllStats, responses, getSubsectionStats, resetAll } = useQuestionStats();
   const overallStats = getAllStats();
   
   const accuracyPercentage = overallStats.total > 0 
@@ -102,13 +105,54 @@ export function HomePage({ sections }: HomePageProps) {
   return (
     <div className="p-8 max-w-7xl mx-auto space-y-8 animate-fade-in">
       {/* Welcome Header */}
-      <div className="space-y-2">
-        <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-          PSITE Review Dashboard
-        </h1>
-        <p className="text-muted-foreground text-lg">
-          Track your progress and master your plastic surgery knowledge
-        </p>
+      <div className="flex items-start justify-between">
+        <div className="space-y-2">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+            PSITE Review Dashboard
+          </h1>
+          <p className="text-muted-foreground text-lg">
+            Track your progress and master your plastic surgery knowledge
+          </p>
+        </div>
+        
+        {/* Action Buttons */}
+        <div className="flex gap-3">
+          {overallStats.incorrect > 0 && (
+            <Button
+              onClick={onReviewIncorrect}
+              variant="outline"
+              className="gap-2"
+            >
+              <AlertCircle className="h-4 w-4" />
+              Review Incorrect ({overallStats.incorrect})
+            </Button>
+          )}
+          
+          {overallStats.total > 0 && (
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive" className="gap-2">
+                  <RotateCcw className="h-4 w-4" />
+                  Reset All
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Reset All Progress?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This will permanently delete all your question responses and progress. This action cannot be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={resetAll} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                    Reset All
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          )}
+        </div>
       </div>
 
       {/* Key Metrics */}

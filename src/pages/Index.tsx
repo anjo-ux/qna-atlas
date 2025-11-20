@@ -149,6 +149,22 @@ export default function Index() {
     setIsNavOpen(false);
   };
 
+  const handleReviewIncorrect = () => {
+    // Find first section/subsection with incorrect answers
+    for (const section of sections) {
+      for (const subsection of section.subsections) {
+        const incorrectIds = getIncorrectQuestionIds(section.id, subsection.id);
+        if (incorrectIds.length > 0) {
+          setSelectedSection(section.id);
+          setSelectedSubsection(subsection.id);
+          setFilterMode('incorrect');
+          setIsNavOpen(false);
+          return;
+        }
+      }
+    }
+  };
+
   const handleSearchResultClick = (
     sectionId: string, 
     subsectionId: string, 
@@ -346,7 +362,7 @@ export default function Index() {
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
             </div>
           ) : !currentSubsection ? (
-            <HomePage sections={sections} />
+            <HomePage sections={sections} onReviewIncorrect={handleReviewIncorrect} />
           ) : (
             <div className={cn(
               "flex-1 flex flex-col sm:flex-row",
