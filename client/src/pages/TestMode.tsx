@@ -5,8 +5,9 @@ import { Card } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Switch } from '@/components/ui/switch';
 import { QuestionCard } from '@/components/QuestionCard';
-import { ArrowLeft, BookOpen } from 'lucide-react';
+import { ArrowLeft, ChevronDown, ChevronRight } from 'lucide-react';
 import { useQuestionStats } from '@/hooks/useQuestionStats';
 
 interface TestModeProps {
@@ -19,10 +20,11 @@ type TestState = 'setup' | 'testing' | 'results';
 export function TestMode({ sections, onBack }: TestModeProps) {
   const [testState, setTestState] = useState<TestState>('setup');
   const [questionCount, setQuestionCount] = useState<10 | 20 | 30 | 40>(10);
-  const [selectedSections, setSelectedSections] = useState<Set<string>>(
-    new Set(sections.map(s => s.id))
+  const [selectedSubsections, setSelectedSubsections] = useState<Set<string>>(
+    new Set(sections.flatMap(s => s.subsections.map(ss => ss.id)))
   );
   const [useAllQuestions, setUseAllQuestions] = useState(true);
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
   const [testQuestions, setTestQuestions] = useState<Question[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [responses, setResponses] = useState<Record<string, { answer: string; correct: boolean }>>({});
@@ -41,16 +43,16 @@ export function TestMode({ sections, onBack }: TestModeProps) {
       });
     } else {
       sections.forEach(section => {
-        if (selectedSections.has(section.id)) {
-          section.subsections.forEach(subsection => {
+        section.subsections.forEach(subsection => {
+          if (selectedSubsections.has(subsection.id)) {
             questions.push(...subsection.questions);
-          });
-        }
+          }
+        });
       });
     }
     
     return questions;
-  }, [sections, selectedSections, useAllQuestions]);
+  }, [sections, selectedSubsections, useAllQuestions]);
 
   const handleStartTest = () => {
     if (availableQuestions.length === 0) {
@@ -67,14 +69,24 @@ export function TestMode({ sections, onBack }: TestModeProps) {
     setTestState('testing');
   };
 
-  const handleToggleSection = (sectionId: string) => {
-    const newSelected = new Set(selectedSections);
-    if (newSelected.has(sectionId)) {
-      newSelected.delete(sectionId);
+  const handleToggleSubsection = (subsectionId: string) => {
+    const newSelected = new Set(selectedSubsections);
+    if (newSelected.has(subsectionId)) {
+      newSelected.delete(subsectionId);
     } else {
-      newSelected.add(sectionId);
+      newSelected.add(subsectionId);
     }
-    setSelectedSections(newSelected);
+    setSelectedSubsections(newSelected);
+  };
+
+  const handleToggleSection = (sectionId: string) => {
+    const newExpanded = new Set(expandedSections);
+    if (newExpanded.has(sectionId)) {
+      newExpanded.delete(sectionId);
+    } else {
+      newExpanded.add(sectionId);
+    }
+    setExpandedSections(newExpanded);
   };
 
   const handleAnswerSubmit = (questionId: string, selectedAnswer: string, correctAnswer: string, isCorrect: boolean) => {
@@ -148,50 +160,77 @@ export function TestMode({ sections, onBack }: TestModeProps) {
 
             {/* Question Source */}
             <Card className="p-6">
-              <h2 className="text-lg font-semibold mb-4">Select Questions From</h2>
-              
-              <div className="space-y-4">
-                <div className="flex items-center space-x-2 p-3 border border-border rounded-lg cursor-pointer hover:bg-accent/5"
-                  onClick={() => setUseAllQuestions(!useAllQuestions)}>
-                  <Checkbox 
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-lg font-semibold">Select Questions From</h2>
+                <div className="flex items-center gap-3">
+                  <Label htmlFor="all-select-toggle" className="text-sm font-medium">{useAllQuestions ? 'All' : 'Select'}</Label>
+                  <Switch
+                    id="all-select-toggle"
                     checked={useAllQuestions}
-                    onCheckedChange={(checked) => setUseAllQuestions(!!checked)}
-                    id="all-questions"
+                    onCheckedChange={setUseAllQuestions}
                   />
-                  <Label htmlFor="all-questions" className="cursor-pointer flex-1">
-                    <div className="font-medium">All Available Questions</div>
-                    <div className="text-sm text-muted-foreground">Randomly select from all {availableQuestions.length} questions</div>
-                  </Label>
                 </div>
+              </div>
 
-                {!useAllQuestions && (
-                  <div className="space-y-3 p-4 bg-muted/30 rounded-lg">
-                    <Label className="text-base font-medium">Sections to Include:</Label>
+              {useAllQuestions ? (
+                <div className="p-4 bg-accent/10 rounded-lg border border-accent/20">
+                  <p className="font-medium text-foreground">All Available Questions</p>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Randomly select from all {availableQuestions.length} questions across all sections
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <Label className="text-base font-medium">Sections & Subsections:</Label>
+                  <div className="space-y-2 max-h-96 overflow-y-auto">
                     {sections.map(section => (
-                      <div key={section.id} className="flex items-center space-x-2">
-                        <Checkbox
-                          checked={selectedSections.has(section.id)}
-                          onCheckedChange={() => handleToggleSection(section.id)}
-                          id={`section-${section.id}`}
-                        />
-                        <Label htmlFor={`section-${section.id}`} className="cursor-pointer">
-                          <div className="font-medium">{section.title}</div>
-                          <div className="text-sm text-muted-foreground">
-                            {section.subsections.reduce((acc, s) => acc + s.questions.length, 0)} questions
+                      <div key={section.id}>
+                        <button
+                          onClick={() => handleToggleSection(section.id)}
+                          className="w-full flex items-center gap-2 p-3 hover:bg-accent/10 rounded-lg transition-colors"
+                        >
+                          {expandedSections.has(section.id) ? (
+                            <ChevronDown className="h-4 w-4" />
+                          ) : (
+                            <ChevronRight className="h-4 w-4" />
+                          )}
+                          <span className="font-medium text-sm flex-1 text-left">{section.title}</span>
+                          <span className="text-xs text-muted-foreground">
+                            {section.subsections.filter(ss => selectedSubsections.has(ss.id)).length} / {section.subsections.length}
+                          </span>
+                        </button>
+
+                        {expandedSections.has(section.id) && (
+                          <div className="ml-4 space-y-2 mt-1">
+                            {section.subsections.map(subsection => (
+                              <div key={subsection.id} className="flex items-center space-x-2 p-2">
+                                <Checkbox
+                                  checked={selectedSubsections.has(subsection.id)}
+                                  onCheckedChange={() => handleToggleSubsection(subsection.id)}
+                                  id={`subsection-${subsection.id}`}
+                                />
+                                <Label htmlFor={`subsection-${subsection.id}`} className="cursor-pointer text-sm flex-1">
+                                  <div className="font-medium">{subsection.title}</div>
+                                  <div className="text-xs text-muted-foreground">
+                                    {subsection.questions.length} questions
+                                  </div>
+                                </Label>
+                              </div>
+                            ))}
                           </div>
-                        </Label>
+                        )}
                       </div>
                     ))}
                   </div>
-                )}
-              </div>
+                </div>
+              )}
             </Card>
 
             {/* Start Button */}
             <Button
               size="lg"
               onClick={handleStartTest}
-              disabled={!useAllQuestions && selectedSections.size === 0}
+              disabled={!useAllQuestions && selectedSubsections.size === 0}
               className="w-full"
             >
               Start Test ({Math.min(questionCount, availableQuestions.length)} questions)
