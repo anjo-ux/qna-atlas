@@ -57,16 +57,6 @@ export function Navigation({
   );
 
   return (
-    <>
-      {/* Backdrop for mobile */}
-      {isOpen && (
-        <div 
-          className="lg:hidden fixed inset-0 bg-background/80 backdrop-blur-sm z-30"
-          onClick={onClose}
-        />
-      )}
-      
-      {/* Navigation Sidebar */}
       <aside className="w-full h-full border-r border-border bg-gradient-to-b from-card via-card to-muted/30 flex flex-col shadow-lg">
         <div className="p-6 border-b border-border bg-gradient-to-r from-primary/10 to-accent/10 flex items-center justify-between">
           <div className="flex-1">
@@ -86,6 +76,5 @@ export function Navigation({
         </div>
         <NavContent />
       </aside>
-    </>
   );
 }
