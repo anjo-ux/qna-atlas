@@ -1,0 +1,74 @@
+import { sql } from 'drizzle-orm';
+import {
+  index,
+  jsonb,
+  pgTable,
+  timestamp,
+  varchar,
+  integer,
+  boolean,
+} from "drizzle-orm/pg-core";
+
+// Session storage table
+// (IMPORTANT) This table is mandatory for Replit Auth, don't drop it.
+export const sessions = pgTable(
+  "sessions",
+  {
+    sid: varchar("sid").primaryKey(),
+    sess: jsonb("sess").notNull(),
+    expire: timestamp("expire").notNull(),
+  },
+  (table) => [index("IDX_session_expire").on(table.expire)],
+);
+
+// User storage table
+// (IMPORTANT) This table is mandatory for Replit Auth, don't drop it.
+export const users = pgTable("users", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  email: varchar("email").unique(),
+  firstName: varchar("first_name"),
+  lastName: varchar("last_name"),
+  profileImageUrl: varchar("profile_image_url"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export type UpsertUser = typeof users.$inferInsert;
+export type User = typeof users.$inferSelect;
+
+// Test Sessions table - tracks user's test progress
+export const testSessions = pgTable("test_sessions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: 'cascade' }),
+  status: varchar("status", { length: 20 }).notNull().default('in-progress'),
+  questionCount: integer("question_count").notNull(),
+  useAllQuestions: boolean("use_all_questions").notNull().default(false),
+  selectedSectionIds: jsonb("selected_section_ids").$type<string[]>().notNull(),
+  questions: jsonb("questions").notNull(), // Store the full Question objects for resume
+  currentQuestionIndex: integer("current_question_index").notNull().default(0),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  completedAt: timestamp("completed_at"),
+}, (table) => [
+  index("idx_test_sessions_user_id").on(table.userId),
+  index("idx_test_sessions_status").on(table.status),
+]);
+
+export type InsertTestSession = typeof testSessions.$inferInsert;
+export type TestSession = typeof testSessions.$inferSelect;
+
+// Question Responses table - tracks answers to individual questions
+export const questionResponses = pgTable("question_responses", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  testSessionId: varchar("test_session_id").notNull().references(() => testSessions.id, { onDelete: 'cascade' }),
+  questionId: varchar("question_id").notNull(),
+  selectedAnswer: varchar("selected_answer").notNull(),
+  isCorrect: boolean("is_correct").notNull(),
+  answeredAt: timestamp("answered_at").defaultNow().notNull(),
+}, (table) => [
+  index("idx_question_responses_test_session").on(table.testSessionId),
+  index("idx_question_responses_question").on(table.questionId),
+]);
+
+export type InsertQuestionResponse = typeof questionResponses.$inferInsert;
+export type QuestionResponse = typeof questionResponses.$inferSelect;
