@@ -37,7 +37,6 @@ export async function setupVite(app: Express, server: Server) {
       let template = fs.readFileSync(clientTemplate, "utf-8");
       template = await vite.transformIndexHtml(url, template);
 
-      const { render } = await vite.ssrLoadModule("/client/src/main.tsx");
       res.status(200).set({ "Content-Type": "text/html" }).end(template);
     } catch (e) {
       vite.ssrFixStacktrace(e as Error);

@@ -4,9 +4,9 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "tsx watch --env-file .env --clear-screen=false server/index.ts",
+    "dev": "tsx watch --clear-screen=false --ignore 'vite.config.ts.timestamp-*' --ignore 'client/**' server/index.ts",
     "build": "vite build",
-    "start": "NODE_ENV=production tsx --env-file .env server/index.ts",
+    "start": "NODE_ENV=production tsx server/index.ts",
     "lint": "eslint .",
     "preview": "vite preview"
   },
