@@ -69,7 +69,7 @@ export function QuestionCard({
     }
     
     return { text: textLines.join('\n'), choices };
-  }, [question.question]);
+  }, [question.id, question.question]);
 
   // Apply highlights to question text
   const questionContent = parsed.text + '\n' + parsed.choices.map(c => `${c.letter}. ${c.text}`).join('\n');
