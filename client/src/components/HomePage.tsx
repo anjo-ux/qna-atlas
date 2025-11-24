@@ -5,10 +5,20 @@ import { Button } from '@/components/ui/button';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { useQuestionStats } from '@/hooks/useQuestionStats';
 import { useTestSessions } from '@/hooks/useTestSessions';
+import { useAuth } from '@/hooks/useAuth';
 import { TestHistory } from '@/components/TestHistory';
 import { Section } from '@/types/question';
-import { BookOpen, CheckCircle2, XCircle, TrendingUp, Target, ChevronRight, RotateCcw, AlertCircle, Zap } from 'lucide-react';
+import { BookOpen, CheckCircle2, XCircle, TrendingUp, Target, ChevronRight, RotateCcw, AlertCircle, Zap, LogOut, User } from 'lucide-react';
 import { useMemo } from 'react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 interface HomePageProps {
   sections: Section[];
@@ -20,6 +30,7 @@ interface HomePageProps {
 export function HomePage({ sections, onReviewIncorrect, onStartTest, onResumeTest }: HomePageProps) {
   const { getAllStats, responses, getSubsectionStats, resetAll } = useQuestionStats();
   const { sessions, deleteSession } = useTestSessions();
+  const { user, logout } = useAuth();
   const overallStats = getAllStats();
   
   const accuracyPercentage = overallStats.total > 0 
@@ -122,48 +133,77 @@ export function HomePage({ sections, onReviewIncorrect, onStartTest, onResumeTes
             PSITE Review Dashboard
           </h1>
           <p className="text-muted-foreground text-lg">
+            {user && (
+              <span>Welcome back, {user.firstName || user.email?.split('@')[0]}! </span>
+            )}
             Track your progress and master your plastic surgery knowledge
           </p>
         </div>
-        
-        {/* Action Buttons */}
-        <div className="flex gap-3">
-          {overallStats.incorrect > 0 && (
-            <Button
-              onClick={onReviewIncorrect}
-              variant="outline"
-              className="gap-2"
-            >
-              <AlertCircle className="h-4 w-4" />
-              Review Incorrect ({overallStats.incorrect})
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="gap-2" data-testid="button-user-menu">
+              <Avatar className="w-8 h-8">
+                <AvatarImage src={user?.profileImageUrl || ''} />
+                <AvatarFallback>
+                  {user?.firstName?.[0] || user?.email?.[0] || 'U'}
+                </AvatarFallback>
+              </Avatar>
+              <span className="hidden md:inline">{user?.firstName || user?.email?.split('@')[0]}</span>
             </Button>
-          )}
-          
-          {overallStats.total > 0 && (
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button variant="destructive" className="gap-2">
-                  <RotateCcw className="h-4 w-4" />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuLabel>My Account</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem disabled>
+              <User className="w-4 h-4 mr-2" />
+              {user?.email}
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => logout()} data-testid="button-logout">
+              <LogOut className="w-4 h-4 mr-2" />
+              Log out
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+      
+      {/* Action Buttons */}
+      <div className="flex gap-3">
+        {overallStats.incorrect > 0 && (
+          <Button
+            onClick={onReviewIncorrect}
+            variant="outline"
+            className="gap-2"
+          >
+            <AlertCircle className="h-4 w-4" />
+            Review Incorrect ({overallStats.incorrect})
+          </Button>
+        )}
+        
+        {overallStats.total > 0 && (
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="destructive" className="gap-2">
+                <RotateCcw className="h-4 w-4" />
+                Reset All
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Reset All Progress?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This will permanently delete all your question responses and progress. This action cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={resetAll} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
                   Reset All
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Reset All Progress?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    This will permanently delete all your question responses and progress. This action cannot be undone.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={resetAll} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                    Reset All
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          )}
-        </div>
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        )}
       </div>
 
       {/* Key Metrics */}

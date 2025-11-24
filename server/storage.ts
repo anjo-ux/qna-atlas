@@ -59,7 +59,10 @@ export class DatabaseStorage implements IStorage {
   async createTestSession(sessionData: InsertTestSession): Promise<TestSession> {
     const [session] = await db
       .insert(testSessions)
-      .values(sessionData)
+      .values({
+        ...sessionData,
+        questions: sessionData.questions || [],
+      })
       .returning();
     return session;
   }

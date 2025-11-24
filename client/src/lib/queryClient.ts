@@ -18,6 +18,11 @@ async function throwError(response: Response) {
 async function fetcher(url: string) {
   const res = await fetch(url, { credentials: "include" });
 
+  // For auth endpoint, return null on 401/403 instead of throwing
+  if (url.includes('/api/auth/user') && (res.status === 401 || res.status === 403)) {
+    return null;
+  }
+
   if (!res.ok) {
     await throwError(res);
   }

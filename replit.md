@@ -6,7 +6,8 @@ A plastic surgery knowledge review application that helps users track their prog
 ## Project Structure
 This is a fullstack JavaScript application using:
 - **Frontend**: React with TypeScript, Vite, Wouter for routing, TanStack Query for data fetching
-- **Backend**: Express.js server
+- **Backend**: Express.js server with Replit Auth integration
+- **Database**: PostgreSQL with Drizzle ORM
 - **UI Components**: Shadcn UI components with Radix UI primitives
 - **Styling**: Tailwind CSS with custom theming
 
@@ -15,38 +16,48 @@ This is a fullstack JavaScript application using:
 client/           # Frontend React application
   src/
     components/   # React components including UI primitives
-    pages/        # Page components (Index, NotFound)
-    hooks/        # Custom React hooks
+    pages/        # Page components (Index, NotFound, Landing)
+    hooks/        # Custom React hooks (useAuth, useTestSessions)
     lib/          # Utilities and query client
     types/        # TypeScript type definitions
     utils/        # Helper functions
 server/           # Backend Express server
   index.ts        # Server entry point
   routes.ts       # API route definitions
+  storage.ts      # Database storage layer
+  replitAuth.ts   # Replit Auth integration
+  db.ts           # Drizzle database connection
   vite.ts         # Vite dev server setup
 shared/           # Shared types between client and server
+  schema.ts       # Database schema definitions
+  schemas.ts      # Zod validation schemas
 ```
 
 ## Key Features
-- Question review system with sections and subsections
-- Reference text panel for study materials
-- Progress tracking dashboard
-- Search functionality
-- Highlighting and note-taking capabilities
-- Question filters and statistics
+- **Authentication**: Replit Auth integration supporting Google, GitHub, X, Apple, and email/password login
+- **Database Persistence**: PostgreSQL database for user data and test session tracking
+- **Question review system** with sections and subsections
+- **Progress tracking dashboard** with analytics
+- **Test sessions** that can be resumed across devices
+- **Reference text panel** for study materials
+- **Search functionality** for questions
+- **Highlighting and note-taking capabilities**
+- **Question filters and statistics**
 
-## Recent Changes (Migration from Lovable to Replit)
-- **Date**: November 24, 2025
-- Restructured project from Lovable's frontend-only structure to Replit's fullstack architecture
-- Created Express backend with Vite middleware for development
-- Updated routing from react-router-dom to wouter
-- Configured proper TypeScript paths and aliases
-- Set up fullstack development and production builds
+## Recent Changes (November 24, 2025)
+- **Authentication & Database Integration**:
+  - Implemented Replit Auth with OpenID Connect for user authentication
+  - Created PostgreSQL database with tables: users, sessions, testSessions, questionResponses
+  - Built protected API routes with authentication middleware
+  - Migrated test session storage from localStorage to database
+  - Created Landing page for unauthenticated users
+  - Added user profile menu with logout functionality
 
 ## Running the Project
 - **Development**: `npm run dev` - Starts Express server with Vite HMR on port 5000
 - **Build**: `npm run build` - Builds the frontend for production
 - **Production**: `npm run start` - Runs the production server
+- **Database Push**: `npm run db:push` - Syncs database schema changes
 
 ## Data Files
 - `public/data/questions.xlsx` - Question bank
@@ -56,7 +67,19 @@ shared/           # Shared types between client and server
 None documented yet.
 
 ## Architecture Notes
-- Uses in-memory storage (no database required for current functionality)
+- Uses PostgreSQL database with Drizzle ORM
 - Client-side routing with wouter
 - TanStack Query for state management and caching
 - Hot module replacement (HMR) enabled in development
+- Session management with connect-pg-simple
+- Protected API routes using isAuthenticated middleware
+
+## Known Limitations
+- **Question Responses**: While the database schema and API endpoints support saving individual question responses, the frontend integration is not yet complete. Currently, test sessions store questions in the database but individual answers are not persisted/restored. This means users can create and resume test sessions, but their answer progress within a session is not saved to the database yet.
+
+## Security
+- Authentication tokens managed by Replit Auth with OpenID Connect
+- Protected API routes verify user ownership of resources
+- Input validation using Zod schemas
+- Session data stored securely in database
+- CSRF protection via Express session middleware

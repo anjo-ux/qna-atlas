@@ -2,14 +2,20 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
+import { insertTestSessionSchema, updateTestSessionSchema, insertQuestionResponseSchema } from "@shared/schemas";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Set up authentication middleware
   await setupAuth(app);
 
   // Auth routes
-  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
+  app.get('/api/auth/user', async (req: any, res) => {
     try {
+      // Allow unauthenticated access - return null if not logged in
+      if (!req.isAuthenticated() || !req.user?.claims?.sub) {
+        return res.json(null);
+      }
+      
       const userId = req.user.claims.sub;
       const user = await storage.getUser(userId);
       res.json(user);
@@ -65,8 +71,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/test-sessions', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
+      
+      // Validate request body
+      const validationResult = insertTestSessionSchema.safeParse(req.body);
+      if (!validationResult.success) {
+        return res.status(400).json({ 
+          message: "Invalid request data",
+          errors: validationResult.error.errors 
+        });
+      }
+      
       const sessionData = {
-        ...req.body,
+        ...validationResult.data,
         userId,
       };
       
@@ -91,7 +107,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Forbidden" });
       }
       
-      const updated = await storage.updateTestSession(req.params.id, req.body);
+      // Validate and whitelist allowed fields
+      const validationResult = updateTestSessionSchema.safeParse(req.body);
+      if (!validationResult.success) {
+        return res.status(400).json({ 
+          message: "Invalid request data",
+          errors: validationResult.error.errors 
+        });
+      }
+      
+      const updated = await storage.updateTestSession(req.params.id, validationResult.data);
       res.json(updated);
     } catch (error) {
       console.error("Error updating test session:", error);
@@ -145,7 +170,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/question-responses', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const { testSessionId } = req.body;
+      
+      // Validate request body
+      const validationResult = insertQuestionResponseSchema.safeParse(req.body);
+      if (!validationResult.success) {
+        return res.status(400).json({ 
+          message: "Invalid request data",
+          errors: validationResult.error.errors 
+        });
+      }
+      
+      const { testSessionId } = validationResult.data;
       
       // Verify the test session belongs to the user
       const session = await storage.getTestSession(testSessionId);
@@ -153,7 +188,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Forbidden" });
       }
       
-      const response = await storage.upsertQuestionResponse(req.body);
+      const response = await storage.upsertQuestionResponse(validationResult.data);
       res.json(response);
     } catch (error) {
       console.error("Error saving question response:", error);

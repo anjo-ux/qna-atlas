@@ -1,7 +1,10 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { queryClient, apiRequest } from '@/lib/queryClient';
 import { Question } from '@/types/question';
 import { QuestionResponse } from './useQuestionStats';
+import type { TestSession as DbTestSession } from '@shared/schema';
 
+// Frontend test session interface extends database schema with local data
 export interface TestSession {
   id: string;
   createdAt: number;
@@ -16,90 +19,166 @@ export interface TestSession {
   currentQuestionIndex: number;
 }
 
-const SESSIONS_KEY = 'psite-test-sessions';
+// Local storage key for questions (since they come from Excel file)
+const QUESTIONS_KEY = 'psite-test-questions';
 
 export function useTestSessions() {
-  const [sessions, setSessions] = useState<TestSession[]>([]);
+  // Fetch all test sessions from database
+  const { data: dbSessions = [], isLoading } = useQuery<DbTestSession[]>({
+    queryKey: ['/api/test-sessions'],
+    retry: 1,
+  });
 
-  useEffect(() => {
-    const saved = localStorage.getItem(SESSIONS_KEY);
-    if (saved) {
-      setSessions(JSON.parse(saved));
-    }
-  }, []);
-
-  const saveSessions = useCallback((newSessions: TestSession[]) => {
-    setSessions(newSessions);
-    localStorage.setItem(SESSIONS_KEY, JSON.stringify(newSessions));
-  }, []);
-
-  const createSession = useCallback((
-    questionCount: number,
-    selectedSectionIds: string[],
-    useAllQuestions: boolean,
-    questions: Question[]
-  ): TestSession => {
-    const session: TestSession = {
-      id: `test-${Date.now()}`,
-      createdAt: Date.now(),
-      status: 'in-progress' as const,
-      questionCount,
-      selectedSectionIds,
-      useAllQuestions,
-      questions,
+  // Convert database sessions to frontend sessions
+  const sessions: TestSession[] = dbSessions.map(dbSession => {
+    return {
+      id: dbSession.id,
+      createdAt: new Date(dbSession.createdAt).getTime(),
+      completedAt: dbSession.completedAt ? new Date(dbSession.completedAt).getTime() : undefined,
+      status: dbSession.status,
+      questionCount: dbSession.questionCount,
+      selectedSectionIds: dbSession.selectedSectionIds,
+      useAllQuestions: dbSession.useAllQuestions,
+      questions: (dbSession.questions as any) || [],
       responses: {},
-      currentQuestionIndex: 0,
+      currentQuestionIndex: dbSession.currentQuestionIndex,
     };
+  });
 
-    saveSessions([...sessions, session]);
-    return session;
-  }, [sessions, saveSessions]);
+  // Create session mutation
+  const createSessionMutation = useMutation({
+    mutationFn: async (data: {
+      questionCount: number;
+      selectedSectionIds: string[];
+      useAllQuestions: boolean;
+      questions: Question[];
+    }) => {
+      // Create session in database with questions
+      const response = await apiRequest('/api/test-sessions', {
+        method: 'POST',
+        body: JSON.stringify({
+          questionCount: data.questionCount,
+          selectedSectionIds: data.selectedSectionIds,
+          useAllQuestions: data.useAllQuestions,
+          questions: data.questions,
+          currentQuestionIndex: 0,
+        }),
+      });
 
-  const updateSession = useCallback((sessionId: string, updates: Partial<TestSession>) => {
-    const updated = sessions.map(s =>
-      s.id === sessionId ? { ...s, ...updates } : s
-    );
-    saveSessions(updated);
-  }, [sessions, saveSessions]);
+      return response;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/test-sessions'] });
+    },
+  });
 
-  const completeSession = useCallback((sessionId: string) => {
-    const updated = sessions.map(s =>
-      s.id === sessionId ? { ...s, status: 'completed' as const, completedAt: Date.now() } : s
-    );
-    saveSessions(updated);
-  }, [sessions, saveSessions]);
+  // Update session mutation
+  const updateSessionMutation = useMutation({
+    mutationFn: async ({ sessionId, updates }: {
+      sessionId: string;
+      updates: Partial<TestSession>;
+    }) => {
+      // Update session in database
+      const dbUpdates: any = {};
+      if (updates.currentQuestionIndex !== undefined) {
+        dbUpdates.currentQuestionIndex = updates.currentQuestionIndex;
+      }
+      if (updates.status !== undefined) {
+        dbUpdates.status = updates.status;
+      }
+      if (updates.questions !== undefined) {
+        dbUpdates.questions = updates.questions;
+      }
 
-  const deleteSession = useCallback((sessionId: string) => {
-    saveSessions(sessions.filter(s => s.id !== sessionId));
-  }, [sessions, saveSessions]);
+      const response = await apiRequest(`/api/test-sessions/${sessionId}`, {
+        method: 'PATCH',
+        body: JSON.stringify(dbUpdates),
+      });
 
-  const getSession = useCallback((sessionId: string): TestSession | undefined => {
-    return sessions.find(s => s.id === sessionId);
-  }, [sessions]);
+      return response;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/test-sessions'] });
+    },
+  });
 
-  const getRecentSessions = useCallback((limit: number = 5): TestSession[] => {
-    return [...sessions]
-      .sort((a, b) => b.createdAt - a.createdAt)
-      .slice(0, limit);
-  }, [sessions]);
+  // Complete session mutation
+  const completeSessionMutation = useMutation({
+    mutationFn: async (sessionId: string) => {
+      const response = await apiRequest(`/api/test-sessions/${sessionId}/complete`, {
+        method: 'POST',
+      });
+      return response;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/test-sessions'] });
+    },
+  });
 
-  const getInProgressSessions = useCallback((): TestSession[] => {
-    return sessions.filter(s => s.status === 'in-progress');
-  }, [sessions]);
-
-  const getCompletedSessions = useCallback((): TestSession[] => {
-    return sessions.filter(s => s.status === 'completed');
-  }, [sessions]);
+  // Delete session mutation
+  const deleteSessionMutation = useMutation({
+    mutationFn: async (sessionId: string) => {
+      // Delete session from database
+      await apiRequest(`/api/test-sessions/${sessionId}`, {
+        method: 'DELETE',
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/test-sessions'] });
+    },
+  });
 
   return {
     sessions,
-    createSession,
-    updateSession,
-    completeSession,
-    deleteSession,
-    getSession,
-    getRecentSessions,
-    getInProgressSessions,
-    getCompletedSessions,
+    isLoading,
+    createSession: async (
+      questionCount: number,
+      selectedSectionIds: string[],
+      useAllQuestions: boolean,
+      questions: Question[]
+    ) => {
+      const result = await createSessionMutation.mutateAsync({
+        questionCount,
+        selectedSectionIds,
+        useAllQuestions,
+        questions,
+      });
+      
+      // Return the created session from the database
+      return {
+        id: result.id,
+        createdAt: new Date(result.createdAt).getTime(),
+        status: result.status as 'in-progress' | 'completed',
+        questionCount: result.questionCount,
+        selectedSectionIds: result.selectedSectionIds,
+        useAllQuestions: result.useAllQuestions,
+        questions,
+        responses: {},
+        currentQuestionIndex: result.currentQuestionIndex,
+      };
+    },
+    updateSession: (sessionId: string, updates: Partial<TestSession>) => {
+      updateSessionMutation.mutate({ sessionId, updates });
+    },
+    completeSession: (sessionId: string) => {
+      completeSessionMutation.mutate(sessionId);
+    },
+    deleteSession: (sessionId: string) => {
+      deleteSessionMutation.mutate(sessionId);
+    },
+    getSession: (sessionId: string): TestSession | undefined => {
+      return sessions.find(s => s.id === sessionId);
+    },
+    getRecentSessions: (limit: number = 5): TestSession[] => {
+      return [...sessions]
+        .sort((a, b) => b.createdAt - a.createdAt)
+        .slice(0, limit);
+    },
+    getInProgressSessions: (): TestSession[] => {
+      return sessions.filter(s => s.status === 'in-progress');
+    },
+    getCompletedSessions: (): TestSession[] => {
+      return sessions.filter(s => s.status === 'completed');
+    },
   };
 }
