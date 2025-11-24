@@ -18,6 +18,7 @@ interface QuestionCardProps {
   subsectionId: string;
   savedResponse?: QuestionResponse;
   onAnswerSubmit: (questionId: string, selectedAnswer: string, correctAnswer: string, isCorrect: boolean) => void;
+  isTestMode?: boolean;
 }
 
 interface ParsedQuestion {
@@ -31,7 +32,8 @@ export function QuestionCard({
   sectionId, 
   subsectionId, 
   savedResponse,
-  onAnswerSubmit 
+  onAnswerSubmit,
+  isTestMode = false
 }: QuestionCardProps) {
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(savedResponse?.selectedAnswer || null);
   const [showExplanation, setShowExplanation] = useState(!!savedResponse);
@@ -84,7 +86,7 @@ export function QuestionCard({
     return selectedAnswer.toUpperCase() === correctAnswer;
   }, [selectedAnswer, correctAnswer]);
 
-  // Load saved response and clear state when reset
+  // Reset state when question changes or when saved response changes
   useEffect(() => {
     if (savedResponse) {
       setSelectedAnswer(savedResponse.selectedAnswer);
@@ -93,7 +95,7 @@ export function QuestionCard({
       setSelectedAnswer(null);
       setShowExplanation(false);
     }
-  }, [savedResponse]);
+  }, [savedResponse, question.id]);
 
   const handleAnswerClick = () => {
     if (selectedAnswer && !showExplanation && correctAnswer) {
@@ -239,6 +241,7 @@ export function QuestionCard({
                 onClick={handleAnswerClick}
                 className="mt-4"
                 size="sm"
+                data-testid="button-show-answer"
               >
                 Show Answer
               </Button>
