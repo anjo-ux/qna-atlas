@@ -4,17 +4,21 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { Button } from '@/components/ui/button';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { useQuestionStats } from '@/hooks/useQuestionStats';
+import { useTestSessions } from '@/hooks/useTestSessions';
+import { TestHistory } from '@/components/TestHistory';
 import { Section } from '@/types/question';
-import { BookOpen, CheckCircle2, XCircle, TrendingUp, Target, ChevronRight, RotateCcw, AlertCircle } from 'lucide-react';
+import { BookOpen, CheckCircle2, XCircle, TrendingUp, Target, ChevronRight, RotateCcw, AlertCircle, Zap } from 'lucide-react';
 import { useMemo } from 'react';
 
 interface HomePageProps {
   sections: Section[];
   onReviewIncorrect?: () => void;
+  onStartTest?: () => void;
 }
 
-export function HomePage({ sections, onReviewIncorrect }: HomePageProps) {
+export function HomePage({ sections, onReviewIncorrect, onStartTest }: HomePageProps) {
   const { getAllStats, responses, getSubsectionStats, resetAll } = useQuestionStats();
+  const { getRecentSessions } = useTestSessions();
   const overallStats = getAllStats();
   
   const accuracyPercentage = overallStats.total > 0 
@@ -80,6 +84,10 @@ export function HomePage({ sections, onReviewIncorrect }: HomePageProps) {
       };
     });
   }, [sections, getSubsectionStats]);
+
+  const recentSessions = useMemo(() => {
+    return getRecentSessions(3);
+  }, [getRecentSessions]);
 
   // Get recent activity (last 7 days)
   const recentActivity = useMemo(() => {
@@ -259,6 +267,17 @@ export function HomePage({ sections, onReviewIncorrect }: HomePageProps) {
           </div>
         </Card>
       </div>
+
+      {/* Recent Tests */}
+      {recentSessions.length > 0 && (
+        <Card className="p-6">
+          <div className="flex items-center gap-2 mb-6">
+            <Zap className="h-5 w-5 text-primary" />
+            <h2 className="text-xl font-semibold">Recent Tests</h2>
+          </div>
+          <TestHistory sessions={recentSessions} maxItems={5} />
+        </Card>
+      )}
 
       {/* Section Progress */}
       <Card className="p-6">

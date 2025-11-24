@@ -397,7 +397,11 @@ export default function Index() {
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
             </div>
           ) : !currentSubsection ? (
-            <HomePage sections={sections} onReviewIncorrect={handleReviewIncorrect} />
+            <HomePage 
+              sections={sections} 
+              onReviewIncorrect={handleReviewIncorrect}
+              onStartTest={() => setScreenMode('test')}
+            />
           ) : (
             <div className={cn(
               "flex-1 flex flex-col sm:flex-row",

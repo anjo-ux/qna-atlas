@@ -7,8 +7,10 @@ import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Switch } from '@/components/ui/switch';
 import { QuestionCard } from '@/components/QuestionCard';
+import { TestHistory } from '@/components/TestHistory';
 import { ArrowLeft, ChevronDown, ChevronRight, ChevronLeft, ChevronRight as ChevronRightIcon, Check, X, Circle } from 'lucide-react';
 import { useQuestionStats, QuestionResponse } from '@/hooks/useQuestionStats';
+import { useTestSessions, TestSession } from '@/hooks/useTestSessions';
 import { cn } from '@/lib/utils';
 
 interface TestModeProps {
@@ -31,8 +33,10 @@ export function TestMode({ sections, onBack }: TestModeProps) {
   const [testQuestions, setTestQuestions] = useState<Question[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [responses, setResponses] = useState<Record<string, QuestionResponse>>({});
+  const [currentSession, setCurrentSession] = useState<TestSession | null>(null);
 
   const { recordResponse } = useQuestionStats();
+  const { createSession, updateSession, completeSession, getInProgressSessions, deleteSession } = useTestSessions();
 
   // Get all available questions based on selection
   const availableQuestions = useMemo(() => {
@@ -66,9 +70,26 @@ export function TestMode({ sections, onBack }: TestModeProps) {
     const shuffled = [...availableQuestions].sort(() => Math.random() - 0.5);
     const selected = shuffled.slice(0, Math.min(questionCount, shuffled.length));
     
+    // Create test session
+    const session = createSession(
+      questionCount,
+      Array.from(selectedSubsections),
+      useAllQuestions,
+      selected
+    );
+    
     setTestQuestions(selected);
     setCurrentQuestionIndex(0);
     setResponses({});
+    setCurrentSession(session);
+    setTestState('testing');
+  };
+
+  const handleResumeTest = (session: TestSession) => {
+    setTestQuestions(session.questions);
+    setCurrentQuestionIndex(session.currentQuestionIndex);
+    setResponses(session.responses);
+    setCurrentSession(session);
     setTestState('testing');
   };
 
@@ -94,28 +115,34 @@ export function TestMode({ sections, onBack }: TestModeProps) {
 
   const handleAnswerSubmit = (questionId: string, selectedAnswer: string, correctAnswer: string, isCorrect: boolean) => {
     // Find the section and subsection for this question
-    let sectionId = '';
-    let subsectionId = '';
-    
     for (const section of sections) {
       for (const subsection of section.subsections) {
         if (subsection.questions.some(q => q.id === questionId)) {
-          sectionId = section.id;
-          subsectionId = subsection.id;
+          const newResponse: QuestionResponse = {
+            questionId,
+            sectionId: section.id,
+            subsectionId: subsection.id,
+            selectedAnswer,
+            correctAnswer,
+            isCorrect,
+            timestamp: Date.now()
+          };
           
-          // Store the full response
+          // Store the response locally
           setResponses(prev => ({
             ...prev,
-            [questionId]: {
-              questionId,
-              sectionId: section.id,
-              subsectionId: subsection.id,
-              selectedAnswer,
-              correctAnswer,
-              isCorrect,
-              timestamp: Date.now()
-            }
+            [questionId]: newResponse
           }));
+          
+          // Update session if active
+          if (currentSession) {
+            updateSession(currentSession.id, {
+              responses: {
+                ...responses,
+                [questionId]: newResponse
+              }
+            });
+          }
           
           // Record in global stats
           recordResponse({
@@ -134,13 +161,21 @@ export function TestMode({ sections, onBack }: TestModeProps) {
 
   const handleNextQuestion = () => {
     if (currentQuestionIndex < testQuestions.length - 1) {
-      setCurrentQuestionIndex(currentQuestionIndex + 1);
+      const newIndex = currentQuestionIndex + 1;
+      setCurrentQuestionIndex(newIndex);
+      if (currentSession) {
+        updateSession(currentSession.id, { currentQuestionIndex: newIndex });
+      }
     }
   };
 
   const handlePreviousQuestion = () => {
     if (currentQuestionIndex > 0) {
-      setCurrentQuestionIndex(currentQuestionIndex - 1);
+      const newIndex = currentQuestionIndex - 1;
+      setCurrentQuestionIndex(newIndex);
+      if (currentSession) {
+        updateSession(currentSession.id, { currentQuestionIndex: newIndex });
+      }
     }
   };
 
@@ -149,6 +184,9 @@ export function TestMode({ sections, onBack }: TestModeProps) {
   };
 
   const handleFinishTest = () => {
+    if (currentSession) {
+      completeSession(currentSession.id);
+    }
     setTestState('results');
   };
 
@@ -168,6 +206,8 @@ export function TestMode({ sections, onBack }: TestModeProps) {
   }, [responses]);
 
   if (testState === 'setup') {
+    const inProgressSessions = getInProgressSessions();
+    
     return (
       <div className="flex-1 flex flex-col overflow-auto">
         <div className="p-6 border-b border-border">
@@ -181,6 +221,17 @@ export function TestMode({ sections, onBack }: TestModeProps) {
 
         <div className="flex-1 overflow-auto p-6">
           <div className="max-w-2xl mx-auto space-y-6">
+            {/* In Progress Tests */}
+            {inProgressSessions.length > 0 && (
+              <div className="space-y-3">
+                <h2 className="text-lg font-semibold text-foreground">Resume Test</h2>
+                <TestHistory
+                  sessions={inProgressSessions}
+                  onResume={handleResumeTest}
+                  onDelete={deleteSession}
+                />
+              </div>
+            )}
             {/* Question Count */}
             <Card className="p-4">
               <h2 className="text-sm font-semibold mb-3">Number of Questions</h2>
