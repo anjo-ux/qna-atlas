@@ -221,14 +221,16 @@ export default function Index() {
   return (
     <div className="flex h-screen overflow-hidden bg-background">
       {/* Navigation Sidebar */}
-      <Navigation
-        sections={sections}
-        selectedSection={selectedSection}
-        selectedSubsection={selectedSubsection}
-        onNavigate={handleNavigate}
-        isOpen={isNavOpen}
-        onClose={() => setIsNavOpen(false)}
-      />
+      <div className={`${isNavOpen ? 'w-80' : 'w-0'} lg:w-80 transition-all duration-300 overflow-hidden`}>
+        <Navigation
+          sections={sections}
+          selectedSection={selectedSection}
+          selectedSubsection={selectedSubsection}
+          onNavigate={handleNavigate}
+          isOpen={isNavOpen}
+          onClose={() => setIsNavOpen(false)}
+        />
+      </div>
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col min-h-screen overflow-hidden">

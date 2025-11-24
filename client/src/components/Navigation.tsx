@@ -58,40 +58,34 @@ export function Navigation({
 
   return (
     <>
-      {/* Desktop Navigation */}
-      <aside className="hidden lg:flex w-80 border-r border-border bg-gradient-to-b from-card via-card to-muted/30 flex-col shadow-lg">
-        <div className="p-6 border-b border-border bg-gradient-to-r from-primary/10 to-accent/10">
-          <h2 className="text-lg font-semibold text-foreground">Sections</h2>
-          <p className="text-sm text-muted-foreground mt-1">
-            {sections.reduce((acc, s) => acc + s.subsections.length, 0)} subsections
-          </p>
+      {/* Backdrop for mobile */}
+      {isOpen && (
+        <div 
+          className="lg:hidden fixed inset-0 bg-background/80 backdrop-blur-sm z-30"
+          onClick={onClose}
+        />
+      )}
+      
+      {/* Navigation Sidebar */}
+      <aside className="w-full h-full border-r border-border bg-gradient-to-b from-card via-card to-muted/30 flex flex-col shadow-lg">
+        <div className="p-6 border-b border-border bg-gradient-to-r from-primary/10 to-accent/10 flex items-center justify-between">
+          <div className="flex-1">
+            <h2 className="text-lg font-semibold text-foreground">Sections</h2>
+            <p className="text-sm text-muted-foreground mt-1">
+              {sections.reduce((acc, s) => acc + s.subsections.length, 0)} subsections
+            </p>
+          </div>
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={onClose}
+            className="lg:hidden flex-shrink-0"
+          >
+            <X className="h-5 w-5" />
+          </Button>
         </div>
         <NavContent />
       </aside>
-
-      {/* Mobile Navigation */}
-      {isOpen && (
-        <>
-          <div 
-            className="lg:hidden fixed inset-0 bg-background/80 backdrop-blur-sm z-40"
-            onClick={onClose}
-          />
-          <aside className="lg:hidden fixed left-0 top-0 bottom-0 w-80 border-r border-border bg-gradient-to-b from-card via-card to-muted/30 z-50 flex flex-col shadow-xl">
-            <div className="p-6 border-b border-border bg-gradient-to-r from-primary/10 to-accent/10 flex items-center justify-between">
-              <div>
-                <h2 className="text-lg font-semibold text-foreground">Sections</h2>
-                <p className="text-sm text-muted-foreground mt-1">
-                  {sections.reduce((acc, s) => acc + s.subsections.length, 0)} subsections
-                </p>
-              </div>
-              <Button variant="ghost" size="icon" onClick={onClose}>
-                <X className="h-5 w-5" />
-              </Button>
-            </div>
-            <NavContent />
-          </aside>
-        </>
-      )}
     </>
   );
 }
