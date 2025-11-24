@@ -24,7 +24,9 @@ export function TestMode({ sections, onBack }: TestModeProps) {
     new Set(sections.flatMap(s => s.subsections.map(ss => ss.id)))
   );
   const [useAllQuestions, setUseAllQuestions] = useState(true);
-  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(
+    new Set(sections.map(s => s.id))
+  );
   const [testQuestions, setTestQuestions] = useState<Question[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [responses, setResponses] = useState<Record<string, { answer: string; correct: boolean }>>({});
