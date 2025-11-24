@@ -10,8 +10,9 @@ import { QuestionStats } from '@/components/QuestionStats';
 import { QuestionFilters } from '@/components/QuestionFilters';
 import { SearchResults } from '@/components/SearchResults';
 import { HomePage } from '@/components/HomePage';
+import { TestMode } from './TestMode';
 import { Input } from '@/components/ui/input';
-import { Search, Menu, X, BookOpen, FileQuestion, Columns2, Home } from 'lucide-react';
+import { Search, Menu, X, BookOpen, FileQuestion, Columns2, Home, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useQuestionStats } from '@/hooks/useQuestionStats';
@@ -21,6 +22,7 @@ import { toast } from 'sonner';
 
 type ViewMode = 'questions' | 'reference' | 'split';
 type FilterMode = 'all' | 'incorrect';
+type ScreenMode = 'study' | 'test';
 
 export default function Index() {
   const [sections, setSections] = useState<Section[]>([]);
@@ -33,6 +35,7 @@ export default function Index() {
   const [viewMode, setViewMode] = useState<ViewMode>('split');
   const [filterMode, setFilterMode] = useState<FilterMode>('all');
   const [showSearchResults, setShowSearchResults] = useState(false);
+  const [screenMode, setScreenMode] = useState<ScreenMode>('study');
   const searchRef = useRef<HTMLDivElement>(null);
 
   const {
@@ -218,6 +221,17 @@ export default function Index() {
     .find(s => s.id === selectedSection)
     ?.subsections.find(ss => ss.id === selectedSubsection)?.title || '';
 
+  if (screenMode === 'test') {
+    return (
+      <div className="flex h-screen overflow-hidden bg-background">
+        <TestMode 
+          sections={sections} 
+          onBack={() => setScreenMode('study')}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="flex h-screen overflow-hidden bg-background">
       {/* Navigation Sidebar */}
@@ -266,6 +280,16 @@ export default function Index() {
                 </p>
               </div>
 
+              {/* Test Button */}
+              <Button
+                onClick={() => setScreenMode('test')}
+                variant="outline"
+                className="gap-2"
+              >
+                <Zap className="h-4 w-4" />
+                <span className="hidden md:inline">Test</span>
+              </Button>
+
               {/* View Mode Toggle */}
               <div className="hidden sm:flex items-center gap-2 bg-accent/5 rounded-lg p-1">
                 <Button
@@ -300,6 +324,15 @@ export default function Index() {
 
             {/* Mobile View Toggle */}
             <div className="flex sm:hidden items-center gap-2 mt-4 bg-accent/5 rounded-lg p-1">
+              <Button
+                onClick={() => setScreenMode('test')}
+                variant="outline"
+                size="sm"
+                className="gap-2 flex-1"
+              >
+                <Zap className="h-4 w-4" />
+                Test
+              </Button>
               <Button
                 variant={viewMode === 'reference' ? 'default' : 'ghost'}
                 size="sm"
