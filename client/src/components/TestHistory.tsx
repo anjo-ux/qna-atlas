@@ -108,10 +108,11 @@ export function TestHistory({ sessions, onResume, onDelete, maxItems }: TestHist
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogCancel data-testid="button-cancel-delete">Cancel</AlertDialogCancel>
                         <AlertDialogAction
                           onClick={() => onDelete(session.id)}
                           className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                          data-testid="button-confirm-delete"
                         >
                           Delete
                         </AlertDialogAction>

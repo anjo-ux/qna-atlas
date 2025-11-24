@@ -23,6 +23,7 @@ import { toast } from 'sonner';
 type ViewMode = 'questions' | 'reference' | 'split';
 type FilterMode = 'all' | 'incorrect';
 type ScreenMode = 'study' | 'test';
+type TestModeState = { mode: 'new' } | { mode: 'resume'; sessionId: string };
 
 export default function Index() {
   const [sections, setSections] = useState<Section[]>([]);
@@ -36,6 +37,7 @@ export default function Index() {
   const [filterMode, setFilterMode] = useState<FilterMode>('all');
   const [showSearchResults, setShowSearchResults] = useState(false);
   const [screenMode, setScreenMode] = useState<ScreenMode>('study');
+  const [testModeState, setTestModeState] = useState<TestModeState>({ mode: 'new' });
   const searchRef = useRef<HTMLDivElement>(null);
 
   const {
@@ -221,12 +223,26 @@ export default function Index() {
     .find(s => s.id === selectedSection)
     ?.subsections.find(ss => ss.id === selectedSubsection)?.title || '';
 
+  const handleResumeTest = (sessionId: string) => {
+    setTestModeState({ mode: 'resume', sessionId });
+    setScreenMode('test');
+  };
+
+  const handleStartTest = () => {
+    setTestModeState({ mode: 'new' });
+    setScreenMode('test');
+  };
+
   if (screenMode === 'test') {
     return (
       <div className="flex h-screen overflow-hidden bg-background">
         <TestMode 
           sections={sections} 
-          onBack={() => setScreenMode('study')}
+          onBack={() => {
+            setScreenMode('study');
+            setTestModeState({ mode: 'new' });
+          }}
+          resumeSessionId={testModeState.mode === 'resume' ? testModeState.sessionId : undefined}
         />
       </div>
     );
@@ -282,7 +298,7 @@ export default function Index() {
 
               {/* Test Button */}
               <Button
-                onClick={() => setScreenMode('test')}
+                onClick={handleStartTest}
                 variant="outline"
                 className="gap-2"
               >
@@ -325,7 +341,7 @@ export default function Index() {
             {/* Mobile View Toggle */}
             <div className="flex sm:hidden items-center gap-2 mt-4 bg-accent/5 rounded-lg p-1">
               <Button
-                onClick={() => setScreenMode('test')}
+                onClick={handleStartTest}
                 variant="outline"
                 size="sm"
                 className="gap-2 flex-1"
@@ -400,7 +416,8 @@ export default function Index() {
             <HomePage 
               sections={sections} 
               onReviewIncorrect={handleReviewIncorrect}
-              onStartTest={() => setScreenMode('test')}
+              onStartTest={handleStartTest}
+              onResumeTest={handleResumeTest}
             />
           ) : (
             <div className={cn(

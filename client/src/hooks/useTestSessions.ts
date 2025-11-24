@@ -42,7 +42,7 @@ export function useTestSessions() {
     const session: TestSession = {
       id: `test-${Date.now()}`,
       createdAt: Date.now(),
-      status: 'in-progress',
+      status: 'in-progress' as const,
       questionCount,
       selectedSectionIds,
       useAllQuestions,
@@ -64,7 +64,7 @@ export function useTestSessions() {
 
   const completeSession = useCallback((sessionId: string) => {
     const updated = sessions.map(s =>
-      s.id === sessionId ? { ...s, status: 'completed', completedAt: Date.now() } : s
+      s.id === sessionId ? { ...s, status: 'completed' as const, completedAt: Date.now() } : s
     );
     saveSessions(updated);
   }, [sessions, saveSessions]);

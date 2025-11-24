@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { Section, Question } from '@/types/question';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -16,11 +16,12 @@ import { cn } from '@/lib/utils';
 interface TestModeProps {
   sections: Section[];
   onBack: () => void;
+  resumeSessionId?: string;
 }
 
 type TestState = 'setup' | 'testing' | 'results';
 
-export function TestMode({ sections, onBack }: TestModeProps) {
+export function TestMode({ sections, onBack, resumeSessionId }: TestModeProps) {
   const [testState, setTestState] = useState<TestState>('setup');
   const [questionCount, setQuestionCount] = useState<10 | 20 | 30 | 40>(10);
   const [selectedSubsections, setSelectedSubsections] = useState<Set<string>>(
@@ -34,9 +35,10 @@ export function TestMode({ sections, onBack }: TestModeProps) {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [responses, setResponses] = useState<Record<string, QuestionResponse>>({});
   const [currentSession, setCurrentSession] = useState<TestSession | null>(null);
+  const hasResumedRef = useRef(false);
 
   const { recordResponse } = useQuestionStats();
-  const { createSession, updateSession, completeSession, getInProgressSessions, deleteSession } = useTestSessions();
+  const { createSession, updateSession, completeSession, getInProgressSessions, deleteSession, sessions } = useTestSessions();
 
   // Get all available questions based on selection
   const availableQuestions = useMemo(() => {
@@ -86,12 +88,32 @@ export function TestMode({ sections, onBack }: TestModeProps) {
   };
 
   const handleResumeTest = (session: TestSession) => {
+    // Restore test state
     setTestQuestions(session.questions);
     setCurrentQuestionIndex(session.currentQuestionIndex);
     setResponses(session.responses);
     setCurrentSession(session);
+    
+    // Restore configuration
+    setQuestionCount(session.questionCount as 10 | 20 | 30 | 40);
+    setUseAllQuestions(session.useAllQuestions);
+    setSelectedSubsections(new Set(session.selectedSectionIds));
+    
     setTestState('testing');
   };
+
+  // Auto-resume if resumeSessionId is provided
+  useEffect(() => {
+    // Only auto-resume once and only if sessions have been loaded from localStorage
+    if (resumeSessionId && sessions.length >= 0 && !hasResumedRef.current) {
+      const session = sessions.find(s => s.id === resumeSessionId);
+      if (session && session.status === 'in-progress') {
+        hasResumedRef.current = true;
+        handleResumeTest(session);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [resumeSessionId, sessions]);
 
   const handleToggleSubsection = (subsectionId: string) => {
     const newSelected = new Set(selectedSubsections);
@@ -128,21 +150,22 @@ export function TestMode({ sections, onBack }: TestModeProps) {
             timestamp: Date.now()
           };
           
-          // Store the response locally
-          setResponses(prev => ({
-            ...prev,
-            [questionId]: newResponse
-          }));
-          
-          // Update session if active
-          if (currentSession) {
-            updateSession(currentSession.id, {
-              responses: {
-                ...responses,
-                [questionId]: newResponse
-              }
-            });
-          }
+          // Store the response locally and update session with latest state
+          setResponses(prev => {
+            const updatedResponses = {
+              ...prev,
+              [questionId]: newResponse
+            };
+            
+            // Update session with the fresh responses
+            if (currentSession) {
+              updateSession(currentSession.id, {
+                responses: updatedResponses
+              });
+            }
+            
+            return updatedResponses;
+          });
           
           // Record in global stats
           recordResponse({
@@ -181,6 +204,9 @@ export function TestMode({ sections, onBack }: TestModeProps) {
 
   const handleQuestionNavigation = (index: number) => {
     setCurrentQuestionIndex(index);
+    if (currentSession) {
+      updateSession(currentSession.id, { currentQuestionIndex: index });
+    }
   };
 
   const handleFinishTest = () => {

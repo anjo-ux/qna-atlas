@@ -14,11 +14,12 @@ interface HomePageProps {
   sections: Section[];
   onReviewIncorrect?: () => void;
   onStartTest?: () => void;
+  onResumeTest?: (sessionId: string) => void;
 }
 
-export function HomePage({ sections, onReviewIncorrect, onStartTest }: HomePageProps) {
+export function HomePage({ sections, onReviewIncorrect, onStartTest, onResumeTest }: HomePageProps) {
   const { getAllStats, responses, getSubsectionStats, resetAll } = useQuestionStats();
-  const { getRecentSessions } = useTestSessions();
+  const { sessions, deleteSession } = useTestSessions();
   const overallStats = getAllStats();
   
   const accuracyPercentage = overallStats.total > 0 
@@ -86,8 +87,10 @@ export function HomePage({ sections, onReviewIncorrect, onStartTest }: HomePageP
   }, [sections, getSubsectionStats]);
 
   const recentSessions = useMemo(() => {
-    return getRecentSessions(3);
-  }, [getRecentSessions]);
+    return [...sessions]
+      .sort((a, b) => b.createdAt - a.createdAt)
+      .slice(0, 3);
+  }, [sessions]);
 
   // Get recent activity (last 7 days)
   const recentActivity = useMemo(() => {
@@ -275,7 +278,12 @@ export function HomePage({ sections, onReviewIncorrect, onStartTest }: HomePageP
             <Zap className="h-5 w-5 text-primary" />
             <h2 className="text-xl font-semibold">Recent Tests</h2>
           </div>
-          <TestHistory sessions={recentSessions} maxItems={5} />
+          <TestHistory 
+            sessions={recentSessions} 
+            maxItems={5}
+            onResume={onResumeTest ? (session) => onResumeTest(session.id) : undefined}
+            onDelete={deleteSession}
+          />
         </Card>
       )}
 
