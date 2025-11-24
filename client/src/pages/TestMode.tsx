@@ -144,14 +144,14 @@ export function TestMode({ sections, onBack }: TestModeProps) {
         <div className="flex-1 overflow-auto p-6">
           <div className="max-w-2xl mx-auto space-y-6">
             {/* Question Count */}
-            <Card className="p-6">
-              <h2 className="text-lg font-semibold mb-4">Number of Questions</h2>
+            <Card className="p-4">
+              <h2 className="text-sm font-semibold mb-3">Number of Questions</h2>
               <RadioGroup value={questionCount.toString()} onValueChange={(v) => setQuestionCount(parseInt(v) as any)}>
-                <div className="space-y-3">
+                <div className="space-y-2">
                   {[10, 20, 30, 40].map(count => (
                     <div key={count} className="flex items-center space-x-2">
                       <RadioGroupItem value={count.toString()} id={`count-${count}`} />
-                      <Label htmlFor={`count-${count}`} className="cursor-pointer">{count} Questions</Label>
+                      <Label htmlFor={`count-${count}`} className="cursor-pointer text-sm">{count} Questions</Label>
                     </div>
                   ))}
                 </div>
@@ -159,11 +159,11 @@ export function TestMode({ sections, onBack }: TestModeProps) {
             </Card>
 
             {/* Question Source */}
-            <Card className="p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-lg font-semibold">Select Questions From</h2>
-                <div className="flex items-center gap-3">
-                  <Label htmlFor="all-select-toggle" className="text-sm font-medium">{useAllQuestions ? 'All' : 'Select'}</Label>
+            <Card className="p-4">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-sm font-semibold">Select Questions From</h2>
+                <div className="flex items-center gap-2">
+                  <Label htmlFor="all-select-toggle" className="text-xs font-medium">{useAllQuestions ? 'All' : 'Select'}</Label>
                   <Switch
                     id="all-select-toggle"
                     checked={useAllQuestions}
@@ -173,46 +173,46 @@ export function TestMode({ sections, onBack }: TestModeProps) {
               </div>
 
               {useAllQuestions ? (
-                <div className="p-4 bg-accent/10 rounded-lg border border-accent/20">
-                  <p className="font-medium text-foreground">All Available Questions</p>
-                  <p className="text-sm text-muted-foreground mt-1">
+                <div className="p-3 bg-accent/10 rounded-lg border border-accent/20">
+                  <p className="font-medium text-foreground text-sm">All Available Questions</p>
+                  <p className="text-xs text-muted-foreground mt-1">
                     Randomly select from all {availableQuestions.length} questions across all sections
                   </p>
                 </div>
               ) : (
-                <div className="space-y-2">
-                  <Label className="text-base font-medium">Sections & Subsections:</Label>
-                  <div className="space-y-2 max-h-96 overflow-y-auto">
+                <div className="space-y-1 border border-border rounded-lg p-3 bg-muted/30">
+                  <div className="space-y-1">
                     {sections.map(section => (
                       <div key={section.id}>
                         <button
                           onClick={() => handleToggleSection(section.id)}
-                          className="w-full flex items-center gap-2 p-3 hover:bg-accent/10 rounded-lg transition-colors"
+                          className="w-full flex items-center gap-1 p-2 hover:bg-accent/10 rounded transition-colors"
                         >
                           {expandedSections.has(section.id) ? (
-                            <ChevronDown className="h-4 w-4" />
+                            <ChevronDown className="h-3 w-3 flex-shrink-0" />
                           ) : (
-                            <ChevronRight className="h-4 w-4" />
+                            <ChevronRight className="h-3 w-3 flex-shrink-0" />
                           )}
-                          <span className="font-medium text-sm flex-1 text-left">{section.title}</span>
+                          <span className="font-medium text-xs flex-1 text-left">{section.title}</span>
                           <span className="text-xs text-muted-foreground">
                             {section.subsections.filter(ss => selectedSubsections.has(ss.id)).length} / {section.subsections.length}
                           </span>
                         </button>
 
                         {expandedSections.has(section.id) && (
-                          <div className="ml-4 space-y-2 mt-1">
+                          <div className="ml-3 space-y-1">
                             {section.subsections.map(subsection => (
-                              <div key={subsection.id} className="flex items-center space-x-2 p-2">
+                              <div key={subsection.id} className="flex items-start space-x-2 p-1">
                                 <Checkbox
                                   checked={selectedSubsections.has(subsection.id)}
                                   onCheckedChange={() => handleToggleSubsection(subsection.id)}
                                   id={`subsection-${subsection.id}`}
+                                  className="mt-0.5"
                                 />
-                                <Label htmlFor={`subsection-${subsection.id}`} className="cursor-pointer text-sm flex-1">
-                                  <div className="font-medium">{subsection.title}</div>
+                                <Label htmlFor={`subsection-${subsection.id}`} className="cursor-pointer flex-1 pt-0.5">
+                                  <div className="font-medium text-xs">{subsection.title}</div>
                                   <div className="text-xs text-muted-foreground">
-                                    {subsection.questions.length} questions
+                                    {subsection.questions.length} q
                                   </div>
                                 </Label>
                               </div>
