@@ -180,48 +180,55 @@ export function TestMode({ sections, onBack }: TestModeProps) {
                   </p>
                 </div>
               ) : (
-                <div className="space-y-1 border border-border rounded-lg p-3 bg-muted/30">
-                  <div className="space-y-1">
-                    {sections.map(section => (
-                      <div key={section.id}>
-                        <button
-                          onClick={() => handleToggleSection(section.id)}
-                          className="w-full flex items-center gap-1 p-2 hover:bg-accent/10 rounded transition-colors"
-                        >
-                          {expandedSections.has(section.id) ? (
-                            <ChevronDown className="h-3 w-3 flex-shrink-0" />
-                          ) : (
-                            <ChevronRight className="h-3 w-3 flex-shrink-0" />
-                          )}
-                          <span className="font-medium text-xs flex-1 text-left">{section.title}</span>
-                          <span className="text-xs text-muted-foreground">
-                            {section.subsections.filter(ss => selectedSubsections.has(ss.id)).length} / {section.subsections.length}
-                          </span>
-                        </button>
-
-                        {expandedSections.has(section.id) && (
-                          <div className="ml-3 space-y-1">
-                            {section.subsections.map(subsection => (
-                              <div key={subsection.id} className="flex items-start space-x-2 p-1">
-                                <Checkbox
-                                  checked={selectedSubsections.has(subsection.id)}
-                                  onCheckedChange={() => handleToggleSubsection(subsection.id)}
-                                  id={`subsection-${subsection.id}`}
-                                  className="mt-0.5"
-                                />
-                                <Label htmlFor={`subsection-${subsection.id}`} className="cursor-pointer flex-1 pt-0.5">
-                                  <div className="font-medium text-xs">{subsection.title}</div>
-                                  <div className="text-xs text-muted-foreground">
-                                    {subsection.questions.length} q
-                                  </div>
-                                </Label>
-                              </div>
-                            ))}
-                          </div>
+                <div className="border border-border rounded-lg p-4 bg-muted/30 space-y-3">
+                  {sections.map(section => (
+                    <div key={section.id}>
+                      <button
+                        onClick={() => handleToggleSection(section.id)}
+                        className="w-full flex items-center gap-2 mb-2 hover:opacity-70 transition-opacity"
+                      >
+                        {expandedSections.has(section.id) ? (
+                          <ChevronDown className="h-4 w-4 flex-shrink-0" />
+                        ) : (
+                          <ChevronRight className="h-4 w-4 flex-shrink-0" />
                         )}
-                      </div>
-                    ))}
-                  </div>
+                        <Checkbox
+                          checked={section.subsections.every(ss => selectedSubsections.has(ss.id))}
+                          onCheckedChange={(checked) => {
+                            const newSelected = new Set(selectedSubsections);
+                            section.subsections.forEach(ss => {
+                              if (checked) {
+                                newSelected.add(ss.id);
+                              } else {
+                                newSelected.delete(ss.id);
+                              }
+                            });
+                            setSelectedSubsections(newSelected);
+                          }}
+                          className="flex-shrink-0"
+                        />
+                        <span className="font-medium text-sm">{section.title}</span>
+                      </button>
+
+                      {expandedSections.has(section.id) && (
+                        <div className="grid grid-cols-2 gap-2 ml-6">
+                          {section.subsections.map(subsection => (
+                            <div key={subsection.id} className="flex items-center gap-2">
+                              <Checkbox
+                                checked={selectedSubsections.has(subsection.id)}
+                                onCheckedChange={() => handleToggleSubsection(subsection.id)}
+                                id={`subsection-${subsection.id}`}
+                                className="flex-shrink-0"
+                              />
+                              <Label htmlFor={`subsection-${subsection.id}`} className="cursor-pointer text-xs flex-1">
+                                {subsection.title} <span className="text-muted-foreground">({subsection.questions.length})</span>
+                              </Label>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))}
                 </div>
               )}
             </Card>
