@@ -103,7 +103,7 @@ export function HomePage({ sections, onReviewIncorrect }: HomePageProps) {
     : 0;
 
   return (
-    <div className="p-8 max-w-7xl mx-auto space-y-8 animate-fade-in">
+    <div className="p-8 max-w-7xl mx-auto space-y-8 animate-fade-in overflow-auto flex-1">
       {/* Welcome Header */}
       <div className="flex items-start justify-between">
         <div className="space-y-2">
