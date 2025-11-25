@@ -2,12 +2,14 @@ import {
   users,
   testSessions,
   questionResponses,
+  loginConnections,
   type User,
   type UpsertUser,
   type TestSession,
   type InsertTestSession,
   type QuestionResponse,
   type InsertQuestionResponse,
+  type LoginConnection,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc } from "drizzle-orm";
@@ -32,6 +34,11 @@ export interface IStorage {
   createQuestionResponse(response: InsertQuestionResponse): Promise<QuestionResponse>;
   getTestSessionResponses(testSessionId: string): Promise<QuestionResponse[]>;
   upsertQuestionResponse(response: InsertQuestionResponse): Promise<QuestionResponse>;
+
+  // Login Connection operations
+  getLoginConnections(userId: string): Promise<LoginConnection[]>;
+  addLoginConnection(userId: string, provider: string): Promise<LoginConnection>;
+  removeLoginConnection(userId: string, provider: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -184,6 +191,29 @@ export class DatabaseStorage implements IStorage {
       // Create new
       return await this.createQuestionResponse(responseData);
     }
+  }
+
+  // Login Connection operations
+  async getLoginConnections(userId: string): Promise<LoginConnection[]> {
+    return await db
+      .select()
+      .from(loginConnections)
+      .where(eq(loginConnections.userId, userId));
+  }
+
+  async addLoginConnection(userId: string, provider: string): Promise<LoginConnection> {
+    const [conn] = await db
+      .insert(loginConnections)
+      .values({ userId, provider })
+      .onConflictDoNothing()
+      .returning();
+    return conn || (await db.select().from(loginConnections).where(and(eq(loginConnections.userId, userId), eq(loginConnections.provider, provider))).then(r => r[0]));
+  }
+
+  async removeLoginConnection(userId: string, provider: string): Promise<void> {
+    await db
+      .delete(loginConnections)
+      .where(and(eq(loginConnections.userId, userId), eq(loginConnections.provider, provider)));
   }
 }
 

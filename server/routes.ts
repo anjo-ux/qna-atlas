@@ -28,7 +28,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Update user profile
   app.patch('/api/auth/user', async (req: any, res) => {
     try {
-      // Check if user is authenticated - allow if req.user exists
       if (!req.isAuthenticated() || !req.user?.claims?.sub) {
         return res.status(401).json({ message: "Unauthorized" });
       }
@@ -48,6 +47,63 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error updating user:", error);
       res.status(500).json({ message: "Failed to update user" });
+    }
+  });
+
+  // Get user's login connections
+  app.get('/api/auth/connections', async (req: any, res) => {
+    try {
+      if (!req.isAuthenticated() || !req.user?.claims?.sub) {
+        return res.json([]);
+      }
+      
+      const userId = req.user.claims.sub;
+      const connections = await storage.getLoginConnections(userId);
+      res.json(connections.map(c => c.provider));
+    } catch (error) {
+      console.error("Error fetching connections:", error);
+      res.status(500).json({ message: "Failed to fetch connections" });
+    }
+  });
+
+  // Add login connection
+  app.post('/api/auth/connections/:provider', async (req: any, res) => {
+    try {
+      if (!req.isAuthenticated() || !req.user?.claims?.sub) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      const userId = req.user.claims.sub;
+      const { provider } = req.params;
+      
+      await storage.addLoginConnection(userId, provider);
+      res.json({ provider, added: true });
+    } catch (error) {
+      console.error("Error adding connection:", error);
+      res.status(500).json({ message: "Failed to add connection" });
+    }
+  });
+
+  // Remove login connection
+  app.delete('/api/auth/connections/:provider', async (req: any, res) => {
+    try {
+      if (!req.isAuthenticated() || !req.user?.claims?.sub) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      const userId = req.user.claims.sub;
+      const { provider } = req.params;
+      
+      const connections = await storage.getLoginConnections(userId);
+      if (connections.length <= 1) {
+        return res.status(400).json({ message: "Cannot remove last connection" });
+      }
+      
+      await storage.removeLoginConnection(userId, provider);
+      res.json({ provider, removed: true });
+    } catch (error) {
+      console.error("Error removing connection:", error);
+      res.status(500).json({ message: "Failed to remove connection" });
     }
   });
 

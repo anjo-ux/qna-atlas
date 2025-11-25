@@ -132,7 +132,20 @@ export function Settings({ onBack }: SettingsProps) {
     }
   };
 
-  const [connectedProviders, setConnectedProviders] = useState<string[]>(['google']);
+  const [connectedProviders, setConnectedProviders] = useState<string[]>([]);
+
+  useEffect(() => {
+    const fetchConnections = async () => {
+      try {
+        const res = await fetch('/api/auth/connections');
+        const providers = await res.json();
+        setConnectedProviders(providers);
+      } catch (error) {
+        console.error('Error fetching connections:', error);
+      }
+    };
+    fetchConnections();
+  }, []);
 
   const hasChanges = 
     formData.username !== (user?.username || '') ||
@@ -141,19 +154,30 @@ export function Settings({ onBack }: SettingsProps) {
     formData.institutionalAffiliation !== (user?.institutionalAffiliation || '') ||
     formData.profileImageUrl !== (user?.profileImageUrl || '');
 
-  const handleAddConnection = (provider: string) => {
-    if (!connectedProviders.includes(provider)) {
-      setConnectedProviders([...connectedProviders, provider]);
-      toast.success(`${provider} connection added`);
+  const handleAddConnection = async (provider: string) => {
+    try {
+      const res = await fetch(`/api/auth/connections/${provider}`, { method: 'POST' });
+      if (res.ok) {
+        setConnectedProviders([...connectedProviders, provider]);
+        toast.success(`${provider} connection added`);
+      }
+    } catch (error) {
+      toast.error(`Failed to add ${provider} connection`);
     }
   };
 
-  const handleRemoveConnection = (provider: string) => {
-    if (connectedProviders.length > 1) {
-      setConnectedProviders(connectedProviders.filter(p => p !== provider));
-      toast.success(`${provider} connection removed`);
-    } else {
-      toast.error('You must have at least one connection');
+  const handleRemoveConnection = async (provider: string) => {
+    try {
+      const res = await fetch(`/api/auth/connections/${provider}`, { method: 'DELETE' });
+      if (res.ok) {
+        setConnectedProviders(connectedProviders.filter(p => p !== provider));
+        toast.success(`${provider} connection removed`);
+      } else {
+        const error = await res.json();
+        toast.error(error.message || `Failed to remove ${provider} connection`);
+      }
+    } catch (error) {
+      toast.error(`Failed to remove ${provider} connection`);
     }
   };
 
