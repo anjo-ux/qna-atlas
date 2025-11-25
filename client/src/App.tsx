@@ -6,6 +6,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/useAuth";
 import Index from "./pages/Index";
+import PreviewMode from "./pages/PreviewMode";
 import NotFound from "./pages/NotFound";
 import Landing from "./pages/Landing";
 
@@ -23,14 +24,17 @@ function Router() {
     );
   }
 
-  if (!isAuthenticated) {
-    return <Landing />;
-  }
-
   return (
     <Switch>
-      <Route path="/" component={Index} />
-      <Route component={NotFound} />
+      <Route path="/preview" component={PreviewMode} />
+      {!isAuthenticated ? (
+        <Route component={Landing} />
+      ) : (
+        <>
+          <Route path="/" component={Index} />
+          <Route component={NotFound} />
+        </>
+      )}
     </Switch>
   );
 }
