@@ -23,13 +23,13 @@ export default function Landing() {
         }}
       />
 
-      <header className="border-b bg-white dark:bg-slate-950">
+      <header className="border-b glass-effect sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <img src={atlasLogo} alt="Plastic Surgery Atlas" className="w-8 h-8 object-contain" />
-            <h1 className="text-xl font-bold text-primary">Plastic Surgery Atlas</h1>
+            <h1 className="text-xl font-bold gradient-text">Plastic Surgery Atlas</h1>
           </div>
-          <Button onClick={handleLogin} data-testid="button-login">
+          <Button onClick={handleLogin} data-testid="button-login" className="glow-primary transition-glow">
             Sign In
           </Button>
         </div>
@@ -39,19 +39,19 @@ export default function Landing() {
         <div className="max-w-4xl mx-auto space-y-12">
           <div className="text-center space-y-6">
             <div className="flex justify-center mb-4">
-              <img src={atlasLogo} alt="Plastic Surgery Atlas" className="w-24 h-24 object-contain" />
+              <img src={atlasLogo} alt="Plastic Surgery Atlas" className="w-24 h-24 object-contain drop-shadow-lg" />
             </div>
-            <h2 className="text-5xl font-bold text-primary">
+            <h2 className="text-5xl font-bold gradient-text">
               Plastic Surgery Atlas
             </h2>
             <p className="text-xl text-muted-foreground">
               Master comprehensive plastic surgery knowledge through interactive questions, detailed explanations, and structured learning paths
             </p>
             <div className="pt-4 flex gap-3 justify-center">
-              <Button size="lg" onClick={handleLogin} data-testid="button-get-started" className="bg-primary hover:bg-primary/90">
+              <Button size="lg" onClick={handleLogin} data-testid="button-get-started" className="glow-primary transition-glow">
                 Get Started
               </Button>
-              <Button size="lg" variant="outline" onClick={() => setShowPreviewWizard(true)} data-testid="button-preview">
+              <Button size="lg" variant="outline" onClick={() => setShowPreviewWizard(true)} data-testid="button-preview" className="transition-glow hover:glow-primary">
                 <Eye className="mr-2 h-4 w-4" />
                 Preview
               </Button>
@@ -59,9 +59,9 @@ export default function Landing() {
           </div>
 
           <div className="grid md:grid-cols-2 gap-6">
-            <Card>
+            <Card className="glass-card glow-primary transition-glow">
               <CardHeader>
-                <CardTitle>Comprehensive Learning</CardTitle>
+                <CardTitle className="gradient-text">Comprehensive Learning</CardTitle>
                 <CardDescription>
                   Organized by surgical specialties and topics
                 </CardDescription>
@@ -88,9 +88,9 @@ export default function Landing() {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="glass-card glow-accent transition-glow">
               <CardHeader>
-                <CardTitle>Track Your Progress</CardTitle>
+                <CardTitle className="gradient-text">Track Your Progress</CardTitle>
                 <CardDescription>
                   Monitor mastery across all topics
                 </CardDescription>

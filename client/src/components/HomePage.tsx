@@ -216,7 +216,7 @@ export function HomePage({ sections, onReviewIncorrect, onStartTest, onResumeTes
 
       {/* Key Metrics */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 md:gap-4">
-        <Card className="p-3 md:p-6 bg-gradient-to-br from-chart-1/10 to-chart-2/10 border-chart-1/20">
+        <Card className="p-3 md:p-6 glass-card glow-primary transition-glow hover:glow-primary">
           <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-3">
             <div className="p-2 md:p-3 rounded-lg bg-chart-1/20 flex-shrink-0">
               <BookOpen className="h-5 w-5 md:h-6 md:w-6 text-chart-1" />
@@ -228,7 +228,7 @@ export function HomePage({ sections, onReviewIncorrect, onStartTest, onResumeTes
           </div>
         </Card>
 
-        <Card className="p-3 md:p-6 bg-gradient-to-br from-chart-3/10 to-success/10 border-success/20">
+        <Card className="p-3 md:p-6 glass-card glow-primary transition-glow hover:glow-primary">
           <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-3">
             <div className="p-2 md:p-3 rounded-lg bg-success/20 flex-shrink-0">
               <CheckCircle2 className="h-5 w-5 md:h-6 md:w-6 text-success" />
@@ -240,7 +240,7 @@ export function HomePage({ sections, onReviewIncorrect, onStartTest, onResumeTes
           </div>
         </Card>
 
-        <Card className="p-3 md:p-6 bg-gradient-to-br from-destructive/10 to-destructive/5 border-destructive/20">
+        <Card className="p-3 md:p-6 glass-card glow-primary transition-glow hover:glow-primary">
           <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-3">
             <div className="p-2 md:p-3 rounded-lg bg-destructive/20 flex-shrink-0">
               <XCircle className="h-5 w-5 md:h-6 md:w-6 text-destructive" />
@@ -252,7 +252,7 @@ export function HomePage({ sections, onReviewIncorrect, onStartTest, onResumeTes
           </div>
         </Card>
 
-        <Card className="p-3 md:p-6 bg-gradient-to-br from-accent/10 to-primary/10 border-accent/20">
+        <Card className="p-3 md:p-6 glass-card glow-accent transition-glow hover:glow-accent">
           <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-3">
             <div className="p-2 md:p-3 rounded-lg bg-accent/20 flex-shrink-0">
               <Target className="h-5 w-5 md:h-6 md:w-6 text-accent" />
@@ -267,8 +267,8 @@ export function HomePage({ sections, onReviewIncorrect, onStartTest, onResumeTes
 
       {/* Progress Overview */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
-        <Card className="p-4 md:p-6">
-          <h2 className="text-lg md:text-xl font-semibold mb-4 flex items-center gap-2">
+        <Card className="p-4 md:p-6 glass-card glow-primary transition-glow">
+          <h2 className="text-lg md:text-xl font-semibold mb-4 flex items-center gap-2 gradient-text">
             <TrendingUp className="h-5 w-5 text-primary" />
             Overall Progress
           </h2>
@@ -292,8 +292,8 @@ export function HomePage({ sections, onReviewIncorrect, onStartTest, onResumeTes
           </div>
         </Card>
 
-        <Card className="p-4 md:p-6">
-          <h2 className="text-lg md:text-xl font-semibold mb-4">Recent Activity (7 Days)</h2>
+        <Card className="p-4 md:p-6 glass-card glow-accent transition-glow">
+          <h2 className="text-lg md:text-xl font-semibold mb-4 gradient-text">Recent Activity (7 Days)</h2>
           <div className="space-y-4">
             <div className="flex justify-between items-center p-3 md:p-4 bg-muted/50 rounded-lg gap-2">
               <div>
