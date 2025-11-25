@@ -27,6 +27,7 @@ export function ReferenceTextPanel({
     addNote,
     updateNote,
     removeNote,
+    updateNotePosition,
     getHighlightsForSection,
     getNotesForSection,
   } = useHighlights();
@@ -146,6 +147,7 @@ export function ReferenceTextPanel({
           position={note.position}
           onUpdate={updateNote}
           onDelete={removeNote}
+          onPositionChange={updateNotePosition}
         />
       ))}
     </div>
