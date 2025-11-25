@@ -39,7 +39,7 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
   const [responses, setResponses] = useState<Record<string, QuestionResponse>>({});
   const [currentSession, setCurrentSession] = useState<TestSession | null>(null);
   const [showTestWizard, setShowTestWizard] = useState(false);
-  const [showQuestionPanel, setShowQuestionPanel] = useState(true);
+  const [showQuestionPanel, setShowQuestionPanel] = useState(false);
   const hasResumedRef = useRef(false);
 
   const { recordResponse } = useQuestionStats();
