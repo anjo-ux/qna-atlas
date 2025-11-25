@@ -127,18 +127,18 @@ export function HomePage({ sections, onReviewIncorrect, onStartTest, onResumeTes
     : 0;
 
   return (
-    <div className="p-8 max-w-7xl mx-auto space-y-8 animate-fade-in overflow-auto flex-1">
+    <div className="p-4 md:p-6 lg:p-8 max-w-7xl mx-auto space-y-6 md:space-y-8 animate-fade-in overflow-auto flex-1">
       {/* Welcome Header */}
-      <div className="flex items-start justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
         <div className="space-y-2">
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-            PSITE Review Dashboard
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+            Plastic Surgery Atlas
           </h1>
-          <p className="text-muted-foreground text-lg">
+          <p className="text-muted-foreground text-sm md:text-base">
             {user && (
               <span>Welcome back, {user.firstName || user.email?.split('@')[0]}! </span>
             )}
-            Track your progress and master your plastic surgery knowledge
+            Track your progress and master your knowledge
           </p>
         </div>
         <DropdownMenu>
@@ -175,22 +175,23 @@ export function HomePage({ sections, onReviewIncorrect, onStartTest, onResumeTes
       </div>
       
       {/* Action Buttons */}
-      <div className="flex gap-3">
+      <div className="flex flex-wrap gap-2 md:gap-3">
         {overallStats.incorrect > 0 && (
           <Button
             onClick={onReviewIncorrect}
             variant="outline"
-            className="gap-2"
+            className="gap-2 text-xs sm:text-sm"
           >
             <AlertCircle className="h-4 w-4" />
-            Review Incorrect ({overallStats.incorrect})
+            <span className="hidden sm:inline">Review Incorrect ({overallStats.incorrect})</span>
+            <span className="sm:hidden">Incorrect ({overallStats.incorrect})</span>
           </Button>
         )}
         
         {overallStats.total > 0 && (
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <Button variant="destructive" className="gap-2">
+              <Button variant="destructive" className="gap-2 text-xs sm:text-sm">
                 <RotateCcw className="h-4 w-4" />
                 Reset All
               </Button>
@@ -214,60 +215,60 @@ export function HomePage({ sections, onReviewIncorrect, onStartTest, onResumeTes
       </div>
 
       {/* Key Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="p-6 bg-gradient-to-br from-chart-1/10 to-chart-2/10 border-chart-1/20">
-          <div className="flex items-center gap-3">
-            <div className="p-3 rounded-lg bg-chart-1/20">
-              <BookOpen className="h-6 w-6 text-chart-1" />
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 md:gap-4">
+        <Card className="p-3 md:p-6 bg-gradient-to-br from-chart-1/10 to-chart-2/10 border-chart-1/20">
+          <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-3">
+            <div className="p-2 md:p-3 rounded-lg bg-chart-1/20 flex-shrink-0">
+              <BookOpen className="h-5 w-5 md:h-6 md:w-6 text-chart-1" />
             </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Total Questions</p>
-              <p className="text-2xl font-bold text-foreground">{overallStats.total}</p>
-            </div>
-          </div>
-        </Card>
-
-        <Card className="p-6 bg-gradient-to-br from-chart-3/10 to-success/10 border-success/20">
-          <div className="flex items-center gap-3">
-            <div className="p-3 rounded-lg bg-success/20">
-              <CheckCircle2 className="h-6 w-6 text-success" />
-            </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Correct</p>
-              <p className="text-2xl font-bold text-success">{overallStats.correct}</p>
+            <div className="min-w-0">
+              <p className="text-xs md:text-sm text-muted-foreground">Total Questions</p>
+              <p className="text-lg md:text-2xl font-bold text-foreground">{overallStats.total}</p>
             </div>
           </div>
         </Card>
 
-        <Card className="p-6 bg-gradient-to-br from-destructive/10 to-destructive/5 border-destructive/20">
-          <div className="flex items-center gap-3">
-            <div className="p-3 rounded-lg bg-destructive/20">
-              <XCircle className="h-6 w-6 text-destructive" />
+        <Card className="p-3 md:p-6 bg-gradient-to-br from-chart-3/10 to-success/10 border-success/20">
+          <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-3">
+            <div className="p-2 md:p-3 rounded-lg bg-success/20 flex-shrink-0">
+              <CheckCircle2 className="h-5 w-5 md:h-6 md:w-6 text-success" />
             </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Incorrect</p>
-              <p className="text-2xl font-bold text-destructive">{overallStats.incorrect}</p>
+            <div className="min-w-0">
+              <p className="text-xs md:text-sm text-muted-foreground">Correct</p>
+              <p className="text-lg md:text-2xl font-bold text-success">{overallStats.correct}</p>
             </div>
           </div>
         </Card>
 
-        <Card className="p-6 bg-gradient-to-br from-accent/10 to-primary/10 border-accent/20">
-          <div className="flex items-center gap-3">
-            <div className="p-3 rounded-lg bg-accent/20">
-              <Target className="h-6 w-6 text-accent" />
+        <Card className="p-3 md:p-6 bg-gradient-to-br from-destructive/10 to-destructive/5 border-destructive/20">
+          <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-3">
+            <div className="p-2 md:p-3 rounded-lg bg-destructive/20 flex-shrink-0">
+              <XCircle className="h-5 w-5 md:h-6 md:w-6 text-destructive" />
             </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Accuracy</p>
-              <p className="text-2xl font-bold text-accent">{accuracyPercentage}%</p>
+            <div className="min-w-0">
+              <p className="text-xs md:text-sm text-muted-foreground">Incorrect</p>
+              <p className="text-lg md:text-2xl font-bold text-destructive">{overallStats.incorrect}</p>
+            </div>
+          </div>
+        </Card>
+
+        <Card className="p-3 md:p-6 bg-gradient-to-br from-accent/10 to-primary/10 border-accent/20">
+          <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-3">
+            <div className="p-2 md:p-3 rounded-lg bg-accent/20 flex-shrink-0">
+              <Target className="h-5 w-5 md:h-6 md:w-6 text-accent" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-xs md:text-sm text-muted-foreground">Accuracy</p>
+              <p className="text-lg md:text-2xl font-bold text-accent">{accuracyPercentage}%</p>
             </div>
           </div>
         </Card>
       </div>
 
       {/* Progress Overview */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="p-6">
-          <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
+        <Card className="p-4 md:p-6">
+          <h2 className="text-lg md:text-xl font-semibold mb-4 flex items-center gap-2">
             <TrendingUp className="h-5 w-5 text-primary" />
             Overall Progress
           </h2>
@@ -291,27 +292,27 @@ export function HomePage({ sections, onReviewIncorrect, onStartTest, onResumeTes
           </div>
         </Card>
 
-        <Card className="p-6">
-          <h2 className="text-xl font-semibold mb-4">Recent Activity (7 Days)</h2>
+        <Card className="p-4 md:p-6">
+          <h2 className="text-lg md:text-xl font-semibold mb-4">Recent Activity (7 Days)</h2>
           <div className="space-y-4">
-            <div className="flex justify-between items-center p-4 bg-muted/50 rounded-lg">
+            <div className="flex justify-between items-center p-3 md:p-4 bg-muted/50 rounded-lg gap-2">
               <div>
-                <p className="text-sm text-muted-foreground">Questions Answered</p>
-                <p className="text-2xl font-bold">{recentActivity.total}</p>
+                <p className="text-xs md:text-sm text-muted-foreground">Questions Answered</p>
+                <p className="text-lg md:text-2xl font-bold">{recentActivity.total}</p>
               </div>
               <div className="text-right">
-                <p className="text-sm text-muted-foreground">Accuracy</p>
-                <p className="text-2xl font-bold text-success">{recentActivity.accuracy}%</p>
+                <p className="text-xs md:text-sm text-muted-foreground">Accuracy</p>
+                <p className="text-lg md:text-2xl font-bold text-success">{recentActivity.accuracy}%</p>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="p-3 bg-success/10 rounded-lg border border-success/20">
+            <div className="grid grid-cols-2 gap-2 md:gap-3">
+              <div className="p-2 md:p-3 bg-success/10 rounded-lg border border-success/20">
                 <p className="text-xs text-muted-foreground">Correct</p>
-                <p className="text-xl font-bold text-success">{recentActivity.correct}</p>
+                <p className="text-base md:text-xl font-bold text-success">{recentActivity.correct}</p>
               </div>
-              <div className="p-3 bg-destructive/10 rounded-lg border border-destructive/20">
+              <div className="p-2 md:p-3 bg-destructive/10 rounded-lg border border-destructive/20">
                 <p className="text-xs text-muted-foreground">Incorrect</p>
-                <p className="text-xl font-bold text-destructive">{recentActivity.total - recentActivity.correct}</p>
+                <p className="text-base md:text-xl font-bold text-destructive">{recentActivity.total - recentActivity.correct}</p>
               </div>
             </div>
           </div>
@@ -320,10 +321,10 @@ export function HomePage({ sections, onReviewIncorrect, onStartTest, onResumeTes
 
       {/* Recent Tests */}
       {recentSessions.length > 0 && (
-        <Card className="p-6">
+        <Card className="p-4 md:p-6">
           <div className="flex items-center gap-2 mb-6">
             <Zap className="h-5 w-5 text-primary" />
-            <h2 className="text-xl font-semibold">Recent Tests</h2>
+            <h2 className="text-lg md:text-xl font-semibold">Recent Tests</h2>
           </div>
           <TestHistory 
             sessions={recentSessions} 
@@ -335,51 +336,51 @@ export function HomePage({ sections, onReviewIncorrect, onStartTest, onResumeTes
       )}
 
       {/* Section Progress */}
-      <Card className="p-6">
-        <h2 className="text-xl font-semibold mb-6">Progress by Section</h2>
+      <Card className="p-4 md:p-6">
+        <h2 className="text-lg md:text-xl font-semibold mb-6">Progress by Section</h2>
         <Accordion type="multiple" className="space-y-3">
           {sectionProgress.map(({ section, totalSectionQuestions, answeredQuestions, percentage, accuracy, subsectionDetails }) => (
-            <AccordionItem key={section.id} value={section.id} className="border rounded-lg px-4">
-              <AccordionTrigger className="hover:no-underline py-4">
-                <div className="flex-1 space-y-2">
-                  <div className="flex justify-between items-center">
-                    <h3 className="font-medium text-foreground text-left">{section.title}</h3>
-                    <div className="flex items-center gap-4 mr-2">
-                      <span className="text-sm text-muted-foreground">
+            <AccordionItem key={section.id} value={section.id} className="border rounded-lg px-2 md:px-4">
+              <AccordionTrigger className="hover:no-underline py-3 md:py-4">
+                <div className="flex-1 space-y-2 min-w-0">
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
+                    <h3 className="font-medium text-foreground text-left text-sm md:text-base">{section.title}</h3>
+                    <div className="flex flex-wrap items-center gap-2 md:gap-4 text-xs md:text-sm">
+                      <span className="text-muted-foreground">
                         {answeredQuestions} / {totalSectionQuestions}
                       </span>
-                      <span className="text-sm font-semibold text-primary">{percentage}%</span>
+                      <span className="font-semibold text-primary">{percentage}%</span>
                       {answeredQuestions > 0 && (
-                        <span className="text-sm text-success">({accuracy}% accurate)</span>
+                        <span className="text-success">({accuracy}% accurate)</span>
                       )}
                     </div>
                   </div>
                   <Progress value={percentage} className="h-2" />
                 </div>
               </AccordionTrigger>
-              <AccordionContent className="pb-4">
-                <div className="space-y-3 mt-2">
+              <AccordionContent className="pb-3 md:pb-4">
+                <div className="space-y-2 md:space-y-3 mt-2">
                   {subsectionDetails.map(({ subsection, totalQuestions, answered, correct, percentage: subPercentage, accuracy: subAccuracy }) => (
-                    <div key={subsection.id} className="pl-4 space-y-2 border-l-2 border-muted">
-                      <div className="flex justify-between items-center">
-                        <div className="flex items-center gap-2">
-                          <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                          <span className="text-sm font-medium text-foreground">{subsection.title}</span>
+                    <div key={subsection.id} className="pl-2 md:pl-4 space-y-2 border-l-2 border-muted">
+                      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-2">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <ChevronRight className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                          <span className="text-xs md:text-sm font-medium text-foreground truncate">{subsection.title}</span>
                         </div>
-                        <div className="flex items-center gap-3">
-                          <span className="text-xs text-muted-foreground">
+                        <div className="flex flex-wrap items-center gap-1 md:gap-3 text-xs">
+                          <span className="text-muted-foreground">
                             {answered} / {totalQuestions}
                           </span>
-                          <span className="text-xs font-semibold text-primary min-w-[35px] text-right">
+                          <span className="font-semibold text-primary min-w-[35px] text-right">
                             {subPercentage}%
                           </span>
                           {answered > 0 && (
-                            <span className="text-xs text-success min-w-[65px] text-right">
+                            <span className="text-success min-w-fit text-right">
                               {correct} correct ({subAccuracy}%)
                             </span>
                           )}
                           {answered === 0 && (
-                            <span className="text-xs text-muted-foreground min-w-[65px] text-right">
+                            <span className="text-muted-foreground text-right">
                               Not started
                             </span>
                           )}
@@ -397,18 +398,18 @@ export function HomePage({ sections, onReviewIncorrect, onStartTest, onResumeTes
 
       {/* Get Started Message */}
       {overallStats.total === 0 && (
-        <Card className="p-8 text-center bg-gradient-to-br from-primary/5 to-accent/5 border-primary/20">
-          <BookOpen className="h-12 w-12 text-primary mx-auto mb-4" />
-          <h3 className="text-xl font-semibold mb-2">Ready to Begin?</h3>
-          <p className="text-muted-foreground mb-6">
+        <Card className="p-4 md:p-8 text-center bg-gradient-to-br from-primary/5 to-accent/5 border-primary/20">
+          <BookOpen className="h-10 md:h-12 w-10 md:w-12 text-primary mx-auto mb-4" />
+          <h3 className="text-lg md:text-xl font-semibold mb-2">Ready to Begin?</h3>
+          <p className="text-xs md:text-base text-muted-foreground mb-6">
             Select a section from the navigation menu to start answering questions and track your progress
           </p>
-          <div className="flex gap-3 justify-center">
-            <Button onClick={onStartTest} data-testid="button-get-started">
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 justify-center">
+            <Button onClick={onStartTest} data-testid="button-get-started" className="text-xs sm:text-sm">
               Get Started
             </Button>
             {onPreview && (
-              <Button variant="outline" onClick={onPreview} data-testid="button-preview">
+              <Button variant="outline" onClick={onPreview} data-testid="button-preview" className="text-xs sm:text-sm">
                 <Eye className="mr-2 h-4 w-4" />
                 Preview
               </Button>

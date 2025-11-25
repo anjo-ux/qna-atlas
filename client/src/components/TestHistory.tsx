@@ -19,10 +19,10 @@ export function TestHistory({ sessions, onResume, onDelete, maxItems }: TestHist
 
   if (sessions.length === 0) {
     return (
-      <Card className="p-8 text-center border-dashed">
-        <Clock className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
-        <h3 className="text-lg font-semibold mb-1">No Tests Yet</h3>
-        <p className="text-muted-foreground">Create your first test to get started</p>
+      <Card className="p-4 md:p-8 text-center border-dashed">
+        <Clock className="h-10 md:h-12 w-10 md:w-12 text-muted-foreground mx-auto mb-3" />
+        <h3 className="text-base md:text-lg font-semibold mb-1">No Tests Yet</h3>
+        <p className="text-xs md:text-base text-muted-foreground">Create your first test to get started</p>
       </Card>
     );
   }
