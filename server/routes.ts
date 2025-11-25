@@ -54,12 +54,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/subscription', async (req: any, res) => {
     try {
       if (!req.isAuthenticated() || !req.user?.claims?.sub) {
-        return res.json({ status: 'none', daysRemaining: 0, trialEndsAt: null });
+        return res.json({ status: 'none', daysRemaining: 0, trialEndsAt: null, isLocked: false });
       }
       
       const user = await storage.getUser(req.user.claims.sub);
       if (!user) {
-        return res.json({ status: 'none', daysRemaining: 0, trialEndsAt: null });
+        return res.json({ status: 'none', daysRemaining: 0, trialEndsAt: null, isLocked: false });
+      }
+
+      // Emory University institutional affiliation override - unlimited access
+      const hasEmoryAccess = user.institutionalAffiliation?.toLowerCase().includes('emory');
+      if (hasEmoryAccess) {
+        return res.json({ 
+          status: 'institutional', 
+          daysRemaining: -1,
+          trialEndsAt: null,
+          isLocked: false,
+          subscriptionType: 'Institutional Affiliation'
+        });
       }
 
       const now = new Date();
@@ -86,7 +98,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       console.error('Error checking subscription:', error);
-      res.json({ status: 'error', daysRemaining: 0, trialEndsAt: null });
+      res.json({ status: 'error', daysRemaining: 0, trialEndsAt: null, isLocked: false });
     }
   });
 
@@ -199,7 +211,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!validationResult.success) {
         return res.status(400).json({ 
           message: "Invalid request data",
-          errors: validationResult.error.errors 
+          errors: validationResult.error.flatten().fieldErrors
         });
       }
       
@@ -298,7 +310,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!validationResult.success) {
         return res.status(400).json({ 
           message: "Invalid request data",
-          errors: validationResult.error.errors 
+          errors: validationResult.error.flatten().fieldErrors
         });
       }
       

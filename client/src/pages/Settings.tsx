@@ -28,9 +28,10 @@ import { Upload } from 'lucide-react';
 
 interface SettingsProps {
   onBack: () => void;
+  subscription?: any;
 }
 
-export function Settings({ onBack }: SettingsProps) {
+export function Settings({ onBack, subscription }: SettingsProps) {
   const { user } = useAuth();
   const { getAllStats } = useQuestionStats();
   const overallStats = getAllStats();
@@ -39,6 +40,10 @@ export function Settings({ onBack }: SettingsProps) {
   const [openCombobox, setOpenCombobox] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Determine if Emory affiliation grants free access
+  const hasEmoryAccess = user?.institutionalAffiliation?.toLowerCase().includes('emory');
+  const displaySubscription = subscription || { status: 'none', daysRemaining: 0 };
 
   const [formData, setFormData] = useState({
     username: user?.username || '',
@@ -220,32 +225,43 @@ export function Settings({ onBack }: SettingsProps) {
                 <div className="space-y-4">
                   <div>
                     <p className="text-xs text-muted-foreground font-medium">Current Plan</p>
-                    <p className="font-semibold text-foreground mt-1">Free Trial</p>
+                    <p className="font-semibold text-foreground mt-1">
+                      {hasEmoryAccess ? 'Institutional Affiliation' : (displaySubscription.status === 'trial' ? 'Free Trial' : displaySubscription.status === 'active' ? 'Premium' : 'Expired')}
+                    </p>
                   </div>
 
                   <div className="border-t border-border pt-4">
                     <p className="text-xs text-muted-foreground font-medium">Status</p>
-                    <p className="font-semibold text-green-600 dark:text-green-400 mt-1">Active</p>
+                    <p className={`font-semibold mt-1 ${hasEmoryAccess ? 'text-green-600 dark:text-green-400' : displaySubscription.status === 'expired' ? 'text-destructive' : 'text-green-600 dark:text-green-400'}`}>
+                      {hasEmoryAccess ? 'Unlimited Access' : (displaySubscription.status === 'expired' ? 'Expired' : 'Active')}
+                    </p>
                   </div>
 
-                  <div className="border-t border-border pt-4">
-                    <p className="text-xs text-muted-foreground font-medium">Time Remaining</p>
-                    <p className="font-semibold text-foreground mt-2">29 days</p>
-                  </div>
+                  {!hasEmoryAccess && displaySubscription.status !== 'active' && (
+                    <div className="border-t border-border pt-4">
+                      <p className="text-xs text-muted-foreground font-medium">Time Remaining</p>
+                      <p className="font-semibold text-foreground mt-2">{displaySubscription.daysRemaining} days</p>
+                    </div>
+                  )}
 
-                  <div className="border-t border-border pt-4">
-                    <p className="text-sm text-muted-foreground font-medium mb-3">Subscription History</p>
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-xs">
-                        <span className="text-foreground">Free Trial Started</span>
-                        <span className="text-muted-foreground">Nov 25, 2024</span>
-                      </div>
-                      <div className="flex justify-between text-xs">
-                        <span className="text-foreground">Trial Ends</span>
-                        <span className="text-muted-foreground">Dec 25, 2024</span>
+                  {displaySubscription.trialEndsAt && !hasEmoryAccess && (
+                    <div className="border-t border-border pt-4">
+                      <p className="text-sm text-muted-foreground font-medium mb-3">Trial Info</p>
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-xs">
+                          <span className="text-foreground">Trial Ends</span>
+                          <span className="text-muted-foreground">{new Date(displaySubscription.trialEndsAt).toLocaleDateString()}</span>
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  )}
+
+                  {hasEmoryAccess && (
+                    <div className="border-t border-border pt-4 bg-green-500/5 -m-6 mt-4 p-6 rounded">
+                      <p className="text-xs font-medium text-green-600 dark:text-green-400">Special Access</p>
+                      <p className="text-sm text-foreground mt-2">Your Emory University affiliation grants unlimited access to all features.</p>
+                    </div>
+                  )}
                 </div>
               </Card>
             </div>
