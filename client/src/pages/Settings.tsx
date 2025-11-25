@@ -19,11 +19,12 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState, useEffect, useRef } from 'react';
 import { getUniversityOptions } from '@/data/universities';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { queryClient } from '@/lib/queryClient';
+import { Upload } from 'lucide-react';
 
 interface SettingsProps {
   onBack: () => void;
@@ -37,6 +38,7 @@ export function Settings({ onBack }: SettingsProps) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [openCombobox, setOpenCombobox] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [formData, setFormData] = useState({
     firstName: user?.firstName || '',
@@ -86,6 +88,17 @@ export function Settings({ onBack }: SettingsProps) {
     { name: 'Apple', connected: false, icon: '🍎' },
     { name: 'Microsoft', connected: false, icon: '💻' },
   ];
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFormData({ ...formData, profileImageUrl: reader.result as string });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const handleSave = async () => {
     setIsSaving(true);
@@ -198,10 +211,23 @@ export function Settings({ onBack }: SettingsProps) {
               <Card className="p-6">
                 <h2 className="text-lg font-semibold text-foreground mb-4">Profile Information</h2>
                 <div className="flex items-center gap-4 mb-6">
-                  <Avatar className="h-16 w-16">
-                    <AvatarImage src={user?.profileImageUrl} />
-                    <AvatarFallback>{getInitials()}</AvatarFallback>
-                  </Avatar>
+                  <div className="relative group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
+                    <Avatar className="h-16 w-16">
+                      <AvatarImage src={formData.profileImageUrl || user?.profileImageUrl} />
+                      <AvatarFallback>{getInitials()}</AvatarFallback>
+                    </Avatar>
+                    <div className="absolute inset-0 bg-black/40 rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                      <Upload className="h-5 w-5 text-white" />
+                    </div>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      className="hidden"
+                      data-testid="input-profile-image"
+                    />
+                  </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Profile Picture</p>
                     <p className="font-medium">{user?.firstName} {user?.lastName}</p>
@@ -210,13 +236,13 @@ export function Settings({ onBack }: SettingsProps) {
 
                 <div className="space-y-4">
                   <div>
-                    <Label className="text-sm font-medium text-foreground">Profile Image URL</Label>
+                    <Label className="text-sm font-medium text-foreground">Username</Label>
                     <Input 
-                      value={formData.profileImageUrl}
-                      onChange={(e) => setFormData({ ...formData, profileImageUrl: e.target.value })}
+                      value={user?.id || ''} 
+                      disabled 
                       className="mt-1"
-                      placeholder="https://example.com/image.jpg"
-                      data-testid="input-profile-image-url"
+                      readOnly
+                      data-testid="input-username"
                     />
                   </div>
 

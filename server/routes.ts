@@ -26,8 +26,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Update user profile
-  app.patch('/api/auth/user', isAuthenticated, async (req: any, res) => {
+  app.patch('/api/auth/user', async (req: any, res) => {
     try {
+      // Check if user is authenticated - allow if req.user exists
+      if (!req.isAuthenticated() || !req.user?.claims?.sub) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
       const userId = req.user.claims.sub;
       const { firstName, lastName, institutionalAffiliation, profileImageUrl } = req.body;
       
