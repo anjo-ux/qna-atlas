@@ -78,7 +78,7 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
     return questions;
   }, [sections, selectedSubsections, useAllQuestions, isPreview, previewQuestions]);
 
-  const handleStartTest = () => {
+  const handleStartTest = async () => {
     if (availableQuestions.length === 0) {
       return;
     }
@@ -88,7 +88,7 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
     const selected = shuffled.slice(0, Math.min(questionCount, shuffled.length));
     
     // Create test session
-    const session = createSession(
+    const session = await createSession(
       questionCount,
       Array.from(selectedSubsections),
       useAllQuestions,
