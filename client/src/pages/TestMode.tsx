@@ -13,6 +13,7 @@ import { ArrowLeft, ChevronDown, ChevronRight, ChevronLeft, ChevronRight as Chev
 import { useQuestionStats, QuestionResponse } from '@/hooks/useQuestionStats';
 import { useTestSessions, TestSession } from '@/hooks/useTestSessions';
 import { cn } from '@/lib/utils';
+import { shuffleAllQuestions } from '@/utils/shuffleChoices';
 
 interface TestModeProps {
   sections: Section[];
@@ -96,15 +97,18 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
     const shuffled = [...availableQuestions].sort(() => Math.random() - 0.5);
     const selected = shuffled.slice(0, Math.min(questionCount, shuffled.length));
     
+    // Shuffle answer choices for each question
+    const questionsWithShuffledChoices = shuffleAllQuestions(selected);
+    
     // Create test session
     const session = await createSession(
       questionCount,
       Array.from(selectedSubsections),
       useAllQuestions,
-      selected
+      questionsWithShuffledChoices
     );
     
-    setTestQuestions(selected);
+    setTestQuestions(questionsWithShuffledChoices);
     setCurrentQuestionIndex(0);
     setResponses({});
     setCurrentSession(session);
