@@ -55,38 +55,15 @@ export function QuestionCard({
   const questionRef = useRef<HTMLDivElement>(null);
 
   const parsed = useMemo((): ParsedQuestion => {
-    const lines = question.question.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+    const lines = question.question.split('\n');
     const choices: { letter: string; text: string }[] = [];
     const textLines: string[] = [];
-    let foundFirstChoice = false;
-    let expectedNextLetter: string | null = 'A';
     
     for (const line of lines) {
-      // Match answer choices: "A) text", "A. text", "A: text", "A - text", "(A) text"
-      const choiceMatch = line.match(/^[\(]*([A-E])[\)\.\:\-\s]+(.+)$/i);
-      
-      if (choiceMatch && choiceMatch[2].trim().length > 2) {
-        const letter = choiceMatch[1].toUpperCase();
-        const text = choiceMatch[2].trim();
-        
-        // First potential choice OR sequential after previous choice
-        if (!foundFirstChoice && (expectedNextLetter === null || letter === expectedNextLetter)) {
-          foundFirstChoice = true;
-          choices.push({ letter, text });
-          // Expect next letter
-          expectedNextLetter = String.fromCharCode(letter.charCodeAt(0) + 1);
-        } else if (foundFirstChoice && (letter === expectedNextLetter || letter.charCodeAt(0) > 'A'.charCodeAt(0))) {
-          // Continuing the sequence
-          choices.push({ letter, text });
-          expectedNextLetter = String.fromCharCode(letter.charCodeAt(0) + 1);
-        } else if (foundFirstChoice) {
-          // Out of sequence after finding choices, treat as text
-          textLines.push(line);
-        } else {
-          // Before any choices found, treat as text
-          textLines.push(line);
-        }
-      } else {
+      const match = line.match(/^([A-E])[.)]\s*(.+)$/);
+      if (match) {
+        choices.push({ letter: match[1], text: match[2].trim() });
+      } else if (line.trim()) {
         textLines.push(line);
       }
     }
@@ -99,24 +76,9 @@ export function QuestionCard({
   useTextHighlight(questionRef, highlights, questionContent);
 
   const correctAnswer = useMemo(() => {
-    if (!question.answer) return null;
-    
-    // Try multiple patterns to extract correct answer
-    let patterns = [
-      /(?:correct answer is|answer is|correct response is|response is|correct answer:|answer:)\s*(?:option\s+)?([A-E])/i,
-      /^([A-E])\s*[\)\.\:\-]/,  // Answer at the start
-      /(?:the correct answer|the answer)\s+(?:is\s+)?(?:option\s+)?([A-E])/i,
-      /([A-E])\s+(?:is\s+)?(?:correct|correct choice|the right answer)/i,
-    ];
-    
-    for (const pattern of patterns) {
-      const match = question.answer.match(pattern);
-      if (match && match[1]) {
-        return match[1].toUpperCase();
-      }
-    }
-    
-    return null;
+    // Extract correct answer from the answer text
+    const match = question.answer.match(/(?:correct answer is|answer is|correct response is|response is)\s*(?:option\s+)?([A-E])/i);
+    return match ? match[1].toUpperCase() : null;
   }, [question.answer]);
 
   const isCorrect = useMemo(() => {
