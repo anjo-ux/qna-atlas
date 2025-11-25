@@ -39,6 +39,7 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
   const [responses, setResponses] = useState<Record<string, QuestionResponse>>({});
   const [currentSession, setCurrentSession] = useState<TestSession | null>(null);
   const [showTestWizard, setShowTestWizard] = useState(false);
+  const [showQuestionPanel, setShowQuestionPanel] = useState(true);
   const hasResumedRef = useRef(false);
 
   const { recordResponse } = useQuestionStats();
@@ -441,57 +442,6 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
     
     return (
       <div className="flex h-screen overflow-hidden">
-        {/* Left Sidebar - Question Tracker */}
-        <div className="w-64 border-r border-border bg-muted/30 flex flex-col">
-          <div className="p-4 border-b border-border">
-            <h2 className="font-semibold text-sm">Questions</h2>
-            <p className="text-xs text-muted-foreground mt-1">
-              {Object.keys(responses).length} / {testQuestions.length} answered
-            </p>
-          </div>
-          
-          <div className="flex-1 overflow-y-auto p-2">
-            <div className="grid grid-cols-5 gap-2">
-              {testQuestions.map((question, index) => {
-                const status = getQuestionStatus(index);
-                const isCurrent = index === currentQuestionIndex;
-                
-                return (
-                  <button
-                    key={question.id}
-                    data-testid={`button-question-${index + 1}`}
-                    onClick={() => handleQuestionNavigation(index)}
-                    className={cn(
-                      "aspect-square rounded flex items-center justify-center text-xs font-semibold transition-all",
-                      isCurrent && "ring-2 ring-primary ring-offset-2",
-                      status === 'unanswered' && "bg-muted hover:bg-muted/80 text-muted-foreground",
-                      status === 'correct' && "bg-green-500/20 text-green-700 dark:text-green-400 hover:bg-green-500/30",
-                      status === 'incorrect' && "bg-red-500/20 text-red-700 dark:text-red-400 hover:bg-red-500/30"
-                    )}
-                  >
-                    {index + 1}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          <div className="p-3 border-t border-border space-y-2">
-            <div className="flex items-center gap-2 text-xs">
-              <div className="w-4 h-4 rounded bg-green-500/20"></div>
-              <span className="text-muted-foreground">Correct</span>
-            </div>
-            <div className="flex items-center gap-2 text-xs">
-              <div className="w-4 h-4 rounded bg-red-500/20"></div>
-              <span className="text-muted-foreground">Incorrect</span>
-            </div>
-            <div className="flex items-center gap-2 text-xs">
-              <div className="w-4 h-4 rounded bg-muted"></div>
-              <span className="text-muted-foreground">Unanswered</span>
-            </div>
-          </div>
-        </div>
-
         {/* Main Content */}
         <div className="flex-1 flex flex-col overflow-hidden">
           <div className="p-4 border-b border-border bg-accent/5">
@@ -501,6 +451,15 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
                 <p className="text-sm text-muted-foreground">Question {currentQuestionIndex + 1} of {testQuestions.length}</p>
               </div>
               <div className="flex items-center gap-2">
+                <Button 
+                  size="icon"
+                  variant="ghost"
+                  onClick={() => setShowQuestionPanel(!showQuestionPanel)}
+                  className="md:hidden"
+                  data-testid="button-toggle-questions"
+                >
+                  {showQuestionPanel ? <ChevronRight className="h-5 w-5" /> : <ChevronLeft className="h-5 w-5" />}
+                </Button>
                 <Button data-testid="button-save-exit" onClick={handleSaveAndExit} variant="outline">
                   Save & Exit
                 </Button>
