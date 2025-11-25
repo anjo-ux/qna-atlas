@@ -208,7 +208,7 @@ export function QuestionCard({
         "hover:elevated-shadow hover:border-primary/20"
       )}
     >
-      <div className="p-6 space-y-4">
+      <div className="p-4 md:p-6 space-y-3 md:space-y-4">
         <HighlightToolbar
           activeColor={activeColor}
           onColorChange={setActiveColor}
@@ -216,24 +216,24 @@ export function QuestionCard({
           onClearHighlights={handleClearHighlights}
         />
         
-        <div className="flex items-start gap-4" ref={questionRef} onMouseUp={handleTextSelection}>
-          <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-            <span className="text-sm font-semibold text-primary">{index + 1}</span>
+        <div className="flex items-start gap-3 md:gap-4" ref={questionRef} onMouseUp={handleTextSelection}>
+          <div className="flex-shrink-0 w-7 h-7 md:w-8 md:h-8 rounded-full bg-primary/10 flex items-center justify-center">
+            <span className="text-xs md:text-sm font-semibold text-primary">{index + 1}</span>
           </div>
-          <div className="flex-1">
-            <p className="text-base leading-relaxed text-foreground whitespace-pre-wrap mb-4">
+          <div className="flex-1 min-w-0">
+            <p className="text-sm md:text-base leading-relaxed text-foreground whitespace-pre-wrap mb-3 md:mb-4">
               {parsed.text}
             </p>
             
             {parsed.choices.length > 0 && (
               <RadioGroup value={selectedAnswer || ''} onValueChange={setSelectedAnswer}>
-                <div className="space-y-2">
+                <div className="space-y-2 max-h-96 overflow-y-auto">
                   {parsed.choices.map((choice) => {
                     const showResult = selectedAnswer && showExplanation;
                     const isThisChoice = choice.letter === selectedAnswer;
                     const isCorrectChoice = choice.letter === correctAnswer;
                     
-                    let choiceClassName = "flex items-start space-x-3 p-3 rounded-lg border transition-colors";
+                    let choiceClassName = "flex items-start space-x-2 md:space-x-3 p-2 md:p-3 rounded-lg border transition-colors text-sm md:text-base";
                     
                     if (showResult && isThisChoice) {
                       // Highlight selected answer

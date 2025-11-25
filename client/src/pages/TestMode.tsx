@@ -441,11 +441,11 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
     const currentQuestion = testQuestions[currentQuestionIndex];
     
     return (
-      <div className="flex flex-col overflow-auto md:flex-row md:h-screen md:overflow-hidden">
+      <div className="flex flex-col h-screen md:flex-row md:h-screen md:overflow-hidden overflow-hidden">
         {/* Question Panel - Top on mobile, Right on desktop */}
         <div className={cn(
           "md:flex md:flex-col md:w-64 md:border-r md:border-border md:bg-muted/30 md:overflow-visible md:flex-shrink-0 md:h-screen",
-          "flex flex-col border-b border-border bg-muted/30 w-full",
+          "flex flex-col border-b border-border bg-muted/30 w-full flex-shrink-0",
           !showQuestionPanel && "hidden md:flex",
           showQuestionPanel && "flex"
         )}>
@@ -518,14 +518,14 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
         </div>
 
         {/* Main Content */}
-        <div className="flex flex-col md:flex-1 md:overflow-hidden w-full">
-          <div className="p-4 border-b border-border bg-accent/5">
+        <div className="flex flex-col flex-1 overflow-hidden w-full">
+          <div className="p-3 md:p-4 border-b border-border bg-accent/5 flex-shrink-0">
             <div className="flex items-center justify-between gap-3">
-              <div className="flex-1">
-                <h1 className="text-2xl font-bold">Test Mode</h1>
-                <p className="text-sm text-muted-foreground">Question {currentQuestionIndex + 1} of {testQuestions.length}</p>
+              <div className="flex-1 min-w-0">
+                <h1 className="text-xl md:text-2xl font-bold truncate">Test Mode</h1>
+                <p className="text-xs md:text-sm text-muted-foreground">Question {currentQuestionIndex + 1} of {testQuestions.length}</p>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1 md:gap-2 flex-shrink-0">
                 <Button 
                   size="icon"
                   variant="ghost"
@@ -533,19 +533,21 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
                   className="md:hidden"
                   data-testid="button-toggle-questions"
                 >
-                  {showQuestionPanel ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+                  {showQuestionPanel ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                 </Button>
                 <Button data-testid="button-save-exit" onClick={handleSaveAndExit} variant="outline" size="sm">
-                  Save & Exit
+                  <span className="hidden md:inline">Save & Exit</span>
+                  <span className="md:hidden">Save</span>
                 </Button>
                 <Button data-testid="button-finish-test" onClick={handleFinishTest} variant="default" size="sm">
-                  Finish Test
+                  <span className="hidden md:inline">Finish Test</span>
+                  <span className="md:hidden">Done</span>
                 </Button>
               </div>
             </div>
           </div>
 
-          <div className="md:flex-1 md:overflow-auto p-4 md:p-6">
+          <div className="flex-1 overflow-auto p-3 md:p-6">
             <div className="max-w-2xl md:max-w-4xl mx-auto w-full">
               <QuestionCard
                 key={`${currentQuestion.id}-${currentQuestionIndex}`}
@@ -561,7 +563,7 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
           </div>
 
           {/* Navigation Buttons */}
-          <div className="p-4 border-t border-border bg-accent/5">
+          <div className="p-3 md:p-4 border-t border-border bg-accent/5 flex-shrink-0">
             <div className="max-w-2xl md:max-w-4xl mx-auto flex items-center justify-between gap-2">
               <Button
                 data-testid="button-previous-question"
