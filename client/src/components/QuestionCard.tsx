@@ -60,10 +60,22 @@ export function QuestionCard({
     const textLines: string[] = [];
     
     for (const line of lines) {
-      const match = line.match(/^([A-E])[.)]\s*(.+)$/);
-      if (match) {
-        choices.push({ letter: match[1], text: match[2].trim() });
-      } else if (line.trim()) {
+      const trimmed = line.trim();
+      
+      // Match various formats: "A) text", "A. text", "A: text", "A - text", "(A) text"
+      const match = trimmed.match(/^[\(]*([A-E])[\)\.\:\-\s]+(.+)$/i);
+      
+      if (match && match[2].trim().length > 2) {
+        const letter = match[1].toUpperCase();
+        const text = match[2].trim();
+        
+        // Verify this is likely a choice (not just a line starting with a letter)
+        if (!textLines.length || textLines[textLines.length - 1].includes('?')) {
+          choices.push({ letter, text });
+        } else {
+          textLines.push(line);
+        }
+      } else if (trimmed && trimmed.length > 0) {
         textLines.push(line);
       }
     }
@@ -76,9 +88,24 @@ export function QuestionCard({
   useTextHighlight(questionRef, highlights, questionContent);
 
   const correctAnswer = useMemo(() => {
-    // Extract correct answer from the answer text
-    const match = question.answer.match(/(?:correct answer is|answer is|correct response is|response is)\s*(?:option\s+)?([A-E])/i);
-    return match ? match[1].toUpperCase() : null;
+    if (!question.answer) return null;
+    
+    // Try multiple patterns to extract correct answer
+    let patterns = [
+      /(?:correct answer is|answer is|correct response is|response is|correct answer:|answer:)\s*(?:option\s+)?([A-E])/i,
+      /^([A-E])\s*[\)\.\:\-]/,  // Answer at the start
+      /(?:the correct answer|the answer)\s+(?:is\s+)?(?:option\s+)?([A-E])/i,
+      /([A-E])\s+(?:is\s+)?(?:correct|correct choice|the right answer)/i,
+    ];
+    
+    for (const pattern of patterns) {
+      const match = question.answer.match(pattern);
+      if (match && match[1]) {
+        return match[1].toUpperCase();
+      }
+    }
+    
+    return null;
   }, [question.answer]);
 
   const isCorrect = useMemo(() => {

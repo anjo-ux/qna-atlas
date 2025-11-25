@@ -98,15 +98,42 @@ function categorizeQuestion(category: string, subcategory: string): { section: s
 }
 
 function stripHtml(html: string): string {
+  if (!html) return '';
+  
   return html
+    .replace(/<p>/g, '\n')
+    .replace(/<\/p>/g, '')
     .replace(/<div>/g, '\n')
     .replace(/<\/div>/g, '')
+    .replace(/<li>/g, '\n• ')
+    .replace(/<\/li>/g, '')
+    .replace(/<ol[^>]*>/g, '')
+    .replace(/<\/ol>/g, '')
+    .replace(/<ul[^>]*>/g, '')
+    .replace(/<\/ul>/g, '')
     .replace(/<br\s*\/?>/g, '\n')
+    .replace(/<strong>/g, '')
+    .replace(/<\/strong>/g, '')
+    .replace(/<b>/g, '')
+    .replace(/<\/b>/g, '')
+    .replace(/<em>/g, '')
+    .replace(/<\/em>/g, '')
+    .replace(/<i>/g, '')
+    .replace(/<\/i>/g, '')
     .replace(/<span[^>]*>/g, '')
     .replace(/<\/span>/g, '')
+    .replace(/<a[^>]*>/g, '')
+    .replace(/<\/a>/g, '')
     .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
     .replace(/<[^>]+>/g, '')
-    .replace(/\\/g, '')
+    .replace(/\\\\/g, '\\')
+    .replace(/\\"/g, '"')
+    .replace(/\n+/g, '\n')
     .trim();
 }
 
