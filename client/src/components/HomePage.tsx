@@ -25,9 +25,10 @@ interface HomePageProps {
   onReviewIncorrect?: () => void;
   onStartTest?: () => void;
   onResumeTest?: (sessionId: string) => void;
+  onSettings?: () => void;
 }
 
-export function HomePage({ sections, onReviewIncorrect, onStartTest, onResumeTest }: HomePageProps) {
+export function HomePage({ sections, onReviewIncorrect, onStartTest, onResumeTest, onSettings }: HomePageProps) {
   const { getAllStats, responses, getSubsectionStats, resetAll } = useQuestionStats();
   const { sessions, deleteSession } = useTestSessions();
   const { user, logout } = useAuth();
