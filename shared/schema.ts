@@ -125,3 +125,27 @@ export const bookmarks = pgTable("bookmarks", {
 
 export type InsertBookmark = typeof bookmarks.$inferInsert;
 export type Bookmark = typeof bookmarks.$inferSelect;
+
+// Spaced Repetition table - tracks SR algorithm state for questions
+export const spacedRepetitions = pgTable("spaced_repetitions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: 'cascade' }),
+  questionId: varchar("question_id").notNull(),
+  sectionId: varchar("section_id").notNull(),
+  subsectionId: varchar("subsection_id").notNull(),
+  repetitionCount: integer("repetition_count").notNull().default(0),
+  easeFactor: integer("ease_factor").notNull().default(2500), // Stored as integer * 100 (so 2.5 = 2500)
+  interval: integer("interval").notNull().default(1), // Days until next review
+  lastReviewedAt: timestamp("last_reviewed_at"),
+  nextReviewAt: timestamp("next_review_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (table) => [
+  index("idx_sr_user_id").on(table.userId),
+  index("idx_sr_question").on(table.questionId),
+  index("idx_sr_next_review").on(table.nextReviewAt),
+  index("idx_sr_user_question").on(table.userId, table.questionId),
+]);
+
+export type InsertSpacedRepetition = typeof spacedRepetitions.$inferInsert;
+export type SpacedRepetition = typeof spacedRepetitions.$inferSelect;

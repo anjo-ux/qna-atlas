@@ -5,6 +5,7 @@ import {
   loginConnections,
   notes,
   bookmarks,
+  spacedRepetitions,
   type User,
   type UpsertUser,
   type TestSession,
@@ -16,9 +17,11 @@ import {
   type InsertNote,
   type Bookmark,
   type InsertBookmark,
+  type SpacedRepetition,
+  type InsertSpacedRepetition,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, desc } from "drizzle-orm";
+import { eq, and, desc, lte } from "drizzle-orm";
 
 // Interface for storage operations
 export interface IStorage {
@@ -57,6 +60,12 @@ export interface IStorage {
   removeBookmark(userId: string, questionId: string): Promise<void>;
   getUserBookmarks(userId: string): Promise<Bookmark[]>;
   isQuestionBookmarked(userId: string, questionId: string): Promise<boolean>;
+
+  // Spaced Repetition operations
+  upsertSpacedRepetition(sr: InsertSpacedRepetition): Promise<SpacedRepetition>;
+  getSpacedRepetition(userId: string, questionId: string): Promise<SpacedRepetition | undefined>;
+  getUserDueQuestions(userId: string): Promise<SpacedRepetition[]>;
+  updateSpacedRepetition(id: string, updates: Partial<InsertSpacedRepetition>): Promise<SpacedRepetition>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -327,6 +336,76 @@ export class DatabaseStorage implements IStorage {
         )
       );
     return !!result;
+  }
+
+  // Spaced Repetition operations
+  async upsertSpacedRepetition(srData: InsertSpacedRepetition): Promise<SpacedRepetition> {
+    const [existing] = await db
+      .select()
+      .from(spacedRepetitions)
+      .where(
+        and(
+          eq(spacedRepetitions.userId, srData.userId),
+          eq(spacedRepetitions.questionId, srData.questionId)
+        )
+      );
+
+    if (existing) {
+      const [updated] = await db
+        .update(spacedRepetitions)
+        .set({
+          ...srData,
+          updatedAt: new Date(),
+        })
+        .where(eq(spacedRepetitions.id, existing.id))
+        .returning();
+      return updated;
+    } else {
+      const [created] = await db
+        .insert(spacedRepetitions)
+        .values(srData)
+        .returning();
+      return created;
+    }
+  }
+
+  async getSpacedRepetition(userId: string, questionId: string): Promise<SpacedRepetition | undefined> {
+    const [result] = await db
+      .select()
+      .from(spacedRepetitions)
+      .where(
+        and(
+          eq(spacedRepetitions.userId, userId),
+          eq(spacedRepetitions.questionId, questionId)
+        )
+      );
+    return result;
+  }
+
+  async getUserDueQuestions(userId: string): Promise<SpacedRepetition[]> {
+    const now = new Date();
+    return await db
+      .select()
+      .from(spacedRepetitions)
+      .where(
+        and(
+          eq(spacedRepetitions.userId, userId),
+          lte(spacedRepetitions.nextReviewAt, now)
+        )
+      )
+      .orderBy(spacedRepetitions.nextReviewAt);
+  }
+
+  async updateSpacedRepetition(id: string, updates: Partial<InsertSpacedRepetition>): Promise<SpacedRepetition> {
+    const [updated] = await db
+      .update(spacedRepetitions)
+      .set({
+        ...updates,
+        updatedAt: new Date(),
+      })
+      .where(eq(spacedRepetitions.id, id))
+      .returning();
+    return updated;
   }
 }
 

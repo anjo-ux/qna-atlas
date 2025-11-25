@@ -496,6 +496,90 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Spaced Repetition routes
+  app.get('/api/spaced-repetition/due', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const dueQuestions = await storage.getUserDueQuestions(userId);
+      res.json(dueQuestions);
+    } catch (error) {
+      console.error("Error fetching due questions:", error);
+      res.status(500).json({ message: "Failed to fetch due questions" });
+    }
+  });
+
+  app.post('/api/spaced-repetition/update', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { questionId, sectionId, subsectionId, quality: rawQuality } = req.body;
+
+      if (!questionId || rawQuality === undefined) {
+        return res.status(400).json({ message: "Missing required fields" });
+      }
+
+      // Get existing SR data or create new
+      let sr = await storage.getSpacedRepetition(userId, questionId);
+      
+      // Calculate new interval based on SM-2 algorithm (simplified)
+      const quality = Math.max(0, Math.min(5, rawQuality)); // 0-5 scale
+      let repetitionCount = (sr?.repetitionCount || 0) + 1;
+      let easeFactor = sr?.easeFactor || 2500;
+      let interval = 1;
+
+      if (quality >= 3) {
+        // Correct or acceptable answer
+        if (repetitionCount === 1) {
+          interval = 1;
+        } else if (repetitionCount === 2) {
+          interval = 3;
+        } else {
+          interval = Math.round((sr?.interval || 1) * (easeFactor / 100));
+        }
+      } else {
+        // Incorrect or difficult answer - reset
+        interval = 1;
+        repetitionCount = 0;
+      }
+
+      // Update ease factor
+      easeFactor = Math.max(1300, Math.round(easeFactor + (50 * quality - 150)));
+
+      // Calculate next review date
+      const nextReviewAt = new Date();
+      nextReviewAt.setDate(nextReviewAt.getDate() + interval);
+
+      const updatedSR = await storage.upsertSpacedRepetition({
+        userId,
+        questionId,
+        sectionId: sectionId || '',
+        subsectionId: subsectionId || '',
+        repetitionCount,
+        easeFactor,
+        interval,
+        nextReviewAt,
+        lastReviewedAt: new Date(),
+      });
+
+      res.json(updatedSR);
+    } catch (error) {
+      console.error("Error updating spaced repetition:", error);
+      res.status(500).json({ message: "Failed to update spaced repetition" });
+    }
+  });
+
+  app.get('/api/spaced-repetition/:questionId', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const questionId = req.params.questionId;
+      
+      const sr = await storage.getSpacedRepetition(userId, questionId);
+      res.json(sr || { nextReviewAt: new Date() });
+    } catch (error) {
+      console.error("Error fetching SR data:", error);
+      res.status(500).json({ message: "Failed to fetch SR data" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
