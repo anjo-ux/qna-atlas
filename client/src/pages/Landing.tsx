@@ -1,8 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { BookOpen, Check, Eye } from "lucide-react";
+import { Check, Eye } from "lucide-react";
 import { useState } from "react";
 import { PreviewWizard } from "@/components/PreviewWizard";
+import atlasLogo from "@assets/atlas_1764093111680.png";
 
 function handleLogin() {
   window.location.href = '/api/login';
@@ -22,11 +23,11 @@ export default function Landing() {
         }}
       />
 
-      <header className="border-b">
+      <header className="border-b bg-white dark:bg-slate-950">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <BookOpen className="w-6 h-6" />
-            <h1 className="text-xl font-semibold">PSITE Review</h1>
+          <div className="flex items-center gap-3">
+            <img src={atlasLogo} alt="Plastic Surgery Atlas" className="w-8 h-8 object-contain" />
+            <h1 className="text-xl font-bold text-primary">Plastic Surgery Atlas</h1>
           </div>
           <Button onClick={handleLogin} data-testid="button-login">
             Sign In
@@ -36,15 +37,18 @@ export default function Landing() {
 
       <main className="flex-1 container mx-auto px-4 py-16">
         <div className="max-w-4xl mx-auto space-y-12">
-          <div className="text-center space-y-4">
-            <h2 className="text-4xl font-bold">
-              Master Plastic Surgery Knowledge
+          <div className="text-center space-y-6">
+            <div className="flex justify-center mb-4">
+              <img src={atlasLogo} alt="Plastic Surgery Atlas" className="w-24 h-24 object-contain" />
+            </div>
+            <h2 className="text-5xl font-bold text-primary">
+              Plastic Surgery Atlas
             </h2>
             <p className="text-xl text-muted-foreground">
-              Interactive review platform for the Plastic Surgery In-Training Examination (PSITE)
+              Master comprehensive plastic surgery knowledge through interactive questions, detailed explanations, and structured learning paths
             </p>
             <div className="pt-4 flex gap-3 justify-center">
-              <Button size="lg" onClick={handleLogin} data-testid="button-get-started">
+              <Button size="lg" onClick={handleLogin} data-testid="button-get-started" className="bg-primary hover:bg-primary/90">
                 Get Started
               </Button>
               <Button size="lg" variant="outline" onClick={() => setShowPreviewWizard(true)} data-testid="button-preview">
@@ -57,28 +61,28 @@ export default function Landing() {
           <div className="grid md:grid-cols-2 gap-6">
             <Card>
               <CardHeader>
-                <CardTitle>Track Your Progress</CardTitle>
+                <CardTitle>Comprehensive Learning</CardTitle>
                 <CardDescription>
-                  Monitor your performance across all test sessions
+                  Organized by surgical specialties and topics
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-2">
                 <div className="flex items-start gap-2">
-                  <Check className="w-5 h-5 text-primary mt-0.5" />
+                  <Check className="w-5 h-5 text-secondary mt-0.5 flex-shrink-0" />
                   <span className="text-muted-foreground">
-                    Save your progress across devices
+                    500+ carefully curated questions
                   </span>
                 </div>
                 <div className="flex items-start gap-2">
-                  <Check className="w-5 h-5 text-primary mt-0.5" />
+                  <Check className="w-5 h-5 text-secondary mt-0.5 flex-shrink-0" />
                   <span className="text-muted-foreground">
-                    View detailed performance analytics
+                    Detailed explanations for every answer
                   </span>
                 </div>
                 <div className="flex items-start gap-2">
-                  <Check className="w-5 h-5 text-primary mt-0.5" />
+                  <Check className="w-5 h-5 text-secondary mt-0.5 flex-shrink-0" />
                   <span className="text-muted-foreground">
-                    Resume tests anytime
+                    Reference materials and study guides
                   </span>
                 </div>
               </CardContent>
@@ -86,43 +90,43 @@ export default function Landing() {
 
             <Card>
               <CardHeader>
-                <CardTitle>Interactive Questions</CardTitle>
+                <CardTitle>Track Your Progress</CardTitle>
                 <CardDescription>
-                  Comprehensive question bank with detailed explanations
+                  Monitor mastery across all topics
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-2">
                 <div className="flex items-start gap-2">
-                  <Check className="w-5 h-5 text-primary mt-0.5" />
+                  <Check className="w-5 h-5 text-secondary mt-0.5 flex-shrink-0" />
                   <span className="text-muted-foreground">
-                    Filter by sections and subsections
+                    Performance analytics by topic
                   </span>
                 </div>
                 <div className="flex items-start gap-2">
-                  <Check className="w-5 h-5 text-primary mt-0.5" />
+                  <Check className="w-5 h-5 text-secondary mt-0.5 flex-shrink-0" />
                   <span className="text-muted-foreground">
-                    Review reference materials
+                    Sync progress across devices
                   </span>
                 </div>
                 <div className="flex items-start gap-2">
-                  <Check className="w-5 h-5 text-primary mt-0.5" />
+                  <Check className="w-5 h-5 text-secondary mt-0.5 flex-shrink-0" />
                   <span className="text-muted-foreground">
-                    Practice with timed tests
+                    Resume tests anytime
                   </span>
                 </div>
               </CardContent>
             </Card>
           </div>
 
-          <Card className="bg-primary/5">
+          <Card className="border-secondary/30 bg-secondary/5">
             <CardHeader>
-              <CardTitle>Why Create an Account?</CardTitle>
+              <CardTitle className="text-primary">Start Your Journey</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              <p className="text-muted-foreground">
-                Sign in to save your test progress, track your performance over time, and access your data from any device. Your progress is automatically saved as you work through questions.
+              <p className="text-foreground">
+                Join surgeons studying for board certification and continuing education. Create an account to unlock the full learning experience with progress tracking, custom tests, and personalized recommendations.
               </p>
-              <Button onClick={handleLogin} data-testid="button-sign-up">
+              <Button onClick={handleLogin} data-testid="button-sign-up" className="bg-primary hover:bg-primary/90">
                 Create Free Account
               </Button>
             </CardContent>
@@ -130,9 +134,9 @@ export default function Landing() {
         </div>
       </main>
 
-      <footer className="border-t py-6">
+      <footer className="border-t py-6 bg-muted/30">
         <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          PSITE Review © {new Date().getFullYear()}
+          Plastic Surgery Atlas © {new Date().getFullYear()} • Empowering surgical excellence
         </div>
       </footer>
     </div>

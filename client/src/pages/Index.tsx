@@ -353,8 +353,8 @@ export default function Index() {
               </Button>
               
               <div className="flex-1">
-                <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
-                  PSITE Review
+                <h1 className="text-2xl sm:text-3xl font-bold text-primary">
+                  Plastic Surgery Atlas
                 </h1>
                 <p className="text-sm text-muted-foreground mt-1">
                   {currentSubsection ? currentSubsection.title : 'Select a section to begin'}
