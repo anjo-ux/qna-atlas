@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useLocation } from 'wouter';
-import * as XLSX from 'xlsx';
-import { Section, Question } from '@/types/question';
+import { Section } from '@/types/question';
 import { TestMode } from './TestMode';
 import { getPreviewQuestions } from '@/utils/previewQuestions';
+import { loadQuestions } from '@/utils/parseQuestions';
 
 export default function PreviewMode() {
   const [sections, setSections] = useState<Section[]>([]);
@@ -13,46 +13,8 @@ export default function PreviewMode() {
   useEffect(() => {
     const loadData = async () => {
       try {
-        const response = await fetch('/data/questions.xlsx');
-        const arrayBuffer = await response.arrayBuffer();
-        const workbook = XLSX.read(arrayBuffer, { type: 'array' });
-        const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-        const data = XLSX.utils.sheet_to_json(worksheet);
-
-        const groupedData: Record<string, Record<string, Question[]>> = {};
-        
-        data.forEach((row: any) => {
-          const section = row['Section'] || 'Unknown';
-          const subsection = row['Subsection'] || 'General';
-          const question: Question = {
-            id: row['ID'] || '',
-            question: row['Question'] || '',
-            answer: row['Correct Answer'] || 'A',
-            category: section,
-            subcategory: subsection,
-            tags: [],
-          };
-
-          if (!groupedData[section]) {
-            groupedData[section] = {};
-          }
-          if (!groupedData[section][subsection]) {
-            groupedData[section][subsection] = [];
-          }
-          groupedData[section][subsection].push(question);
-        });
-
-        const sections: Section[] = Object.entries(groupedData).map(([sectionName, subsections]) => ({
-          id: sectionName.toLowerCase().replace(/\s+/g, '-'),
-          title: sectionName,
-          subsections: Object.entries(subsections).map(([subsectionName, questions]) => ({
-            id: `${sectionName.toLowerCase().replace(/\s+/g, '-')}-${subsectionName.toLowerCase().replace(/\s+/g, '-')}`,
-            title: subsectionName,
-            questions,
-          })),
-        }));
-
-        setSections(sections);
+        const questionsData = await loadQuestions();
+        setSections(questionsData);
       } catch (error) {
         console.error('Error loading questions:', error);
       } finally {
