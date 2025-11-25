@@ -13,7 +13,7 @@ import { HomePage } from '@/components/HomePage';
 import { TestMode } from './TestMode';
 import { Settings as SettingsPage } from './Settings';
 import { Input } from '@/components/ui/input';
-import { Search, Menu, X, BookOpen, FileQuestion, Columns2, Home, Zap, Settings } from 'lucide-react';
+import { Search, Menu, X, BookOpen, FileQuestion, Columns2, Home, Zap, Settings, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useQuestionStats } from '@/hooks/useQuestionStats';
@@ -32,7 +32,7 @@ export default function Index() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSection, setSelectedSection] = useState<string | null>(null);
   const [selectedSubsection, setSelectedSubsection] = useState<string | null>(null);
-  const [isNavOpen, setIsNavOpen] = useState(false);
+  const [isNavOpen, setIsNavOpen] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
   const [viewMode, setViewMode] = useState<ViewMode>('split');
   const [filterMode, setFilterMode] = useState<FilterMode>('all');
@@ -261,17 +261,30 @@ export default function Index() {
 
   return (
     <div className="flex h-screen overflow-hidden bg-background">
-      {/* Navigation Sidebar */}
-      <div className={`${isNavOpen ? 'w-80' : 'w-0'} lg:w-80 transition-all duration-300 overflow-hidden`}>
-        <Navigation
-          sections={sections}
-          selectedSection={selectedSection}
-          selectedSubsection={selectedSubsection}
-          onNavigate={handleNavigate}
-          isOpen={isNavOpen}
-          onClose={() => setIsNavOpen(false)}
-        />
-      </div>
+      {/* Navigation Sidebar - Collapsible */}
+      {isNavOpen && (
+        <div className="w-80 flex-shrink-0 transition-all duration-300 overflow-hidden">
+          <Navigation
+            sections={sections}
+            selectedSection={selectedSection}
+            selectedSubsection={selectedSubsection}
+            onNavigate={handleNavigate}
+            isOpen={isNavOpen}
+            onClose={() => setIsNavOpen(false)}
+          />
+        </div>
+      )}
+
+      {/* Sidebar Toggle Button */}
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={() => setIsNavOpen(!isNavOpen)}
+        className="flex-shrink-0 rounded-none border-r border-border"
+        data-testid="button-toggle-nav"
+      >
+        {isNavOpen ? <ChevronLeft className="h-5 w-5" /> : <ChevronRight className="h-5 w-5" />}
+      </Button>
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col min-h-screen overflow-hidden">
@@ -279,16 +292,6 @@ export default function Index() {
         <header className="sticky top-0 z-10 backdrop-blur-lg bg-background/80 border-b border-border">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4">
             <div className="flex items-center gap-4">
-              {!isNavOpen && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="lg:hidden"
-                  onClick={() => setIsNavOpen(!isNavOpen)}
-                >
-                  <Menu className="h-5 w-5" />
-                </Button>
-              )}
               
               <Button
                 variant="ghost"
