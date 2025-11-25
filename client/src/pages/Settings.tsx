@@ -33,14 +33,14 @@ export function Settings({ onBack }: SettingsProps) {
 
   const connectionMethods = [
     { name: 'Gmail', connected: true, icon: '📧' },
-    { name: 'GitHub', connected: false, icon: '🔧' },
     { name: 'Apple', connected: false, icon: '🍎' },
+    { name: 'Microsoft', connected: false, icon: '💻' },
   ];
 
   return (
-    <div className="flex-1 flex flex-col overflow-auto">
+    <div className="flex-1 flex flex-col overflow-hidden">
       <div className="p-6 border-b border-border">
-        <div className="flex items-center gap-3 mb-4">
+        <div className="flex items-center gap-3">
           <Button variant="ghost" size="icon" onClick={onBack}>
             <ArrowLeft className="h-5 w-5" />
           </Button>
@@ -48,184 +48,232 @@ export function Settings({ onBack }: SettingsProps) {
         </div>
       </div>
 
-      <div className="flex-1 overflow-auto p-6">
-        <div className="max-w-2xl mx-auto space-y-6">
-          {/* Profile Section */}
-          <Card className="p-6">
-            <h2 className="text-lg font-semibold text-foreground mb-4">Profile Information</h2>
-            <div className="flex items-center gap-4 mb-6">
-              <Avatar className="h-16 w-16">
-                <AvatarImage src={user?.profileImageUrl} />
-                <AvatarFallback>{getInitials()}</AvatarFallback>
-              </Avatar>
-              <div>
-                <p className="text-sm text-muted-foreground">Profile Picture</p>
-                <p className="font-medium">{user?.firstName} {user?.lastName}</p>
-              </div>
-            </div>
+      <div className="flex flex-1 overflow-hidden">
+        {/* Left Sidebar - Sticky Subscription */}
+        <div className="hidden lg:block w-72 border-r border-border overflow-y-auto sticky top-0 h-full">
+          <div className="p-6">
+            <Card className="p-6 h-full">
+              <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+                <CreditCard className="h-5 w-5" />
+                Subscription
+              </h2>
 
-            <div className="space-y-4">
-              <div>
-                <Label className="text-sm font-medium text-foreground">Username</Label>
-                <Input 
-                  value={user?.id || ''} 
-                  disabled 
-                  className="mt-1"
-                  readOnly
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label className="text-sm font-medium text-foreground">First Name</Label>
-                  <Input 
-                    value={user?.firstName || ''} 
-                    disabled 
-                    className="mt-1"
-                    readOnly
-                  />
-                </div>
-                <div>
-                  <Label className="text-sm font-medium text-foreground">Last Name</Label>
-                  <Input 
-                    value={user?.lastName || ''} 
-                    disabled 
-                    className="mt-1"
-                    readOnly
-                  />
-                </div>
-              </div>
-
-              <div>
-                <Label className="text-sm font-medium text-foreground">Institutional Affiliation</Label>
-                <Input 
-                  value={user?.institutionalAffiliation || 'Not provided'} 
-                  disabled 
-                  className="mt-1"
-                  readOnly
-                />
-              </div>
-            </div>
-          </Card>
-
-          {/* Statistics Section */}
-          <Card className="p-6 bg-gradient-to-br from-chart-1/10 to-chart-2/10 border-chart-1/20">
-            <h2 className="text-lg font-semibold text-foreground mb-4">Learning Statistics</h2>
-            <div className="grid grid-cols-3 gap-4">
-              <div className="flex flex-col items-center p-4 bg-white dark:bg-slate-950 rounded-lg border border-border/50">
-                <div className="flex items-center justify-center h-10 w-10 rounded-full bg-chart-1/20 mb-2">
-                  <BookOpen className="h-5 w-5 text-chart-1" />
-                </div>
-                <p className="text-2xl font-bold text-foreground">{stats.total}</p>
-                <p className="text-xs text-muted-foreground text-center mt-1">Questions Answered</p>
-              </div>
-
-              <div className="flex flex-col items-center p-4 bg-white dark:bg-slate-950 rounded-lg border border-border/50">
-                <div className="flex items-center justify-center h-10 w-10 rounded-full bg-success/20 mb-2">
-                  <TrendingUp className="h-5 w-5 text-success" />
-                </div>
-                <p className="text-2xl font-bold text-foreground">{stats.correct}</p>
-                <p className="text-xs text-muted-foreground text-center mt-1">Correct Answers</p>
-              </div>
-
-              <div className="flex flex-col items-center p-4 bg-white dark:bg-slate-950 rounded-lg border border-border/50">
-                <div className="flex items-center justify-center h-10 w-10 rounded-full bg-chart-3/20 mb-2">
-                  <Target className="h-5 w-5 text-chart-3" />
-                </div>
-                <p className="text-2xl font-bold text-foreground">{stats.accuracy}%</p>
-                <p className="text-xs text-muted-foreground text-center mt-1">Accuracy</p>
-              </div>
-            </div>
-          </Card>
-
-          {/* Account Section */}
-          <Card className="p-6">
-            <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
-              <Mail className="h-5 w-5" />
-              Account
-            </h2>
-
-            <div className="space-y-4">
-              <div>
-                <Label className="text-sm font-medium text-foreground">Email Address</Label>
-                <Input 
-                  value={user?.email || ''} 
-                  disabled 
-                  className="mt-1"
-                  readOnly
-                />
-              </div>
-            </div>
-          </Card>
-
-          {/* Connections Section */}
-          <Card className="p-6">
-            <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
-              <Lock className="h-5 w-5" />
-              Login Connections
-            </h2>
-
-            <div className="space-y-3">
-              {connectionMethods.map(method => (
-                <div key={method.name} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg border border-border">
-                  <div className="flex items-center gap-3">
-                    <span className="text-xl">{method.icon}</span>
-                    <div>
-                      <p className="font-medium text-foreground">{method.name}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {method.connected ? 'Connected' : 'Not connected'}
-                      </p>
-                    </div>
-                  </div>
-                  {method.connected && (
-                    <span className="text-xs px-2 py-1 bg-green-500/20 text-green-700 dark:text-green-400 rounded">
-                      Active
-                    </span>
-                  )}
-                </div>
-              ))}
-            </div>
-          </Card>
-
-          {/* Subscription Section */}
-          <Card className="p-6">
-            <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
-              <CreditCard className="h-5 w-5" />
-              Subscription
-            </h2>
-
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-4">
                 <div>
                   <p className="text-xs text-muted-foreground font-medium">Current Plan</p>
                   <p className="font-semibold text-foreground mt-1">Free Trial</p>
                 </div>
-                <div>
+
+                <div className="border-t border-border pt-4">
                   <p className="text-xs text-muted-foreground font-medium">Status</p>
                   <p className="font-semibold text-green-600 dark:text-green-400 mt-1">Active</p>
                 </div>
-              </div>
 
-              <div>
-                <p className="text-xs text-muted-foreground font-medium">Time Remaining</p>
-                <p className="font-semibold text-foreground mt-1">29 days</p>
-              </div>
+                <div className="border-t border-border pt-4">
+                  <p className="text-xs text-muted-foreground font-medium">Time Remaining</p>
+                  <p className="font-semibold text-foreground mt-2">29 days</p>
+                </div>
 
-              <div className="bg-muted/30 rounded-lg p-3 border border-border">
-                <p className="text-sm text-muted-foreground mb-2">Subscription History</p>
-                <div className="space-y-2">
-                  <div className="flex justify-between text-xs">
-                    <span className="text-foreground">Free Trial Started</span>
-                    <span className="text-muted-foreground">Nov 25, 2024</span>
-                  </div>
-                  <div className="flex justify-between text-xs">
-                    <span className="text-foreground">Trial Ends</span>
-                    <span className="text-muted-foreground">Dec 25, 2024</span>
+                <div className="border-t border-border pt-4">
+                  <p className="text-sm text-muted-foreground font-medium mb-3">Subscription History</p>
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-xs">
+                      <span className="text-foreground">Free Trial Started</span>
+                      <span className="text-muted-foreground">Nov 25, 2024</span>
+                    </div>
+                    <div className="flex justify-between text-xs">
+                      <span className="text-foreground">Trial Ends</span>
+                      <span className="text-muted-foreground">Dec 25, 2024</span>
+                    </div>
                   </div>
                 </div>
               </div>
+            </Card>
+          </div>
+        </div>
+
+        {/* Main Content Area - Scrollable */}
+        <div className="flex-1 overflow-y-auto">
+          <div className="p-6">
+            <div className="max-w-2xl mx-auto space-y-6">
+              {/* Profile Section */}
+              <Card className="p-6">
+                <h2 className="text-lg font-semibold text-foreground mb-4">Profile Information</h2>
+                <div className="flex items-center gap-4 mb-6">
+                  <Avatar className="h-16 w-16">
+                    <AvatarImage src={user?.profileImageUrl} />
+                    <AvatarFallback>{getInitials()}</AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Profile Picture</p>
+                    <p className="font-medium">{user?.firstName} {user?.lastName}</p>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <div>
+                    <Label className="text-sm font-medium text-foreground">Username</Label>
+                    <Input 
+                      value={user?.id || ''} 
+                      disabled 
+                      className="mt-1"
+                      readOnly
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label className="text-sm font-medium text-foreground">First Name</Label>
+                      <Input 
+                        value={user?.firstName || ''} 
+                        disabled 
+                        className="mt-1"
+                        readOnly
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-sm font-medium text-foreground">Last Name</Label>
+                      <Input 
+                        value={user?.lastName || ''} 
+                        disabled 
+                        className="mt-1"
+                        readOnly
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label className="text-sm font-medium text-foreground">Institutional Affiliation</Label>
+                    <Input 
+                      value={user?.institutionalAffiliation || 'Not provided'} 
+                      disabled 
+                      className="mt-1"
+                      readOnly
+                    />
+                  </div>
+                </div>
+              </Card>
+
+              {/* Statistics Section */}
+              <Card className="p-6 bg-gradient-to-br from-chart-1/10 to-chart-2/10 border-chart-1/20">
+                <h2 className="text-lg font-semibold text-foreground mb-4">Learning Statistics</h2>
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="flex flex-col items-center p-4 bg-white dark:bg-slate-950 rounded-lg border border-border/50">
+                    <div className="flex items-center justify-center h-10 w-10 rounded-full bg-chart-1/20 mb-2">
+                      <BookOpen className="h-5 w-5 text-chart-1" />
+                    </div>
+                    <p className="text-2xl font-bold text-foreground">{stats.total}</p>
+                    <p className="text-xs text-muted-foreground text-center mt-1">Questions Answered</p>
+                  </div>
+
+                  <div className="flex flex-col items-center p-4 bg-white dark:bg-slate-950 rounded-lg border border-border/50">
+                    <div className="flex items-center justify-center h-10 w-10 rounded-full bg-success/20 mb-2">
+                      <TrendingUp className="h-5 w-5 text-success" />
+                    </div>
+                    <p className="text-2xl font-bold text-foreground">{stats.correct}</p>
+                    <p className="text-xs text-muted-foreground text-center mt-1">Correct Answers</p>
+                  </div>
+
+                  <div className="flex flex-col items-center p-4 bg-white dark:bg-slate-950 rounded-lg border border-border/50">
+                    <div className="flex items-center justify-center h-10 w-10 rounded-full bg-chart-3/20 mb-2">
+                      <Target className="h-5 w-5 text-chart-3" />
+                    </div>
+                    <p className="text-2xl font-bold text-foreground">{stats.accuracy}%</p>
+                    <p className="text-xs text-muted-foreground text-center mt-1">Accuracy</p>
+                  </div>
+                </div>
+              </Card>
+
+              {/* Account Section */}
+              <Card className="p-6">
+                <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+                  <Mail className="h-5 w-5" />
+                  Account
+                </h2>
+
+                <div className="space-y-4">
+                  <div>
+                    <Label className="text-sm font-medium text-foreground">Email Address</Label>
+                    <Input 
+                      value={user?.email || ''} 
+                      disabled 
+                      className="mt-1"
+                      readOnly
+                    />
+                  </div>
+                </div>
+              </Card>
+
+              {/* Connections Section */}
+              <Card className="p-6">
+                <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+                  <Lock className="h-5 w-5" />
+                  Login Connections
+                </h2>
+
+                <div className="space-y-3">
+                  {connectionMethods.map(method => (
+                    <div key={method.name} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg border border-border">
+                      <div className="flex items-center gap-3">
+                        <span className="text-xl">{method.icon}</span>
+                        <div>
+                          <p className="font-medium text-foreground">{method.name}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {method.connected ? 'Connected' : 'Not connected'}
+                          </p>
+                        </div>
+                      </div>
+                      {method.connected && (
+                        <span className="text-xs px-2 py-1 bg-green-500/20 text-green-700 dark:text-green-400 rounded">
+                          Active
+                        </span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </Card>
+
+              {/* Mobile Subscription Section */}
+              <Card className="p-6 lg:hidden bg-gradient-to-br from-chart-1/10 to-chart-2/10 border-chart-1/20">
+                <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+                  <CreditCard className="h-5 w-5" />
+                  Subscription
+                </h2>
+
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-xs text-muted-foreground font-medium">Current Plan</p>
+                      <p className="font-semibold text-foreground mt-1">Free Trial</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground font-medium">Status</p>
+                      <p className="font-semibold text-green-600 dark:text-green-400 mt-1">Active</p>
+                    </div>
+                  </div>
+
+                  <div>
+                    <p className="text-xs text-muted-foreground font-medium">Time Remaining</p>
+                    <p className="font-semibold text-foreground mt-1">29 days</p>
+                  </div>
+
+                  <div className="bg-muted/30 rounded-lg p-3 border border-border">
+                    <p className="text-sm text-muted-foreground mb-2">Subscription History</p>
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-xs">
+                        <span className="text-foreground">Free Trial Started</span>
+                        <span className="text-muted-foreground">Nov 25, 2024</span>
+                      </div>
+                      <div className="flex justify-between text-xs">
+                        <span className="text-foreground">Trial Ends</span>
+                        <span className="text-muted-foreground">Dec 25, 2024</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </Card>
             </div>
-          </Card>
+          </div>
         </div>
       </div>
     </div>
