@@ -74,7 +74,8 @@ export function QuestionCard({
       // Handle case where choices are already on separate lines
       const textLines: string[] = [];
       for (const line of lines) {
-        const match = line.match(/^([A-E])[.)]\s*(.+)$/);
+        // Match "A)" or "A )" with optional space before paren
+        const match = line.match(/^([A-E])\s*[.)]\s*(.+)$/);
         if (match) {
           choices.push({ letter: match[1], text: match[2].trim() });
         } else if (line.trim()) {
@@ -98,8 +99,9 @@ export function QuestionCard({
         const beforeMarker = questionText.substring(0, lastMarkerIndex + 1);
         const afterMarker = questionText.substring(lastMarkerIndex + 1);
         
-        // Parse concatenated choices: "A) TextB) TextC) Text..."
-        const choicePattern = /([A-E])\)\s*([^A-E]*?)(?=(?:[A-E]\)|$))/g;
+        // Parse concatenated choices: "A) TextB) TextC) Text..." or "A ) TextB ) TextC ) Text..."
+        // Match letter with optional space, then ) or ., then the text
+        const choicePattern = /([A-E])\s*[.)]\s*([^A-E]*?)(?=(?:[A-E]\s*[.)]|$))/g;
         let match;
         
         while ((match = choicePattern.exec(afterMarker)) !== null) {
