@@ -3,6 +3,7 @@ import {
   testSessions,
   questionResponses,
   loginConnections,
+  notes,
   type User,
   type UpsertUser,
   type TestSession,
@@ -10,6 +11,8 @@ import {
   type QuestionResponse,
   type InsertQuestionResponse,
   type LoginConnection,
+  type Note,
+  type InsertNote,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc } from "drizzle-orm";
@@ -39,6 +42,12 @@ export interface IStorage {
   getLoginConnections(userId: string): Promise<LoginConnection[]>;
   addLoginConnection(userId: string, provider: string): Promise<LoginConnection>;
   removeLoginConnection(userId: string, provider: string): Promise<void>;
+
+  // Notes operations
+  createNote(note: InsertNote): Promise<Note>;
+  getUserNotes(userId: string, sectionId?: string, subsectionId?: string): Promise<Note[]>;
+  updateNote(id: string, updates: Partial<InsertNote>): Promise<Note>;
+  deleteNote(id: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -214,6 +223,44 @@ export class DatabaseStorage implements IStorage {
     await db
       .delete(loginConnections)
       .where(and(eq(loginConnections.userId, userId), eq(loginConnections.provider, provider)));
+  }
+
+  // Notes operations
+  async createNote(noteData: InsertNote): Promise<Note> {
+    const [note] = await db
+      .insert(notes)
+      .values(noteData)
+      .returning();
+    return note;
+  }
+
+  async getUserNotes(userId: string, sectionId?: string, subsectionId?: string): Promise<Note[]> {
+    let query = db.select().from(notes).where(eq(notes.userId, userId));
+    
+    if (sectionId && subsectionId) {
+      query = query.where(and(
+        eq(notes.sectionId, sectionId),
+        eq(notes.subsectionId, subsectionId)
+      ));
+    }
+    
+    return await query.orderBy(desc(notes.createdAt));
+  }
+
+  async updateNote(id: string, updates: Partial<InsertNote>): Promise<Note> {
+    const [note] = await db
+      .update(notes)
+      .set({
+        ...updates,
+        updatedAt: new Date(),
+      })
+      .where(eq(notes.id, id))
+      .returning();
+    return note;
+  }
+
+  async deleteNote(id: string): Promise<void> {
+    await db.delete(notes).where(eq(notes.id, id));
   }
 }
 

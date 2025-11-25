@@ -351,6 +351,90 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Notes endpoints
+  app.get('/api/notes', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { sectionId, subsectionId } = req.query;
+      const userNotes = await storage.getUserNotes(userId, sectionId as string, subsectionId as string);
+      res.json(userNotes);
+    } catch (error) {
+      console.error("Error fetching notes:", error);
+      res.status(500).json({ message: "Failed to fetch notes" });
+    }
+  });
+
+  app.post('/api/notes', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { content, sectionId, subsectionId, location, questionId, positionX, positionY } = req.body;
+      
+      const note = await storage.createNote({
+        userId,
+        content,
+        sectionId,
+        subsectionId,
+        location,
+        questionId,
+        positionX: positionX || 100,
+        positionY: positionY || 100,
+      });
+      
+      res.json(note);
+    } catch (error) {
+      console.error("Error creating note:", error);
+      res.status(500).json({ message: "Failed to create note" });
+    }
+  });
+
+  app.patch('/api/notes/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const noteId = req.params.id;
+      const { content, positionX, positionY } = req.body;
+      
+      // Verify note belongs to user - need to get the note first
+      const userNotes = await storage.getUserNotes(userId);
+      const note = userNotes.find(n => n.id === noteId);
+      
+      if (!note) {
+        return res.status(404).json({ message: "Note not found" });
+      }
+      
+      const updates: any = {};
+      if (content !== undefined) updates.content = content;
+      if (positionX !== undefined) updates.positionX = positionX;
+      if (positionY !== undefined) updates.positionY = positionY;
+      
+      const updatedNote = await storage.updateNote(noteId, updates);
+      res.json(updatedNote);
+    } catch (error) {
+      console.error("Error updating note:", error);
+      res.status(500).json({ message: "Failed to update note" });
+    }
+  });
+
+  app.delete('/api/notes/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const noteId = req.params.id;
+      
+      // Verify note belongs to user
+      const userNotes = await storage.getUserNotes(userId);
+      const note = userNotes.find(n => n.id === noteId);
+      
+      if (!note) {
+        return res.status(404).json({ message: "Note not found" });
+      }
+      
+      await storage.deleteNote(noteId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting note:", error);
+      res.status(500).json({ message: "Failed to delete note" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

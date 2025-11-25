@@ -87,3 +87,24 @@ export const questionResponses = pgTable("question_responses", {
 
 export type InsertQuestionResponse = typeof questionResponses.$inferInsert;
 export type QuestionResponse = typeof questionResponses.$inferSelect;
+
+// Notes table - tracks user notes on highlights
+export const notes = pgTable("notes", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: 'cascade' }),
+  content: varchar("content").notNull(),
+  sectionId: varchar("section_id").notNull(),
+  subsectionId: varchar("subsection_id").notNull(),
+  location: varchar("location", { length: 20 }).notNull(), // 'reference' or 'question'
+  questionId: varchar("question_id"),
+  positionX: integer("position_x").notNull().default(100),
+  positionY: integer("position_y").notNull().default(100),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (table) => [
+  index("idx_notes_user_id").on(table.userId),
+  index("idx_notes_section").on(table.sectionId, table.subsectionId),
+]);
+
+export type InsertNote = typeof notes.$inferInsert;
+export type Note = typeof notes.$inferSelect;
