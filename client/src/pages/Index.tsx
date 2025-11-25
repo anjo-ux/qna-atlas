@@ -261,6 +261,17 @@ export default function Index() {
 
   return (
     <div className="flex h-screen overflow-hidden bg-background">
+      {/* Sidebar Toggle Button */}
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={() => setIsNavOpen(!isNavOpen)}
+        className="flex-shrink-0 rounded-none border-r border-border h-full"
+        data-testid="button-toggle-nav"
+      >
+        {isNavOpen ? <ChevronLeft className="h-5 w-5" /> : <ChevronRight className="h-5 w-5" />}
+      </Button>
+
       {/* Navigation Sidebar - Collapsible */}
       {isNavOpen && (
         <div className="w-80 flex-shrink-0 transition-all duration-300 overflow-hidden">
@@ -274,17 +285,6 @@ export default function Index() {
           />
         </div>
       )}
-
-      {/* Sidebar Toggle Button */}
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={() => setIsNavOpen(!isNavOpen)}
-        className="flex-shrink-0 rounded-none border-r border-border"
-        data-testid="button-toggle-nav"
-      >
-        {isNavOpen ? <ChevronLeft className="h-5 w-5" /> : <ChevronRight className="h-5 w-5" />}
-      </Button>
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col min-h-screen overflow-hidden">
