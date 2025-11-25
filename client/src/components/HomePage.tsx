@@ -395,28 +395,6 @@ export function HomePage({ sections, onReviewIncorrect, onStartTest, onResumeTes
           ))}
         </Accordion>
       </Card>
-
-      {/* Get Started Message */}
-      {overallStats.total === 0 && (
-        <Card className="p-4 md:p-8 text-center bg-gradient-to-br from-primary/5 to-accent/5 border-primary/20">
-          <BookOpen className="h-10 md:h-12 w-10 md:w-12 text-primary mx-auto mb-4" />
-          <h3 className="text-lg md:text-xl font-semibold mb-2">Ready to Begin?</h3>
-          <p className="text-xs md:text-base text-muted-foreground mb-6">
-            Select a section from the navigation menu to start answering questions and track your progress
-          </p>
-          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 justify-center">
-            <Button onClick={onStartTest} data-testid="button-get-started" className="text-xs sm:text-sm">
-              Get Started
-            </Button>
-            {onPreview && (
-              <Button variant="outline" onClick={onPreview} data-testid="button-preview" className="text-xs sm:text-sm">
-                <Eye className="mr-2 h-4 w-4" />
-                Preview
-              </Button>
-            )}
-          </div>
-        </Card>
-      )}
     </div>
   );
 }
