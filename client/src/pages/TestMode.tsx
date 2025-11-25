@@ -38,7 +38,7 @@ export function TestMode({ sections, onBack, resumeSessionId }: TestModeProps) {
   const hasResumedRef = useRef(false);
 
   const { recordResponse } = useQuestionStats();
-  const { createSession, updateSession, completeSession, getInProgressSessions, deleteSession, sessions } = useTestSessions();
+  const { createSession, updateSession, completeSession, getInProgressSessions, getCompletedSessions, deleteSession, sessions } = useTestSessions();
 
   // Get all available questions based on selection
   const availableQuestions = useMemo(() => {
@@ -233,6 +233,7 @@ export function TestMode({ sections, onBack, resumeSessionId }: TestModeProps) {
 
   if (testState === 'setup') {
     const inProgressSessions = getInProgressSessions();
+    const completedSessions = getCompletedSessions();
     
     return (
       <div className="flex-1 flex flex-col overflow-auto">
@@ -253,6 +254,18 @@ export function TestMode({ sections, onBack, resumeSessionId }: TestModeProps) {
                 <h2 className="text-lg font-semibold text-foreground">Resume Test</h2>
                 <TestHistory
                   sessions={inProgressSessions}
+                  onResume={handleResumeTest}
+                  onDelete={deleteSession}
+                />
+              </div>
+            )}
+            
+            {/* Completed Tests */}
+            {completedSessions.length > 0 && (
+              <div className="space-y-3">
+                <h2 className="text-lg font-semibold text-foreground">Completed Tests</h2>
+                <TestHistory
+                  sessions={completedSessions}
                   onResume={handleResumeTest}
                   onDelete={deleteSession}
                 />
