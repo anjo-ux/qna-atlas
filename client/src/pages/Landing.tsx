@@ -1,14 +1,27 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { BookOpen, Check } from "lucide-react";
+import { BookOpen, Check, Eye } from "lucide-react";
+import { useState } from "react";
+import { PreviewWizard } from "@/components/PreviewWizard";
 
 function handleLogin() {
   window.location.href = '/api/login';
 }
 
 export default function Landing() {
+  const [showPreviewWizard, setShowPreviewWizard] = useState(false);
+
   return (
     <div className="min-h-screen flex flex-col">
+      <PreviewWizard
+        open={showPreviewWizard}
+        onClose={() => setShowPreviewWizard(false)}
+        onStart={() => {
+          setShowPreviewWizard(false);
+          window.location.href = '/preview';
+        }}
+      />
+
       <header className="border-b">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -30,9 +43,13 @@ export default function Landing() {
             <p className="text-xl text-muted-foreground">
               Interactive review platform for the Plastic Surgery In-Training Examination (PSITE)
             </p>
-            <div className="pt-4">
+            <div className="pt-4 flex gap-3 justify-center">
               <Button size="lg" onClick={handleLogin} data-testid="button-get-started">
                 Get Started
+              </Button>
+              <Button size="lg" variant="outline" onClick={() => setShowPreviewWizard(true)} data-testid="button-preview">
+                <Eye className="mr-2 h-4 w-4" />
+                Preview
               </Button>
             </div>
           </div>
