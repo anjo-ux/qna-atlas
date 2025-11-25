@@ -20,10 +20,10 @@ export function ViewModeSlider({ value, onChange, hideLabels = false }: ViewMode
   const sliderOffset = selectedIndex * sliderWidth;
 
   return (
-    <div className="relative inline-flex items-center gap-0 bg-muted/30 rounded-lg p-1 overflow-hidden">
-      {/* Animated slider background */}
+    <div className="relative inline-flex items-center gap-0 bg-muted/50 rounded-lg p-1 overflow-hidden border border-border/50">
+      {/* Animated slider background - covers full button */}
       <div
-        className="absolute top-1 bottom-1 bg-primary/15 rounded-md transition-all duration-300 ease-out"
+        className="absolute top-0 bottom-0 bg-primary rounded-md transition-all duration-300 ease-out shadow-sm"
         style={{
           width: `calc(${sliderWidth}% - 0.5rem)`,
           left: `calc(${sliderOffset}% + 0.25rem)`,
@@ -36,7 +36,11 @@ export function ViewModeSlider({ value, onChange, hideLabels = false }: ViewMode
         <button
           key={mode.id}
           onClick={() => onChange(mode.id)}
-          className="relative flex items-center justify-center gap-2 px-3 py-1.5 text-sm font-medium transition-colors duration-200 z-10"
+          className={`relative flex items-center justify-center gap-2 px-3 py-1.5 text-sm font-medium transition-colors duration-200 z-10 flex-1 ${
+            value === mode.id 
+              ? 'text-primary-foreground' 
+              : 'text-foreground hover:text-foreground/80'
+          }`}
           data-testid={`button-view-${mode.id}`}
         >
           {mode.icon}
