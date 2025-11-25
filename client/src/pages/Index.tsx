@@ -268,20 +268,22 @@ export default function Index() {
         <header className="sticky top-0 z-10 backdrop-blur-lg bg-background/80 border-b border-border">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4">
             <div className="flex items-center gap-4">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="lg:hidden"
-                onClick={() => setIsNavOpen(!isNavOpen)}
-              >
-                {isNavOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-              </Button>
+              {!isNavOpen && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="lg:hidden"
+                  onClick={() => setIsNavOpen(!isNavOpen)}
+                >
+                  <Menu className="h-5 w-5" />
+                </Button>
+              )}
               
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={handleGoHome}
-                className="hover:bg-primary/10"
+                className="hover:bg-primary/10 flex-shrink-0"
                 title="Go to Dashboard"
               >
                 <Home className="h-5 w-5" />
