@@ -6,10 +6,12 @@ import { Label } from '@/components/ui/label';
 import { Question } from '@/types/question';
 import { cn } from '@/lib/utils';
 import { useHighlights } from '@/hooks/useHighlights';
+import { useBookmarks } from '@/hooks/useBookmarks';
 import { HighlightToolbar } from '@/components/HighlightToolbar';
 import { StickyNote } from '@/components/StickyNote';
 import { useTextHighlight } from '@/hooks/useTextHighlight';
 import { QuestionResponse } from '@/hooks/useQuestionStats';
+import { Bookmark } from 'lucide-react';
 
 interface QuestionCardProps {
   question: Question;
@@ -51,8 +53,11 @@ export function QuestionCard({
     getNotesForSection,
   } = useHighlights();
 
+  const { isBookmarked, toggleBookmark, isPending: isBookmarkPending } = useBookmarks();
+
   const highlights = getHighlightsForSection(sectionId, subsectionId, 'question', question.id);
   const notes = getNotesForSection(sectionId, subsectionId, 'question', question.id);
+  const questionIsBookmarked = isBookmarked(question.id);
   const questionRef = useRef<HTMLDivElement>(null);
 
   const parsed = useMemo((): ParsedQuestion => {
@@ -209,12 +214,27 @@ export function QuestionCard({
       )}
     >
       <div className="p-4 md:p-6 space-y-3 md:space-y-4">
-        <HighlightToolbar
-          activeColor={activeColor}
-          onColorChange={setActiveColor}
-          onAddNote={handleAddNote}
-          onClearHighlights={handleClearHighlights}
-        />
+        <div className="flex items-center justify-between">
+          <HighlightToolbar
+            activeColor={activeColor}
+            onColorChange={setActiveColor}
+            onAddNote={handleAddNote}
+            onClearHighlights={handleClearHighlights}
+          />
+          <Button
+            size="icon"
+            variant="ghost"
+            onClick={() => toggleBookmark(question.id, sectionId, subsectionId)}
+            disabled={isBookmarkPending}
+            data-testid={`button-bookmark-${question.id}`}
+            className={cn(
+              "flex-shrink-0 transition-colors",
+              questionIsBookmarked && "text-accent"
+            )}
+          >
+            <Bookmark className={cn("h-5 w-5", questionIsBookmarked && "fill-accent")} />
+          </Button>
+        </div>
         
         <div className="flex items-start gap-3 md:gap-4" ref={questionRef} onMouseUp={handleTextSelection}>
           <div className="flex-shrink-0 w-7 h-7 md:w-8 md:h-8 rounded-full bg-primary/10 flex items-center justify-center">

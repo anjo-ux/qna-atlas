@@ -108,3 +108,20 @@ export const notes = pgTable("notes", {
 
 export type InsertNote = typeof notes.$inferInsert;
 export type Note = typeof notes.$inferSelect;
+
+// Bookmarks table - tracks user's bookmarked questions
+export const bookmarks = pgTable("bookmarks", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: 'cascade' }),
+  questionId: varchar("question_id").notNull(),
+  sectionId: varchar("section_id").notNull(),
+  subsectionId: varchar("subsection_id").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => [
+  index("idx_bookmarks_user_id").on(table.userId),
+  index("idx_bookmarks_question").on(table.questionId),
+  index("idx_bookmarks_user_question").on(table.userId, table.questionId),
+]);
+
+export type InsertBookmark = typeof bookmarks.$inferInsert;
+export type Bookmark = typeof bookmarks.$inferSelect;

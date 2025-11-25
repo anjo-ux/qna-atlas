@@ -435,6 +435,67 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Bookmarks routes
+  app.get('/api/bookmarks', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const bookmarks = await storage.getUserBookmarks(userId);
+      res.json(bookmarks);
+    } catch (error) {
+      console.error("Error fetching bookmarks:", error);
+      res.status(500).json({ message: "Failed to fetch bookmarks" });
+    }
+  });
+
+  app.post('/api/bookmarks', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { questionId, sectionId, subsectionId } = req.body;
+      
+      if (!questionId || !sectionId || !subsectionId) {
+        return res.status(400).json({ message: "Missing required fields" });
+      }
+      
+      const bookmark = await storage.addBookmark({
+        userId,
+        questionId,
+        sectionId,
+        subsectionId,
+      });
+      
+      res.json(bookmark);
+    } catch (error) {
+      console.error("Error adding bookmark:", error);
+      res.status(500).json({ message: "Failed to add bookmark" });
+    }
+  });
+
+  app.delete('/api/bookmarks/:questionId', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const questionId = req.params.questionId;
+      
+      await storage.removeBookmark(userId, questionId);
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error removing bookmark:", error);
+      res.status(500).json({ message: "Failed to remove bookmark" });
+    }
+  });
+
+  app.get('/api/bookmarks/check/:questionId', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const questionId = req.params.questionId;
+      
+      const isBookmarked = await storage.isQuestionBookmarked(userId, questionId);
+      res.json({ isBookmarked });
+    } catch (error) {
+      console.error("Error checking bookmark:", error);
+      res.status(500).json({ message: "Failed to check bookmark" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

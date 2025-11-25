@@ -4,6 +4,7 @@ import {
   questionResponses,
   loginConnections,
   notes,
+  bookmarks,
   type User,
   type UpsertUser,
   type TestSession,
@@ -13,6 +14,8 @@ import {
   type LoginConnection,
   type Note,
   type InsertNote,
+  type Bookmark,
+  type InsertBookmark,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc } from "drizzle-orm";
@@ -48,6 +51,12 @@ export interface IStorage {
   getUserNotes(userId: string, sectionId?: string, subsectionId?: string): Promise<Note[]>;
   updateNote(id: string, updates: Partial<InsertNote>): Promise<Note>;
   deleteNote(id: string): Promise<void>;
+
+  // Bookmarks operations
+  addBookmark(bookmark: InsertBookmark): Promise<Bookmark>;
+  removeBookmark(userId: string, questionId: string): Promise<void>;
+  getUserBookmarks(userId: string): Promise<Bookmark[]>;
+  isQuestionBookmarked(userId: string, questionId: string): Promise<boolean>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -261,6 +270,61 @@ export class DatabaseStorage implements IStorage {
 
   async deleteNote(id: string): Promise<void> {
     await db.delete(notes).where(eq(notes.id, id));
+  }
+
+  // Bookmarks operations
+  async addBookmark(bookmarkData: InsertBookmark): Promise<Bookmark> {
+    const [bookmark] = await db
+      .insert(bookmarks)
+      .values(bookmarkData)
+      .onConflictDoNothing()
+      .returning();
+    
+    if (bookmark) return bookmark;
+    
+    // If it was a conflict (already exists), return the existing bookmark
+    const [existing] = await db
+      .select()
+      .from(bookmarks)
+      .where(
+        and(
+          eq(bookmarks.userId, bookmarkData.userId),
+          eq(bookmarks.questionId, bookmarkData.questionId)
+        )
+      );
+    return existing;
+  }
+
+  async removeBookmark(userId: string, questionId: string): Promise<void> {
+    await db
+      .delete(bookmarks)
+      .where(
+        and(
+          eq(bookmarks.userId, userId),
+          eq(bookmarks.questionId, questionId)
+        )
+      );
+  }
+
+  async getUserBookmarks(userId: string): Promise<Bookmark[]> {
+    return await db
+      .select()
+      .from(bookmarks)
+      .where(eq(bookmarks.userId, userId))
+      .orderBy(desc(bookmarks.createdAt));
+  }
+
+  async isQuestionBookmarked(userId: string, questionId: string): Promise<boolean> {
+    const [result] = await db
+      .select()
+      .from(bookmarks)
+      .where(
+        and(
+          eq(bookmarks.userId, userId),
+          eq(bookmarks.questionId, questionId)
+        )
+      );
+    return !!result;
   }
 }
 
