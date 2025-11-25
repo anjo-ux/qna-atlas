@@ -11,6 +11,7 @@ import { QuestionFilters } from '@/components/QuestionFilters';
 import { SearchResults } from '@/components/SearchResults';
 import { HomePage } from '@/components/HomePage';
 import { Paywall } from '@/components/Paywall';
+import { PreviewWizard } from '@/components/PreviewWizard';
 import { TestMode } from './TestMode';
 import { Settings as SettingsPage } from './Settings';
 import { Input } from '@/components/ui/input';
@@ -24,7 +25,7 @@ import { toast } from 'sonner';
 
 type ViewMode = 'questions' | 'reference' | 'split';
 type FilterMode = 'all' | 'incorrect';
-type ScreenMode = 'study' | 'test' | 'settings';
+type ScreenMode = 'study' | 'test' | 'settings' | 'preview';
 type TestModeState = { mode: 'new' } | { mode: 'resume'; sessionId: string };
 
 export default function Index() {
@@ -43,6 +44,7 @@ export default function Index() {
   const searchRef = useRef<HTMLDivElement>(null);
   const [subscription, setSubscription] = useState<any>(null);
   const [isCheckingSubscription, setIsCheckingSubscription] = useState(true);
+  const [showPreviewWizard, setShowPreviewWizard] = useState(false);
 
   const {
     recordResponse,
@@ -277,6 +279,21 @@ export default function Index() {
         <SettingsPage 
           onBack={() => setScreenMode('study')}
           subscription={subscription}
+        />
+      </div>
+    );
+  }
+
+  if (screenMode === 'preview') {
+    const { getPreviewQuestions } = require('@/utils/previewQuestions');
+    const previewQuestions = getPreviewQuestions(sections);
+    return (
+      <div className="flex h-screen overflow-hidden bg-background">
+        <TestMode 
+          sections={sections}
+          previewQuestions={previewQuestions}
+          onBack={() => setScreenMode('study')}
+          isPreview={true}
         />
       </div>
     );

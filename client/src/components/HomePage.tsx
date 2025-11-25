@@ -8,7 +8,7 @@ import { useTestSessions } from '@/hooks/useTestSessions';
 import { useAuth } from '@/hooks/useAuth';
 import { TestHistory } from '@/components/TestHistory';
 import { Section } from '@/types/question';
-import { BookOpen, CheckCircle2, XCircle, TrendingUp, Target, ChevronRight, RotateCcw, AlertCircle, Zap, LogOut, User, Settings } from 'lucide-react';
+import { BookOpen, CheckCircle2, XCircle, TrendingUp, Target, ChevronRight, RotateCcw, AlertCircle, Zap, LogOut, User, Settings, Eye } from 'lucide-react';
 import { useMemo } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
@@ -26,9 +26,10 @@ interface HomePageProps {
   onStartTest?: () => void;
   onResumeTest?: (sessionId: string) => void;
   onSettings?: () => void;
+  onPreview?: () => void;
 }
 
-export function HomePage({ sections, onReviewIncorrect, onStartTest, onResumeTest, onSettings }: HomePageProps) {
+export function HomePage({ sections, onReviewIncorrect, onStartTest, onResumeTest, onSettings, onPreview }: HomePageProps) {
   const { getAllStats, responses, getSubsectionStats, resetAll } = useQuestionStats();
   const { sessions, deleteSession } = useTestSessions();
   const { user, logout } = useAuth();
@@ -399,9 +400,20 @@ export function HomePage({ sections, onReviewIncorrect, onStartTest, onResumeTes
         <Card className="p-8 text-center bg-gradient-to-br from-primary/5 to-accent/5 border-primary/20">
           <BookOpen className="h-12 w-12 text-primary mx-auto mb-4" />
           <h3 className="text-xl font-semibold mb-2">Ready to Begin?</h3>
-          <p className="text-muted-foreground">
+          <p className="text-muted-foreground mb-6">
             Select a section from the navigation menu to start answering questions and track your progress
           </p>
+          <div className="flex gap-3 justify-center">
+            <Button onClick={onStartTest} data-testid="button-get-started">
+              Get Started
+            </Button>
+            {onPreview && (
+              <Button variant="outline" onClick={onPreview} data-testid="button-preview">
+                <Eye className="mr-2 h-4 w-4" />
+                Preview
+              </Button>
+            )}
+          </div>
         </Card>
       )}
     </div>
