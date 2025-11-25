@@ -10,6 +10,7 @@ import { QuestionStats } from '@/components/QuestionStats';
 import { QuestionFilters } from '@/components/QuestionFilters';
 import { SearchResults } from '@/components/SearchResults';
 import { HomePage } from '@/components/HomePage';
+import { Paywall } from '@/components/Paywall';
 import { TestMode } from './TestMode';
 import { Settings as SettingsPage } from './Settings';
 import { Input } from '@/components/ui/input';
@@ -40,6 +41,8 @@ export default function Index() {
   const [screenMode, setScreenMode] = useState<ScreenMode>('study');
   const [testModeState, setTestModeState] = useState<TestModeState>({ mode: 'new' });
   const searchRef = useRef<HTMLDivElement>(null);
+  const [subscription, setSubscription] = useState<any>(null);
+  const [isCheckingSubscription, setIsCheckingSubscription] = useState(true);
 
   const {
     recordResponse,
@@ -58,6 +61,11 @@ export default function Index() {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        // Check subscription status first
+        const subRes = await fetch('/api/subscription');
+        const subData = await subRes.json();
+        setSubscription(subData);
+
         const [questionsData, referenceData] = await Promise.all([
           loadQuestions(),
           Promise.resolve(loadReferenceText())
@@ -68,6 +76,7 @@ export default function Index() {
         console.error('Error loading data:', error);
       } finally {
         setIsLoading(false);
+        setIsCheckingSubscription(false);
       }
     };
 
@@ -234,6 +243,19 @@ export default function Index() {
     setScreenMode('test');
   };
 
+  // Check if trial is expired
+  if (!isCheckingSubscription && subscription?.isLocked) {
+    return (
+      <Paywall 
+        daysRemaining={subscription.daysRemaining}
+        onUpgrade={() => {
+          toast.info('Upgrade options coming soon');
+        }}
+        onSettings={() => setScreenMode('settings')}
+      />
+    );
+  }
+
   if (screenMode === 'test') {
     return (
       <div className="flex h-screen overflow-hidden bg-background">
@@ -254,6 +276,7 @@ export default function Index() {
       <div className="flex h-screen overflow-hidden bg-background">
         <SettingsPage 
           onBack={() => setScreenMode('study')}
+          subscription={subscription}
         />
       </div>
     );

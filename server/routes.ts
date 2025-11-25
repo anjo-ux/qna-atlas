@@ -50,6 +50,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Check subscription status
+  app.get('/api/subscription', async (req: any, res) => {
+    try {
+      if (!req.isAuthenticated() || !req.user?.claims?.sub) {
+        return res.json({ status: 'none', daysRemaining: 0, trialEndsAt: null });
+      }
+      
+      const user = await storage.getUser(req.user.claims.sub);
+      if (!user) {
+        return res.json({ status: 'none', daysRemaining: 0, trialEndsAt: null });
+      }
+
+      const now = new Date();
+      const trialEndsAt = user.trialEndsAt ? new Date(user.trialEndsAt) : null;
+      
+      let status = user.subscriptionStatus || 'trial';
+      let daysRemaining = 0;
+
+      if (trialEndsAt) {
+        const diffTime = trialEndsAt.getTime() - now.getTime();
+        daysRemaining = Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
+        
+        if (daysRemaining === 0 && status === 'trial') {
+          status = 'expired';
+          await storage.updateUserProfile(user.id, { subscriptionStatus: 'expired' });
+        }
+      }
+
+      res.json({ 
+        status, 
+        daysRemaining, 
+        trialEndsAt,
+        isLocked: status === 'expired'
+      });
+    } catch (error) {
+      console.error('Error checking subscription:', error);
+      res.json({ status: 'error', daysRemaining: 0, trialEndsAt: null });
+    }
+  });
+
   // Get user's login connections
   app.get('/api/auth/connections', async (req: any, res) => {
     try {

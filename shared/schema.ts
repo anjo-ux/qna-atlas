@@ -31,6 +31,8 @@ export const users = pgTable("users", {
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
   institutionalAffiliation: varchar("institutional_affiliation"),
+  subscriptionStatus: varchar("subscription_status").default('trial'), // trial, active, expired
+  trialEndsAt: timestamp("trial_ends_at"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

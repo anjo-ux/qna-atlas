@@ -51,12 +51,17 @@ function updateUserSession(
 }
 
 async function upsertUser(claims: any) {
+  const trialEndsAt = new Date();
+  trialEndsAt.setDate(trialEndsAt.getDate() + 30);
+  
   await storage.upsertUser({
     id: claims["sub"],
     email: claims["email"],
     firstName: claims["first_name"],
     lastName: claims["last_name"],
     profileImageUrl: claims["profile_image_url"],
+    subscriptionStatus: 'trial',
+    trialEndsAt,
   });
 }
 
