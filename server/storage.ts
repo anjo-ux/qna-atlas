@@ -244,16 +244,18 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getUserNotes(userId: string, sectionId?: string, subsectionId?: string): Promise<Note[]> {
-    let query = db.select().from(notes).where(eq(notes.userId, userId));
+    const conditions: any[] = [eq(notes.userId, userId)];
     
     if (sectionId && subsectionId) {
-      query = query.where(and(
-        eq(notes.sectionId, sectionId),
-        eq(notes.subsectionId, subsectionId)
-      ));
+      conditions.push(eq(notes.sectionId, sectionId));
+      conditions.push(eq(notes.subsectionId, subsectionId));
     }
     
-    return await query.orderBy(desc(notes.createdAt));
+    return await db
+      .select()
+      .from(notes)
+      .where(and(...conditions))
+      .orderBy(desc(notes.createdAt));
   }
 
   async updateNote(id: string, updates: Partial<InsertNote>): Promise<Note> {

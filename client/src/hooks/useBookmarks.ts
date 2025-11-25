@@ -11,7 +11,10 @@ export function useBookmarks() {
   // Add bookmark mutation
   const addBookmarkMutation = useMutation({
     mutationFn: async (data: { questionId: string; sectionId: string; subsectionId: string }) => {
-      return await apiRequest('POST', '/api/bookmarks', data);
+      return await apiRequest('/api/bookmarks', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/bookmarks'] });
@@ -21,7 +24,9 @@ export function useBookmarks() {
   // Remove bookmark mutation
   const removeBookmarkMutation = useMutation({
     mutationFn: async (questionId: string) => {
-      return await apiRequest('DELETE', `/api/bookmarks/${questionId}`);
+      return await apiRequest(`/api/bookmarks/${questionId}`, {
+        method: 'DELETE',
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/bookmarks'] });
