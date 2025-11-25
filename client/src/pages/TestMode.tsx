@@ -446,7 +446,7 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
         <div className="flex-1 flex flex-col overflow-hidden">
           <div className="p-4 border-b border-border bg-accent/5">
             <div className="flex items-center justify-between gap-3">
-              <div>
+              <div className="flex-1">
                 <h1 className="text-2xl font-bold">Test Mode</h1>
                 <p className="text-sm text-muted-foreground">Question {currentQuestionIndex + 1} of {testQuestions.length}</p>
               </div>
@@ -460,18 +460,18 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
                 >
                   {showQuestionPanel ? <ChevronRight className="h-5 w-5" /> : <ChevronLeft className="h-5 w-5" />}
                 </Button>
-                <Button data-testid="button-save-exit" onClick={handleSaveAndExit} variant="outline">
+                <Button data-testid="button-save-exit" onClick={handleSaveAndExit} variant="outline" size="sm">
                   Save & Exit
                 </Button>
-                <Button data-testid="button-finish-test" onClick={handleFinishTest} variant="default">
+                <Button data-testid="button-finish-test" onClick={handleFinishTest} variant="default" size="sm">
                   Finish Test
                 </Button>
               </div>
             </div>
           </div>
 
-          <div className="flex-1 overflow-auto p-6">
-            <div className="max-w-4xl mx-auto">
+          <div className="flex-1 overflow-auto p-4 md:p-6">
+            <div className="max-w-2xl md:max-w-4xl mx-auto">
               <QuestionCard
                 key={`${currentQuestion.id}-${currentQuestionIndex}`}
                 question={currentQuestion}
@@ -487,19 +487,20 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
 
           {/* Navigation Buttons */}
           <div className="p-4 border-t border-border bg-accent/5">
-            <div className="max-w-4xl mx-auto flex items-center justify-between">
+            <div className="max-w-2xl md:max-w-4xl mx-auto flex items-center justify-between gap-2">
               <Button
                 data-testid="button-previous-question"
                 onClick={handlePreviousQuestion}
                 disabled={currentQuestionIndex === 0}
                 variant="outline"
-                className="gap-2"
+                size="sm"
+                className="gap-1"
               >
                 <ChevronLeft className="h-4 w-4" />
-                Previous
+                <span className="hidden sm:inline">Previous</span>
               </Button>
               
-              <div className="text-sm text-muted-foreground">
+              <div className="text-xs sm:text-sm text-muted-foreground text-center">
                 Question {currentQuestionIndex + 1} of {testQuestions.length}
               </div>
 
@@ -508,11 +509,86 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
                 onClick={handleNextQuestion}
                 disabled={currentQuestionIndex === testQuestions.length - 1}
                 variant="outline"
-                className="gap-2"
+                size="sm"
+                className="gap-1"
               >
-                Next
+                <span className="hidden sm:inline">Next</span>
                 <ChevronRightIcon className="h-4 w-4" />
               </Button>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Sidebar - Question Tracker (Hidden on mobile by default, visible on md+) */}
+        <div className={cn(
+          "border-l border-border bg-muted/30 flex flex-col transition-all duration-300",
+          "w-0 md:w-64 overflow-hidden md:overflow-visible",
+          showQuestionPanel && "w-64 fixed md:relative right-0 md:right-auto top-0 md:top-auto h-screen md:h-auto z-40 md:z-auto"
+        )}>
+          <div className="p-4 border-b border-border min-h-fit">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex-1">
+                <h2 className="font-semibold text-sm">Questions</h2>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {Object.keys(responses).length} / {testQuestions.length}
+                </p>
+              </div>
+              <Button
+                size="icon"
+                variant="ghost"
+                onClick={() => setShowQuestionPanel(false)}
+                className="md:hidden"
+                data-testid="button-close-questions"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+          
+          <div className="flex-1 overflow-y-auto p-2">
+            <div className="grid grid-cols-5 gap-2">
+              {testQuestions.map((question, index) => {
+                const status = getQuestionStatus(index);
+                const isCurrent = index === currentQuestionIndex;
+                
+                return (
+                  <button
+                    key={question.id}
+                    data-testid={`button-question-${index + 1}`}
+                    onClick={() => {
+                      handleQuestionNavigation(index);
+                      // Auto-close on mobile after selection
+                      if (window.innerWidth < 768) {
+                        setShowQuestionPanel(false);
+                      }
+                    }}
+                    className={cn(
+                      "aspect-square rounded flex items-center justify-center text-xs font-semibold transition-all",
+                      isCurrent && "ring-2 ring-primary ring-offset-2",
+                      status === 'unanswered' && "bg-muted hover:bg-muted/80 text-muted-foreground",
+                      status === 'correct' && "bg-green-500/20 text-green-700 dark:text-green-400 hover:bg-green-500/30",
+                      status === 'incorrect' && "bg-red-500/20 text-red-700 dark:text-red-400 hover:bg-red-500/30"
+                    )}
+                  >
+                    {index + 1}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="p-3 border-t border-border space-y-2 text-xs">
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 rounded bg-green-500/20"></div>
+              <span className="text-muted-foreground">Correct</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 rounded bg-red-500/20"></div>
+              <span className="text-muted-foreground">Incorrect</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 rounded bg-muted"></div>
+              <span className="text-muted-foreground">Unanswered</span>
             </div>
           </div>
         </div>
