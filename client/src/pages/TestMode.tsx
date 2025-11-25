@@ -441,15 +441,15 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
     const currentQuestion = testQuestions[currentQuestionIndex];
     
     return (
-      <div className="flex flex-col md:flex-row md:h-screen md:overflow-hidden">
+      <div className="flex flex-col overflow-auto md:flex-row md:h-screen md:overflow-hidden">
         {/* Question Panel - Top on mobile, Right on desktop */}
         <div className={cn(
-          "md:flex md:flex-col md:w-64 md:border-r md:border-border md:bg-muted/30 md:overflow-visible md:flex-shrink-0",
-          "flex flex-col border-b border-border bg-muted/30",
+          "md:flex md:flex-col md:w-64 md:border-r md:border-border md:bg-muted/30 md:overflow-visible md:flex-shrink-0 md:h-screen",
+          "flex flex-col border-b border-border bg-muted/30 w-full",
           !showQuestionPanel && "hidden md:flex",
           showQuestionPanel && "flex"
         )}>
-          <div className="p-4 border-b border-border flex-shrink-0">
+          <div className="p-4 border-b border-border">
             <div className="flex items-center justify-between gap-2">
               <div className="flex-1">
                 <h2 className="font-semibold text-sm">Questions</h2>
@@ -469,7 +469,7 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
             </div>
           </div>
           
-          <div className="overflow-y-auto p-2 flex-1 min-h-0">
+          <div className="p-2">
             <div className="grid grid-cols-5 gap-2">
               {testQuestions.map((question, index) => {
                 const status = getQuestionStatus(index);
@@ -501,7 +501,7 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
             </div>
           </div>
 
-          <div className="p-3 border-t border-border space-y-2 text-xs flex-shrink-0">
+          <div className="p-3 border-t border-border space-y-2 text-xs">
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 rounded bg-green-500/20"></div>
               <span className="text-muted-foreground">Correct</span>
@@ -518,7 +518,7 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
         </div>
 
         {/* Main Content */}
-        <div className="flex-1 flex flex-col md:overflow-hidden">
+        <div className="flex flex-col md:flex-1 md:overflow-hidden w-full">
           <div className="p-4 border-b border-border bg-accent/5">
             <div className="flex items-center justify-between gap-3">
               <div className="flex-1">
@@ -545,7 +545,7 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
             </div>
           </div>
 
-          <div className="flex-1 md:overflow-auto p-4 md:p-6">
+          <div className="md:flex-1 md:overflow-auto p-4 md:p-6">
             <div className="max-w-2xl md:max-w-4xl mx-auto w-full">
               <QuestionCard
                 key={`${currentQuestion.id}-${currentQuestionIndex}`}
