@@ -55,68 +55,32 @@ export function QuestionCard({
   const questionRef = useRef<HTMLDivElement>(null);
 
   const parsed = useMemo((): ParsedQuestion => {
-    let fullText = question.question;
+    const lines = question.question.split('\n');
     const choices: { letter: string; text: string }[] = [];
+    const textLines: string[] = [];
     
-    // Pattern to match answer choices: "A) text", "B) text", etc.
-    // This handles both single-line and multi-line formats
-    const choicePattern = /([A-E])\)\s*([^A-E)]+?)(?=(?:[A-E]\)|$))/gi;
-    
-    let match;
-    const choicesFound: { start: number; end: number; letter: string; text: string }[] = [];
-    
-    while ((match = choicePattern.exec(fullText)) !== null) {
-      const letter = match[1].toUpperCase();
-      const text = match[2].trim();
+    for (const line of lines) {
+      const trimmed = line.trim();
       
-      // Only treat as a choice if the text is reasonably long (not just a word or two)
-      if (text.length > 2 && !text.includes('\n\n')) {
-        choicesFound.push({
-          start: match.index,
-          end: match.index + match[0].length,
-          letter,
-          text,
-        });
-        choices.push({ letter, text });
-      }
-    }
-    
-    // Extract question text (everything before the first choice)
-    let questionText = fullText;
-    if (choicesFound.length > 0) {
-      questionText = fullText.substring(0, choicesFound[0].start).trim();
-    }
-    
-    // If we didn't find any choices, try splitting by newlines (fallback)
-    if (choices.length === 0) {
-      const lines = question.question.split('\n');
-      const textLines: string[] = [];
+      // Match various formats: "A) text", "A. text", "A: text", "A - text", "(A) text"
+      const match = trimmed.match(/^[\(]*([A-E])[\)\.\:\-\s]+(.+)$/i);
       
-      for (const line of lines) {
-        const trimmed = line.trim();
-        const lineMatch = trimmed.match(/^[\(]*([A-E])[\)\.\:\-\s]+(.+)$/i);
+      if (match && match[2].trim().length > 2) {
+        const letter = match[1].toUpperCase();
+        const text = match[2].trim();
         
-        if (lineMatch && lineMatch[2].trim().length > 2) {
-          const letter = lineMatch[1].toUpperCase();
-          const text = lineMatch[2].trim();
-          
-          if (!textLines.length || textLines[textLines.length - 1].includes('?')) {
-            choices.push({ letter, text });
-          } else {
-            textLines.push(line);
-          }
-        } else if (trimmed && trimmed.length > 0) {
+        // Verify this is likely a choice (not just a line starting with a letter)
+        if (!textLines.length || textLines[textLines.length - 1].includes('?')) {
+          choices.push({ letter, text });
+        } else {
           textLines.push(line);
         }
+      } else if (trimmed && trimmed.length > 0) {
+        textLines.push(line);
       }
-      
-      questionText = textLines.join('\n');
     }
     
-    // Sort choices by letter to ensure correct order
-    choices.sort((a, b) => a.letter.charCodeAt(0) - b.letter.charCodeAt(0));
-    
-    return { text: questionText, choices };
+    return { text: textLines.join('\n'), choices };
   }, [question.id, question.question]);
 
   // Apply highlights to question text
