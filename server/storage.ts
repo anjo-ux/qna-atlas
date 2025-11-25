@@ -66,6 +66,15 @@ export interface IStorage {
   getSpacedRepetition(userId: string, questionId: string): Promise<SpacedRepetition | undefined>;
   getUserDueQuestions(userId: string): Promise<SpacedRepetition[]>;
   updateSpacedRepetition(id: string, updates: Partial<InsertSpacedRepetition>): Promise<SpacedRepetition>;
+
+  // Topic Analytics operations
+  getTopicStats(userId: string, sectionId?: string): Promise<{
+    sectionId: string;
+    sectionTitle?: string;
+    total: number;
+    correct: number;
+    accuracy: number;
+  }[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -406,6 +415,46 @@ export class DatabaseStorage implements IStorage {
       .where(eq(spacedRepetitions.id, id))
       .returning();
     return updated;
+  }
+
+  // Topic Analytics operations
+  async getTopicStats(userId: string, sectionId?: string): Promise<{
+    sectionId: string;
+    sectionTitle?: string;
+    total: number;
+    correct: number;
+    accuracy: number;
+  }[]> {
+    const conditions: any[] = [eq(questionResponses.userId, userId)];
+    if (sectionId) {
+      conditions.push(eq(questionResponses.sectionId, sectionId));
+    }
+
+    const responses = await db
+      .select()
+      .from(questionResponses)
+      .where(and(...conditions));
+
+    // Group by section
+    const statsMap = new Map<string, { total: number; correct: number }>();
+    
+    responses.forEach(r => {
+      const key = r.sectionId;
+      if (!statsMap.has(key)) {
+        statsMap.set(key, { total: 0, correct: 0 });
+      }
+      const stats = statsMap.get(key)!;
+      stats.total++;
+      if (r.isCorrect) stats.correct++;
+    });
+
+    // Convert to array format
+    return Array.from(statsMap.entries()).map(([sectionId, stats]) => ({
+      sectionId,
+      total: stats.total,
+      correct: stats.correct,
+      accuracy: stats.total > 0 ? Math.round((stats.correct / stats.total) * 100) : 0,
+    }));
   }
 }
 

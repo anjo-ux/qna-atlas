@@ -75,14 +75,20 @@ export type TestSession = typeof testSessions.$inferSelect;
 // Question Responses table - tracks answers to individual questions
 export const questionResponses = pgTable("question_responses", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: 'cascade' }),
   testSessionId: varchar("test_session_id").notNull().references(() => testSessions.id, { onDelete: 'cascade' }),
   questionId: varchar("question_id").notNull(),
+  sectionId: varchar("section_id").notNull(),
+  subsectionId: varchar("subsection_id").notNull(),
   selectedAnswer: varchar("selected_answer").notNull(),
   isCorrect: boolean("is_correct").notNull(),
   answeredAt: timestamp("answered_at").defaultNow().notNull(),
 }, (table) => [
   index("idx_question_responses_test_session").on(table.testSessionId),
   index("idx_question_responses_question").on(table.questionId),
+  index("idx_question_responses_user").on(table.userId),
+  index("idx_question_responses_section").on(table.sectionId),
+  index("idx_question_responses_user_section").on(table.userId, table.sectionId),
 ]);
 
 export type InsertQuestionResponse = typeof questionResponses.$inferInsert;

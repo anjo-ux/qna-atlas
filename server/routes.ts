@@ -580,6 +580,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Topic Analytics routes
+  app.get('/api/analytics/topics', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const sectionId = req.query.sectionId as string | undefined;
+      
+      const topicStats = await storage.getTopicStats(userId, sectionId);
+      res.json(topicStats);
+    } catch (error) {
+      console.error("Error fetching topic stats:", error);
+      res.status(500).json({ message: "Failed to fetch topic stats" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
