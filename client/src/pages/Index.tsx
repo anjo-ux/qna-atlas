@@ -418,38 +418,30 @@ export default function Index() {
               <Button
                 onClick={handleStartTest}
                 variant="outline"
-                size="sm"
-                className="gap-2 flex-1"
+                size="icon"
               >
                 <Zap className="h-4 w-4" />
-                Test
               </Button>
               <Button
                 variant={viewMode === 'reference' ? 'default' : 'ghost'}
-                size="sm"
+                size="icon"
                 onClick={() => setViewMode('reference')}
-                className="gap-2 flex-1"
               >
                 <BookOpen className="h-4 w-4" />
-                Reference
               </Button>
               <Button
                 variant={viewMode === 'split' ? 'default' : 'ghost'}
-                size="sm"
+                size="icon"
                 onClick={() => setViewMode('split')}
-                className="gap-2 flex-1"
               >
                 <Columns2 className="h-4 w-4" />
-                Split
               </Button>
               <Button
                 variant={viewMode === 'questions' ? 'default' : 'ghost'}
-                size="sm"
+                size="icon"
                 onClick={() => setViewMode('questions')}
-                className="gap-2 flex-1"
               >
                 <FileQuestion className="h-4 w-4" />
-                Questions
               </Button>
             </div>
 
