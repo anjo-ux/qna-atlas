@@ -5,6 +5,7 @@ import { Label } from '@/components/ui/label';
 import { ArrowLeft, Mail, Lock, CreditCard, BookOpen, TrendingUp, Target, Save, ChevronRight, ChevronLeft, Check, ChevronsUpDown } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { QuestionBreakdownCharts } from '@/components/QuestionBreakdownCharts';
 import { useQuestionStats } from '@/hooks/useQuestionStats';
 import {
   Popover,
@@ -450,6 +451,15 @@ export function Settings({ onBack, subscription }: SettingsProps) {
                   </div>
                 </div>
               </Card>
+
+              {/* Question Breakdown Charts */}
+              <div>
+                <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+                  <TrendingUp className="h-5 w-5" />
+                  Question Analytics
+                </h2>
+                <QuestionBreakdownCharts />
+              </div>
 
               {/* Connections Section */}
               <Card className="p-6">
