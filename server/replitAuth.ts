@@ -72,9 +72,14 @@ export async function setupAuth(app: Express) {
     tokens: client.TokenEndpointResponse & client.TokenEndpointResponseHelpers,
     verified: passport.AuthenticateCallback
   ) => {
-    const user = {};
+    const user = {} as any;
     updateUserSession(user, tokens);
     await upsertUser(tokens.claims());
+    
+    // Store provider info for later use in callback
+    const provider = tokens.claims()?.provider || 'google';
+    user.authProvider = provider;
+    
     verified(null, user);
   };
 
@@ -103,6 +108,11 @@ export async function setupAuth(app: Express) {
   passport.deserializeUser((user: Express.User, cb) => cb(null, user));
 
   app.get("/api/login", (req, res, next) => {
+    // Store login context (provider and action) in session
+    const session = req.session as any;
+    session.loginProvider = req.query.provider || 'google';
+    session.loginAction = req.query.action || 'login';
+    
     ensureStrategy(req.hostname);
     passport.authenticate(`replitauth:${req.hostname}`, {
       prompt: "login consent",
@@ -115,7 +125,42 @@ export async function setupAuth(app: Express) {
     passport.authenticate(`replitauth:${req.hostname}`, {
       successReturnToOrRedirect: "/",
       failureRedirect: "/api/login",
-    })(req, res, next);
+    }, async (err: any, user: any, info: any) => {
+      if (err || !user) {
+        return res.redirect("/api/login");
+      }
+
+      req.logIn(user, async (loginErr) => {
+        if (loginErr) {
+          return res.redirect("/api/login");
+        }
+
+        // Handle connection addition
+        const session = req.session as any;
+        if (session.loginAction === 'connect') {
+          const provider = session.loginProvider || 'google';
+          const userId = user.claims?.sub;
+          
+          try {
+            if (userId) {
+              await storage.addLoginConnection(userId, provider);
+            }
+          } catch (error) {
+            console.error('Error adding connection:', error);
+          }
+
+          // Redirect back to settings with success
+          delete session.loginProvider;
+          delete session.loginAction;
+          return res.redirect("/settings?connection_added=" + provider);
+        }
+
+        // Normal login flow
+        delete session.loginProvider;
+        delete session.loginAction;
+        res.redirect("/");
+      })(req, res, next);
+    });
   });
 
   app.get("/api/logout", (req, res) => {

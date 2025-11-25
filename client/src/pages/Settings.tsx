@@ -145,7 +145,18 @@ export function Settings({ onBack }: SettingsProps) {
       }
     };
     fetchConnections();
-  }, []);
+
+    // Check for connection_added in URL params
+    const params = new URLSearchParams(window.location.search);
+    const addedProvider = params.get('connection_added');
+    if (addedProvider) {
+      toast.success(`${addedProvider} connection added successfully`);
+      // Clean up the URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+      // Refresh connections
+      fetchConnections();
+    }
+  }, [toast]);
 
   const hasChanges = 
     formData.username !== (user?.username || '') ||
@@ -154,16 +165,8 @@ export function Settings({ onBack }: SettingsProps) {
     formData.institutionalAffiliation !== (user?.institutionalAffiliation || '') ||
     formData.profileImageUrl !== (user?.profileImageUrl || '');
 
-  const handleAddConnection = async (provider: string) => {
-    try {
-      const res = await fetch(`/api/auth/connections/${provider}`, { method: 'POST' });
-      if (res.ok) {
-        setConnectedProviders([...connectedProviders, provider]);
-        toast.success(`${provider} connection added`);
-      }
-    } catch (error) {
-      toast.error(`Failed to add ${provider} connection`);
-    }
+  const handleAddConnection = (provider: string) => {
+    window.location.href = `/api/login?provider=${provider}&action=connect`;
   };
 
   const handleRemoveConnection = async (provider: string) => {
