@@ -13,7 +13,9 @@ interface TestHistoryProps {
 }
 
 export function TestHistory({ sessions, onResume, onDelete, maxItems }: TestHistoryProps) {
-  const displaySessions = maxItems ? sessions.slice(0, maxItems) : sessions;
+  // Sort by most recent first
+  const sortedSessions = [...sessions].sort((a, b) => b.createdAt - a.createdAt);
+  const displaySessions = maxItems ? sortedSessions.slice(0, maxItems) : sortedSessions;
 
   if (sessions.length === 0) {
     return (
@@ -57,20 +59,32 @@ export function TestHistory({ sessions, onResume, onDelete, maxItems }: TestHist
                   </div>
                 </div>
 
-                <div className="flex flex-col sm:flex-row sm:items-center gap-2 text-sm text-muted-foreground">
-                  <span>{formatDistanceToNow(createdDate, { addSuffix: true })}</span>
-                  <span className="hidden sm:inline">•</span>
-                  <span>
-                    {totalAnswered} / {session.questionCount} answered
-                  </span>
-                  {isComplete && (
-                    <>
-                      <span className="hidden sm:inline">•</span>
-                      <span className="text-success font-semibold">
-                        {correctAnswers} correct ({accuracy}%)
-                      </span>
-                    </>
-                  )}
+                <div className="flex flex-col gap-2">
+                  <div className="text-xs text-muted-foreground">
+                    {createdDate.toLocaleString('en-US', { 
+                      year: 'numeric',
+                      month: 'short',
+                      day: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                      hour12: true
+                    })}
+                  </div>
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 text-sm text-muted-foreground">
+                    <span>{formatDistanceToNow(createdDate, { addSuffix: true })}</span>
+                    <span className="hidden sm:inline">•</span>
+                    <span>
+                      {totalAnswered} / {session.questionCount} answered
+                    </span>
+                    {isComplete && (
+                      <>
+                        <span className="hidden sm:inline">•</span>
+                        <span className="text-success font-semibold">
+                          {correctAnswers} correct ({accuracy}%)
+                        </span>
+                      </>
+                    )}
+                  </div>
                 </div>
               </div>
 
