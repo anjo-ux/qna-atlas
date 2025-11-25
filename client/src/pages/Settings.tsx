@@ -2,9 +2,11 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ArrowLeft, Mail, Lock, Building2, CreditCard } from 'lucide-react';
+import { ArrowLeft, Mail, Lock, Building2, CreditCard, BookOpen, TrendingUp, Target } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { useQuestionStats } from '@/hooks/useQuestionStats';
+import { useMemo } from 'react';
 
 interface SettingsProps {
   onBack: () => void;
@@ -12,6 +14,15 @@ interface SettingsProps {
 
 export function Settings({ onBack }: SettingsProps) {
   const { user } = useAuth();
+  const { getAllStats } = useQuestionStats();
+  const overallStats = getAllStats();
+
+  const stats = useMemo(() => {
+    const total = overallStats.total;
+    const correct = overallStats.correct;
+    const accuracy = total > 0 ? Math.round((correct / total) * 100) : 0;
+    return { total, correct, accuracy };
+  }, [overallStats]);
 
   const getInitials = () => {
     if (!user) return 'U';
@@ -93,6 +104,36 @@ export function Settings({ onBack }: SettingsProps) {
                   className="mt-1"
                   readOnly
                 />
+              </div>
+            </div>
+          </Card>
+
+          {/* Statistics Section */}
+          <Card className="p-6 bg-gradient-to-br from-chart-1/10 to-chart-2/10 border-chart-1/20">
+            <h2 className="text-lg font-semibold text-foreground mb-4">Learning Statistics</h2>
+            <div className="grid grid-cols-3 gap-4">
+              <div className="flex flex-col items-center p-4 bg-white dark:bg-slate-950 rounded-lg border border-border/50">
+                <div className="flex items-center justify-center h-10 w-10 rounded-full bg-chart-1/20 mb-2">
+                  <BookOpen className="h-5 w-5 text-chart-1" />
+                </div>
+                <p className="text-2xl font-bold text-foreground">{stats.total}</p>
+                <p className="text-xs text-muted-foreground text-center mt-1">Questions Answered</p>
+              </div>
+
+              <div className="flex flex-col items-center p-4 bg-white dark:bg-slate-950 rounded-lg border border-border/50">
+                <div className="flex items-center justify-center h-10 w-10 rounded-full bg-success/20 mb-2">
+                  <TrendingUp className="h-5 w-5 text-success" />
+                </div>
+                <p className="text-2xl font-bold text-foreground">{stats.correct}</p>
+                <p className="text-xs text-muted-foreground text-center mt-1">Correct Answers</p>
+              </div>
+
+              <div className="flex flex-col items-center p-4 bg-white dark:bg-slate-950 rounded-lg border border-border/50">
+                <div className="flex items-center justify-center h-10 w-10 rounded-full bg-chart-3/20 mb-2">
+                  <Target className="h-5 w-5 text-chart-3" />
+                </div>
+                <p className="text-2xl font-bold text-foreground">{stats.accuracy}%</p>
+                <p className="text-xs text-muted-foreground text-center mt-1">Accuracy</p>
               </div>
             </div>
           </Card>
