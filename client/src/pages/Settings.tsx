@@ -2,20 +2,27 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ArrowLeft, Mail, Lock, CreditCard, BookOpen, TrendingUp, Target, Save, ChevronRight, ChevronLeft } from 'lucide-react';
+import { ArrowLeft, Mail, Lock, CreditCard, BookOpen, TrendingUp, Target, Save, ChevronRight, ChevronLeft, Check, ChevronsUpDown } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useQuestionStats } from '@/hooks/useQuestionStats';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
 import { useMemo, useState, useEffect } from 'react';
 import { getUniversityOptions } from '@/data/universities';
 import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
 
 interface SettingsProps {
   onBack: () => void;
@@ -27,12 +34,25 @@ export function Settings({ onBack }: SettingsProps) {
   const overallStats = getAllStats();
   const [isSaving, setIsSaving] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [openCombobox, setOpenCombobox] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const [formData, setFormData] = useState({
     firstName: user?.firstName || '',
     lastName: user?.lastName || '',
     institutionalAffiliation: user?.institutionalAffiliation || '',
   });
+
+  const universities = useMemo(() => {
+    return getUniversityOptions().map(u => u.value);
+  }, []);
+
+  const filteredUniversities = useMemo(() => {
+    if (!searchQuery) return universities;
+    return universities.filter(uni => 
+      uni.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [searchQuery, universities]);
 
   useEffect(() => {
     if (user) {
@@ -212,18 +232,55 @@ export function Settings({ onBack }: SettingsProps) {
 
                   <div>
                     <Label className="text-sm font-medium text-foreground">Institutional Affiliation</Label>
-                    <Select value={formData.institutionalAffiliation} onValueChange={(value) => setFormData({ ...formData, institutionalAffiliation: value })}>
-                      <SelectTrigger className="mt-1" data-testid="select-university">
-                        <SelectValue placeholder="Select a university" />
-                      </SelectTrigger>
-                      <SelectContent className="max-h-[300px]">
-                        {getUniversityOptions().map(uni => (
-                          <SelectItem key={uni.value} value={uni.value} data-testid={`option-${uni.value}`}>
-                            {uni.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <Popover open={openCombobox} onOpenChange={setOpenCombobox}>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          role="combobox"
+                          aria-expanded={openCombobox}
+                          className="mt-1 w-full justify-between"
+                          data-testid="select-university"
+                        >
+                          {formData.institutionalAffiliation || "Select a university..."}
+                          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-full p-0" align="start">
+                        <Command shouldFilter={false}>
+                          <CommandInput 
+                            placeholder="Search universities..." 
+                            value={searchQuery}
+                            onValueChange={setSearchQuery}
+                            data-testid="input-university-search"
+                          />
+                          <CommandEmpty>No university found.</CommandEmpty>
+                          <CommandList>
+                            <CommandGroup>
+                              {filteredUniversities.map((uni) => (
+                                <CommandItem
+                                  key={uni}
+                                  value={uni}
+                                  onSelect={(currentValue) => {
+                                    setFormData({ ...formData, institutionalAffiliation: currentValue });
+                                    setOpenCombobox(false);
+                                    setSearchQuery('');
+                                  }}
+                                  data-testid={`option-${uni}`}
+                                >
+                                  <Check
+                                    className={cn(
+                                      "mr-2 h-4 w-4",
+                                      formData.institutionalAffiliation === uni ? "opacity-100" : "opacity-0"
+                                    )}
+                                  />
+                                  {uni}
+                                </CommandItem>
+                              ))}
+                            </CommandGroup>
+                          </CommandList>
+                        </Command>
+                      </PopoverContent>
+                    </Popover>
                   </div>
 
                   {hasChanges && (
