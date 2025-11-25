@@ -11,8 +11,9 @@ import { QuestionFilters } from '@/components/QuestionFilters';
 import { SearchResults } from '@/components/SearchResults';
 import { HomePage } from '@/components/HomePage';
 import { TestMode } from './TestMode';
+import { Settings as SettingsPage } from './Settings';
 import { Input } from '@/components/ui/input';
-import { Search, Menu, X, BookOpen, FileQuestion, Columns2, Home, Zap } from 'lucide-react';
+import { Search, Menu, X, BookOpen, FileQuestion, Columns2, Home, Zap, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useQuestionStats } from '@/hooks/useQuestionStats';
@@ -22,7 +23,7 @@ import { toast } from 'sonner';
 
 type ViewMode = 'questions' | 'reference' | 'split';
 type FilterMode = 'all' | 'incorrect';
-type ScreenMode = 'study' | 'test';
+type ScreenMode = 'study' | 'test' | 'settings';
 type TestModeState = { mode: 'new' } | { mode: 'resume'; sessionId: string };
 
 export default function Index() {
@@ -248,6 +249,16 @@ export default function Index() {
     );
   }
 
+  if (screenMode === 'settings') {
+    return (
+      <div className="flex h-screen overflow-hidden bg-background">
+        <SettingsPage 
+          onBack={() => setScreenMode('study')}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="flex h-screen overflow-hidden bg-background">
       {/* Navigation Sidebar */}
@@ -297,6 +308,16 @@ export default function Index() {
                   {currentSubsection ? currentSubsection.title : 'Select a section to begin'}
                 </p>
               </div>
+
+              {/* Settings Button */}
+              <Button
+                onClick={() => setScreenMode('settings')}
+                variant="outline"
+                size="icon"
+                className="lg:hidden"
+              >
+                <Settings className="h-5 w-5" />
+              </Button>
 
               {/* Test Button */}
               <Button
@@ -420,6 +441,7 @@ export default function Index() {
               onReviewIncorrect={handleReviewIncorrect}
               onStartTest={handleStartTest}
               onResumeTest={handleResumeTest}
+              onSettings={() => setScreenMode('settings')}
             />
           ) : (
             <div className={cn(
