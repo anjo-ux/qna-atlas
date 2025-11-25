@@ -216,6 +216,12 @@ export function TestMode({ sections, onBack, resumeSessionId }: TestModeProps) {
     setTestState('results');
   };
 
+  const handleSaveAndExit = () => {
+    // Progress is already saved via updateSession calls as user answers questions
+    // Just return to setup to show the test in "Resume" section
+    setTestState('setup');
+  };
+
   const getQuestionStatus = (index: number) => {
     const question = testQuestions[index];
     const response = responses[question.id];
@@ -435,14 +441,19 @@ export function TestMode({ sections, onBack, resumeSessionId }: TestModeProps) {
         {/* Main Content */}
         <div className="flex-1 flex flex-col overflow-hidden">
           <div className="p-4 border-b border-border bg-accent/5">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between gap-3">
               <div>
                 <h1 className="text-2xl font-bold">Test Mode</h1>
                 <p className="text-sm text-muted-foreground">Question {currentQuestionIndex + 1} of {testQuestions.length}</p>
               </div>
-              <Button data-testid="button-finish-test" onClick={handleFinishTest} variant="default">
-                Finish Test
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button data-testid="button-save-exit" onClick={handleSaveAndExit} variant="outline">
+                  Save & Exit
+                </Button>
+                <Button data-testid="button-finish-test" onClick={handleFinishTest} variant="default">
+                  Finish Test
+                </Button>
+              </div>
             </div>
           </div>
 
