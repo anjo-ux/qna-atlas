@@ -34,9 +34,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const userId = req.user.claims.sub;
-      const { firstName, lastName, institutionalAffiliation, profileImageUrl } = req.body;
+      const { username, firstName, lastName, institutionalAffiliation, profileImageUrl } = req.body;
       
       const updatedUser = await storage.updateUserProfile(userId, {
+        username,
         firstName,
         lastName,
         institutionalAffiliation,

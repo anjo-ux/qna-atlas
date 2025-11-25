@@ -26,6 +26,7 @@ export const sessions = pgTable(
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   email: varchar("email").unique(),
+  username: varchar("username"),
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
@@ -34,8 +35,19 @@ export const users = pgTable("users", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Login connections table - tracks which OAuth providers user has connected
+export const loginConnections = pgTable("login_connections", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: 'cascade' }),
+  provider: varchar("provider").notNull(), // 'google', 'apple', 'microsoft'
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_login_connections_user_id").on(table.userId),
+]);
+
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
+export type LoginConnection = typeof loginConnections.$inferSelect;
 
 // Test Sessions table - tracks user's test progress
 export const testSessions = pgTable("test_sessions", {

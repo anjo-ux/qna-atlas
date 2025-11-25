@@ -41,6 +41,7 @@ export function Settings({ onBack }: SettingsProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [formData, setFormData] = useState({
+    username: user?.username || '',
     firstName: user?.firstName || '',
     lastName: user?.lastName || '',
     institutionalAffiliation: user?.institutionalAffiliation || '',
@@ -61,6 +62,7 @@ export function Settings({ onBack }: SettingsProps) {
   useEffect(() => {
     if (user) {
       setFormData({
+        username: user.username || '',
         firstName: user.firstName || '',
         lastName: user.lastName || '',
         institutionalAffiliation: user.institutionalAffiliation || '',
@@ -107,6 +109,7 @@ export function Settings({ onBack }: SettingsProps) {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          username: formData.username,
           firstName: formData.firstName,
           lastName: formData.lastName,
           institutionalAffiliation: formData.institutionalAffiliation,
@@ -129,11 +132,30 @@ export function Settings({ onBack }: SettingsProps) {
     }
   };
 
+  const [connectedProviders, setConnectedProviders] = useState<string[]>(['google']);
+
   const hasChanges = 
+    formData.username !== (user?.username || '') ||
     formData.firstName !== (user?.firstName || '') ||
     formData.lastName !== (user?.lastName || '') ||
     formData.institutionalAffiliation !== (user?.institutionalAffiliation || '') ||
     formData.profileImageUrl !== (user?.profileImageUrl || '');
+
+  const handleAddConnection = (provider: string) => {
+    if (!connectedProviders.includes(provider)) {
+      setConnectedProviders([...connectedProviders, provider]);
+      toast.success(`${provider} connection added`);
+    }
+  };
+
+  const handleRemoveConnection = (provider: string) => {
+    if (connectedProviders.length > 1) {
+      setConnectedProviders(connectedProviders.filter(p => p !== provider));
+      toast.success(`${provider} connection removed`);
+    } else {
+      toast.error('You must have at least one connection');
+    }
+  };
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
@@ -238,10 +260,10 @@ export function Settings({ onBack }: SettingsProps) {
                   <div>
                     <Label className="text-sm font-medium text-foreground">Username</Label>
                     <Input 
-                      value={user?.id || ''} 
-                      disabled 
+                      value={formData.username}
+                      onChange={(e) => setFormData({ ...formData, username: e.target.value })}
                       className="mt-1"
-                      readOnly
+                      placeholder="Enter username"
                       data-testid="input-username"
                     />
                   </div>
@@ -394,24 +416,54 @@ export function Settings({ onBack }: SettingsProps) {
                 </h2>
 
                 <div className="space-y-3">
-                  {connectionMethods.map(method => (
-                    <div key={method.name} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg border border-border">
-                      <div className="flex items-center gap-3">
-                        <span className="text-xl">{method.icon}</span>
-                        <div>
-                          <p className="font-medium text-foreground">{method.name}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {method.connected ? 'Connected' : 'Not connected'}
-                          </p>
+                  {connectionMethods.map(method => {
+                    const providerKey = method.name.toLowerCase();
+                    const isConnected = connectedProviders.includes(providerKey);
+                    const canDisconnect = connectedProviders.length > 1;
+                    
+                    return (
+                      <div key={method.name} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg border border-border">
+                        <div className="flex items-center gap-3">
+                          <span className="text-xl">{method.icon}</span>
+                          <div>
+                            <p className="font-medium text-foreground">{method.name}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {isConnected ? 'Connected' : 'Not connected'}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {isConnected ? (
+                            <>
+                              <span className="text-xs px-2 py-1 bg-green-500/20 text-green-700 dark:text-green-400 rounded">
+                                Active
+                              </span>
+                              {canDisconnect && (
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleRemoveConnection(providerKey)}
+                                  className="text-destructive hover:text-destructive"
+                                  data-testid={`button-disconnect-${providerKey}`}
+                                >
+                                  Disconnect
+                                </Button>
+                              )}
+                            </>
+                          ) : (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleAddConnection(providerKey)}
+                              data-testid={`button-connect-${providerKey}`}
+                            >
+                              Connect
+                            </Button>
+                          )}
                         </div>
                       </div>
-                      {method.connected && (
-                        <span className="text-xs px-2 py-1 bg-green-500/20 text-green-700 dark:text-green-400 rounded">
-                          Active
-                        </span>
-                      )}
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </Card>
 
