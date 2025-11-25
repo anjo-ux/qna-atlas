@@ -6,6 +6,8 @@ import {
   notes,
   bookmarks,
   spacedRepetitions,
+  subscriptionPlans,
+  subscriptionTransactions,
   type User,
   type UpsertUser,
   type TestSession,
@@ -19,6 +21,10 @@ import {
   type InsertBookmark,
   type SpacedRepetition,
   type InsertSpacedRepetition,
+  type SubscriptionPlan,
+  type InsertSubscriptionPlan,
+  type SubscriptionTransaction,
+  type InsertSubscriptionTransaction,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, lte } from "drizzle-orm";
@@ -75,6 +81,12 @@ export interface IStorage {
     correct: number;
     accuracy: number;
   }[]>;
+
+  // Subscription operations
+  initializeSubscriptionPlans(): Promise<SubscriptionPlan[]>;
+  getSubscriptionPlans(): Promise<SubscriptionPlan[]>;
+  createSubscriptionTransaction(transaction: InsertSubscriptionTransaction): Promise<SubscriptionTransaction>;
+  getUserActiveSubscription(userId: string): Promise<SubscriptionTransaction | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -455,6 +467,59 @@ export class DatabaseStorage implements IStorage {
       correct: stats.correct,
       accuracy: stats.total > 0 ? Math.round((stats.correct / stats.total) * 100) : 0,
     }));
+  }
+
+  // Subscription operations
+  async initializeSubscriptionPlans(): Promise<SubscriptionPlan[]> {
+    // Check if plans already exist
+    const existing = await db.select().from(subscriptionPlans);
+    if (existing.length > 0) return existing;
+
+    // Initialize default plans
+    const plans = [
+      { name: '1-month', durationMonths: 1, priceUSD: 2500 }, // $25
+      { name: '3-month', durationMonths: 3, priceUSD: 5000 },  // $50
+      { name: '6-month', durationMonths: 6, priceUSD: 10000 }, // $100
+    ];
+
+    const result: SubscriptionPlan[] = [];
+    for (const plan of plans) {
+      const [inserted] = await db
+        .insert(subscriptionPlans)
+        .values(plan)
+        .returning();
+      result.push(inserted);
+    }
+    return result;
+  }
+
+  async getSubscriptionPlans(): Promise<SubscriptionPlan[]> {
+    return await db.select().from(subscriptionPlans).orderBy(subscriptionPlans.durationMonths);
+  }
+
+  async createSubscriptionTransaction(transaction: InsertSubscriptionTransaction): Promise<SubscriptionTransaction> {
+    const [created] = await db
+      .insert(subscriptionTransactions)
+      .values(transaction)
+      .returning();
+    return created;
+  }
+
+  async getUserActiveSubscription(userId: string): Promise<SubscriptionTransaction | undefined> {
+    const now = new Date();
+    const active = await db
+      .select()
+      .from(subscriptionTransactions)
+      .where(
+        and(
+          eq(subscriptionTransactions.userId, userId),
+          eq(subscriptionTransactions.status, 'completed'),
+          lte(subscriptionTransactions.startDate, now)
+        )
+      )
+      .orderBy(desc(subscriptionTransactions.endDate))
+      .limit(1);
+    return active[0];
   }
 }
 

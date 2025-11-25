@@ -594,6 +594,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Subscription routes
+  app.get('/api/subscription/plans', async (req: any, res) => {
+    try {
+      await storage.initializeSubscriptionPlans();
+      const plans = await storage.getSubscriptionPlans();
+      res.json(plans);
+    } catch (error) {
+      console.error("Error fetching subscription plans:", error);
+      res.status(500).json({ message: "Failed to fetch subscription plans" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

@@ -159,3 +159,37 @@ export const spacedRepetitions = pgTable("spaced_repetitions", {
 
 export type InsertSpacedRepetition = typeof spacedRepetitions.$inferInsert;
 export type SpacedRepetition = typeof spacedRepetitions.$inferSelect;
+
+// Subscription Plans table - stores available plans
+export const subscriptionPlans = pgTable("subscription_plans", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name").notNull(), // '1-month', '3-month', '6-month'
+  durationMonths: integer("duration_months").notNull(),
+  priceUSD: integer("price_usd").notNull(), // in cents: 2500 = $25.00
+  stripePriceId: varchar("stripe_price_id"),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_subscription_plans_name").on(table.name),
+]);
+
+export type SubscriptionPlan = typeof subscriptionPlans.$inferSelect;
+export type InsertSubscriptionPlan = typeof subscriptionPlans.$inferInsert;
+
+// Subscription Transactions table - tracks user purchases
+export const subscriptionTransactions = pgTable("subscription_transactions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: 'cascade' }),
+  planId: varchar("plan_id").notNull().references(() => subscriptionPlans.id),
+  stripePaymentIntentId: varchar("stripe_payment_intent_id"),
+  amount: integer("amount").notNull(), // in cents
+  status: varchar("status").notNull(), // pending, completed, failed
+  startDate: timestamp("start_date").notNull(),
+  endDate: timestamp("end_date").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_subscription_transactions_user_id").on(table.userId),
+  index("idx_subscription_transactions_status").on(table.status),
+]);
+
+export type SubscriptionTransaction = typeof subscriptionTransactions.$inferSelect;
+export type InsertSubscriptionTransaction = typeof subscriptionTransactions.$inferInsert;
