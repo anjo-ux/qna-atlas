@@ -23,13 +23,14 @@ import { useMemo, useState, useEffect } from 'react';
 import { getUniversityOptions } from '@/data/universities';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { queryClient } from '@/lib/queryClient';
 
 interface SettingsProps {
   onBack: () => void;
 }
 
 export function Settings({ onBack }: SettingsProps) {
-  const { user, refetch } = useAuth();
+  const { user } = useAuth();
   const { getAllStats } = useQuestionStats();
   const overallStats = getAllStats();
   const [isSaving, setIsSaving] = useState(false);
@@ -41,6 +42,7 @@ export function Settings({ onBack }: SettingsProps) {
     firstName: user?.firstName || '',
     lastName: user?.lastName || '',
     institutionalAffiliation: user?.institutionalAffiliation || '',
+    profileImageUrl: user?.profileImageUrl || '',
   });
 
   const universities = useMemo(() => {
@@ -60,6 +62,7 @@ export function Settings({ onBack }: SettingsProps) {
         firstName: user.firstName || '',
         lastName: user.lastName || '',
         institutionalAffiliation: user.institutionalAffiliation || '',
+        profileImageUrl: user.profileImageUrl || '',
       });
     }
   }, [user]);
@@ -90,15 +93,23 @@ export function Settings({ onBack }: SettingsProps) {
       const response = await fetch('/api/auth/user', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          institutionalAffiliation: formData.institutionalAffiliation,
+          profileImageUrl: formData.profileImageUrl,
+        }),
       });
 
-      if (!response.ok) throw new Error('Failed to save');
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to save');
+      }
 
       toast.success('Profile updated successfully');
-      await refetch();
+      await queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
     } catch (error) {
-      toast.error('Failed to save profile');
+      toast.error(error instanceof Error ? error.message : 'Failed to save profile');
       console.error(error);
     } finally {
       setIsSaving(false);
@@ -108,7 +119,8 @@ export function Settings({ onBack }: SettingsProps) {
   const hasChanges = 
     formData.firstName !== (user?.firstName || '') ||
     formData.lastName !== (user?.lastName || '') ||
-    formData.institutionalAffiliation !== (user?.institutionalAffiliation || '');
+    formData.institutionalAffiliation !== (user?.institutionalAffiliation || '') ||
+    formData.profileImageUrl !== (user?.profileImageUrl || '');
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
@@ -198,12 +210,13 @@ export function Settings({ onBack }: SettingsProps) {
 
                 <div className="space-y-4">
                   <div>
-                    <Label className="text-sm font-medium text-foreground">Username</Label>
+                    <Label className="text-sm font-medium text-foreground">Profile Image URL</Label>
                     <Input 
-                      value={user?.id || ''} 
-                      disabled 
+                      value={formData.profileImageUrl}
+                      onChange={(e) => setFormData({ ...formData, profileImageUrl: e.target.value })}
                       className="mt-1"
-                      readOnly
+                      placeholder="https://example.com/image.jpg"
+                      data-testid="input-profile-image-url"
                     />
                   </div>
 
