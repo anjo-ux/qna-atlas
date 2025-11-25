@@ -44,6 +44,11 @@ export async function apiRequest(url: string, options?: RequestInit) {
     await throwError(res);
   }
 
+  // Handle 204 No Content responses (e.g., successful deletions)
+  if (res.status === 204) {
+    return null;
+  }
+
   return await res.json();
 }
 

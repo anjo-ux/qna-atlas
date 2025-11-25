@@ -122,6 +122,7 @@ export function useTestSessions() {
       await apiRequest(`/api/test-sessions/${sessionId}`, {
         method: 'DELETE',
       });
+      return sessionId;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/test-sessions'] });
@@ -163,8 +164,8 @@ export function useTestSessions() {
     completeSession: (sessionId: string) => {
       completeSessionMutation.mutate(sessionId);
     },
-    deleteSession: (sessionId: string) => {
-      deleteSessionMutation.mutate(sessionId);
+    deleteSession: async (sessionId: string) => {
+      await deleteSessionMutation.mutateAsync(sessionId);
     },
     getSession: (sessionId: string): TestSession | undefined => {
       return sessions.find(s => s.id === sessionId);
