@@ -55,20 +55,69 @@ export function QuestionCard({
   const questionRef = useRef<HTMLDivElement>(null);
 
   const parsed = useMemo((): ParsedQuestion => {
-    const lines = question.question.split('\n');
+    let questionText = question.question;
     const choices: { letter: string; text: string }[] = [];
-    const textLines: string[] = [];
+    
+    // Check if choices are on separate lines (already well-formatted)
+    const lines = questionText.split('\n');
+    let choicesOnSeparateLines = false;
     
     for (const line of lines) {
       const match = line.match(/^([A-E])[.)]\s*(.+)$/);
       if (match) {
-        choices.push({ letter: match[1], text: match[2].trim() });
-      } else if (line.trim()) {
-        textLines.push(line);
+        choicesOnSeparateLines = true;
+        break;
       }
     }
     
-    return { text: textLines.join('\n'), choices };
+    if (choicesOnSeparateLines) {
+      // Handle case where choices are already on separate lines
+      const textLines: string[] = [];
+      for (const line of lines) {
+        const match = line.match(/^([A-E])[.)]\s*(.+)$/);
+        if (match) {
+          choices.push({ letter: match[1], text: match[2].trim() });
+        } else if (line.trim()) {
+          textLines.push(line);
+        }
+      }
+      questionText = textLines.join('\n');
+    } else {
+      // Handle case where choices are concatenated: "Question?A) TextB) TextC) Text..."
+      const questionMarkers = ['?', ':', '.'];
+      let lastMarkerIndex = -1;
+      
+      for (const marker of questionMarkers) {
+        const index = questionText.lastIndexOf(marker);
+        if (index > lastMarkerIndex) {
+          lastMarkerIndex = index;
+        }
+      }
+      
+      if (lastMarkerIndex !== -1) {
+        const beforeMarker = questionText.substring(0, lastMarkerIndex + 1);
+        const afterMarker = questionText.substring(lastMarkerIndex + 1);
+        
+        // Parse concatenated choices: "A) TextB) TextC) Text..."
+        const choicePattern = /([A-E])\)\s*([^A-E]*?)(?=(?:[A-E]\)|$))/g;
+        let match;
+        
+        while ((match = choicePattern.exec(afterMarker)) !== null) {
+          const letter = match[1];
+          const text = match[2].trim();
+          if (text) {
+            choices.push({ letter, text });
+          }
+        }
+        
+        // If we found choices, use the part before the marker as the question
+        if (choices.length > 0) {
+          questionText = beforeMarker;
+        }
+      }
+    }
+    
+    return { text: questionText.trim(), choices };
   }, [question.id, question.question]);
 
   // Apply highlights to question text
