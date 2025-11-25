@@ -8,6 +8,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Switch } from '@/components/ui/switch';
 import { QuestionCard } from '@/components/QuestionCard';
 import { TestHistory } from '@/components/TestHistory';
+import { TestModeWizard } from '@/components/TestModeWizard';
 import { ArrowLeft, ChevronDown, ChevronRight, ChevronLeft, ChevronRight as ChevronRightIcon, Check, X, Circle } from 'lucide-react';
 import { useQuestionStats, QuestionResponse } from '@/hooks/useQuestionStats';
 import { useTestSessions, TestSession } from '@/hooks/useTestSessions';
@@ -37,6 +38,7 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [responses, setResponses] = useState<Record<string, QuestionResponse>>({});
   const [currentSession, setCurrentSession] = useState<TestSession | null>(null);
+  const [showTestWizard, setShowTestWizard] = useState(false);
   const hasResumedRef = useRef(false);
 
   const { recordResponse } = useQuestionStats();
@@ -80,6 +82,13 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
 
   const handleStartTest = async () => {
     if (availableQuestions.length === 0) {
+      return;
+    }
+
+    // Check if user has seen test mode wizard
+    const hasSeenWizard = localStorage.getItem('testModeWizardShown');
+    if (!hasSeenWizard && !isPreview) {
+      setShowTestWizard(true);
       return;
     }
 
@@ -252,12 +261,38 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
     return { total, correct, accuracy };
   }, [responses]);
 
+  const handleContinueFromWizard = async () => {
+    // Shuffle and select random questions
+    const shuffled = [...availableQuestions].sort(() => Math.random() - 0.5);
+    const selected = shuffled.slice(0, Math.min(questionCount, shuffled.length));
+    
+    // Create test session
+    const session = await createSession(
+      questionCount,
+      Array.from(selectedSubsections),
+      useAllQuestions,
+      selected
+    );
+    
+    setTestQuestions(selected);
+    setCurrentQuestionIndex(0);
+    setResponses({});
+    setCurrentSession(session);
+    setTestState('testing');
+  };
+
   if (testState === 'setup') {
     const inProgressSessions = getInProgressSessions();
     const completedSessions = getCompletedSessions();
     
     return (
-      <div className="flex-1 flex flex-col overflow-auto">
+      <>
+        <TestModeWizard
+          open={showTestWizard}
+          onClose={() => setShowTestWizard(false)}
+          onContinue={handleContinueFromWizard}
+        />
+        <div className="flex-1 flex flex-col overflow-auto">
         <div className="p-6 border-b border-border">
           <div className="flex items-center gap-3 mb-4">
             <Button variant="ghost" size="icon" onClick={onBack}>
@@ -521,6 +556,7 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
           </div>
         </div>
       </div>
+      </>
     );
   }
 
