@@ -46,6 +46,7 @@ export function QuestionCard({
     addNote,
     updateNote,
     removeNote,
+    updateNotePosition,
     getHighlightsForSection,
     getNotesForSection,
   } = useHighlights();
@@ -330,6 +331,7 @@ export function QuestionCard({
           position={note.position}
           onUpdate={updateNote}
           onDelete={removeNote}
+          onPositionChange={updateNotePosition}
         />
       ))}
     </Card>
