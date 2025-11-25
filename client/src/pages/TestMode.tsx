@@ -258,11 +258,14 @@ export function TestMode({ sections, onBack, resumeSessionId }: TestModeProps) {
             {inProgressSessions.length > 0 && (
               <div className="space-y-3">
                 <h2 className="text-lg font-semibold text-foreground">Resume Test</h2>
-                <TestHistory
-                  sessions={inProgressSessions}
-                  onResume={handleResumeTest}
-                  onDelete={deleteSession}
-                />
+                <div className={inProgressSessions.length > 3 ? "max-h-64 overflow-y-auto" : ""}>
+                  <TestHistory
+                    sessions={inProgressSessions}
+                    onResume={handleResumeTest}
+                    onDelete={deleteSession}
+                    maxItems={3}
+                  />
+                </div>
               </div>
             )}
             
