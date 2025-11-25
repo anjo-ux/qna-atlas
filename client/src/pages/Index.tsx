@@ -14,7 +14,6 @@ import { Paywall } from '@/components/Paywall';
 import { PreviewWizard } from '@/components/PreviewWizard';
 import { TestMode } from './TestMode';
 import { Settings as SettingsPage } from './Settings';
-import { ViewModeSlider } from '@/components/ViewModeSlider';
 import { Input } from '@/components/ui/input';
 import { Search, Menu, X, BookOpen, FileQuestion, Columns2, Home, Zap, Settings, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -383,23 +382,75 @@ export default function Index() {
               </Button>
 
               {/* View Mode Toggle */}
-              <div className="hidden sm:flex items-center">
-                <ViewModeSlider value={viewMode} onChange={setViewMode} />
+              <div className="hidden sm:flex items-center gap-2 bg-accent/5 rounded-lg p-1">
+                <Button
+                  variant={viewMode === 'reference' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setViewMode('reference')}
+                  className="gap-2"
+                >
+                  <BookOpen className="h-4 w-4" />
+                  <span className="hidden md:inline">Reference</span>
+                </Button>
+                <Button
+                  variant={viewMode === 'split' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setViewMode('split')}
+                  className="gap-2"
+                >
+                  <Columns2 className="h-4 w-4" />
+                  <span className="hidden md:inline">Split</span>
+                </Button>
+                <Button
+                  variant={viewMode === 'questions' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setViewMode('questions')}
+                  className="gap-2"
+                >
+                  <FileQuestion className="h-4 w-4" />
+                  <span className="hidden md:inline">Questions</span>
+                </Button>
               </div>
             </div>
 
             {/* Mobile View Toggle */}
-            <div className="flex sm:hidden items-center gap-2 mt-4">
+            <div className="flex sm:hidden items-center gap-2 mt-4 bg-accent/5 rounded-lg p-1">
               <Button
                 onClick={handleStartTest}
                 variant="outline"
                 size="sm"
-                className="gap-2"
+                className="gap-2 flex-1"
               >
                 <Zap className="h-4 w-4" />
                 Test
               </Button>
-              <ViewModeSlider value={viewMode} onChange={setViewMode} hideLabels={true} />
+              <Button
+                variant={viewMode === 'reference' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setViewMode('reference')}
+                className="gap-2 flex-1"
+              >
+                <BookOpen className="h-4 w-4" />
+                Reference
+              </Button>
+              <Button
+                variant={viewMode === 'split' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setViewMode('split')}
+                className="gap-2 flex-1"
+              >
+                <Columns2 className="h-4 w-4" />
+                Split
+              </Button>
+              <Button
+                variant={viewMode === 'questions' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setViewMode('questions')}
+                className="gap-2 flex-1"
+              >
+                <FileQuestion className="h-4 w-4" />
+                Questions
+              </Button>
             </div>
 
             {/* Search Bar */}
