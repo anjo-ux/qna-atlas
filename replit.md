@@ -44,7 +44,17 @@ shared/           # Shared types between client and server
 - **Highlighting and note-taking capabilities**
 - **Question filters and statistics**
 
-## Recent Changes (November 24, 2025)
+## Recent Changes
+
+### November 25, 2025
+- **Bug Fixes**:
+  - Fixed test deletion: Tests now properly disappear from recent tests list after deletion
+    - Added proper 204 (No Content) response handling in apiRequest function
+    - Updated deleteSession to use async/await for proper cache invalidation
+  - Fixed duplicate close button in mobile sidebar
+    - Updated CSS selector to properly hide SheetContent's built-in close button
+
+### November 24, 2025
 - **Authentication & Database Integration**:
   - Implemented Replit Auth with OpenID Connect for user authentication
   - Created PostgreSQL database with tables: users, sessions, testSessions, questionResponses
