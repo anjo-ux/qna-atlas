@@ -444,13 +444,13 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
       <div className="flex flex-col md:flex-row h-screen overflow-hidden">
         {/* Question Panel - Top on mobile, Right on desktop */}
         <div className={cn(
-          "md:flex md:flex-col md:w-64 md:border-r md:border-border md:bg-muted/30 transition-all duration-300",
-          "md:overflow-visible",
-          "w-full border-b border-border bg-muted/30",
-          !showQuestionPanel && "hidden md:flex",
-          showQuestionPanel && "md:flex"
+          "md:flex md:flex-col md:w-64 md:border-r md:border-border md:bg-muted/30 md:overflow-visible",
+          "flex flex-col border-b border-border bg-muted/30 flex-shrink-0 md:flex-shrink md:flex-1",
+          "max-h-52 md:max-h-none md:h-auto",
+          !showQuestionPanel && "hidden md:flex h-0 md:h-auto",
+          showQuestionPanel && "flex"
         )}>
-          <div className="p-4 border-b border-border min-h-fit">
+          <div className="p-4 border-b border-border flex-shrink-0">
             <div className="flex items-center justify-between gap-2">
               <div className="flex-1">
                 <h2 className="font-semibold text-sm">Questions</h2>
@@ -462,7 +462,7 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
                 size="icon"
                 variant="ghost"
                 onClick={() => setShowQuestionPanel(false)}
-                className="md:hidden"
+                className="md:hidden flex-shrink-0"
                 data-testid="button-close-questions"
               >
                 <ChevronDown className="h-4 w-4" />
@@ -470,7 +470,7 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
             </div>
           </div>
           
-          <div className="overflow-y-auto p-2 md:flex-1 max-h-40">
+          <div className="overflow-y-auto p-2 flex-1 min-h-0">
             <div className="grid grid-cols-5 gap-2">
               {testQuestions.map((question, index) => {
                 const status = getQuestionStatus(index);
@@ -502,7 +502,7 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
             </div>
           </div>
 
-          <div className="p-3 border-t border-border space-y-2 text-xs">
+          <div className="p-3 border-t border-border space-y-2 text-xs flex-shrink-0">
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 rounded bg-green-500/20"></div>
               <span className="text-muted-foreground">Correct</span>
@@ -519,7 +519,7 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
         </div>
 
         {/* Main Content */}
-        <div className="flex-1 flex flex-col overflow-hidden">
+        <div className="flex-1 flex flex-col overflow-hidden min-h-0">
           <div className="p-4 border-b border-border bg-accent/5">
             <div className="flex items-center justify-between gap-3">
               <div className="flex-1">
