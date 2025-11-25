@@ -447,7 +447,8 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
           "md:flex md:flex-col md:w-64 md:border-r md:border-border md:bg-muted/30 transition-all duration-300",
           "md:overflow-visible",
           "w-full border-b border-border bg-muted/30",
-          !showQuestionPanel && "hidden md:flex"
+          !showQuestionPanel && "hidden md:flex",
+          showQuestionPanel && "md:flex"
         )}>
           <div className="p-4 border-b border-border min-h-fit">
             <div className="flex items-center justify-between gap-2">
@@ -469,7 +470,7 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
             </div>
           </div>
           
-          <div className="flex-1 overflow-y-auto p-2 md:max-h-none max-h-48">
+          <div className="overflow-y-auto p-2 md:flex-1 max-h-40">
             <div className="grid grid-cols-5 gap-2">
               {testQuestions.map((question, index) => {
                 const status = getQuestionStatus(index);
