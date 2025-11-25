@@ -55,27 +55,38 @@ export function QuestionCard({
   const questionRef = useRef<HTMLDivElement>(null);
 
   const parsed = useMemo((): ParsedQuestion => {
-    const lines = question.question.split('\n');
+    const lines = question.question.split('\n').map(l => l.trim()).filter(l => l.length > 0);
     const choices: { letter: string; text: string }[] = [];
     const textLines: string[] = [];
+    let foundFirstChoice = false;
+    let expectedNextLetter: string | null = 'A';
     
     for (const line of lines) {
-      const trimmed = line.trim();
+      // Match answer choices: "A) text", "A. text", "A: text", "A - text", "(A) text"
+      const choiceMatch = line.match(/^[\(]*([A-E])[\)\.\:\-\s]+(.+)$/i);
       
-      // Match various formats: "A) text", "A. text", "A: text", "A - text", "(A) text"
-      const match = trimmed.match(/^[\(]*([A-E])[\)\.\:\-\s]+(.+)$/i);
-      
-      if (match && match[2].trim().length > 2) {
-        const letter = match[1].toUpperCase();
-        const text = match[2].trim();
+      if (choiceMatch && choiceMatch[2].trim().length > 2) {
+        const letter = choiceMatch[1].toUpperCase();
+        const text = choiceMatch[2].trim();
         
-        // Verify this is likely a choice (not just a line starting with a letter)
-        if (!textLines.length || textLines[textLines.length - 1].includes('?')) {
+        // First potential choice OR sequential after previous choice
+        if (!foundFirstChoice && (expectedNextLetter === null || letter === expectedNextLetter)) {
+          foundFirstChoice = true;
           choices.push({ letter, text });
+          // Expect next letter
+          expectedNextLetter = String.fromCharCode(letter.charCodeAt(0) + 1);
+        } else if (foundFirstChoice && (letter === expectedNextLetter || letter.charCodeAt(0) > 'A'.charCodeAt(0))) {
+          // Continuing the sequence
+          choices.push({ letter, text });
+          expectedNextLetter = String.fromCharCode(letter.charCodeAt(0) + 1);
+        } else if (foundFirstChoice) {
+          // Out of sequence after finding choices, treat as text
+          textLines.push(line);
         } else {
+          // Before any choices found, treat as text
           textLines.push(line);
         }
-      } else if (trimmed && trimmed.length > 0) {
+      } else {
         textLines.push(line);
       }
     }
