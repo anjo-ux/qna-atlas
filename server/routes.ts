@@ -606,6 +606,89 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get subscription details
+  app.get('/api/subscription/details', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      const activeSubscription = await storage.getUserActiveSubscription(userId);
+      const transactions = await storage.getUserSubscriptionTransactions(userId);
+
+      let daysRemaining = 0;
+      if (activeSubscription?.endDate) {
+        const now = new Date();
+        const endDate = new Date(activeSubscription.endDate);
+        daysRemaining = Math.max(0, Math.ceil((endDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
+      }
+
+      res.json({
+        plan: user?.subscriptionPlan,
+        status: user?.subscriptionStatus || 'trial',
+        endsAt: activeSubscription?.endDate,
+        daysRemaining,
+        transactionCount: transactions.length,
+      });
+    } catch (error) {
+      console.error("Error fetching subscription details:", error);
+      res.status(500).json({ message: "Failed to fetch subscription details" });
+    }
+  });
+
+  // Change subscription plan
+  app.post('/api/subscription/change', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { planId } = req.body;
+
+      if (!planId) {
+        return res.status(400).json({ message: "Plan ID required" });
+      }
+
+      const plan = (await storage.getSubscriptionPlans()).find(p => p.id === planId);
+      if (!plan) {
+        return res.status(404).json({ message: "Plan not found" });
+      }
+
+      // Create transaction
+      const startDate = new Date();
+      const endDate = new Date(startDate);
+      endDate.setMonth(endDate.getMonth() + plan.durationMonths);
+
+      await storage.createSubscriptionTransaction({
+        userId,
+        planId,
+        amount: plan.priceUSD,
+        status: 'completed',
+        startDate,
+        endDate,
+      });
+
+      // Update user subscription
+      await storage.updateUserProfile(userId, {
+        subscriptionStatus: 'active',
+        subscriptionPlan: plan.name as any,
+        subscriptionEndsAt: endDate,
+      });
+
+      res.json({ message: "Subscription updated successfully" });
+    } catch (error) {
+      console.error("Error changing subscription:", error);
+      res.status(500).json({ message: "Failed to change subscription" });
+    }
+  });
+
+  // Cancel subscription
+  app.post('/api/subscription/cancel', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      await storage.cancelUserSubscription(userId);
+      res.json({ message: "Subscription canceled successfully" });
+    } catch (error) {
+      console.error("Error canceling subscription:", error);
+      res.status(500).json({ message: "Failed to cancel subscription" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

@@ -87,6 +87,8 @@ export interface IStorage {
   getSubscriptionPlans(): Promise<SubscriptionPlan[]>;
   createSubscriptionTransaction(transaction: InsertSubscriptionTransaction): Promise<SubscriptionTransaction>;
   getUserActiveSubscription(userId: string): Promise<SubscriptionTransaction | undefined>;
+  cancelUserSubscription(userId: string): Promise<void>;
+  getUserSubscriptionTransactions(userId: string): Promise<SubscriptionTransaction[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -520,6 +522,25 @@ export class DatabaseStorage implements IStorage {
       .orderBy(desc(subscriptionTransactions.endDate))
       .limit(1);
     return active[0];
+  }
+
+  async cancelUserSubscription(userId: string): Promise<void> {
+    await db
+      .update(users)
+      .set({
+        subscriptionStatus: 'expired',
+        subscriptionPlan: undefined,
+        subscriptionEndsAt: new Date(),
+      })
+      .where(eq(users.id, userId));
+  }
+
+  async getUserSubscriptionTransactions(userId: string): Promise<SubscriptionTransaction[]> {
+    return await db
+      .select()
+      .from(subscriptionTransactions)
+      .where(eq(subscriptionTransactions.userId, userId))
+      .orderBy(desc(subscriptionTransactions.createdAt));
   }
 }
 

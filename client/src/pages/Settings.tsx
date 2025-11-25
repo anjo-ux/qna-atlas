@@ -6,6 +6,7 @@ import { ArrowLeft, Mail, Lock, CreditCard, BookOpen, TrendingUp, Target, Save, 
 import { useAuth } from '@/hooks/useAuth';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { QuestionBreakdownCharts } from '@/components/QuestionBreakdownCharts';
+import { SubscriptionManager } from '@/components/SubscriptionManager';
 import { useQuestionStats } from '@/hooks/useQuestionStats';
 import {
   Popover,
@@ -217,54 +218,23 @@ export function Settings({ onBack, subscription }: SettingsProps) {
         {sidebarOpen && (
           <div className="w-72 border-r border-border flex-shrink-0 bg-background overflow-hidden flex flex-col transition-all duration-300">
             <div className="w-full h-full overflow-y-auto p-6">
-              <Card className="p-6">
-                <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
-                  <CreditCard className="h-5 w-5" />
-                  Subscription
-                </h2>
-
-                <div className="space-y-4">
-                  <div>
-                    <p className="text-xs text-muted-foreground font-medium">Current Plan</p>
-                    <p className="font-semibold text-foreground mt-1">
-                      {hasEmoryAccess ? 'Institutional Affiliation' : (displaySubscription.status === 'trial' ? 'Free Trial' : displaySubscription.status === 'active' ? 'Premium' : 'Expired')}
-                    </p>
+              {hasEmoryAccess ? (
+                <Card className="p-6 bg-green-500/5 border-green-500/20">
+                  <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+                    <CreditCard className="h-5 w-5" />
+                    Subscription
+                  </h2>
+                  <div className="space-y-3">
+                    <div>
+                      <p className="text-xs text-muted-foreground font-medium">Status</p>
+                      <p className="text-lg font-bold text-green-600 dark:text-green-400 mt-1">Institutional Access</p>
+                    </div>
+                    <p className="text-sm text-foreground">Your Emory University affiliation grants unlimited access to all features.</p>
                   </div>
-
-                  <div className="border-t border-border pt-4">
-                    <p className="text-xs text-muted-foreground font-medium">Status</p>
-                    <p className={`font-semibold mt-1 ${hasEmoryAccess ? 'text-green-600 dark:text-green-400' : displaySubscription.status === 'expired' ? 'text-destructive' : 'text-green-600 dark:text-green-400'}`}>
-                      {hasEmoryAccess ? 'Unlimited Access' : (displaySubscription.status === 'expired' ? 'Expired' : 'Active')}
-                    </p>
-                  </div>
-
-                  {!hasEmoryAccess && displaySubscription.status !== 'active' && (
-                    <div className="border-t border-border pt-4">
-                      <p className="text-xs text-muted-foreground font-medium">Time Remaining</p>
-                      <p className="font-semibold text-foreground mt-2">{displaySubscription.daysRemaining} days</p>
-                    </div>
-                  )}
-
-                  {displaySubscription.trialEndsAt && !hasEmoryAccess && (
-                    <div className="border-t border-border pt-4">
-                      <p className="text-sm text-muted-foreground font-medium mb-3">Trial Info</p>
-                      <div className="space-y-2">
-                        <div className="flex justify-between text-xs">
-                          <span className="text-foreground">Trial Ends</span>
-                          <span className="text-muted-foreground">{new Date(displaySubscription.trialEndsAt).toLocaleDateString()}</span>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {hasEmoryAccess && (
-                    <div className="border-t border-border pt-4 bg-green-500/5 -m-6 mt-4 p-6 rounded">
-                      <p className="text-xs font-medium text-green-600 dark:text-green-400">Special Access</p>
-                      <p className="text-sm text-foreground mt-2">Your Emory University affiliation grants unlimited access to all features.</p>
-                    </div>
-                  )}
-                </div>
-              </Card>
+                </Card>
+              ) : (
+                <SubscriptionManager />
+              )}
             </div>
           </div>
         )}
