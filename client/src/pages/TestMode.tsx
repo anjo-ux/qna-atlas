@@ -17,11 +17,13 @@ interface TestModeProps {
   sections: Section[];
   onBack: () => void;
   resumeSessionId?: string;
+  previewQuestions?: Question[];
+  isPreview?: boolean;
 }
 
 type TestState = 'setup' | 'testing' | 'results';
 
-export function TestMode({ sections, onBack, resumeSessionId }: TestModeProps) {
+export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, isPreview }: TestModeProps) {
   const [testState, setTestState] = useState<TestState>('setup');
   const [questionCount, setQuestionCount] = useState<10 | 20 | 30 | 40>(10);
   const [selectedSubsections, setSelectedSubsections] = useState<Set<string>>(
@@ -40,8 +42,21 @@ export function TestMode({ sections, onBack, resumeSessionId }: TestModeProps) {
   const { recordResponse } = useQuestionStats();
   const { createSession, updateSession, completeSession, getInProgressSessions, getCompletedSessions, deleteSession, sessions } = useTestSessions();
 
+  // For preview mode, use provided questions directly, skip setup
+  useEffect(() => {
+    if (isPreview && previewQuestions && previewQuestions.length > 0 && testState === 'setup') {
+      setTestQuestions(previewQuestions);
+      setTestState('testing');
+    }
+  }, [isPreview, previewQuestions, testState]);
+
   // Get all available questions based on selection
   const availableQuestions = useMemo(() => {
+    // If in preview mode, use preview questions
+    if (isPreview && previewQuestions && previewQuestions.length > 0) {
+      return previewQuestions;
+    }
+
     let questions: Question[] = [];
     
     if (useAllQuestions) {
@@ -61,7 +76,7 @@ export function TestMode({ sections, onBack, resumeSessionId }: TestModeProps) {
     }
     
     return questions;
-  }, [sections, selectedSubsections, useAllQuestions]);
+  }, [sections, selectedSubsections, useAllQuestions, isPreview, previewQuestions]);
 
   const handleStartTest = () => {
     if (availableQuestions.length === 0) {

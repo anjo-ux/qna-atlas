@@ -301,6 +301,15 @@ export default function Index() {
 
   return (
     <div className="flex h-screen overflow-hidden bg-background">
+      <PreviewWizard
+        open={showPreviewWizard}
+        onClose={() => setShowPreviewWizard(false)}
+        onStart={() => {
+          setShowPreviewWizard(false);
+          setScreenMode('preview');
+        }}
+      />
+
       {/* Sidebar Toggle Button */}
       <Button
         variant="ghost"
@@ -485,6 +494,7 @@ export default function Index() {
               onStartTest={handleStartTest}
               onResumeTest={handleResumeTest}
               onSettings={() => setScreenMode('settings')}
+              onPreview={() => setShowPreviewWizard(true)}
             />
           ) : (
             <div className={cn(
