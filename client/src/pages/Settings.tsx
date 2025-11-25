@@ -2,7 +2,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ArrowLeft, Mail, Lock, CreditCard, BookOpen, TrendingUp, Target, Save } from 'lucide-react';
+import { ArrowLeft, Mail, Lock, CreditCard, BookOpen, TrendingUp, Target, Save, ChevronRight, ChevronLeft } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useQuestionStats } from '@/hooks/useQuestionStats';
@@ -26,6 +26,7 @@ export function Settings({ onBack }: SettingsProps) {
   const { getAllStats } = useQuestionStats();
   const overallStats = getAllStats();
   const [isSaving, setIsSaving] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const [formData, setFormData] = useState({
     firstName: user?.firstName || '',
@@ -101,9 +102,9 @@ export function Settings({ onBack }: SettingsProps) {
       </div>
 
       <div className="flex-1 flex overflow-hidden">
-        {/* Left Sidebar - Fixed Width */}
-        <div className="hidden lg:flex lg:w-72 border-r border-border flex-shrink-0 bg-background">
-          <div className="w-full h-full overflow-y-auto p-6">
+        {/* Left Sidebar - Collapsible */}
+        <div className={`${sidebarOpen ? 'w-72' : 'w-0'} border-r border-border flex-shrink-0 bg-background transition-all duration-300 overflow-hidden flex flex-col`}>
+          <div className="w-72 h-full overflow-y-auto p-6">
             <Card className="p-6">
               <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
                 <CreditCard className="h-5 w-5" />
@@ -143,6 +144,17 @@ export function Settings({ onBack }: SettingsProps) {
             </Card>
           </div>
         </div>
+
+        {/* Sidebar Toggle Button */}
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+          className="flex-shrink-0 rounded-none border-r border-border"
+          data-testid="button-toggle-sidebar"
+        >
+          {sidebarOpen ? <ChevronLeft className="h-5 w-5" /> : <ChevronRight className="h-5 w-5" />}
+        </Button>
 
         {/* Main Content Area - Scrollable */}
         <div className="flex-1 overflow-y-auto">
