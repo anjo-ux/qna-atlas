@@ -48,11 +48,11 @@ export function Settings({ onBack }: SettingsProps) {
         </div>
       </div>
 
-      <div className="flex flex-1 overflow-hidden">
-        {/* Left Sidebar - Sticky Subscription */}
-        <div className="hidden lg:block w-72 border-r border-border overflow-y-auto sticky top-0 h-full">
-          <div className="p-6">
-            <Card className="p-6 h-full">
+      <div className="flex-1 flex overflow-hidden">
+        {/* Left Sidebar - Fixed Width, No Scroll */}
+        <div className="hidden lg:flex lg:w-72 border-r border-border flex-shrink-0 bg-background">
+          <div className="w-full h-full overflow-y-auto p-6">
+            <Card className="p-6">
               <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
                 <CreditCard className="h-5 w-5" />
                 Subscription
