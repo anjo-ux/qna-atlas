@@ -278,7 +278,7 @@ export function HomePage({ sections, onReviewIncorrect, onStartTest, onResumeTes
                 <span className="text-sm font-semibold">{overallStats.total} / {totalQuestions}</span>
               </div>
               <Progress value={completionPercentage} className="h-3" />
-              <p className="text-xs text-muted-foreground mt-1">{completionPercentage}% complete</p>
+              <p className="text-xs text-muted-foreground mt-1">{completionPercentage}% Complete</p>
             </div>
             
             <div>

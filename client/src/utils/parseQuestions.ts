@@ -164,9 +164,9 @@ export async function loadQuestions(): Promise<Section[]> {
 function createSectionStructure(sectionMap: Map<string, Map<string, Question[]>>): Section[] {
   const sectionOrder = [
     { id: 'comprehensive', title: 'Section 1: Comprehensive' },
-    { id: 'hand-lower-extremity', title: 'Section 2: Hand and Lower Extremity' },
+    { id: 'hand-lower-extremity', title: 'Section 2: Hand & Lower Extremity' },
     { id: 'craniomaxillofacial', title: 'Section 3: Craniomaxillofacial' },
-    { id: 'breast-cosmetic', title: 'Section 4: Breast and Cosmetic' },
+    { id: 'breast-cosmetic', title: 'Section 4: Breast & Cosmetic' },
     { id: 'core-surgical', title: 'Section 5: Core Surgical Principles' },
   ];
 
