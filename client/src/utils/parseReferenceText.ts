@@ -3480,7 +3480,7 @@ const subsectionTitles: Record<string, Record<string, string>> = {
   'comprehensive': {
     'anatomy': 'Anatomy',
     'skin-lesions': 'Skin Lesions',
-    'flaps-and-grafts': 'Flaps and Grafts',
+    'flaps-and-grafts': 'Flaps & Grafts',
     'microsurgery': 'Microsurgery',
     'infections': 'Infections',
     'burns': 'Burns',
@@ -3488,28 +3488,28 @@ const subsectionTitles: Record<string, Record<string, string>> = {
     'vascular-anomalies': 'Vascular Anomalies',
   },
   'hand-lower-extremity': {
-    'hand-digit-trauma': 'Hand and Digit Trauma',
+    'hand-digit-trauma': 'Hand & Digit Trauma',
     'hand-nerves': 'Hand Nerves',
     'hand-tendons': 'Hand Tendons',
-    'replantation-vascular': 'Replantation and Vascular',
-    'wrist-forearm-injuries': 'Wrist and Forearm Injuries',
+    'replantation-vascular': 'Replantation & Vascular',
+    'wrist-forearm-injuries': 'Wrist & Forearm Injuries',
     'hand-tumors': 'Hand Tumors',
-    'hand-inflammation-infections': 'Hand Inflammation and Infections',
+    'hand-inflammation-infections': 'Hand Inflammation & Infections',
     'congenital-pediatric-hand': 'Congenital and Pediatric Hand',
     'lower-extremity': 'Lower Extremity',
   },
   'craniomaxillofacial': {
-    'cleft-lip-palate': 'Cleft Lip and Palate',
+    'cleft-lip-palate': 'Cleft Lip & Palate',
     'facial-fractures': 'Facial Fractures',
     'facial-paralysis': 'Facial Paralysis',
     'ear-reconstruction': 'Ear Reconstruction',
-    'mandible-dental-orthognathic': 'Mandible, Dental, and Orthognathic',
+    'mandible-dental-orthognathic': 'Mandible, Dental, & Orthognathic',
     'head-neck-tumors': 'Head and Neck Tumors',
     'congenital-syndromes': 'Congenital Syndromes',
   },
   'breast-cosmetic': {
     'breast-augmentation': 'Breast Augmentation',
-    'breast-reduction-mastopexy': 'Breast Reduction and Mastopexy',
+    'breast-reduction-mastopexy': 'Breast Reduction & Mastopexy',
     'breast-reconstruction': 'Breast Reconstruction',
     'facial-rejuvenation': 'Facial Rejuvenation',
     'rhinoplasty': 'Rhinoplasty',
@@ -3522,7 +3522,7 @@ const subsectionTitles: Record<string, Record<string, string>> = {
     'critical-care': 'Critical Care',
     'trauma': 'Trauma',
     'transplantation': 'Transplantation',
-    'statistics-ethics-practice': 'Statistics, Ethics, and Practice Management',
+    'statistics-ethics-practice': 'Statistics, Ethics, & Practice Management',
   }
 };
 
