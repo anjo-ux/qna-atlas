@@ -441,13 +441,12 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
     const currentQuestion = testQuestions[currentQuestionIndex];
     
     return (
-      <div className="flex flex-col md:flex-row h-screen overflow-hidden">
+      <div className="flex flex-col md:flex-row md:h-screen md:overflow-hidden">
         {/* Question Panel - Top on mobile, Right on desktop */}
         <div className={cn(
-          "md:flex md:flex-col md:w-64 md:border-r md:border-border md:bg-muted/30 md:overflow-visible",
-          "flex flex-col border-b border-border bg-muted/30 flex-shrink-0 md:flex-shrink md:flex-1",
-          "max-h-52 md:max-h-none md:h-auto",
-          !showQuestionPanel && "hidden md:flex h-0 md:h-auto",
+          "md:flex md:flex-col md:w-64 md:border-r md:border-border md:bg-muted/30 md:overflow-visible md:flex-shrink-0",
+          "flex flex-col border-b border-border bg-muted/30",
+          !showQuestionPanel && "hidden md:flex",
           showQuestionPanel && "flex"
         )}>
           <div className="p-4 border-b border-border flex-shrink-0">
@@ -519,7 +518,7 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
         </div>
 
         {/* Main Content */}
-        <div className="flex-1 flex flex-col overflow-hidden min-h-0">
+        <div className="flex-1 flex flex-col md:overflow-hidden">
           <div className="p-4 border-b border-border bg-accent/5">
             <div className="flex items-center justify-between gap-3">
               <div className="flex-1">
@@ -546,8 +545,8 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
             </div>
           </div>
 
-          <div className="flex-1 overflow-auto p-4 md:p-6">
-            <div className="max-w-2xl md:max-w-4xl mx-auto">
+          <div className="flex-1 md:overflow-auto p-4 md:p-6">
+            <div className="max-w-2xl md:max-w-4xl mx-auto w-full">
               <QuestionCard
                 key={`${currentQuestion.id}-${currentQuestionIndex}`}
                 question={currentQuestion}
