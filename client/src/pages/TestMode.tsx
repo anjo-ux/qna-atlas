@@ -514,6 +514,7 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
           <div className="flex-1 overflow-auto p-6">
             <div className="max-w-4xl mx-auto">
               <QuestionCard
+                key={`${currentQuestion.id}-${currentQuestionIndex}`}
                 question={currentQuestion}
                 index={currentQuestionIndex}
                 sectionId=""
