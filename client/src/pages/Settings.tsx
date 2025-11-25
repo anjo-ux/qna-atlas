@@ -2,20 +2,46 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ArrowLeft, Mail, Lock, Building2, CreditCard, BookOpen, TrendingUp, Target } from 'lucide-react';
+import { ArrowLeft, Mail, Lock, CreditCard, BookOpen, TrendingUp, Target, Save } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useQuestionStats } from '@/hooks/useQuestionStats';
-import { useMemo } from 'react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useMemo, useState, useEffect } from 'react';
+import { getUniversityOptions } from '@/data/universities';
+import { toast } from 'sonner';
 
 interface SettingsProps {
   onBack: () => void;
 }
 
 export function Settings({ onBack }: SettingsProps) {
-  const { user } = useAuth();
+  const { user, refetch } = useAuth();
   const { getAllStats } = useQuestionStats();
   const overallStats = getAllStats();
+  const [isSaving, setIsSaving] = useState(false);
+
+  const [formData, setFormData] = useState({
+    firstName: user?.firstName || '',
+    lastName: user?.lastName || '',
+    institutionalAffiliation: user?.institutionalAffiliation || '',
+  });
+
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        firstName: user.firstName || '',
+        lastName: user.lastName || '',
+        institutionalAffiliation: user.institutionalAffiliation || '',
+      });
+    }
+  }, [user]);
 
   const stats = useMemo(() => {
     const total = overallStats.total;
@@ -37,6 +63,32 @@ export function Settings({ onBack }: SettingsProps) {
     { name: 'Microsoft', connected: false, icon: '💻' },
   ];
 
+  const handleSave = async () => {
+    setIsSaving(true);
+    try {
+      const response = await fetch('/api/auth/user', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+
+      if (!response.ok) throw new Error('Failed to save');
+
+      toast.success('Profile updated successfully');
+      await refetch();
+    } catch (error) {
+      toast.error('Failed to save profile');
+      console.error(error);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const hasChanges = 
+    formData.firstName !== (user?.firstName || '') ||
+    formData.lastName !== (user?.lastName || '') ||
+    formData.institutionalAffiliation !== (user?.institutionalAffiliation || '');
+
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
       <div className="p-6 border-b border-border">
@@ -49,7 +101,7 @@ export function Settings({ onBack }: SettingsProps) {
       </div>
 
       <div className="flex-1 flex overflow-hidden">
-        {/* Left Sidebar - Fixed Width, No Scroll */}
+        {/* Left Sidebar - Fixed Width */}
         <div className="hidden lg:flex lg:w-72 border-r border-border flex-shrink-0 bg-background">
           <div className="w-full h-full overflow-y-auto p-6">
             <Card className="p-6">
@@ -125,32 +177,52 @@ export function Settings({ onBack }: SettingsProps) {
                     <div>
                       <Label className="text-sm font-medium text-foreground">First Name</Label>
                       <Input 
-                        value={user?.firstName || ''} 
-                        disabled 
+                        value={formData.firstName}
+                        onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
                         className="mt-1"
-                        readOnly
+                        placeholder="Enter first name"
+                        data-testid="input-first-name"
                       />
                     </div>
                     <div>
                       <Label className="text-sm font-medium text-foreground">Last Name</Label>
                       <Input 
-                        value={user?.lastName || ''} 
-                        disabled 
+                        value={formData.lastName}
+                        onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
                         className="mt-1"
-                        readOnly
+                        placeholder="Enter last name"
+                        data-testid="input-last-name"
                       />
                     </div>
                   </div>
 
                   <div>
                     <Label className="text-sm font-medium text-foreground">Institutional Affiliation</Label>
-                    <Input 
-                      value={user?.institutionalAffiliation || 'Not provided'} 
-                      disabled 
-                      className="mt-1"
-                      readOnly
-                    />
+                    <Select value={formData.institutionalAffiliation} onValueChange={(value) => setFormData({ ...formData, institutionalAffiliation: value })}>
+                      <SelectTrigger className="mt-1" data-testid="select-university">
+                        <SelectValue placeholder="Select a university" />
+                      </SelectTrigger>
+                      <SelectContent className="max-h-[300px]">
+                        {getUniversityOptions().map(uni => (
+                          <SelectItem key={uni.value} value={uni.value} data-testid={`option-${uni.value}`}>
+                            {uni.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
+
+                  {hasChanges && (
+                    <Button 
+                      onClick={handleSave}
+                      disabled={isSaving}
+                      className="w-full gap-2"
+                      data-testid="button-save-profile"
+                    >
+                      <Save className="h-4 w-4" />
+                      {isSaving ? 'Saving...' : 'Save Changes'}
+                    </Button>
+                  )}
                 </div>
               </Card>
 
