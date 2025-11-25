@@ -557,7 +557,6 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
           </div>
         </div>
       </div>
-      </>
     );
   }
 
