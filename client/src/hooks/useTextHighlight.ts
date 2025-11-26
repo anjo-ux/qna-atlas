@@ -35,43 +35,52 @@ export function useTextHighlight(
 
     if (highlights.length === 0) return;
 
-    // Get all text content and positions
-    const textNodes: { node: Text; startOffset: number }[] = [];
-    let currentOffset = 0;
+    // Helper function to get fresh text nodes each time we need them
+    const getTextNodes = () => {
+      const textNodes: { node: Text; startOffset: number }[] = [];
+      let currentOffset = 0;
 
-    const walker = document.createTreeWalker(
-      container,
-      NodeFilter.SHOW_TEXT,
-      {
-        acceptNode: (node) => {
-          // Skip text inside script, style, or existing mark tags
-          const parent = node.parentElement;
-          if (parent?.tagName === 'SCRIPT' || parent?.tagName === 'STYLE' || parent?.tagName === 'MARK') {
-            return NodeFilter.FILTER_REJECT;
+      const walker = document.createTreeWalker(
+        container,
+        NodeFilter.SHOW_TEXT,
+        {
+          acceptNode: (node) => {
+            // Skip text inside script, style, or existing mark tags
+            const parent = node.parentElement;
+            if (parent?.tagName === 'SCRIPT' || parent?.tagName === 'STYLE' || parent?.tagName === 'MARK') {
+              return NodeFilter.FILTER_REJECT;
+            }
+            return NodeFilter.FILTER_ACCEPT;
           }
-          return NodeFilter.FILTER_ACCEPT;
+        }
+      );
+
+      let node: Node | null;
+      while ((node = walker.nextNode())) {
+        const textNode = node as Text;
+        if (textNode.textContent) {
+          textNodes.push({
+            node: textNode,
+            startOffset: currentOffset,
+          });
+          currentOffset += textNode.textContent.length;
         }
       }
-    );
+      return textNodes;
+    };
 
-    let node: Node | null;
-    while ((node = walker.nextNode())) {
-      const textNode = node as Text;
-      if (textNode.textContent) {
-        textNodes.push({
-          node: textNode,
-          startOffset: currentOffset,
-        });
-        currentOffset += textNode.textContent.length;
-      }
-    }
-
-    // Apply highlights in reverse order
+    // Apply highlights in reverse order to maintain correct offsets
     const sortedHighlights = [...highlights].sort((a, b) => b.startOffset - a.startOffset);
 
     sortedHighlights.forEach(highlight => {
+      // Get fresh text nodes for each highlight to ensure we're working with current DOM state
+      const textNodes = getTextNodes();
+      
       // Find the text node(s) containing this highlight
       for (const { node: textNode, startOffset: nodeStart } of textNodes) {
+        // Check if node is still in the DOM
+        if (!container.contains(textNode)) continue;
+        
         const nodeEnd = nodeStart + (textNode.textContent?.length || 0);
 
         // Check if this highlight overlaps with this text node
