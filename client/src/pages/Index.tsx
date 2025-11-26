@@ -52,21 +52,6 @@ export default function Index() {
   const { bookmarks } = useBookmarks();
   const { dueCount } = useSpacedRepetition();
 
-  // Handle responsive view mode: questions on small screens, split on large
-  useEffect(() => {
-    const handleResize = () => {
-      const isLargeScreen = window.innerWidth >= 1024; // lg breakpoint
-      setViewMode(isLargeScreen ? 'split' : 'questions');
-    };
-
-    // Set initial view mode
-    handleResize();
-
-    // Update on window resize
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
   const {
     recordResponse,
     getQuestionResponse,
@@ -362,7 +347,7 @@ export default function Index() {
         <header className="glass-surface border-glass">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-3 pb-2">
             {/* Top Row: Home, Title, Actions */}
-            <div className="flex items-center gap-2 sm:gap-4 min-w-0">
+            <div className="flex items-center gap-4">
               
               <Button
                 variant="ghost"
@@ -374,22 +359,32 @@ export default function Index() {
                 <Home className="h-5 w-5" />
               </Button>
               
-              <div className="flex-1 min-w-0 flex items-center gap-2">
+              <div className="flex-1 flex items-center gap-2">
                 <img 
                   src="/atlas-logo.png" 
                   alt="Atlas Logo" 
-                  className="h-8 w-8 object-contain flex-shrink-0"
+                  className="h-8 w-8 object-contain"
                 />
-                <h1 className="text-lg sm:text-xl font-bold text-primary truncate">
-                  Atlas
+                <h1 className="text-lg sm:text-xl font-bold text-primary">
+                  Atlas Review
                 </h1>
               </div>
 
-              {/* Bookmarks Button - Icon only on mobile, full on sm+ */}
+              {/* Settings Button */}
+              <Button
+                onClick={() => setScreenMode('settings')}
+                variant="outline"
+                size="icon"
+                className="lg:hidden"
+              >
+                <Settings className="h-5 w-5" />
+              </Button>
+
+              {/* Bookmarks Button */}
               <Button
                 onClick={() => setLocation('/bookmarks')}
                 variant="outline"
-                className="hidden sm:flex gap-2 relative flex-shrink-0"
+                className="gap-2 relative"
                 data-testid="button-bookmarks"
               >
                 <Bookmark className="h-4 w-4" />
@@ -401,11 +396,11 @@ export default function Index() {
                 )}
               </Button>
 
-              {/* Spaced Repetition Button - Icon only on mobile, full on sm+ */}
+              {/* Spaced Repetition Button */}
               <Button
                 onClick={() => setLocation('/spaced-repetition')}
                 variant="outline"
-                className="hidden sm:flex gap-2 relative flex-shrink-0"
+                className="gap-2 relative"
                 data-testid="button-spaced-repetition"
               >
                 <Brain className="h-4 w-4" />
@@ -417,24 +412,14 @@ export default function Index() {
                 )}
               </Button>
 
-              {/* Test Button - Icon only on mobile, text on sm+ */}
+              {/* Test Button */}
               <Button
                 onClick={handleStartTest}
                 variant="outline"
-                className="hidden sm:flex gap-2 flex-shrink-0"
+                className="gap-2"
               >
                 <Zap className="h-4 w-4" />
                 <span className="hidden md:inline">Test</span>
-              </Button>
-
-              {/* Settings Button */}
-              <Button
-                onClick={() => setScreenMode('settings')}
-                variant="outline"
-                size="icon"
-                className="flex-shrink-0"
-              >
-                <Settings className="h-5 w-5" />
               </Button>
 
               {/* View Mode Toggle */}
@@ -564,15 +549,15 @@ export default function Index() {
               {/* Questions Panel */}
               {(viewMode === 'questions' || viewMode === 'split') && (
                 <div className={cn(
-                  "flex-1 overflow-auto min-w-0",
-                  viewMode === 'split' ? "lg:w-3/5 2xl:w-2/3" : "w-full"
+                  "overflow-auto",
+                  viewMode === 'split' ? "lg:w-3/5 2xl:w-2/3 lg:flex-1" : "flex-1"
                 )}>
-                  <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
-                    <div className="w-full space-y-4">
-                      <div className="w-full space-y-4 mb-6">
-                        <div className="w-full flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 flex-wrap">
-                          <div className="flex-1 min-w-0">
-                            <h2 className="text-xl font-semibold text-foreground truncate">
+                  <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                    <div className="space-y-4">
+                      <div className="space-y-4 mb-6">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                          <div>
+                            <h2 className="text-xl font-semibold text-foreground">
                               {currentSubsection.title}
                             </h2>
                             <p className="text-sm text-muted-foreground mt-1">
@@ -587,7 +572,7 @@ export default function Index() {
                         </div>
 
                         {/* Stats and Filters */}
-                        <div className="w-full flex flex-col lg:flex-row gap-4 flex-wrap">
+                        <div className="flex flex-col lg:flex-row gap-4">
                           <QuestionStats stats={subsectionStats} className="lg:flex-shrink-0 lg:w-64" />
                           <div className="flex-1">
                             <QuestionFilters

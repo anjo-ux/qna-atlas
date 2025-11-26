@@ -41,7 +41,6 @@ export function QuestionCard({
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(savedResponse?.selectedAnswer || null);
   const [showExplanation, setShowExplanation] = useState(!!savedResponse);
   const [isEraserMode, setIsEraserMode] = useState(false);
-  const [isCompressed, setIsCompressed] = useState(window.innerWidth < 768); // md breakpoint
 
   const {
     activeColor,
@@ -183,16 +182,6 @@ export function QuestionCard({
     }
   }, [savedResponse, question.id]);
 
-  // Handle responsive highlight menu: compress only when necessary
-  useEffect(() => {
-    const handleResize = () => {
-      setIsCompressed(window.innerWidth < 768); // md breakpoint
-    };
-
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
   const handleAnswerClick = () => {
     if (selectedAnswer && !showExplanation && correctAnswer) {
       const correct = selectedAnswer.toUpperCase() === correctAnswer;
@@ -254,7 +243,7 @@ export function QuestionCard({
     <Card 
       data-question-id={question.id}
       className={cn(
-        "card-shadow transition-smooth overflow-hidden relative w-full",
+        "card-shadow transition-smooth overflow-hidden relative",
         "hover:elevated-shadow hover:border-primary/20"
       )}
     >
@@ -267,7 +256,6 @@ export function QuestionCard({
             onClearHighlights={handleClearHighlights}
             isEraserMode={isEraserMode}
             onEraserToggle={() => setIsEraserMode(!isEraserMode)}
-            isCompressed={isCompressed}
           />
           <Button
             size="icon"
