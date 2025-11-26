@@ -102,9 +102,11 @@ export function useTextHighlight(
 
             const mark = document.createElement('mark');
             mark.textContent = highlightedText;
-            mark.className = `${HIGHLIGHT_COLORS[highlight.color]} px-1 rounded cursor-pointer transition-all hover:opacity-80`;
+            const cursorClass = isEraserMode ? 'cursor-inherit' : 'cursor-pointer';
+            mark.className = `${HIGHLIGHT_COLORS[highlight.color]} px-1 rounded ${cursorClass} transition-all hover:opacity-80`;
             mark.setAttribute('data-highlight-id', highlight.id);
             mark.title = isEraserMode ? 'Click to delete' : 'Double-click to remove';
+            mark.style.pointerEvents = 'auto';
 
             const parent = textNode.parentNode;
             if (!parent) continue;
