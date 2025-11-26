@@ -132,13 +132,13 @@ export function HomePage({ sections, onReviewIncorrect, onStartTest, onResumeTes
       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
         <div className="space-y-2">
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-            Plastic Surgery Atlas
+            Plastic Surgery In-Training Exam Review
           </h1>
           <p className="text-muted-foreground text-sm md:text-base">
             {user && (
-              <span>Welcome back, {user.firstName || user.email?.split('@')[0]}! </span>
+              <span>Welcome back, {user.firstName || user.email?.split('@')[0]}. Track your progress and master your knowledge.</span>
             )}
-            Track your progress and master your knowledge
+            {!user && "Track your progress and master your knowledge."}
           </p>
         </div>
         <DropdownMenu>
