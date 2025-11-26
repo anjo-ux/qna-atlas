@@ -144,7 +144,7 @@ All colors MUST be HSL.
   }
 
   html {
-    font-family: 'SF Pro Display', 'SF Pro Text', system-ui, sans-serif;
+    font-family: "SF Pro", "SF Pro Display", "SF Pro Text", -apple-system, BlinkMacSystemFont, sans-serif;
   }
 
   body {
@@ -152,7 +152,7 @@ All colors MUST be HSL.
     background-attachment: fixed;
     min-height: 100vh;
     color: hsl(var(--foreground));
-    font-family: 'SF Pro Display', 'SF Pro Text', system-ui, sans-serif;
+    font-family: "SF Pro", "SF Pro Display", "SF Pro Text", -apple-system, BlinkMacSystemFont, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
