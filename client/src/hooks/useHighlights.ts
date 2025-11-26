@@ -107,6 +107,13 @@ export function useHighlights() {
     saveNotes(notes.filter(n => n.highlightId !== id));
   }, [highlights, notes, saveHighlights, saveNotes]);
 
+  const batchRemoveHighlights = useCallback((ids: string[]) => {
+    const newHighlights = highlights.filter(h => !ids.includes(h.id));
+    saveHighlights(newHighlights);
+    // Also remove associated notes
+    saveNotes(notes.filter(n => !ids.includes(n.highlightId || '')));
+  }, [highlights, notes, saveHighlights, saveNotes]);
+
   const addNote = useCallback((note: Omit<Note, 'id' | 'timestamp'>) => {
     const newNote: Note = {
       ...note,
@@ -233,6 +240,7 @@ export function useHighlights() {
     isLoadingNotes,
     addHighlight,
     removeHighlight,
+    batchRemoveHighlights,
     addNote,
     updateNote,
     removeNote,

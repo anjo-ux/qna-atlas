@@ -123,5 +123,5 @@ export function useTextHighlight(
         }
       }
     });
-  }, [highlights, content, containerRef, isEraserMode, onRemoveHighlight]);
+  }, [highlights, content, containerRef, isEraserMode]);
 }

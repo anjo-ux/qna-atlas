@@ -46,6 +46,7 @@ export function QuestionCard({
     setActiveColor,
     addHighlight,
     removeHighlight,
+    batchRemoveHighlights,
     addNote,
     updateNote,
     removeNote,
@@ -206,7 +207,7 @@ export function QuestionCard({
   };
 
   const handleClearHighlights = () => {
-    highlights.forEach(h => removeHighlight(h.id));
+    batchRemoveHighlights(highlights.map(h => h.id));
   };
 
   return (
