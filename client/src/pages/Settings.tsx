@@ -7,6 +7,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { QuestionBreakdownCharts } from '@/components/QuestionBreakdownCharts';
 import { SubscriptionManager } from '@/components/SubscriptionManager';
+import { MobileSubscriptionWidget } from '@/components/MobileSubscriptionWidget';
 import { useQuestionStats } from '@/hooks/useQuestionStats';
 import {
   Popover,
