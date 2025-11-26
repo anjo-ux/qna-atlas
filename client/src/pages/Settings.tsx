@@ -491,44 +491,8 @@ export function Settings({ onBack, subscription }: SettingsProps) {
               </Card>
 
               {/* Mobile Subscription Section */}
-              <Card className="p-6 lg:hidden bg-gradient-to-br from-chart-1/10 to-chart-2/10 border-chart-1/20">
-                <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
-                  <CreditCard className="h-5 w-5" />
-                  Subscription
-                </h2>
-
-                <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <p className="text-xs text-muted-foreground font-medium">Current Plan</p>
-                      <p className="font-semibold text-foreground mt-1">Free Trial</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-muted-foreground font-medium">Status</p>
-                      <p className="font-semibold text-green-600 dark:text-green-400 mt-1">Active</p>
-                    </div>
-                  </div>
-
-                  <div>
-                    <p className="text-xs text-muted-foreground font-medium">Time Remaining</p>
-                    <p className="font-semibold text-foreground mt-1">29 days</p>
-                  </div>
-
-                  <div className="bg-muted/30 rounded-lg p-3 border border-border">
-                    <p className="text-sm text-muted-foreground mb-2">Subscription History</p>
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-xs">
-                        <span className="text-foreground">Free Trial Started</span>
-                        <span className="text-muted-foreground">Nov 25, 2024</span>
-                      </div>
-                      <div className="flex justify-between text-xs">
-                        <span className="text-foreground">Trial Ends</span>
-                        <span className="text-muted-foreground">Dec 25, 2024</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </Card>
+              <MobileSubscriptionWidget />
+            </div>
             </div>
           </div>
         </div>
