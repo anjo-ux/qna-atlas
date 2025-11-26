@@ -222,7 +222,7 @@ export function HomePage({ sections, onReviewIncorrect, onStartTest, onResumeTes
               <BookOpen className="h-5 w-5 md:h-6 md:w-6 text-chart-1" />
             </div>
             <div className="min-w-0">
-              <p className="text-xs md:text-sm text-muted-foreground">Total Questions</p>
+              <p className="text-xs md:text-sm text-muted-foreground">Answered</p>
               <p className="text-lg md:text-2xl font-bold text-foreground">{overallStats.total}</p>
             </div>
           </div>
@@ -337,7 +337,7 @@ export function HomePage({ sections, onReviewIncorrect, onStartTest, onResumeTes
 
       {/* Section Progress */}
       <Card variant="glass" className="p-4 md:p-6">
-        <h2 className="text-lg md:text-xl font-semibold mb-6">Progress by Section</h2>
+        <h2 className="text-lg md:text-xl font-semibold mb-6">Total Progress</h2>
         <Accordion type="multiple" className="space-y-3">
           {sectionProgress.map(({ section, totalSectionQuestions, answeredQuestions, percentage, accuracy, subsectionDetails }) => (
             <AccordionItem key={section.id} value={section.id} className="border rounded-lg px-2 md:px-4">

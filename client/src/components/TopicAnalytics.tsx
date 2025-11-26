@@ -35,7 +35,7 @@ export function TopicAnalytics() {
         <h2 className="text-lg font-semibold mb-4 gradient-text">Topic Performance Overview</h2>
         <div className="grid grid-cols-3 gap-4">
           <div>
-            <p className="text-xs md:text-sm text-muted-foreground">Total Questions</p>
+            <p className="text-xs md:text-sm text-muted-foreground">Answered</p>
             <p className="text-2xl md:text-3xl font-bold">{overallStats.total}</p>
           </div>
           <div>

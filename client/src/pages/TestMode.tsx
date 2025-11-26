@@ -697,7 +697,7 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
 
             <div className="grid grid-cols-3 gap-4">
               <Card className="p-6 text-center">
-                <p className="text-sm text-muted-foreground mb-2">Total Questions</p>
+                <p className="text-sm text-muted-foreground mb-2">Answered</p>
                 <p className="text-3xl font-bold">{testResults.total}</p>
               </Card>
               <Card className="p-6 text-center bg-success/10 border-success/20">
