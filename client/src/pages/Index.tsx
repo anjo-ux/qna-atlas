@@ -552,12 +552,12 @@ export default function Index() {
                   "flex-1 overflow-auto min-w-0",
                   viewMode === 'split' ? "lg:w-3/5 2xl:w-2/3" : "w-full"
                 )}>
-                  <div className="h-full px-4 sm:px-6 lg:px-8 py-8">
-                    <div className="space-y-4">
-                      <div className="space-y-4 mb-6">
-                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                          <div>
-                            <h2 className="text-xl font-semibold text-foreground">
+                  <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
+                    <div className="w-full space-y-4">
+                      <div className="w-full space-y-4 mb-6">
+                        <div className="w-full flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 flex-wrap">
+                          <div className="flex-1 min-w-0">
+                            <h2 className="text-xl font-semibold text-foreground truncate">
                               {currentSubsection.title}
                             </h2>
                             <p className="text-sm text-muted-foreground mt-1">
@@ -572,7 +572,7 @@ export default function Index() {
                         </div>
 
                         {/* Stats and Filters */}
-                        <div className="flex flex-col lg:flex-row gap-4">
+                        <div className="w-full flex flex-col lg:flex-row gap-4 flex-wrap">
                           <QuestionStats stats={subsectionStats} className="lg:flex-shrink-0 lg:w-64" />
                           <div className="flex-1">
                             <QuestionFilters
