@@ -25,7 +25,7 @@ export function SpacedRepetitionPage({ onBack }: SpacedRepetitionProps) {
         const questionsData = await loadQuestions();
         setSections(questionsData);
       } catch (error) {
-        console.error('Error loading questions:', error);
+        console.error('Error Loading Questions:', error);
       }
     };
     loadData();
@@ -83,7 +83,7 @@ export function SpacedRepetitionPage({ onBack }: SpacedRepetitionProps) {
             </div>
           </div>
           <div className="text-right">
-            <p className="text-sm text-muted-foreground">Due for Review</p>
+            <p className="text-sm text-muted-foreground">Due</p>
             <p className="text-2xl font-bold text-primary">{dueQuestions.length}</p>
           </div>
         </div>
@@ -91,7 +91,7 @@ export function SpacedRepetitionPage({ onBack }: SpacedRepetitionProps) {
         {/* Search */}
         <Input
           type="text"
-          placeholder="Search spaced repetition questions..."
+          placeholder="Search"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="bg-white/5 border-white/10 backdrop-blur-sm"
@@ -105,7 +105,7 @@ export function SpacedRepetitionPage({ onBack }: SpacedRepetitionProps) {
           <div className="flex items-center justify-center h-full">
             <div className="text-center space-y-4">
               <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto" />
-              <p className="text-muted-foreground">Loading spaced repetition questions...</p>
+              <p className="text-muted-foreground">Loading</p>
             </div>
           </div>
         )}
@@ -114,7 +114,7 @@ export function SpacedRepetitionPage({ onBack }: SpacedRepetitionProps) {
           <Card variant="glass" className="p-8 text-center max-w-2xl mx-auto">
             <Brain className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-50" />
             <h2 className="text-xl font-semibold text-foreground mb-2">No Questions Due</h2>
-            <p className="text-muted-foreground">Great job! All your spaced repetition questions are up to date. Keep studying to add more.</p>
+            <p className="text-muted-foreground">All your spaced repetition questions are up to date. Keep studying to add more.</p>
           </Card>
         )}
 
