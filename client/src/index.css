@@ -335,3 +335,52 @@ All colors MUST be HSL.
     box-shadow: 0 12px 32px hsl(var(--primary) / 0.25);
   }
 }
+
+/* Scrollbar Styling */
+@layer base {
+  /* Webkit browsers (Chrome, Safari, Edge) */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: rgba(200, 180, 220, 0.3);
+    border-radius: 5px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+    backdrop-filter: blur(8px);
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(200, 180, 220, 0.5);
+    background-clip: padding-box;
+  }
+
+  /* Dark mode scrollbar */
+  .dark ::-webkit-scrollbar-thumb {
+    background: rgba(100, 80, 140, 0.3);
+    background-clip: padding-box;
+    backdrop-filter: blur(8px);
+  }
+
+  .dark ::-webkit-scrollbar-thumb:hover {
+    background: rgba(100, 80, 140, 0.5);
+    background-clip: padding-box;
+  }
+
+  /* Firefox scrollbar */
+  * {
+    scrollbar-color: rgba(200, 180, 220, 0.3) transparent;
+    scrollbar-width: thin;
+  }
+
+  .dark {
+    scrollbar-color: rgba(100, 80, 140, 0.3) transparent;
+  }
+}
+
