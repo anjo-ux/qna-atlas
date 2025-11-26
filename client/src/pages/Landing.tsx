@@ -27,7 +27,7 @@ export default function Landing() {
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <img src={atlasLogo} alt="Plastic Surgery Atlas" className="w-8 h-8 object-contain" />
-            <h1 className="text-xl font-bold gradient-text">Plastic Surgery Atlas</h1>
+            <h1 className="text-xl font-bold gradient-text">Atlas Review</h1>
           </div>
           <Button onClick={handleLogin} data-testid="button-login" className="glow-primary transition-glow">
             Sign In
