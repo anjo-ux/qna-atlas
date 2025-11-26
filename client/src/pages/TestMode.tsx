@@ -24,7 +24,7 @@ interface TestModeProps {
   isPreview?: boolean;
 }
 
-type TestState = 'setup' | 'testing' | 'results';
+type TestState = 'setup' | 'testing' | 'results' | 'review';
 
 export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, isPreview }: TestModeProps) {
   const [testState, setTestState] = useState<TestState>('setup');
@@ -44,6 +44,7 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
   const [showTestWizard, setShowTestWizard] = useState(false);
   const [showQuestionPanel, setShowQuestionPanel] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isReviewMode, setIsReviewMode] = useState(false);
   const hasResumedRef = useRef(false);
 
   const { recordResponse } = useQuestionStats();
@@ -150,6 +151,23 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
     setUseAllQuestions(session.useAllQuestions);
     setSelectedSubsections(new Set(session.selectedSectionIds));
     
+    setIsReviewMode(false);
+    setTestState('testing');
+  };
+
+  const handleReviewTest = (session: TestSession) => {
+    // Load completed test in read-only review mode
+    setTestQuestions(session.questions);
+    setCurrentQuestionIndex(0);
+    setResponses(session.responses);
+    setCurrentSession(session);
+    
+    // Restore configuration
+    setQuestionCount(session.questionCount as 10 | 20 | 30 | 40);
+    setUseAllQuestions(session.useAllQuestions);
+    setSelectedSubsections(new Set(session.selectedSectionIds));
+    
+    setIsReviewMode(true);
     setTestState('testing');
   };
 
@@ -360,7 +378,7 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
                 <h2 className="text-lg font-semibold text-foreground">Completed Tests</h2>
                 <TestHistory
                   sessions={completedSessions}
-                  onResume={handleResumeTest}
+                  onReview={handleReviewTest}
                   onDelete={deleteSession}
                 />
               </div>

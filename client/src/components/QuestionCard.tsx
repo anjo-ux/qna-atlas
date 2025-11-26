@@ -22,6 +22,7 @@ interface QuestionCardProps {
   savedResponse?: QuestionResponse;
   onAnswerSubmit: (questionId: string, selectedAnswer: string, correctAnswer: string, isCorrect: boolean) => void;
   isTestMode?: boolean;
+  isReadOnly?: boolean;
 }
 
 interface ParsedQuestion {
@@ -36,7 +37,8 @@ export function QuestionCard({
   subsectionId, 
   savedResponse,
   onAnswerSubmit,
-  isTestMode = false
+  isTestMode = false,
+  isReadOnly = false
 }: QuestionCardProps) {
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(savedResponse?.selectedAnswer || null);
   const [showExplanation, setShowExplanation] = useState(!!savedResponse);
