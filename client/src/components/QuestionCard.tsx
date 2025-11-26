@@ -135,7 +135,29 @@ export function QuestionCard({
 
   // Apply highlights to question text
   const questionContent = parsed.text + '\n' + parsed.choices.map(c => `${c.letter}. ${c.text}`).join('\n');
-  useTextHighlight(questionRef, highlights, questionContent, isEraserMode, removeHighlight);
+  useTextHighlight(questionRef, highlights, questionContent);
+
+  // Setup global eraser click handler
+  useEffect(() => {
+    if (!isEraserMode) return;
+
+    const handleDocumentClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (target.tagName === 'MARK' && target.hasAttribute('data-highlight-id')) {
+        e.preventDefault();
+        e.stopPropagation();
+        const highlightId = target.getAttribute('data-highlight-id');
+        if (highlightId) {
+          removeHighlight(highlightId);
+        }
+      }
+    };
+
+    document.addEventListener('click', handleDocumentClick, true);
+    return () => {
+      document.removeEventListener('click', handleDocumentClick, true);
+    };
+  }, [isEraserMode, removeHighlight]);
 
   const correctAnswer = useMemo(() => {
     // Extract correct answer from the answer text

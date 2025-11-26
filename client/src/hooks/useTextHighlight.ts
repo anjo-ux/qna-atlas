@@ -11,16 +11,9 @@ const HIGHLIGHT_COLORS: Record<string, string> = {
 export function useTextHighlight(
   containerRef: React.RefObject<HTMLElement>,
   highlights: Highlight[],
-  content: string,
-  isEraserMode: boolean = false,
-  onRemoveHighlight?: (id: string) => void
+  content: string
 ) {
   const previousHighlights = useRef<string>('');
-  const removeHighlightRef = useRef(onRemoveHighlight);
-
-  useEffect(() => {
-    removeHighlightRef.current = onRemoveHighlight;
-  }, [onRemoveHighlight]);
 
   useEffect(() => {
     const highlightsKey = JSON.stringify(highlights.map(h => h.id));
@@ -102,10 +95,9 @@ export function useTextHighlight(
 
             const mark = document.createElement('mark');
             mark.textContent = highlightedText;
-            const cursorClass = isEraserMode ? 'cursor-inherit' : 'cursor-pointer';
-            mark.className = `${HIGHLIGHT_COLORS[highlight.color]} px-1 rounded ${cursorClass} transition-all hover:opacity-80`;
+            mark.className = `${HIGHLIGHT_COLORS[highlight.color]} px-1 rounded cursor-pointer transition-all hover:opacity-80`;
             mark.setAttribute('data-highlight-id', highlight.id);
-            mark.title = isEraserMode ? 'Click to delete' : 'Double-click to remove';
+            mark.title = 'Click to erase or double-click to remove';
             mark.style.pointerEvents = 'auto';
 
             const parent = textNode.parentNode;
@@ -122,27 +114,5 @@ export function useTextHighlight(
         }
       }
     });
-
-    // Setup eraser click handler
-    const handleClick = (e: Event) => {
-      if (!isEraserMode) return;
-      const event = e as MouseEvent;
-      const element = event.target as HTMLElement;
-      
-      // Check if clicking on a mark
-      if (element.tagName === 'MARK' && element.hasAttribute('data-highlight-id')) {
-        event.preventDefault();
-        event.stopPropagation();
-        const highlightId = element.getAttribute('data-highlight-id');
-        if (highlightId && removeHighlightRef.current) {
-          removeHighlightRef.current(highlightId);
-        }
-      }
-    };
-
-    container.addEventListener('click', handleClick, { capture: true });
-    return () => {
-      container.removeEventListener('click', handleClick, { capture: true });
-    };
-  }, [highlights, content, containerRef, isEraserMode]);
+  }, [highlights, content, containerRef]);
 }
