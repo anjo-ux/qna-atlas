@@ -243,7 +243,7 @@ export function QuestionCard({
     <Card 
       data-question-id={question.id}
       className={cn(
-        "card-shadow transition-smooth overflow-hidden relative",
+        "card-shadow transition-smooth overflow-hidden relative w-full",
         "hover:elevated-shadow hover:border-primary/20"
       )}
     >
