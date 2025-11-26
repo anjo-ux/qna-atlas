@@ -108,17 +108,6 @@ export function useTextHighlight(
             mark.title = isEraserMode ? 'Click to delete' : 'Double-click to remove';
             mark.style.pointerEvents = 'auto';
 
-            // Add click handler directly to mark for eraser mode
-            if (isEraserMode) {
-              mark.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const highlightId = mark.getAttribute('data-highlight-id');
-                if (highlightId && removeHighlightRef.current) {
-                  removeHighlightRef.current(highlightId);
-                }
-              });
-            }
-
             const parent = textNode.parentNode;
             if (!parent) continue;
 
@@ -133,5 +122,27 @@ export function useTextHighlight(
         }
       }
     });
+
+    // Add event delegation for eraser mode using mousedown (more reliable than click)
+    const handleMouseDown = (e: MouseEvent) => {
+      if (!isEraserMode) return;
+      
+      const target = e.target as HTMLElement;
+      const mark = target.closest('mark[data-highlight-id]');
+      
+      if (mark) {
+        e.preventDefault();
+        e.stopPropagation();
+        const highlightId = mark.getAttribute('data-highlight-id');
+        if (highlightId && removeHighlightRef.current) {
+          removeHighlightRef.current(highlightId);
+        }
+      }
+    };
+
+    container.addEventListener('mousedown', handleMouseDown, true);
+    return () => {
+      container.removeEventListener('mousedown', handleMouseDown, true);
+    };
   }, [highlights, content, containerRef, isEraserMode]);
 }
