@@ -9,13 +9,21 @@ import { loadQuestions } from '@/utils/parseQuestions';
 import { Section } from '@/types/question';
 import { useQuestionStats } from '@/hooks/useQuestionStats';
 import { cn } from '@/lib/utils';
+import { useQuery } from '@tanstack/react-query';
+import { queryClient } from '@/lib/queryClient';
 
 interface BookmarksProps {
   onBack: () => void;
 }
 
 export function BookmarksPage({ onBack }: BookmarksProps) {
-  const { bookmarks } = useBookmarks();
+  // Query directly with staleTime: 0 to always refetch on this page
+  // This ensures bookmarks are updated immediately when removed from any component
+  const { data: bookmarks = [], isLoading } = useQuery({
+    queryKey: ['/api/bookmarks'],
+    staleTime: 0, // Always consider stale to ensure fresh data
+    gcTime: 1000 * 60 * 5, // Keep in cache for 5 minutes
+  });
   const [sections, setSections] = useState<Section[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const { getQuestionResponse, recordResponse } = useQuestionStats();
