@@ -34,8 +34,8 @@ export function StickyNote({
     if ((e.target as HTMLElement).closest('.drag-handle')) {
       setIsDragging(true);
       setDragOffset({
-        x: e.clientX - currentPosition.x,
-        y: e.clientY - currentPosition.y,
+        x: e.pageX - currentPosition.x,
+        y: e.pageY - currentPosition.y,
       });
     }
   };
@@ -44,8 +44,8 @@ export function StickyNote({
     const handleMouseMove = (e: MouseEvent) => {
       if (isDragging) {
         const newPosition = {
-          x: e.clientX - dragOffset.x,
-          y: e.clientY - dragOffset.y,
+          x: e.pageX - dragOffset.x,
+          y: e.pageY - dragOffset.y,
         };
         setCurrentPosition(newPosition);
       }
