@@ -7,6 +7,11 @@ All colors MUST be HSL.
 */
 
 @layer base {
+  /* Eraser cursor when in eraser mode */
+  .eraser-mode {
+    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"><rect x="2" y="2" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.5" rx="1"/><path d="M14 2 L18 6 L6 18 L2 14 Z" fill="currentColor" opacity="0.3" stroke="currentColor" stroke-width="1"/></svg>') 10 10, auto;
+  }
+
   :root {
     --background: 280 40% 98%;
     --foreground: 280 20% 25%;

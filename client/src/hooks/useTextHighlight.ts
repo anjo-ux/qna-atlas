@@ -16,6 +16,11 @@ export function useTextHighlight(
   onRemoveHighlight?: (id: string) => void
 ) {
   const previousHighlights = useRef<string>('');
+  const removeHighlightRef = useRef(onRemoveHighlight);
+
+  useEffect(() => {
+    removeHighlightRef.current = onRemoveHighlight;
+  }, [onRemoveHighlight]);
 
   useEffect(() => {
     const highlightsKey = JSON.stringify(highlights.map(h => h.id));
@@ -100,14 +105,6 @@ export function useTextHighlight(
             mark.className = `${HIGHLIGHT_COLORS[highlight.color]} px-1 rounded cursor-pointer transition-all hover:opacity-80`;
             mark.setAttribute('data-highlight-id', highlight.id);
             mark.title = isEraserMode ? 'Click to delete' : 'Double-click to remove';
-            
-            // Add click handler for eraser mode
-            if (isEraserMode && onRemoveHighlight) {
-              mark.addEventListener('click', (e) => {
-                e.stopPropagation();
-                onRemoveHighlight(highlight.id);
-              });
-            }
 
             const parent = textNode.parentNode;
             if (!parent) continue;
@@ -123,5 +120,23 @@ export function useTextHighlight(
         }
       }
     });
+
+    // Add event delegation for eraser mode
+    const handleMarkClick = (e: MouseEvent) => {
+      if (!isEraserMode) return;
+      const mark = (e.target as HTMLElement).closest('mark[data-highlight-id]');
+      if (mark) {
+        e.stopPropagation();
+        const highlightId = mark.getAttribute('data-highlight-id');
+        if (highlightId && removeHighlightRef.current) {
+          removeHighlightRef.current(highlightId);
+        }
+      }
+    };
+
+    container.addEventListener('click', handleMarkClick);
+    return () => {
+      container.removeEventListener('click', handleMarkClick);
+    };
   }, [highlights, content, containerRef, isEraserMode]);
 }
