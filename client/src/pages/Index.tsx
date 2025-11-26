@@ -345,9 +345,9 @@ export default function Index() {
       <div className="flex-1 flex flex-col min-h-screen overflow-hidden">
         {/* Header */}
         <header className="glass-surface border-glass">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-2">
             {/* Top Row: Home, Title, Actions */}
-            <div className="flex items-center gap-4 mb-4">
+            <div className="flex items-center gap-4">
               
               <Button
                 variant="ghost"
@@ -359,20 +359,15 @@ export default function Index() {
                 <Home className="h-5 w-5" />
               </Button>
               
-              <div className="flex-1 flex items-center gap-3">
+              <div className="flex-1 flex items-center gap-2">
                 <img 
                   src="/atlas-logo.png" 
                   alt="Atlas Logo" 
-                  className="h-10 w-10 object-contain"
+                  className="h-8 w-8 object-contain"
                 />
-                <div>
-                  <h1 className="text-2xl sm:text-3xl font-bold text-primary">
-                    Atlas Review
-                  </h1>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    {currentSubsection ? currentSubsection.title : 'Select a section to begin.'}
-                  </p>
-                </div>
+                <h1 className="text-lg sm:text-xl font-bold text-primary">
+                  Atlas Review
+                </h1>
               </div>
 
               {/* Settings Button */}
