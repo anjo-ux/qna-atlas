@@ -152,7 +152,7 @@ export function HomePage({ sections, onReviewIncorrect, onStartTest, onResumeTes
       {/* Welcome Header */}
       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
         <div className="space-y-2">
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground">
             Plastic Surgery In-Training Exam Review
           </h1>
           <p className="text-muted-foreground text-sm md:text-base">
