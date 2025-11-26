@@ -522,12 +522,12 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
     return (
       <div className="flex flex-col h-screen md:flex-row md:h-screen md:overflow-hidden overflow-hidden">
         {/* Question Panel - Top on mobile, Right on desktop */}
+        {!isFullscreen && (
         <div className={cn(
           "md:flex md:flex-col md:w-32 md:border-r md:border-border md:bg-muted/30 md:overflow-visible md:flex-shrink-0 md:h-screen",
           "flex flex-col border-b border-border bg-muted/30 w-full flex-shrink-0",
           !showQuestionPanel && "hidden md:flex",
-          showQuestionPanel && "flex",
-          isFullscreen && "hidden"
+          showQuestionPanel && "flex"
         )}>
           <div className="p-4 border-b border-border">
             <div className="flex items-center justify-between gap-2">
@@ -596,9 +596,10 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
             </div>
           </div>
         </div>
+        )}
 
         {/* Main Content */}
-        <div className="flex flex-col flex-1 overflow-hidden w-full">
+        <div className={cn("flex flex-col overflow-hidden", isFullscreen ? "w-full" : "flex-1")}>
           <div className="p-3 md:p-4 border-b border-border bg-accent/5 flex-shrink-0">
             <div className="flex items-center justify-between gap-3">
               <div className="flex-1 min-w-0">
