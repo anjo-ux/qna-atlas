@@ -61,7 +61,7 @@ export default function Landing() {
           <div className="grid md:grid-cols-2 gap-6">
             <Card variant="glass" className="glow-primary transition-glow">
               <CardHeader>
-                <CardTitle className="gradient-text">Comprehensive Learning</CardTitle>
+                <CardTitle className="gradient-text leading-normal">Comprehensive Learning</CardTitle>
                 <CardDescription className="leading-normal">
                   Organized by surgical specialties and topics
                 </CardDescription>
@@ -90,7 +90,7 @@ export default function Landing() {
 
             <Card variant="glass" className="glow-accent transition-glow">
               <CardHeader>
-                <CardTitle className="gradient-text">Track Your Progress</CardTitle>
+                <CardTitle className="gradient-text leading-normal">Track Your Progress</CardTitle>
                 <CardDescription className="leading-normal">
                   Monitor mastery across all topics
                 </CardDescription>
