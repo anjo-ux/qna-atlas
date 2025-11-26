@@ -488,10 +488,10 @@ export default function Index() {
           </div>
 
           {/* Bottom Row: Search Bar - Always Visible */}
-          <div className="border-t border-border/50 px-4 sm:px-6 lg:px-8 py-3">
+          <div className="border-t border-border/50 glass-surface px-4 sm:px-6 lg:px-8 py-3">
             <div className="w-full">
-              <div className="relative glass-surface border-glass rounded-md px-3 py-2" ref={searchRef}>
-                <Search className="absolute left-6 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+              <div className="relative" ref={searchRef}>
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                 <Input
                   type="text"
                   placeholder="Search questions, reference text, and notes..."
@@ -502,7 +502,7 @@ export default function Index() {
                       setShowSearchResults(true);
                     }
                   }}
-                  className="pl-10 w-full bg-transparent border-0 focus-visible:ring-0"
+                  className="pl-10 w-full"
                   data-testid="input-search"
                 />
                 {showSearchResults && searchQuery.trim().length >= 2 && (
