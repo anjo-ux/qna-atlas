@@ -549,11 +549,11 @@ export default function Index() {
               {/* Questions Panel */}
               {(viewMode === 'questions' || viewMode === 'split') && (
                 <div className={cn(
-                  "overflow-auto w-full",
-                  viewMode === 'split' ? "lg:w-3/5 2xl:w-2/3 lg:flex-1" : "flex-1"
+                  "flex-1 overflow-auto min-w-0",
+                  viewMode === 'split' ? "lg:w-3/5 2xl:w-2/3" : "w-full"
                 )}>
-                  <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
-                    <div className="space-y-4 w-full">
+                  <div className="h-full px-4 sm:px-6 lg:px-8 py-8">
+                    <div className="space-y-4">
                       <div className="space-y-4 mb-6">
                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                           <div>
