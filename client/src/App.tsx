@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/useAuth";
+import { useContentProtection } from "@/hooks/useContentProtection";
 import Index from "./pages/Index";
 import PreviewMode from "./pages/PreviewMode";
 import NotFound from "./pages/NotFound";
@@ -48,6 +49,9 @@ function Router() {
 }
 
 export default function App() {
+  // Enable content protection (prevents copy-paste and screenshots)
+  useContentProtection();
+
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>

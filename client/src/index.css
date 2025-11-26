@@ -6,6 +6,38 @@
 All colors MUST be HSL.
 */
 
+/* Content Protection: Prevent copying, printing, and screenshots */
+html, body {
+  -webkit-user-select: text;
+  -webkit-touch-callout: none;
+  -webkit-user-select: text;
+  -khtml-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  user-select: text;
+  -webkit-print-color-adjust: exact !important;
+  print-color-adjust: exact !important;
+}
+
+/* Allow text selection but prevent copying via CSS */
+* {
+  -webkit-user-select: text;
+  -khtml-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  user-select: text;
+}
+
+/* Disable print */
+@media print {
+  * {
+    display: none !important;
+  }
+  body {
+    display: none !important;
+  }
+}
+
 @layer base {
   /* Eraser cursor when in eraser mode */
   .eraser-mode {
