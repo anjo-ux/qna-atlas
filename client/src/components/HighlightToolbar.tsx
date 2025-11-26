@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { Highlighter, StickyNote, Trash2 } from 'lucide-react';
+import { Highlighter, StickyNote, Trash2, Eraser } from 'lucide-react';
 import { HighlightColor } from '@/hooks/useHighlights';
 import { cn } from '@/lib/utils';
 
@@ -8,6 +8,8 @@ interface HighlightToolbarProps {
   onColorChange: (color: HighlightColor) => void;
   onAddNote: () => void;
   onClearHighlights: () => void;
+  isEraserMode?: boolean;
+  onEraserToggle?: () => void;
   disabled?: boolean;
 }
 
