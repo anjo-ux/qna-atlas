@@ -24,7 +24,8 @@ export function useBookmarks() {
     },
     onSuccess: async () => {
       toast.success('Question bookmarked!');
-      // Force an immediate refetch instead of just invalidating
+      // Invalidate first to clear the cache, then refetch to get fresh data
+      await queryClient.invalidateQueries({ queryKey: ['/api/bookmarks'] });
       await queryClient.refetchQueries({ queryKey: ['/api/bookmarks'] });
     },
     onError: (error: any) => {
@@ -52,8 +53,9 @@ export function useBookmarks() {
     onSuccess: async () => {
       console.log('[Bookmark] onSuccess called - bookmark removed successfully');
       toast.success('Bookmark removed!');
-      // Force an immediate refetch instead of just invalidating
-      // This ensures all components get the updated bookmarks data
+      // Invalidate first to clear the cache, then refetch to get fresh data
+      await queryClient.invalidateQueries({ queryKey: ['/api/bookmarks'] });
+      console.log('[Bookmark] Bookmarks invalidated');
       await queryClient.refetchQueries({ queryKey: ['/api/bookmarks'] });
       console.log('[Bookmark] Bookmarks refetched after removal');
     },
