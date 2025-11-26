@@ -7,6 +7,7 @@ import { useQuestionStats } from '@/hooks/useQuestionStats';
 import { useTestSessions } from '@/hooks/useTestSessions';
 import { useAuth } from '@/hooks/useAuth';
 import { TestHistory } from '@/components/TestHistory';
+import { ThemeToggle } from '@/components/ThemeToggle';
 import { Section } from '@/types/question';
 import { BookOpen, CheckCircle2, XCircle, TrendingUp, Target, ChevronRight, RotateCcw, AlertCircle, Zap, LogOut, User, Settings, Eye, Smile, Sparkles, Heart, Rocket, Brain, Flame, Crown, Coffee, Moon, Sun, Star } from 'lucide-react';
 import { useMemo } from 'react';
@@ -162,18 +163,20 @@ export function HomePage({ sections, onReviewIncorrect, onStartTest, onResumeTes
             {!user && "Track your progress and master your knowledge."}
           </p>
         </div>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="gap-2" data-testid="button-user-menu">
-              <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
-                {(() => {
-                  const IconComponent = getAvatarIcon();
-                  return <IconComponent className="w-4 h-4 text-primary" />;
-                })()}
-              </div>
-              <span className="hidden md:inline">{user?.firstName || user?.email?.split('@')[0]}</span>
-            </Button>
-          </DropdownMenuTrigger>
+        <div className="flex items-center gap-2">
+          <ThemeToggle />
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="gap-2" data-testid="button-user-menu">
+                <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
+                  {(() => {
+                    const IconComponent = getAvatarIcon();
+                    return <IconComponent className="w-4 h-4 text-primary" />;
+                  })()}
+                </div>
+                <span className="hidden md:inline">{user?.firstName || user?.email?.split('@')[0]}</span>
+              </Button>
+            </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>My Account</DropdownMenuLabel>
             <DropdownMenuSeparator />
@@ -192,7 +195,8 @@ export function HomePage({ sections, onReviewIncorrect, onStartTest, onResumeTes
               Log out
             </DropdownMenuItem>
           </DropdownMenuContent>
-        </DropdownMenu>
+          </DropdownMenu>
+        </div>
       </div>
       
       {/* Action Buttons */}
