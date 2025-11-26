@@ -89,6 +89,10 @@ export interface IStorage {
   getUserActiveSubscription(userId: string): Promise<SubscriptionTransaction | undefined>;
   cancelUserSubscription(userId: string): Promise<void>;
   getUserSubscriptionTransactions(userId: string): Promise<SubscriptionTransaction[]>;
+
+  // Theme preference operations
+  getThemePreference(userId: string): Promise<string>;
+  updateThemePreference(userId: string, theme: string): Promise<string>;
 }
 
 export class DatabaseStorage implements IStorage {

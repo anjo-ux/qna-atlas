@@ -30,6 +30,7 @@ export const users = pgTable("users", {
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
   avatarIcon: varchar("avatar_icon").default('smile'),
+  themePreference: varchar("theme_preference").default('light'), // 'light' or 'dark'
   institutionalAffiliation: varchar("institutional_affiliation"),
   subscriptionStatus: varchar("subscription_status").default('trial'), // trial, active, expired
   subscriptionPlan: varchar("subscription_plan"), // 1-month, 3-month, 6-month
