@@ -52,11 +52,11 @@ export default function Index() {
   const { bookmarks } = useBookmarks();
   const { dueCount } = useSpacedRepetition();
 
-  // Handle responsive view mode: reference on small screens, split on large
+  // Handle responsive view mode: questions on small screens, split on large
   useEffect(() => {
     const handleResize = () => {
       const isLargeScreen = window.innerWidth >= 1024; // lg breakpoint
-      setViewMode(isLargeScreen ? 'split' : 'reference');
+      setViewMode(isLargeScreen ? 'split' : 'questions');
     };
 
     // Set initial view mode
