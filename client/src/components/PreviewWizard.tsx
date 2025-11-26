@@ -15,12 +15,12 @@ export function PreviewWizard({ open, onClose, onStart }: PreviewWizardProps) {
 
   const steps = [
     {
-      title: 'Welcome to PSITE Review',
-      description: 'Your comprehensive plastic surgery knowledge platform',
+      title: 'Atlas Review Welcome Wizard',
+      description: 'Your comprehensive plastic surgery knowledge platform.',
       icon: BookOpen,
       content: (
         <div className="space-y-4">
-          <p className="text-foreground">PSITE Review helps you master plastic surgery concepts through interactive questions and comprehensive study materials.</p>
+          <p className="text-foreground">Atlas Review helps you master plastic surgery concepts through interactive questions and comprehensive study materials.</p>
           <p className="text-muted-foreground text-sm">This 20-question preview will show you how the platform works.</p>
         </div>
       ),
@@ -33,22 +33,22 @@ export function PreviewWizard({ open, onClose, onStart }: PreviewWizardProps) {
         <div className="space-y-3">
           <Card className="p-3 border-l-4 border-l-primary">
             <p className="font-medium text-sm text-foreground">Multiple Choice Questions</p>
-            <p className="text-xs text-muted-foreground mt-1">Answer questions to test your knowledge and identify weak areas</p>
+            <p className="text-xs text-muted-foreground mt-1">Answer questions to test your knowledge and identify weak areas.</p>
           </Card>
           <Card className="p-3 border-l-4 border-l-chart-1">
             <p className="font-medium text-sm text-foreground">Reference Materials</p>
-            <p className="text-xs text-muted-foreground mt-1">Access detailed reference text alongside questions</p>
+            <p className="text-xs text-muted-foreground mt-1">Access detailed reference text alongside questions.</p>
           </Card>
           <Card className="p-3 border-l-4 border-l-chart-2">
             <p className="font-medium text-sm text-foreground">Progress Tracking</p>
-            <p className="text-xs text-muted-foreground mt-1">Monitor your performance and focus on improvements</p>
+            <p className="text-xs text-muted-foreground mt-1">Monitor your performance and focus on improvements with spaced repetition, bookmarking, and personlized reviews.</p>
           </Card>
         </div>
       ),
     },
     {
       title: 'Features',
-      description: 'Everything you need to succeed',
+      description: 'Everything you need to succeed.',
       icon: TrendingUp,
       content: (
         <div className="space-y-3">
@@ -58,7 +58,7 @@ export function PreviewWizard({ open, onClose, onStart }: PreviewWizardProps) {
             </div>
             <div>
               <p className="font-medium text-sm text-foreground">Test Mode</p>
-              <p className="text-xs text-muted-foreground">Timed practice tests to simulate exams</p>
+              <p className="text-xs text-muted-foreground">Timed and untimed practice tests to simulate exams.</p>
             </div>
           </div>
           <div className="flex gap-3">
@@ -66,8 +66,8 @@ export function PreviewWizard({ open, onClose, onStart }: PreviewWizardProps) {
               <span className="text-sm font-bold text-primary">✓</span>
             </div>
             <div>
-              <p className="font-medium text-sm text-foreground">Resume Anytime</p>
-              <p className="text-xs text-muted-foreground">Pick up where you left off on any device</p>
+              <p className="font-medium text-sm text-foreground">Personalized Repetition</p>
+              <p className="text-xs text-muted-foreground">Spaced repetition and bookmark features.</p>
             </div>
           </div>
           <div className="flex gap-3">
@@ -76,7 +76,7 @@ export function PreviewWizard({ open, onClose, onStart }: PreviewWizardProps) {
             </div>
             <div>
               <p className="font-medium text-sm text-foreground">Analytics</p>
-              <p className="text-xs text-muted-foreground">Detailed performance analytics by topic</p>
+              <p className="text-xs text-muted-foreground">Detailed performance analytics by topic.</p>
             </div>
           </div>
         </div>
@@ -90,11 +90,11 @@ export function PreviewWizard({ open, onClose, onStart }: PreviewWizardProps) {
         <div className="space-y-4">
           <Card className="p-4 bg-primary/5 border-primary/20">
             <p className="text-sm text-foreground font-medium">20 Sample Questions</p>
-            <p className="text-xs text-muted-foreground mt-2">Experience the full platform with this curated set of questions from all topics</p>
+            <p className="text-xs text-muted-foreground mt-2">Experience the full platform with this curated set of questions from all topics.</p>
           </Card>
           <Card className="p-4 bg-accent/5 border-accent/20">
-            <p className="text-sm text-foreground font-medium">Sign Up for Full Access</p>
-            <p className="text-xs text-muted-foreground mt-2">Get your 30-day free trial and access hundreds of questions</p>
+            <p className="text-sm text-foreground font-medium">Sign Up For Full Access</p>
+            <p className="text-xs text-muted-foreground mt-2">Start your 30-day free trial and access hundreds of questions now. Upgrade to extend your subscription at anytime.</p>
           </Card>
         </div>
       ),

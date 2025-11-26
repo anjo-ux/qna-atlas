@@ -63,26 +63,26 @@ export default function Landing() {
               <CardHeader>
                 <CardTitle className="gradient-text leading-normal">Comprehensive Learning</CardTitle>
                 <CardDescription className="leading-normal">
-                  Organized by surgical specialties and topics
+                  Organized by section and individual sub-topics.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-2">
                 <div className="flex items-start gap-2">
                   <Check className="w-5 h-5 text-secondary mt-0.5 flex-shrink-0" />
                   <span className="text-muted-foreground leading-normal">
-                    500+ carefully curated questions
+                    2500+ carefully curated questions.
                   </span>
                 </div>
                 <div className="flex items-start gap-2">
                   <Check className="w-5 h-5 text-secondary mt-0.5 flex-shrink-0" />
                   <span className="text-muted-foreground leading-normal">
-                    Detailed explanations for every answer
+                    Detailed explanations for every answer.
                   </span>
                 </div>
                 <div className="flex items-start gap-2">
                   <Check className="w-5 h-5 text-secondary mt-0.5 flex-shrink-0" />
                   <span className="text-muted-foreground leading-normal">
-                    Reference materials and study guides
+                    Reference materials and study guides with personalized notes.
                   </span>
                 </div>
               </CardContent>
@@ -92,26 +92,26 @@ export default function Landing() {
               <CardHeader>
                 <CardTitle className="gradient-text leading-normal">Track Your Progress</CardTitle>
                 <CardDescription className="leading-normal">
-                  Monitor mastery across all topics
+                  Monitor mastery across all topics and sections.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-2">
                 <div className="flex items-start gap-2">
                   <Check className="w-5 h-5 text-secondary mt-0.5 flex-shrink-0" />
                   <span className="text-muted-foreground leading-normal">
-                    Performance analytics by topic
+                    Spaced repetition algorithm to optimize learning.
                   </span>
                 </div>
                 <div className="flex items-start gap-2">
                   <Check className="w-5 h-5 text-secondary mt-0.5 flex-shrink-0" />
                   <span className="text-muted-foreground leading-normal">
-                    Sync progress across devices
+                    Sync progress across all devices.
                   </span>
                 </div>
                 <div className="flex items-start gap-2">
                   <Check className="w-5 h-5 text-secondary mt-0.5 flex-shrink-0" />
                   <span className="text-muted-foreground leading-normal">
-                    Resume tests anytime
+                   Create mock exams and resume or review tests anytime.
                   </span>
                 </div>
               </CardContent>
@@ -124,7 +124,7 @@ export default function Landing() {
             </CardHeader>
             <CardContent className="space-y-6">
               <p className="text-foreground leading-normal">
-                Join surgeons studying for board certification and continuing education. Create an account to unlock the full learning experience with progress tracking, custom tests, and personalized recommendations.
+                Join surgeons studying for in-service training exam and board certification. Create an account to unlock the full learning experience with progress tracking, custom tests, and personalized recommendations.
               </p>
               <Button onClick={handleLogin} data-testid="button-sign-up" className="bg-primary hover:bg-primary/90">
                 Create Free Account
@@ -136,7 +136,7 @@ export default function Landing() {
 
       <footer className="border-t py-6 bg-muted/30">
         <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          Plastic Surgery Atlas © {new Date().getFullYear()} • Empowering surgical excellence
+          Atlas Review © {new Date().getFullYear()} • Empowering Surgical Education
         </div>
       </footer>
     </div>

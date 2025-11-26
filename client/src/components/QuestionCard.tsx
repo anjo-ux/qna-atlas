@@ -254,7 +254,7 @@ export function QuestionCard({
             
             {parsed.choices.length > 0 && (
               <RadioGroup value={selectedAnswer || ''} onValueChange={setSelectedAnswer}>
-                <div className="space-y-2 max-h-96 overflow-y-auto">
+                <div className="space-y-2">
                   {parsed.choices.map((choice) => {
                     const showResult = selectedAnswer && showExplanation;
                     const isThisChoice = choice.letter === selectedAnswer;
