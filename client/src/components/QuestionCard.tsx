@@ -246,11 +246,11 @@ export function QuestionCard({
           </Button>
         </div>
         
-        <div className="flex items-start gap-3 md:gap-4" ref={questionRef} onMouseUp={handleTextSelection}>
+        <div className="flex items-start gap-3 md:gap-4">
           <div className="flex-shrink-0 w-7 h-7 md:w-8 md:h-8 rounded-full bg-primary/10 flex items-center justify-center">
             <span className="text-xs md:text-sm font-semibold text-primary">{index + 1}</span>
           </div>
-          <div className="flex-1 min-w-0">
+          <div className="flex-1 min-w-0" ref={questionRef} onMouseUp={handleTextSelection}>
             <p className="text-sm md:text-base leading-relaxed text-foreground whitespace-pre-wrap mb-3 md:mb-4">
               {parsed.text}
             </p>
