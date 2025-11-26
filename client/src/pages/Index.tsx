@@ -15,7 +15,7 @@ import { PreviewWizard } from '@/components/PreviewWizard';
 import { TestMode } from './TestMode';
 import { Settings as SettingsPage } from './Settings';
 import { Input } from '@/components/ui/input';
-import { Search, Menu, X, BookOpen, FileQuestion, Columns2, Home, Zap, Settings, ChevronLeft, ChevronRight, Bookmark } from 'lucide-react';
+import { Search, Menu, X, BookOpen, FileQuestion, Columns2, Home, Zap, Settings, ChevronLeft, ChevronRight, Bookmark, Brain } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useQuestionStats } from '@/hooks/useQuestionStats';
@@ -49,6 +49,10 @@ export default function Index() {
   const [isCheckingSubscription, setIsCheckingSubscription] = useState(true);
   const [showPreviewWizard, setShowPreviewWizard] = useState(false);
   const { bookmarks } = useBookmarks();
+  const { dueCount } = useSpacedRepetition ? (async () => {
+    const mod = await import('@/hooks/useSpacedRepetition');
+    return mod.useSpacedRepetition();
+  })() : { dueCount: 0 };
 
   const {
     recordResponse,

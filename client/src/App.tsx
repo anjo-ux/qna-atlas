@@ -10,6 +10,7 @@ import PreviewMode from "./pages/PreviewMode";
 import NotFound from "./pages/NotFound";
 import Landing from "./pages/Landing";
 import { BookmarksPage } from "./pages/Bookmarks";
+import { SpacedRepetitionPage } from "./pages/SpacedRepetition";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -35,6 +36,9 @@ function Router() {
           <Route path="/" component={Index} />
           <Route path="/bookmarks">
             {() => <BookmarksPage onBack={() => window.history.back()} />}
+          </Route>
+          <Route path="/spaced-repetition">
+            {() => <SpacedRepetitionPage onBack={() => window.history.back()} />}
           </Route>
           <Route component={NotFound} />
         </>
