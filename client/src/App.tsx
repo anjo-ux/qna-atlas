@@ -9,6 +9,7 @@ import Index from "./pages/Index";
 import PreviewMode from "./pages/PreviewMode";
 import NotFound from "./pages/NotFound";
 import Landing from "./pages/Landing";
+import { BookmarksPage } from "./pages/Bookmarks";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -32,6 +33,9 @@ function Router() {
       ) : (
         <>
           <Route path="/" component={Index} />
+          <Route path="/bookmarks">
+            {() => <BookmarksPage onBack={() => window.history.back()} />}
+          </Route>
           <Route component={NotFound} />
         </>
       )}

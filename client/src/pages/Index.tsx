@@ -15,12 +15,14 @@ import { PreviewWizard } from '@/components/PreviewWizard';
 import { TestMode } from './TestMode';
 import { Settings as SettingsPage } from './Settings';
 import { Input } from '@/components/ui/input';
-import { Search, Menu, X, BookOpen, FileQuestion, Columns2, Home, Zap, Settings, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Search, Menu, X, BookOpen, FileQuestion, Columns2, Home, Zap, Settings, ChevronLeft, ChevronRight, Bookmark } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useQuestionStats } from '@/hooks/useQuestionStats';
 import { useHighlights } from '@/hooks/useHighlights';
 import { useGlobalSearch } from '@/hooks/useGlobalSearch';
+import { useBookmarks } from '@/hooks/useBookmarks';
+import { useLocation } from 'wouter';
 import { toast } from 'sonner';
 
 type ViewMode = 'questions' | 'reference' | 'split';
@@ -29,6 +31,7 @@ type ScreenMode = 'study' | 'test' | 'settings' | 'preview';
 type TestModeState = { mode: 'new' } | { mode: 'resume'; sessionId: string };
 
 export default function Index() {
+  const [, setLocation] = useLocation();
   const [sections, setSections] = useState<Section[]>([]);
   const [referenceSections, setReferenceSections] = useState<ReferenceSection[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -45,6 +48,7 @@ export default function Index() {
   const [subscription, setSubscription] = useState<any>(null);
   const [isCheckingSubscription, setIsCheckingSubscription] = useState(true);
   const [showPreviewWizard, setShowPreviewWizard] = useState(false);
+  const { bookmarks } = useBookmarks();
 
   const {
     recordResponse,
@@ -369,6 +373,22 @@ export default function Index() {
                 className="lg:hidden"
               >
                 <Settings className="h-5 w-5" />
+              </Button>
+
+              {/* Bookmarks Button */}
+              <Button
+                onClick={() => setLocation('/bookmarks')}
+                variant="outline"
+                className="gap-2 relative"
+                data-testid="button-bookmarks"
+              >
+                <Bookmark className="h-4 w-4" />
+                <span className="hidden md:inline">Bookmarks</span>
+                {bookmarks.length > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-accent text-accent-foreground text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                    {bookmarks.length > 99 ? '99+' : bookmarks.length}
+                  </span>
+                )}
               </Button>
 
               {/* Test Button */}
