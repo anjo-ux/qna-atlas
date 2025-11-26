@@ -53,7 +53,7 @@ export function QuestionBreakdownCharts() {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       {/* Overall Answered vs Unanswered */}
-      <Card className="p-6 glass-card glow-primary transition-glow flex flex-col">
+      <Card variant="glass" className="p-6 glow-primary transition-glow flex flex-col">
         <h3 className="text-lg font-semibold mb-4 gradient-text">Questions Answered</h3>
         <div className="flex-1 flex items-center justify-center">
           {stats.total > 0 ? (
@@ -96,7 +96,7 @@ export function QuestionBreakdownCharts() {
       </Card>
 
       {/* Correct vs Incorrect */}
-      <Card className="p-6 glass-card glow-accent transition-glow flex flex-col">
+      <Card variant="glass" className="p-6 glow-accent transition-glow flex flex-col">
         <h3 className="text-lg font-semibold mb-4 gradient-text">Answer Accuracy</h3>
         <div className="flex-1 flex items-center justify-center">
           {stats.total > 0 ? (
@@ -140,7 +140,7 @@ export function QuestionBreakdownCharts() {
 
       {/* By Topic - Questions Answered */}
       {topicAnswered.length > 0 && (
-        <Card className="p-6 glass-card glow-primary transition-glow flex flex-col">
+        <Card variant="glass" className="p-6 glow-primary transition-glow flex flex-col">
           <h3 className="text-lg font-semibold mb-4 gradient-text">Questions by Topic</h3>
           <div className="flex-1 flex items-center justify-center">
             <ResponsiveContainer width="100%" height={280}>
@@ -167,7 +167,7 @@ export function QuestionBreakdownCharts() {
 
       {/* By Topic - Correct Answers */}
       {topicCorrect.length > 0 && (
-        <Card className="p-6 glass-card glow-accent transition-glow flex flex-col">
+        <Card variant="glass" className="p-6 glow-accent transition-glow flex flex-col">
           <h3 className="text-lg font-semibold mb-4 gradient-text">Correct by Topic</h3>
           <div className="flex-1 flex items-center justify-center">
             <ResponsiveContainer width="100%" height={280}>

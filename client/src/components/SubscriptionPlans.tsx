@@ -54,7 +54,8 @@ export function SubscriptionPlans() {
           return (
             <Card
               key={plan.id}
-              className={`p-6 glass-card flex flex-col transition-all ${
+              variant="glass"
+              className={`p-6 flex flex-col transition-all ${
                 details.popular
                   ? 'border-accent glow-accent md:scale-105'
                   : 'hover:glow-primary'

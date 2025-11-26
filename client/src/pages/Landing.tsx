@@ -23,7 +23,7 @@ export default function Landing() {
         }}
       />
 
-      <header className="border-b glass-effect sticky top-0 z-50">
+      <header className="sticky top-0 z-50 glass-surface border-glass border-b">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <img src={atlasLogo} alt="Plastic Surgery Atlas" className="w-8 h-8 object-contain" />
@@ -59,7 +59,7 @@ export default function Landing() {
           </div>
 
           <div className="grid md:grid-cols-2 gap-6">
-            <Card className="glass-card glow-primary transition-glow">
+            <Card variant="glass" className="glow-primary transition-glow">
               <CardHeader>
                 <CardTitle className="gradient-text">Comprehensive Learning</CardTitle>
                 <CardDescription>
@@ -88,7 +88,7 @@ export default function Landing() {
               </CardContent>
             </Card>
 
-            <Card className="glass-card glow-accent transition-glow">
+            <Card variant="glass" className="glow-accent transition-glow">
               <CardHeader>
                 <CardTitle className="gradient-text">Track Your Progress</CardTitle>
                 <CardDescription>

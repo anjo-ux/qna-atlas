@@ -216,7 +216,7 @@ export function HomePage({ sections, onReviewIncorrect, onStartTest, onResumeTes
 
       {/* Key Metrics */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 md:gap-4">
-        <Card className="p-3 md:p-6 glass-card glow-primary transition-glow hover:glow-primary">
+        <Card variant="glass" className="p-3 md:p-6 glow-primary transition-glow hover:glow-primary">
           <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-3">
             <div className="p-2 md:p-3 rounded-lg bg-chart-1/20 flex-shrink-0">
               <BookOpen className="h-5 w-5 md:h-6 md:w-6 text-chart-1" />
@@ -228,7 +228,7 @@ export function HomePage({ sections, onReviewIncorrect, onStartTest, onResumeTes
           </div>
         </Card>
 
-        <Card className="p-3 md:p-6 glass-card glow-primary transition-glow hover:glow-primary">
+        <Card variant="glass" className="p-3 md:p-6 glow-primary transition-glow hover:glow-primary">
           <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-3">
             <div className="p-2 md:p-3 rounded-lg bg-success/20 flex-shrink-0">
               <CheckCircle2 className="h-5 w-5 md:h-6 md:w-6 text-success" />
@@ -240,7 +240,7 @@ export function HomePage({ sections, onReviewIncorrect, onStartTest, onResumeTes
           </div>
         </Card>
 
-        <Card className="p-3 md:p-6 glass-card glow-primary transition-glow hover:glow-primary">
+        <Card variant="glass" className="p-3 md:p-6 glow-primary transition-glow hover:glow-primary">
           <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-3">
             <div className="p-2 md:p-3 rounded-lg bg-destructive/20 flex-shrink-0">
               <XCircle className="h-5 w-5 md:h-6 md:w-6 text-destructive" />
@@ -252,7 +252,7 @@ export function HomePage({ sections, onReviewIncorrect, onStartTest, onResumeTes
           </div>
         </Card>
 
-        <Card className="p-3 md:p-6 glass-card glow-accent transition-glow hover:glow-accent">
+        <Card variant="glass" className="p-3 md:p-6 glow-accent transition-glow hover:glow-accent">
           <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-3">
             <div className="p-2 md:p-3 rounded-lg bg-accent/20 flex-shrink-0">
               <Target className="h-5 w-5 md:h-6 md:w-6 text-accent" />
@@ -267,7 +267,7 @@ export function HomePage({ sections, onReviewIncorrect, onStartTest, onResumeTes
 
       {/* Progress Overview */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
-        <Card className="p-4 md:p-6 glass-card glow-primary transition-glow hover:glow-primary">
+        <Card variant="glass" className="p-4 md:p-6 glow-primary transition-glow hover:glow-primary">
           <h2 className="text-lg md:text-xl font-semibold mb-4 flex items-center gap-2 gradient-text">
             <TrendingUp className="h-5 w-5 text-primary" />
             Overall Progress
@@ -292,7 +292,7 @@ export function HomePage({ sections, onReviewIncorrect, onStartTest, onResumeTes
           </div>
         </Card>
 
-        <Card className="p-4 md:p-6 glass-card glow-accent transition-glow hover:glow-accent">
+        <Card variant="glass" className="p-4 md:p-6 glow-accent transition-glow hover:glow-accent">
           <h2 className="text-lg md:text-xl font-semibold mb-4 gradient-text">Recent Activity (7 Days)</h2>
           <div className="space-y-4">
             <div className="flex justify-between items-center p-3 md:p-4 bg-muted/50 rounded-lg gap-2">
@@ -321,7 +321,7 @@ export function HomePage({ sections, onReviewIncorrect, onStartTest, onResumeTes
 
       {/* Recent Tests */}
       {recentSessions.length > 0 && (
-        <Card className="p-4 md:p-6 glass-card">
+        <Card variant="glass" className="p-4 md:p-6">
           <div className="flex items-center gap-2 mb-6">
             <Zap className="h-5 w-5 text-primary" />
             <h2 className="text-lg md:text-xl font-semibold">Recent Tests</h2>
@@ -336,7 +336,7 @@ export function HomePage({ sections, onReviewIncorrect, onStartTest, onResumeTes
       )}
 
       {/* Section Progress */}
-      <Card className="p-4 md:p-6">
+      <Card variant="glass" className="p-4 md:p-6">
         <h2 className="text-lg md:text-xl font-semibold mb-6">Progress by Section</h2>
         <Accordion type="multiple" className="space-y-3">
           {sectionProgress.map(({ section, totalSectionQuestions, answeredQuestions, percentage, accuracy, subsectionDetails }) => (

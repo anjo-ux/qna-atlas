@@ -87,7 +87,7 @@ export function BookmarksPage({ onBack }: BookmarksProps) {
   };
 
   return (
-    <div className="h-screen w-full flex flex-col bg-background">
+    <div className="h-screen w-full flex flex-col">
       {/* Header */}
       <div className="border-b border-border bg-accent/5 p-4 flex-shrink-0">
         <div className="max-w-4xl mx-auto flex items-center justify-between">

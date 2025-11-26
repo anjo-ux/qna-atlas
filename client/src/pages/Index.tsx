@@ -264,7 +264,7 @@ export default function Index() {
 
   if (screenMode === 'test') {
     return (
-      <div className="flex h-screen overflow-hidden bg-background">
+      <div className="flex h-screen overflow-hidden">
         <TestMode 
           sections={sections} 
           onBack={() => {
@@ -279,7 +279,7 @@ export default function Index() {
 
   if (screenMode === 'settings') {
     return (
-      <div className="flex h-screen overflow-hidden bg-background">
+      <div className="flex h-screen overflow-hidden">
         <SettingsPage 
           onBack={() => setScreenMode('study')}
           subscription={subscription}
@@ -292,7 +292,7 @@ export default function Index() {
     const { getPreviewQuestions } = require('@/utils/previewQuestions');
     const previewQuestions = getPreviewQuestions(sections);
     return (
-      <div className="flex h-screen overflow-hidden bg-background">
+      <div className="flex h-screen overflow-hidden">
         <TestMode 
           sections={sections}
           previewQuestions={previewQuestions}
@@ -304,7 +304,7 @@ export default function Index() {
   }
 
   return (
-    <div className="flex h-screen overflow-hidden bg-background">
+    <div className="flex h-screen overflow-hidden">
       <PreviewWizard
         open={showPreviewWizard}
         onClose={() => setShowPreviewWizard(false)}
@@ -342,7 +342,7 @@ export default function Index() {
       {/* Main Content */}
       <div className="flex-1 flex flex-col min-h-screen overflow-hidden">
         {/* Header */}
-        <header className="sticky top-0 z-10 backdrop-blur-lg bg-background/80 border-b border-border">
+        <header className="sticky top-0 z-10 glass-surface border-glass">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4">
             {/* Top Row: Home, Title, Actions */}
             <div className="flex items-center gap-4 mb-4">
@@ -475,7 +475,7 @@ export default function Index() {
           </div>
 
           {/* Bottom Row: Search Bar - Always Visible */}
-          <div className="border-t border-border/50 bg-background/50 px-4 sm:px-6 lg:px-8 py-3">
+          <div className="border-t border-border/50 glass-surface px-4 sm:px-6 lg:px-8 py-3">
             <div className="w-full">
               <div className="relative" ref={searchRef}>
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
@@ -527,7 +527,7 @@ export default function Index() {
               {/* Reference Text Panel */}
               {(viewMode === 'reference' || viewMode === 'split') && (
                 <div className={cn(
-                  "overflow-hidden bg-background",
+                  "overflow-hidden",
                   viewMode === 'split' ? "h-1/2 sm:h-auto sm:w-1/2" : "flex-1"
                 )}>
                   <ReferenceTextPanel 

@@ -217,7 +217,7 @@ export function Settings({ onBack, subscription }: SettingsProps) {
 
         {/* Left Sidebar - Collapsible */}
         {sidebarOpen && (
-          <div className="w-72 border-r border-border flex-shrink-0 bg-background overflow-hidden flex flex-col transition-all duration-300">
+          <div className="w-72 border-r border-border flex-shrink-0 overflow-hidden flex flex-col transition-all duration-300">
             <div className="w-full h-full overflow-y-auto p-6">
               {hasEmoryAccess ? (
                 <Card className="p-6 bg-green-500/5 border-green-500/20">

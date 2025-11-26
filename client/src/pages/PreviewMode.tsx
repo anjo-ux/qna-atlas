@@ -39,7 +39,7 @@ export default function PreviewMode() {
   const previewQuestions = getPreviewQuestions(sections);
 
   return (
-    <div className="flex h-screen overflow-hidden bg-background">
+    <div className="flex h-screen overflow-hidden">
       <TestMode 
         sections={sections}
         previewQuestions={previewQuestions}
