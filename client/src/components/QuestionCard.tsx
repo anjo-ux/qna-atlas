@@ -224,7 +224,14 @@ export function QuestionCard({
           <Button
             size="icon"
             variant="ghost"
-            onClick={() => toggleBookmark(question.id, sectionId, subsectionId)}
+            onClick={() => {
+              console.log('[QuestionCard] Bookmark button clicked for question:', {
+                id: question.id,
+                sectionId,
+                subsectionId,
+              });
+              toggleBookmark(question.id, sectionId, subsectionId);
+            }}
             disabled={isBookmarkPending}
             data-testid={`button-bookmark-${question.id}`}
             className={cn(
