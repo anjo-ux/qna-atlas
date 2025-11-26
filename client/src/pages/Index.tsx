@@ -357,13 +357,20 @@ export default function Index() {
                 <Home className="h-5 w-5" />
               </Button>
               
-              <div className="flex-1">
-                <h1 className="text-2xl sm:text-3xl font-bold text-primary">
-                  Plastic Surgery Atlas
-                </h1>
-                <p className="text-sm text-muted-foreground mt-1">
-                  {currentSubsection ? currentSubsection.title : 'Select a section to begin'}
-                </p>
+              <div className="flex-1 flex items-center gap-3">
+                <img 
+                  src="/atlas-logo.png" 
+                  alt="Atlas Logo" 
+                  className="h-10 w-10 object-contain"
+                />
+                <div>
+                  <h1 className="text-2xl sm:text-3xl font-bold text-primary">
+                    Atlas Review
+                  </h1>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {currentSubsection ? currentSubsection.title : 'Select a section to begin'}
+                  </p>
+                </div>
               </div>
 
               {/* Settings Button */}
