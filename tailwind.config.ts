@@ -100,7 +100,7 @@ export default {
         },
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+        sans: ['-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Helvetica Neue', 'sans-serif'],
       },
       borderRadius: {
         lg: "var(--radius)",
