@@ -45,6 +45,18 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
   const { recordResponse } = useQuestionStats();
   const { createSession, updateSession, completeSession, getInProgressSessions, getCompletedSessions, deleteSession, sessions } = useTestSessions();
 
+  // Helper function to find section and subsection IDs for a question
+  const findSectionAndSubsectionForQuestion = (questionId: string): { sectionId: string; subsectionId: string } => {
+    for (const section of sections) {
+      for (const subsection of section.subsections) {
+        if (subsection.questions.some(q => q.id === questionId)) {
+          return { sectionId: section.id, subsectionId: subsection.id };
+        }
+      }
+    }
+    return { sectionId: '', subsectionId: '' };
+  };
+
   // For preview mode, use provided questions directly, skip setup
   useEffect(() => {
     if (isPreview && previewQuestions && previewQuestions.length > 0 && testState === 'setup') {
@@ -549,16 +561,21 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
 
           <div className="flex-1 overflow-auto p-3 md:p-6">
             <div className="max-w-2xl md:max-w-4xl mx-auto w-full">
-              <QuestionCard
-                key={`${currentQuestion.id}-${currentQuestionIndex}`}
-                question={currentQuestion}
-                index={currentQuestionIndex}
-                sectionId=""
-                subsectionId=""
-                savedResponse={responses[currentQuestion.id]}
-                onAnswerSubmit={handleAnswerSubmit}
-                isTestMode={true}
-              />
+              {(() => {
+                const { sectionId, subsectionId } = findSectionAndSubsectionForQuestion(currentQuestion.id);
+                return (
+                  <QuestionCard
+                    key={`${currentQuestion.id}-${currentQuestionIndex}`}
+                    question={currentQuestion}
+                    index={currentQuestionIndex}
+                    sectionId={sectionId}
+                    subsectionId={subsectionId}
+                    savedResponse={responses[currentQuestion.id]}
+                    onAnswerSubmit={handleAnswerSubmit}
+                    isTestMode={true}
+                  />
+                );
+              })()}
             </div>
           </div>
 
