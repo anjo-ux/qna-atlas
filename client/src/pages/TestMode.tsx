@@ -636,8 +636,8 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
             </div>
           </div>
 
-          <div className="flex-1 overflow-auto p-3 md:p-6 w-full">
-            <div className="w-full">
+          <div className="flex-1 overflow-auto p-3 md:p-6 w-full min-w-0">
+            <div className="w-full h-fit max-w-none">
               {(() => {
                 const { sectionId, subsectionId } = findSectionAndSubsectionForQuestion(currentQuestion.id);
                 return (
@@ -657,8 +657,8 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
           </div>
 
           {/* Navigation Buttons */}
-          <div className="p-3 md:p-4 border-t border-border bg-accent/5 flex-shrink-0 w-full">
-            <div className="flex items-center justify-between gap-2">
+          <div className="p-3 md:p-4 border-t border-border bg-accent/5 flex-shrink-0 w-full min-w-0">
+            <div className="w-full flex items-center justify-between gap-2 max-w-none">
               <Button
                 data-testid="button-previous-question"
                 onClick={handlePreviousQuestion}
