@@ -534,7 +534,7 @@ export default function Index() {
               {(viewMode === 'reference' || viewMode === 'split') && (
                 <div className={cn(
                   "overflow-hidden",
-                  viewMode === 'split' ? "lg:w-1/4 lg:max-w-sm lg:flex-shrink-0" : "flex-1"
+                  viewMode === 'split' ? "lg:w-2/5 2xl:w-1/3 lg:flex-shrink-0" : "flex-1"
                 )}>
                   <ReferenceTextPanel 
                     content={currentReferenceContent}
@@ -549,7 +549,7 @@ export default function Index() {
               {(viewMode === 'questions' || viewMode === 'split') && (
                 <div className={cn(
                   "overflow-auto",
-                  viewMode === 'split' ? "lg:w-3/4 lg:flex-1" : "flex-1"
+                  viewMode === 'split' ? "lg:w-3/5 2xl:w-2/3 lg:flex-1" : "flex-1"
                 )}>
                   <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
                     <div className="space-y-4">
