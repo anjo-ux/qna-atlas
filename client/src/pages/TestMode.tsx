@@ -9,7 +9,7 @@ import { Switch } from '@/components/ui/switch';
 import { QuestionCard } from '@/components/QuestionCard';
 import { TestHistory } from '@/components/TestHistory';
 import { TestModeWizard } from '@/components/TestModeWizard';
-import { ArrowLeft, ChevronDown, ChevronUp, ChevronRight, ChevronLeft, ChevronRight as ChevronRightIcon, Check, X, Circle } from 'lucide-react';
+import { ArrowLeft, ChevronDown, ChevronUp, ChevronRight, ChevronLeft, ChevronRight as ChevronRightIcon, Check, X, Circle, Maximize2, Minimize2 } from 'lucide-react';
 import { useQuestionStats, QuestionResponse } from '@/hooks/useQuestionStats';
 import { useTestSessions, TestSession } from '@/hooks/useTestSessions';
 import { useBookmarks } from '@/hooks/useBookmarks';
@@ -43,6 +43,7 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
   const [currentSession, setCurrentSession] = useState<TestSession | null>(null);
   const [showTestWizard, setShowTestWizard] = useState(false);
   const [showQuestionPanel, setShowQuestionPanel] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const hasResumedRef = useRef(false);
 
   const { recordResponse } = useQuestionStats();
@@ -525,7 +526,8 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
           "md:flex md:flex-col md:w-32 md:border-r md:border-border md:bg-muted/30 md:overflow-visible md:flex-shrink-0 md:h-screen",
           "flex flex-col border-b border-border bg-muted/30 w-full flex-shrink-0",
           !showQuestionPanel && "hidden md:flex",
-          showQuestionPanel && "flex"
+          showQuestionPanel && "flex",
+          isFullscreen && "hidden"
         )}>
           <div className="p-4 border-b border-border">
             <div className="flex items-center justify-between gap-2">
@@ -604,6 +606,15 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
                 <p className="text-xs md:text-sm text-muted-foreground">Question {currentQuestionIndex + 1} of {testQuestions.length}</p>
               </div>
               <div className="flex items-center gap-1 md:gap-2 flex-shrink-0">
+                <Button 
+                  size="icon"
+                  variant="ghost"
+                  onClick={() => setIsFullscreen(!isFullscreen)}
+                  data-testid="button-fullscreen-toggle"
+                  title={isFullscreen ? "Exit fullscreen" : "Fullscreen"}
+                >
+                  {isFullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+                </Button>
                 <Button 
                   size="icon"
                   variant="ghost"
