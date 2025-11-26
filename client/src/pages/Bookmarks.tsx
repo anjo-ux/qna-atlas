@@ -122,7 +122,7 @@ export function BookmarksPage({ onBack }: BookmarksProps) {
               placeholder="Search bookmarked questions..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="max-w-md bg-white/5 border-white/10 backdrop-blur-sm"
+              className="w-full bg-white/5 border-white/10 backdrop-blur-sm"
               data-testid="input-search-bookmarks"
             />
           </div>
