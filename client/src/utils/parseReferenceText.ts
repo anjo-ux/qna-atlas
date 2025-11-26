@@ -319,956 +319,696 @@ Penile replantation and transplantation procedures rely on the deep dorsal penis
     'skin-lesions': `# Skin
 
 ## Epidermis
-5 layers (deep to superficial): Basal, spinosum, lucidum, granulosum, corneum.
-Keratinocytes Originate from basal layer, 90% of epidermis cells, acts as environmental barrier.
-Melanocytes.
+The epidermis has 5 layers from deep to superficial: the basal layer, stratum spinosum, stratum lucidum, stratum granulosum, and stratum corneum. Keratinocytes originate from the basal layer, constitute 90% of epidermis cells, and act as an environmental barrier. Melanocytes are also present in the epidermis.
 
 ## Dermis
-Papillary (superficial).
-Reticular (deep): Hair roots, sebaceous and sweat glands.
-Predominantly made of type I collagen.
+The dermis consists of two layers: the papillary layer (superficial) and the reticular layer (deep), which contains hair roots, sebaceous glands, and sweat glands. The dermis is predominantly made of type I collagen.
 
 # Benign Skin Conditions
 
 ## Hidradenitis suppurativa
-Apocrine gland involvement; forms subcutaneous fistulae from occlusion of folliculopilosebaceous units.
-Treatment includes topical/oral antibiotics (1st line, mild cases), TNF-alpha inhibitors (2nd line, moderate cases).
-Treatment involves excision of involved areas, reconstruction.
+Hidradenitis suppurativa involves the apocrine glands and forms subcutaneous fistulae from occlusion of folliculopilosebaceous units. First-line treatment for mild cases includes topical or oral antibiotics, while second-line treatment for moderate cases includes TNF-alpha inhibitors. Severe cases require excision of involved areas with reconstruction.
 
 ## Dermoid cyst
-Most common childhood skin lesion.
+Dermoid cysts are the most common childhood skin lesion.
 
 ## Cylindromas
-Benign adnexal tumors.
-Diagnosis involves firm, nodular, pink-colored scalp lesions.
-Treatment includes excision.
+Cylindromas are benign adnexal tumors that present as firm, nodular, pink-colored scalp lesions. Treatment is excision.
 
 ## Pilomatricoma
-Slow-growing blue nodule associated with hair follicle, calcific features.
-Diagnosis involves firm to touch, tender.
-Risk factors include teenagers.
-Treatment includes excision.
+Pilomatricoma is a slow-growing blue nodule associated with hair follicles and calcific features. On examination, it is firm to touch and tender. It most commonly occurs in teenagers. Treatment is excision.
 
 ## Spiradenomas
-Benign dermal neoplasms.
-Diagnosis involves small, painful, bluish nodules.
-Treatment includes excision.
+Spiradenomas are benign dermal neoplasms that present as small, painful, bluish nodules. Treatment is excision.
 
 # Malignant Skin Diseases
 
 ## Basal cell carcinoma
-Pearly round nodules.
-Risk factors include xeroderma pigmentosum. X-linked recessive gene impairing nucleotide excision repair. Diagnosis involves extreme sun sensitivity, extensive photoaging, dry skin.
-Treatment includes non-surgical: topical creams (5-FU, imatinib), electrodesiccation and curettage for superficial lesions, XRT for high-risk patients (non-surgical candidates).
-Treatment includes Moh's excision. Involves real-time circumferential skin lesion sectioning with frozen section review. Associated with high cure rate (>95% for basal and squamous cell carcinomas).
-Treatment involves excision with 4mm margins.
+Basal cell carcinoma presents as pearly round nodules. Risk factors include xeroderma pigmentosum, which is an X-linked recessive gene disorder impairing nucleotide excision repair that presents with extreme sun sensitivity, extensive photoaging, and dry skin. Non-surgical treatment options include topical creams (5-FU, imatinib), electrodesiccation and curettage for superficial lesions, and XRT for high-risk patients who are non-surgical candidates. Mohs excision involves real-time circumferential skin lesion sectioning with frozen section review and is associated with a high cure rate (greater than 95% for basal and squamous cell carcinomas). Standard surgical treatment involves excision with 4mm margins.
 
 ## Squamous cell carcinoma
-Arises from stratum basale. Histology poorly differentiated cords of spindle cells from keratinocytes.
-Aggressive subtypes adenoid, adenosquamous, desmoid.
-Actinic keratosis ~10% malignant risk. Treatment includes cryotherapy, imiquimod (acts on skin immune system), topical 5-FU.
-Most-common primary malignant skin tumor of the hand.
-Treatment includes Moh's.
-Treatment involves wide local excision with 6mm margins for low risk, 1cm for aggressive tumors, XRT for non-surgical candidates (efficacy better for smaller lesions).
+Squamous cell carcinoma arises from the stratum basale. Histologically, it shows poorly differentiated cords of spindle cells from keratinocytes. Aggressive subtypes include adenoid, adenosquamous, and desmoid variants. Actinic keratosis has approximately 10% malignant risk and is treated with cryotherapy, imiquimod (which acts on the skin immune system), or topical 5-FU. Squamous cell carcinoma is the most common primary malignant skin tumor of the hand. Mohs excision is an effective treatment option. Wide local excision uses 6mm margins for low-risk tumors and 1cm for aggressive tumors. XRT is used for non-surgical candidates and has better efficacy for smaller lesions.
 
 ## Melanoma
-Arises from stratum basale.
-Clinical features (ABCDs): Asymmetry, irregular Border, heterogenous Color, Diameter > 6mm.
-Ulceration has worse prognosis.
-Types superficial spreading (#1), nodular (grows more vertically, lowest disease-specific survival).
-Lentigo maligna melanoma in situ variant. Treatment includes excision, XRT, topical imiquimod (upregulates immunomodulation).
-Neurocutaneous melanosis. Midline involvement, >20 satellite lesions. Dx MRI central nervous system screening before 6 months.
-Diagnosis involves punch biopsy for depth, labs (LDH), imaging (CXR, possible PET/CT).
-Treatment includes Wide local excision:  Margins: <1mm depth – 1cm, 1-2mm – 1-2cm, >2mm – 2cm. Lymph node management:  Sentinel lymph node biopsy (SLNB): indicated for >0.7mm primary lesion depth. Completion lymph node dissection: high nodal burden (>3), extracapsular extension. Systemic therapy (immunotherapy): indications include positive nodal disease, distant metastases.
+Melanoma arises from the stratum basale. Clinical features follow the ABCDs: Asymmetry, irregular Border, heterogenous Color, and Diameter greater than 6mm. Ulceration indicates a worse prognosis. Types include superficial spreading (most common) and nodular (which grows more vertically and has the lowest disease-specific survival). Lentigo maligna is a melanoma in situ variant treated with excision, XRT, or topical imiquimod (which upregulates immunomodulation). Neurocutaneous melanosis presents with midline involvement and more than 20 satellite lesions, requiring MRI central nervous system screening before 6 months of age. Diagnosis involves punch biopsy for depth assessment, labs (LDH), and imaging (CXR, possible PET/CT). Treatment includes wide local excision with margins based on depth: less than 1mm depth requires 1cm margins, 1-2mm requires 1-2cm margins, and greater than 2mm requires 2cm margins. Sentinel lymph node biopsy (SLNB) is indicated for primary lesion depth greater than 0.7mm. Completion lymph node dissection is performed for high nodal burden (more than 3 nodes) or extracapsular extension. Systemic immunotherapy is indicated for positive nodal disease or distant metastases.
 
 ## Merkel cell carcinoma
-Neuroendocrine tumor.
-Histologically, it features nuclear molding, small blue cells, salt-and-pepper chromatin on Hematoxylin and Eosin.
-Risk of development Merkel cell polyomavirus (>80% of cases).
-Treatment includes surgery with 1-2cm margins + XRT, SLNB.
-Poor prognosis.
+Merkel cell carcinoma is a neuroendocrine tumor. Histologically, it features nuclear molding, small blue cells, and salt-and-pepper chromatin on Hematoxylin and Eosin staining. More than 80% of cases are associated with Merkel cell polyomavirus. Treatment includes surgery with 1-2cm margins plus XRT and SLNB. Prognosis is poor.
 
 ## Angiosarcoma
-Rapidly-growing red or purple macules or nodules; usually in head and neck.
-It is associated with prior XRT or lymphedema.
-Treatment includes surgery, XRT, chemotherapy; poor prognosis.
-
+Angiosarcoma presents as rapidly-growing red or purple macules or nodules, usually in the head and neck region. It is associated with prior XRT or lymphedema. Treatment includes surgery, XRT, and chemotherapy, but prognosis is poor.
 
 ## Split-thickness skin graft (STSG)
-More forgiving to recipient site than full-thickness skin graft.
-First-intention failure inadequate recipient site vascularity, infection, seroma, hematoma.
-Seroma/hematoma can prevent graft from taking; avoid by messengering, pie-crusting.
-Requires immobilization/bolster to prevent shearing.
-Less secondary contracture than full-thickness skin graft.
-Thinner grafts lower metabolic demand, higher skin contracture rate, requires less vascular bed.
-Heals by secondary intention.
+Split-thickness skin grafts are more forgiving to the recipient site than full-thickness skin grafts. First-intention failure can result from inadequate recipient site vascularity, infection, seroma, or hematoma. Seroma or hematoma can prevent the graft from taking and should be avoided by messengering and pie-crusting. The graft requires immobilization with a bolster to prevent shearing. Split-thickness grafts have less secondary contracture than full-thickness skin grafts. Thinner grafts have lower metabolic demand and higher skin contracture rate but require less vascular bed. They heal by secondary intention.
 
 ## Full-thickness skin graft (FTSG)
-Less secondary contracture than split-thickness skin graft.
-Requires higher quality recipient site.
-Heals by primary intention.
-Better pigmentation match.
-Thicker grafts more durable, less re-epithelialization.
+Full-thickness skin grafts have less secondary contracture than split-thickness skin grafts but require a higher quality recipient site. They heal by primary intention and provide better pigmentation match. Thicker grafts are more durable but have less re-epithelialization.
 
 ## Composite graft
-Multiple tissue types taken together from donor site; requires meticulous recipient bed.
-Example ear cartilage + skin, dermal-fat graft.
+Composite grafts contain multiple tissue types taken together from the donor site and require a meticulous recipient bed. Examples include ear cartilage with skin and dermal-fat grafts.
 
 # Flap Classification
 
-Mathes and Nahai muscle flap blood supply classification Type I single vascular pedicle (gastrocnemius, tensor fascia lata). Type II dominant pedicle, minor pedicles (gracilis, soleus, trapezius). Type III two dominant pedicles (gluteus maximus, rectus abdominus). Type IV segmental pedicles (sartorius, external oblique). Type V single dominant pedicle, secondary segmental pedicles (latissimus, pectoralis major).
+The Mathes and Nahai classification categorizes muscle flaps by blood supply: Type I has a single vascular pedicle (gastrocnemius, tensor fascia lata), Type II has a dominant pedicle with minor pedicles (gracilis, soleus, trapezius), Type III has two dominant pedicles (gluteus maximus, rectus abdominus), Type IV has segmental pedicles (sartorius, external oblique), and Type V has a single dominant pedicle with secondary segmental pedicles (latissimus, pectoralis major).
 
 ## Flap types
-Axial carries own blood supply.
-Random survives off subdermal plexus. Often 3 1 length-to-width ratio. Bipedicled can go down to 2 1 length-to-width ratio.
+An axial flap carries its own blood supply. A random flap survives off the subdermal plexus and often follows a 3:1 length-to-width ratio. A bipedicled flap can extend to a 2:1 length-to-width ratio.
 
 ## Z plasty
-Used commonly in scar contracture releases.
-Gain length by rearranging width.
-30 degrees 25% gain in length.
-45 degrees 50%.
-60 degrees 75%.
-75 degrees 100%.
-90 degrees 125%.
-5-flap Z plasty Includes a V to Y advancement to the central limb for lengthening.
+Z-plasty is commonly used in scar contracture releases. It gains length by rearranging width: 30 degrees provides 25% gain in length, 45 degrees provides 50%, 60 degrees provides 75%, 75 degrees provides 100%, and 90 degrees provides 125%. The 5-flap Z-plasty includes a V to Y advancement to the central limb for lengthening.
 
 ## Keystone flap
-Perforator island fasciocutaneous local flap.
-Design with same width as defect, double V to Y donor closure.
-No undermining performed to the flap.
+The keystone flap is a perforator island fasciocutaneous local flap. It is designed with the same width as the defect and uses a double V to Y donor closure. No undermining is performed to the flap.
 
 # Flap Anatomy
 
 ## Neck
-Submental fasciocutaneous flap. The vascular supply is from the submental artery off cervical branch of facial artery. Traverses level I lymph nodes in neck. Use in intra-oral and lower face soft-tissue reconstruction.
+The submental fasciocutaneous flap receives its vascular supply from the submental artery off the cervical branch of the facial artery. It traverses level I lymph nodes in the neck and is used in intra-oral and lower face soft-tissue reconstruction.
 
 ## Trunk
-Latissimus dorsi muscle/musculocutaneous flap. The vascular supply is from the thoracodorsal artery. Its function includes shoulder adduction, extension, internal rotation. Donor site has decreased shoulder range of motion that improves by one year. Versatile flap used mostly in breast reconstruction and trunk reconstruction; is the largest single muscle available for free flap.
-Trapezius flap. The vascular supply is from the transverse cervical artery. Used in cervical-spine reconstruction.
-Scapula bone flap. The vascular supply is from the circumflex scapular artery off subscapular artery. Traverses triangular space (teres minor, teres major, long head of triceps). Tip of scapula, can be chimeric flap with other tissues from subscapular system (latissimus dorsi, parascapular flaps). Used for shoulder, back of neck, axilla reconstruction.
-Paraspinous flap. Type IV segmental blood supply. Used in spinal coverage.
-Omentum flap. The vascular supply is from the right and left gastroepiploic arteries (only need one side). Used in sternal reconstruction, lymphatic surgery; needs subsequent skin coverage.
-Lumbar artery perforator flap. Vascular L4 lumbar artery perforator. Runs between erector spinae and quadratus lumborum. Innervation is from the cluneal nerve. Used as a secondary breast free flap option.
-Groin flap. The vascular supply is from the superficial circumflex iliac artery. Used as a distant (non-microsurgical) flap for hand coverage.
-Superficial circumflex iliac perforator. Thin, pliable flap; improved donor morbidity compared to radial forearm flap.
-Iliac crest osteocutaneous flap. The vascular supply is from the deep circumflex iliac. Used as an alternative bone flap in mandibular reconstruction; better vertical height than fibula.
+The latissimus dorsi muscle/musculocutaneous flap receives its vascular supply from the thoracodorsal artery. Its function includes shoulder adduction, extension, and internal rotation. The donor site has decreased shoulder range of motion that improves by one year. This versatile flap is used mostly in breast reconstruction and trunk reconstruction and is the largest single muscle available for free flap transfer.
+
+The trapezius flap receives its vascular supply from the transverse cervical artery and is used in cervical-spine reconstruction.
+
+The scapula bone flap receives its vascular supply from the circumflex scapular artery off the subscapular artery. It traverses the triangular space (bounded by teres minor, teres major, and long head of triceps). The tip of the scapula can be a chimeric flap with other tissues from the subscapular system (latissimus dorsi, parascapular flaps) and is used for shoulder, back of neck, and axilla reconstruction.
+
+The paraspinous flap has Type IV segmental blood supply and is used in spinal coverage.
+
+The omentum flap receives its vascular supply from the right and left gastroepiploic arteries (only one side is needed). It is used in sternal reconstruction and lymphatic surgery and requires subsequent skin coverage.
+
+The lumbar artery perforator flap receives its vascular supply from the L4 lumbar artery perforator and runs between the erector spinae and quadratus lumborum. Innervation is from the cluneal nerve. It is used as a secondary breast free flap option.
+
+The groin flap receives its vascular supply from the superficial circumflex iliac artery and is used as a distant (non-microsurgical) flap for hand coverage.
+
+The superficial circumflex iliac perforator flap is a thin, pliable flap with improved donor morbidity compared to the radial forearm flap.
+
+The iliac crest osteocutaneous flap receives its vascular supply from the deep circumflex iliac artery and is used as an alternative bone flap in mandibular reconstruction, offering better vertical height than the fibula.
 
 ## Upper Extremity
-Lateral arm flap. The vascular supply is from the posterior radial collateral artery. Runs between lateral triceps and brachialis. Used in forearm and hand reconstruction as a thin fasciocutaneous free flap.
-Reverse lateral arm flap. The vascular supply is from the radial recurrent artery. Used for elbow coverage as a pedicled flap.
-Radial forearm flap. The vascular supply is from the radial artery. Need normal Allen's test (intact palmar arch). Thin, pliable fasciocutaneous flap; can be innervated flap using lateral antebrachial cutaneous nerve. Used as pedicled (anterograde) for elbow coverage, reversed for hand coverage (to level of proximal interphalangeal joints), or free flap for head and neck reconstruction (e.g., hemiglossectomy defects), phalloplasty.
-Ulnar artery flap. The vascular supply is from the ulnar artery. Less tendon exposure risk than radial forearm flap. Shorter pedicle, smaller diameter vessel than radial forearm flap.
-Posterior interosseous artery flap. The vascular supply is from the posterior interosseous artery. Runs between extensor digiti minimi and extensor carpi ulnaris. Used for hand and elbow coverage; pedicle length limits free flap use.
+The lateral arm flap receives its vascular supply from the posterior radial collateral artery and runs between the lateral triceps and brachialis. It is used in forearm and hand reconstruction as a thin fasciocutaneous free flap.
+
+The reverse lateral arm flap receives its vascular supply from the radial recurrent artery and is used for elbow coverage as a pedicled flap.
+
+The radial forearm flap receives its vascular supply from the radial artery and requires a normal Allen's test (intact palmar arch). It is a thin, pliable fasciocutaneous flap that can be innervated using the lateral antebrachial cutaneous nerve. It is used as a pedicled (anterograde) flap for elbow coverage, as a reversed flap for hand coverage (to the level of proximal interphalangeal joints), or as a free flap for head and neck reconstruction (e.g., hemiglossectomy defects) and phalloplasty.
+
+The ulnar artery flap receives its vascular supply from the ulnar artery. It has less tendon exposure risk than the radial forearm flap but has a shorter pedicle and smaller diameter vessel.
+
+The posterior interosseous artery flap receives its vascular supply from the posterior interosseous artery and runs between the extensor digiti minimi and extensor carpi ulnaris. It is used for hand and elbow coverage, though pedicle length limits its use as a free flap.
 
 ## Lower Extremity
-Medial sural artery perforator flap. The vascular supply is from the medial sural artery perforator. Used for heel coverage, Achilles coverage.
-Sural artery flap. The vascular supply is from the lesser saphenous vein and sural nerve. Used for heel and Achilles coverage; pedicled flap.
-Fibula bone flap. The vascular supply is from the peroneal artery. Segmental bone flap. Skin paddle posterior/lateral leg. Used in mandibular reconstruction; donor site has increased ankle fracture risk.
-Anterolateral thigh flap. The vascular supply is from the descending branch of lateral circumflex femoral artery. Innervation is from the lateral femoral cutaneous nerve. Muscle perforator or septocutaneous. Versatile flap with long pedicle, large donor site. Used in head and neck reconstruction, trunk reconstruction, extremity coverage.
-Profunda artery perforator flap. Vascular 1st or 2nd perforator of profunda femoris artery. Innervation is from the posterior femoral cutaneous nerve. Used in perineal reconstruction, breast reconstruction; disadvantage is prone position for flap harvest.
-Gracilis flap. The vascular supply is from the medial circumflex femoral artery. Used in perineal reconstruction, breast reconstruction, functional muscle transfer.
-Tensor fascia lata flap. The vascular supply is from the ascending branch of lateral circumflex femoral artery. Used in trochanteric coverage, abdominal-wall defects.
-Rectus femoris flap. The vascular supply is from the descending branch of lateral circumflex femoral artery. Used for pelvic and groin coverage.`
+The medial sural artery perforator flap receives its vascular supply from the medial sural artery perforator and is used for heel and Achilles coverage.
+
+The sural artery flap receives its vascular supply from the lesser saphenous vein and sural nerve. It is used as a pedicled flap for heel and Achilles coverage.
+
+The fibula bone flap receives its vascular supply from the peroneal artery. It is a segmental bone flap with a skin paddle from the posterior/lateral leg. It is used in mandibular reconstruction, and the donor site has increased ankle fracture risk.
+
+The anterolateral thigh flap receives its vascular supply from the descending branch of the lateral circumflex femoral artery. Innervation is from the lateral femoral cutaneous nerve. It can be a muscle perforator or septocutaneous flap. It is a versatile flap with a long pedicle and large donor site, used in head and neck reconstruction, trunk reconstruction, and extremity coverage.
+
+The profunda artery perforator flap receives its vascular supply from the 1st or 2nd perforator of the profunda femoris artery. Innervation is from the posterior femoral cutaneous nerve. It is used in perineal reconstruction and breast reconstruction, though prone positioning for flap harvest is a disadvantage.
+
+The gracilis flap receives its vascular supply from the medial circumflex femoral artery. It is used in perineal reconstruction, breast reconstruction, and functional muscle transfer.
+
+The tensor fascia lata flap receives its vascular supply from the ascending branch of the lateral circumflex femoral artery and is used in trochanteric coverage and abdominal-wall defects.
+
+The rectus femoris flap receives its vascular supply from the descending branch of the lateral circumflex femoral artery and is used for pelvic and groin coverage.`
   },
   'hand-lower-extremity': {
     'hand-digit-trauma': `# Dislocations
 
 ## Thumb
-Anatomy The most common dislocation dorsally through dorsoradial ligament.
-CMC stabilizers Volar oblique, ulnar collateral, intermetacarpal, dorsoradial (most important), posterior oblique, anterior oblique (prevents radial subluxation).
-Occurs with axial force, flexion of the wrist.
-Diagnosis involves XR with anteroposterior and lateral views in 30 degrees of pronation.
+The most common thumb dislocation occurs dorsally through the dorsoradial ligament. The CMC stabilizers include the volar oblique, ulnar collateral, intermetacarpal, dorsoradial (most important), posterior oblique, and anterior oblique (which prevents radial subluxation) ligaments. Thumb CMC dislocations occur with axial force and flexion of the wrist. Diagnosis is made with XR using anteroposterior and lateral views in 30 degrees of pronation.
 
 ## Finger dislocations
-Proximal interphalangeal (PIPJ) joint dislocation. Simple: reduce. Complex: unable to reduce due to interposed soft tissue. Dorsal (MC): interposed volar plate. Volar: interposed extensor tendon. Diagnosis involves Elson test to assess central slip integrity.
-Metacarpophalangeal (MCP) joint dislocations. Rare, often complex due to volar plate interposition. Treatment includes surgical. Volar: higher risk of digital nerve injury. Dorsal: unable to repair volar plate.
+Proximal interphalangeal (PIPJ) joint dislocations can be simple (reducible) or complex (irreducible due to interposed soft tissue). Dorsal dislocations are most common and involve interposition of the volar plate, while volar dislocations involve interposition of the extensor tendon. The Elson test is used to assess central slip integrity.
 
-# Phalangeal, metacarpal fractures
+Metacarpophalangeal (MCP) joint dislocations are rare and often complex due to volar plate interposition, requiring surgical treatment. Volar dislocations have higher risk of digital nerve injury, while dorsal dislocations prevent volar plate repair.
+
+# Phalangeal and Metacarpal Fractures
 
 ## Bennett fracture
-Thumb metacarpal base intra-articular fracture.
-Reduce with axial traction, pronation, and palmar abduction.
+Bennett fracture is a thumb metacarpal base intra-articular fracture. It is reduced with axial traction, pronation, and palmar abduction.
 
 ## 5th metacarpal neck (Boxer's) fracture
-Can tolerate up to 70 degrees of angulation.
-Treatment includes buddy tapes (ring to small finger)/active range of motion.
-Treatment involves The most common for malrotation.
+This fracture can tolerate up to 70 degrees of angulation. Treatment includes buddy tapes (ring to small finger) with active range of motion. Surgery is most commonly indicated for malrotation.
 
 ## Metacarpal fractures
-Interosseous muscles most likely to incarcerate in fracture line.
-Open fractures Minor soft tissue injury can be irrigated, closed, splinted in ER with short-course antibiotics, outpatient follow up.
-Treatment includes multiple operative techniques (pinning, plating, intramedullary screw fixation, lag screw).
-Lag-screw fixation used for oblique fractures, allows primary bone healing.
+Interosseous muscles are most likely to incarcerate in the fracture line. Open fractures with minor soft tissue injury can be irrigated, closed, and splinted in the ER with short-course antibiotics and outpatient follow-up. Treatment options include multiple operative techniques such as pinning, plating, intramedullary screw fixation, and lag screw. Lag-screw fixation is used for oblique fractures and allows primary bone healing.
 
 ## Proximal interphalangeal joint (PIPJ) fracture/dislocation
-Simple, stable (<30% joint surface). Diagnosis involves assess stability of joint with up to 30 degrees of PIPJ flexion. Treatment includes extension-block splinting or pinning (maintain in slight flexion).
-Pilon base fractures, unstable fractures Treatment includes dynamic external fixation.
-30-50% volar base fractures Treatment includes hemi-hamate arthroplasty, volar plate arthroplasty.
+For simple, stable fractures involving less than 30% of the joint surface, diagnosis involves assessing stability of the joint with up to 30 degrees of PIPJ flexion. Treatment includes extension-block splinting or pinning (maintaining in slight flexion). Pilon base fractures and unstable fractures require dynamic external fixation. Fractures involving 30-50% of the volar base are treated with hemi-hamate arthroplasty or volar plate arthroplasty.
 
 # Ligament Injuries
 
 ## Intrinsic-plus splint position
-Wrist extended (30 degrees), metacarpophalangeal joints (MCPJs) flexed (75-90 degrees), interphalangeal joints (IPJs) extended (0 degrees).
-Maintains MCPJ collateral ligaments at full length.
+The intrinsic-plus splint position involves the wrist extended at 30 degrees, metacarpophalangeal joints (MCPJs) flexed at 75-90 degrees, and interphalangeal joints (IPJs) extended at 0 degrees. This position maintains the MCPJ collateral ligaments at full length.
 
 ## Intrinsic tightness
-Intrinsic tightness passive flexion of proximal interphalangeal joint (PIPJ) tight with MCPJ hyperextended.
-Extrinsic tightness PIPJ flexion tight with MCPJ flexed.
+Intrinsic tightness is demonstrated when passive flexion of the proximal interphalangeal joint (PIPJ) is tight with the MCPJ hyperextended. Extrinsic tightness is demonstrated when PIPJ flexion is tight with the MCPJ flexed.
 
 ## Ulnar collateral ligament injury
-Instability of thumb MCPJ with radial-directed force.
-Symptoms include weakness, pain with pinch tasks.
-Diagnosis involves increased laxity >30 degrees of radial-directed stress to thumb, compare to contralateral thumb.
-Diagnosis involves stress view XR.
-US (or MRI) evaluates for Stener lesion (UCL retracts into adductor muscle).
-Treatment includes splinting (1st line).
-Treatment includes ulnar collateral ligament reconstruction for failure of non-operative treatment, Stener lesion.
+Ulnar collateral ligament injury causes instability of the thumb MCPJ with radial-directed force. Symptoms include weakness and pain with pinch tasks. Diagnosis is made by finding increased laxity greater than 30 degrees with radial-directed stress to the thumb compared to the contralateral thumb, along with stress view XR. Ultrasound or MRI can evaluate for Stener lesion (UCL retracted into adductor muscle). First-line treatment is splinting. Ulnar collateral ligament reconstruction is indicated for failure of non-operative treatment or presence of Stener lesion.
 
 # Digit Reconstruction
 
 ## Thumb reconstruction
-Thumb is 40-50% of overall hand function, favor functional reconstructions.
-Volar defects First dorsal metacarpal artery flap (larger defects), Moberg flap (defects <1.5cm, up to 2cm with islandization).
-Volar and dorsal defects Great toe wraparound flap at proximal phalanx level.
-Total thumb reconstruction. CMC and metacarpal base present toe-to-thumb transfer. CMC or metacarpal base absent pollicization.
-1st webspace contracture. Skin only Z plasties (four-flap), skin grafts. Deep structures flap coverage (e.g., posterior interosseous reverse flap).
+The thumb accounts for 40-50% of overall hand function, so functional reconstructions are preferred. Volar defects are reconstructed with first dorsal metacarpal artery flap (for larger defects) or Moberg flap (for defects less than 1.5cm, up to 2cm with islandization). Combined volar and dorsal defects at the proximal phalanx level are treated with great toe wraparound flap. For total thumb reconstruction, toe-to-thumb transfer is performed when the CMC and metacarpal base are present, while pollicization is performed when the CMC or metacarpal base is absent. First webspace contracture is treated with Z-plasties (four-flap) or skin grafts for skin-only involvement, and flap coverage (e.g., posterior interosseous reverse flap) for involvement of deep structures.
 
 ## IPJ arthroplasty
-Silicone arthroplasty Improves pain, not motion.
+Silicone arthroplasty improves pain but not motion.
 
 ## Fillet of finger flaps
-Useful to provide coverage and reduce returns to OR.
-Consider when otherwise unsalvageable bone stock of injured finger.
+Fillet of finger flaps are useful to provide coverage and reduce returns to the operating room. They should be considered when there is otherwise unsalvageable bone stock of an injured finger.
 
 ## Nailbed injuries
-Germinal matrix produces nail, sterile matrix is adherent to nail.
-Tx (large subungual hematoma or laceration):  Acute: repair nail bed (2-octyl cyanoacrylate with similar outcomes, less time-consuming than suture repair). Chronic: split thickness nail matrix graft from toe, nail ablation.
-Hook nail soft tissue defect from loss of distal sterile matrix, inadequate bone/soft tissue support for nail. Treatment includes release scar with soft-tissue augmentation, excision of distal sterile matrix.
-Nail ridging from untreated nail bed injury Treatment includes attempt direct closure of nail bed at re-repair.
+The germinal matrix produces the nail, while the sterile matrix is adherent to the nail. For large subungual hematomas or lacerations, acute treatment involves nail bed repair (2-octyl cyanoacrylate has similar outcomes and is less time-consuming than suture repair). Chronic treatment options include split-thickness nail matrix graft from the toe or nail ablation. Hook nail is a soft tissue defect from loss of distal sterile matrix with inadequate bone and soft tissue support for the nail, treated by releasing the scar with soft-tissue augmentation or excision of the distal sterile matrix. Nail ridging from untreated nail bed injury is treated by attempting direct closure of the nail bed at re-repair.
 
 ## Fingertip Injuries
-Secondary intention healing for <1.5cm, no exposed bone. Treatment includes moist wound healing, petroleum jelly. Better sensation than flaps or skin grafts; associated with longer healing time.
+Secondary intention healing is appropriate for wounds less than 1.5cm with no exposed bone. Treatment includes moist wound healing with petroleum jelly. This approach provides better sensation than flaps or skin grafts but is associated with longer healing time.
 
 ## Finger soft-tissue reconstruction
-Cross-finger flap uses dorsal skin from adjacent digit for a volar wound.
-Reverse cross-finger flap uses dorsal skin from adjacent digit for a dorsal wound.`,
+Cross-finger flaps use dorsal skin from an adjacent digit to cover a volar wound. Reverse cross-finger flaps use dorsal skin from an adjacent digit to cover a dorsal wound.`,
 
     'hand-nerves': `# Anatomy
 
 ## Brachial plexus
-Upper roots (C5-7) proximal functions (shoulder function, elbow flexion). Symptoms include shoulder adducted/internally rotated, elbow extended, forearm pronated, fingers flexed.
-Lower roots (C8-T1) distal functions (wrist, hand).
-Posterior cord. Axillary nerve From upper roots (C5-C6); innervates deltoid (shoulder abduction), some of triceps. C7 root Contributes innervation to triceps. Radial nerve From lower roots (C8 to T1); innervates wrist and digital extension, some of triceps.
-Lateral cord. Musculocutaneous nerve From upper roots (C5-7); innervates biceps, brachialis for elbow flexion.
-Medial cord. Median nerve Innervates thumb intrinsics, flexor carpi radialis (FCR), flexor pollicis longus (FPL), flexor digitorum superficialis (FDS), flexor digitorum profundus (FDP) [index, middle fingers], pronator teres. Ulnar nerve Innervates hand intrinsics (interosseous), flexor carpi ulnaris (FCU), FDP (ring and small fingers).
+The upper roots (C5-7) control proximal functions including shoulder function and elbow flexion. Injury presents with shoulder adducted and internally rotated, elbow extended, forearm pronated, and fingers flexed. The lower roots (C8-T1) control distal functions of the wrist and hand.
+
+The posterior cord gives rise to the axillary nerve (from upper roots C5-C6), which innervates the deltoid for shoulder abduction and some of the triceps. The C7 root contributes innervation to the triceps. The radial nerve (from lower roots C8 to T1) innervates wrist and digital extension and some of the triceps.
+
+The lateral cord gives rise to the musculocutaneous nerve (from upper roots C5-7), which innervates the biceps and brachialis for elbow flexion.
+
+The medial cord gives rise to the median nerve, which innervates thumb intrinsics, flexor carpi radialis (FCR), flexor pollicis longus (FPL), flexor digitorum superficialis (FDS), flexor digitorum profundus (FDP) to the index and middle fingers, and pronator teres. The ulnar nerve innervates the hand intrinsics (interossei), flexor carpi ulnaris (FCU), and FDP to the ring and small fingers.
 
 ## Superficial nerves
-Medial antebrachial cutaneous nerve Follows basilic vein on ulnar aspect of forearm.
-Lateral antebrachial cutaneous nerve Follows cephalic vein on radial aspect of forearm; musculocutaneous nerve branch.
-Intercostobrachial nerve Innervates medial upper arm; nerve pierces through serratus anterior.
-Dorsal sensory branch of ulnar nerve Supplies dorsal/ulnar hand sensation.
-Saphenous nerve Innervates medial malleolus; travels along with greater saphenous vein.
+The medial antebrachial cutaneous nerve follows the basilic vein on the ulnar aspect of the forearm. The lateral antebrachial cutaneous nerve follows the cephalic vein on the radial aspect of the forearm and is a branch of the musculocutaneous nerve. The intercostobrachial nerve innervates the medial upper arm and pierces through the serratus anterior. The dorsal sensory branch of the ulnar nerve supplies dorsal and ulnar hand sensation. The saphenous nerve innervates the medial malleolus and travels with the greater saphenous vein.
 
 # Compression Neuropathies
 
 ## Carpal tunnel syndrome
-Symptoms include numbness to thumb, index, middle fingers, worse at night; can progress to affect thumb intrinsic/thenar muscles.
-Diagnosis involves clinical or electrodiagnostic testing. Nerve conduction studies: median nerve sensory peak latency >3.5ms, motor >4.5ms. Diagnosis involves US or MRI with increased cross-sectional area of median nerve. Diagnosis involves amyloidosis (~10% of bilateral carpal tunnel); congo red stain on tenosynovium biopsy.
-Treatment includes night splinting (mild), corticosteroid injection for short-term relief.
-Treatment involves carpal tunnel release for symptoms >3 months, failure of conservative measures. No difference between open and endoscopic approaches long-term.
+Carpal tunnel syndrome presents with numbness to the thumb, index, and middle fingers that is worse at night and can progress to affect the thumb intrinsic and thenar muscles. Diagnosis is made clinically or with electrodiagnostic testing. Nerve conduction studies show median nerve sensory peak latency greater than 3.5ms and motor latency greater than 4.5ms. Ultrasound or MRI demonstrates increased cross-sectional area of the median nerve. Approximately 10% of bilateral carpal tunnel cases are associated with amyloidosis, diagnosed by congo red stain on tenosynovium biopsy. Treatment for mild cases includes night splinting, and corticosteroid injection provides short-term relief. Carpal tunnel release is indicated for symptoms lasting more than 3 months or failure of conservative measures, with no long-term difference between open and endoscopic approaches.
 
 ## Cubital tunnel syndrome
-Symptoms include ring and small finger numbness; can progress to finger weakness due to affecting finger intrinsics.
-Diagnosis involves Froment sign: pull a paper from a patient pinching, look for compensation with thumb flexion (FPL).
-Diagnosis involves clinical or electrodiagnostic test (velocity decrease ~10m/s around elbow).
-Treatment includes elbow extension splint.
-Treatment involves cubital tunnel release in situ. Anterior transposition (submuscular or subcutaneous) if ulnar nerve subluxation, recurrence. Areas of compression Osbourne ligament (near medial epicondyle), medial intermuscular septum and arcade of Struthers in upper arm, FDP heads in forearm, anconeus epitrochlearis (congenital anomalous muscle in medial elbow).
+Cubital tunnel syndrome presents with ring and small finger numbness that can progress to finger weakness due to involvement of the finger intrinsics. The Froment sign is elicited by pulling paper from a patient who is pinching and observing compensation with thumb flexion (FPL). Diagnosis is made clinically or with electrodiagnostic testing showing velocity decrease of approximately 10m/s around the elbow. Initial treatment includes an elbow extension splint. Surgical treatment involves cubital tunnel release in situ, with anterior transposition (submuscular or subcutaneous) performed for ulnar nerve subluxation or recurrence. Areas of compression include the Osbourne ligament (near the medial epicondyle), medial intermuscular septum and arcade of Struthers in the upper arm, FDP heads in the forearm, and anconeus epitrochlearis (a congenital anomalous muscle in the medial elbow).
 
 ## Guyon's canal
-3rd most-common compressive neuropathy site (2nd most-common ulnar nerve compression site).
-Borders hypothenar muscle, transverse carpal ligament, volar carpal ligament, pisiform.
+Guyon's canal is the third most common compressive neuropathy site and the second most common ulnar nerve compression site. Its borders include the hypothenar muscles, transverse carpal ligament, volar carpal ligament, and pisiform.
 
 ## Anterior interosseous nerve syndrome
-Motor only affects FPL, FDP index finger.
+Anterior interosseous nerve syndrome is a motor-only condition that affects the FPL and FDP to the index finger.
 
 ## Pronator/lacertus fibrosis compression
-Motor and sensory to median nerve at forearm.
-Includes anterior interosseous nerve weakness, thumb intrinsic weakness motor changes.
+This compression affects both motor and sensory functions of the median nerve at the forearm. It includes anterior interosseous nerve weakness and thumb intrinsic weakness.
 
 ## Radial tunnel syndrome
-Symptoms include lateral forearm pain.
-Diagnosis involves tenderness 5cm distal to lateral epicondyle, no motor symptoms.
-Diagnosis involves MRI.
+Radial tunnel syndrome presents with lateral forearm pain. Diagnosis is made by finding tenderness 5cm distal to the lateral epicondyle without motor symptoms. MRI can confirm the diagnosis.
 
 ## Posterior interosseous palsy
-Diagnosis involves intact tenodesis effect (tendons intact), no active extension of digits.
+Posterior interosseous palsy is diagnosed by finding an intact tenodesis effect (indicating intact tendons) with no active extension of the digits.
 
 ## Superficial branch of radial nerve compression
-Symptoms include numbness over dorsal thumb and index finger.
-Treatment includes splinting, rest.
-Treatment involves release fascia between brachioradialis and extensor carpi radialis longus (ECRL). Pierces ECRL at 8cm proximal to radial styloid.
+This compression presents with numbness over the dorsal thumb and index finger. Initial treatment includes splinting and rest. Surgical treatment involves releasing the fascia between the brachioradialis and extensor carpi radialis longus (ECRL), where the nerve pierces the ECRL at 8cm proximal to the radial styloid.
 
 # Nerve Injuries
 
 ## Sunderland classification
-I Neurapraxia segmental demyelination.
-II Axonotmesis intrafascicular injury (mild).
-III Axonotmesis (moderate).
-IV Axonotmesis (severe).
-V Neurotmesis transection of nerve.
-VI Mixed components.
+The Sunderland classification grades nerve injuries: Grade I (neurapraxia) involves segmental demyelination; Grade II (axonotmesis) involves mild intrafascicular injury; Grade III involves moderate axonotmesis; Grade IV involves severe axonotmesis; Grade V (neurotmesis) involves complete transection of the nerve; Grade VI involves mixed components.
 
 ## Electrodiagnostic testing
-EMG May see some changes as early as 10 days from injury.
-Complete denervation positive sharp waves, fibrillation potentials, decreased motor unit recruitment.
-Nerve recovery nascent potentials.
+EMG may show changes as early as 10 days from injury. Complete denervation shows positive sharp waves, fibrillation potentials, and decreased motor unit recruitment. Nerve recovery is indicated by nascent potentials.
 
 ## Brachial plexus injury
-Diagnosis involves MRI a few weeks from injury to evaluate for root avulsions.
-Nerve root injury can affect diaphragm (C3-5).
-Treatment includes nerve transfers if no functional or EMG recovery at 3-6 months.
+MRI should be performed a few weeks after injury to evaluate for root avulsions. Nerve root injury can affect the diaphragm (C3-5). Nerve transfers are indicated if there is no functional or EMG recovery at 3-6 months.
 
 ## Radial nerve injury
-Early reinnervation brachioradialis, extensor carpi longus and brevis (ECRL, ECRB).
-Last reinnervation extensor indicus proprius.
+Following radial nerve injury, early reinnervation occurs in the brachioradialis and extensor carpi longus and brevis (ECRL, ECRB). The last muscle to reinnervate is the extensor indicis proprius.
 
 ## Ulnar nerve injury
-Innervates FDP ring and small fingers, FCU proximally in forearm, digital intrinsic muscles distally in hand.
-Weak digital abduction/adduction, thumb adduction (adductor pollicis).
+The ulnar nerve innervates the FDP to the ring and small fingers and FCU proximally in the forearm, and the digital intrinsic muscles distally in the hand. Injury causes weak digital abduction and adduction and weak thumb adduction (adductor pollicis).
 
 ## Complex regional pain syndrome
-Symptoms include burning pain, stiffness.
-Risk factors include smokers, female.
-Diagnosis involves shiny, swollen, warm skin, hypersensitivity on exam.
-Diagnosis involves Normal EMG/NCS, bone scan with increased area intake.
-Pathophysiology changes to C nerve fibers.
-Types I no identifiable nerve; II identifiable nerve.
+Complex regional pain syndrome presents with burning pain and stiffness. Risk factors include smoking and female sex. Examination reveals shiny, swollen, warm skin with hypersensitivity. EMG and NCS are normal, while bone scan shows increased uptake in the affected area. The pathophysiology involves changes to C nerve fibers. Type I has no identifiable nerve injury, while Type II has an identifiable nerve injury.
 
-## Parsonage-Turner
-Acute brachial neuritis, can occur after viral infection.
-Diagnosis involves multiple peripheral nerves involved on EMG/NCS, hourglass constriction of the brachial plexus on MRI.
+## Parsonage-Turner syndrome
+Parsonage-Turner syndrome is an acute brachial neuritis that can occur after viral infection. Diagnosis is made by finding multiple peripheral nerves involved on EMG/NCS and hourglass constriction of the brachial plexus on MRI.
 
 # Nerve Repairs
 
 ## Repair and reconstruction
-Tension-free coaptation (#1 technical factor).
-Use nerve grafts for gaps >1cm.
-Nerve autografts sural, lateral antebrachial cutaneous, medial antebrachial cutaneous.
-Age (#1) most predictive of outcome, more distal injury favorable to proximal injury.
-Nerve regenerates at ~1mm/day, can reinnervate muscle 12-18 months from injury.
+Tension-free coaptation is the most important technical factor. Nerve grafts are used for gaps greater than 1cm. Common nerve autografts include the sural, lateral antebrachial cutaneous, and medial antebrachial cutaneous nerves. Age is the most predictive factor of outcome, and more distal injuries have more favorable outcomes than proximal injuries. Nerves regenerate at approximately 1mm per day and can reinnervate muscle 12-18 months from injury.
 
 ## Nerve transfers
-Consider when distance from injury to motor end plates unlikely to reinnervate.
-Anterior interosseous (intrinsic) nerve transfer. Used to reestablish hand intrinsic function after proximal ulnar nerve injury (around elbow). Treatment includes anterior interosseous nerve from pronator quadratus transferred to ulnar motor branch at distal forearm. Ulnar nerve topography at distal forearm: sensory/motor/sensory.
-Elbow flexion nerve transfer. Tx FCU fascicle of ulnar nerve to brachialis (Oberlin) +/- FCR of median (McKinnon) to biceps branches.
+Nerve transfers are considered when the distance from injury to motor end plates makes reinnervation unlikely. The anterior interosseous (intrinsic) nerve transfer is used to reestablish hand intrinsic function after proximal ulnar nerve injury (around the elbow). The anterior interosseous nerve from the pronator quadratus is transferred to the ulnar motor branch at the distal forearm. The ulnar nerve topography at the distal forearm follows a sensory/motor/sensory pattern. For elbow flexion nerve transfer, the FCU fascicle of the ulnar nerve is transferred to the brachialis (Oberlin transfer), with or without the FCR fascicle of the median nerve to the biceps branches (McKinnon modification).
 
 ## Free functional muscle transfer
-Role in complete plexopathy.
-Use extra-plexus donor nerve (e.g., spinal accessory, intercostals).
-Spinal accessory nerve runs in posterior triangle of the neck, innervates sternocleidomastoid, trapezius muscles.
-The most common gracilis flap used to restore elbow flexion.
+Free functional muscle transfer has a role in complete plexopathy and uses extra-plexus donor nerves such as the spinal accessory or intercostal nerves. The spinal accessory nerve runs in the posterior triangle of the neck and innervates the sternocleidomastoid and trapezius muscles. The gracilis flap is most commonly used to restore elbow flexion.
 
 ## Neuroma in continuity
-Treatment includes excise, repair with nerve graft.
+Treatment involves excision and repair with nerve graft.
 
 # Tendon Transfers
 
-Need supple joints, soft tissue equilibrium, donor of adequate excursion, adequate strength donor, expendable donor, straight line of pull, synergy, single function per transfer.
-Tendon transfers PT to ECRB, FCR to extensor digitorum communis (EDC), FDS IV to extensor pollicis longus (EPL).
+Tendon transfers require supple joints, soft tissue equilibrium, a donor of adequate excursion, adequate strength donor, expendable donor, straight line of pull, synergy, and single function per transfer. Common tendon transfers include pronator teres (PT) to extensor carpi radialis brevis (ECRB), flexor carpi radialis (FCR) to extensor digitorum communis (EDC), and flexor digitorum superficialis IV (FDS IV) to extensor pollicis longus (EPL).
 
 ## Targeted muscle reinnervation
-Major peripheral nerve to selective motor branch nerve transfer.
-Select synergistic transfers e.g., median nerve to flex digits.
-Decreases phantom pain, improved ability to use myoelectric prosthetics.
-Billed as a pedicled nerve transfer.
-Primary TMR performed at amputation.
-Secondary TMR performed after amputation for pain or phantom sensation. Pain initially worse for first 6 weeks, then plateaus and decreases over following 6 months.
+Targeted muscle reinnervation (TMR) involves major peripheral nerve to selective motor branch nerve transfer. Synergistic transfers are selected, such as median nerve to flex digits. TMR decreases phantom pain and improves the ability to use myoelectric prosthetics. It is billed as a pedicled nerve transfer. Primary TMR is performed at the time of amputation. Secondary TMR is performed after amputation for pain or phantom sensation; pain is initially worse for the first 6 weeks, then plateaus and decreases over the following 6 months.
 
 ## Myoelectric prosthesis
-Senses surface EMG signals.
-Targeted muscle reinnervation creates stronger signals.
-More complex motions than body-powered prosthesis.
-Synergistic functions Above-elbow amputation median nerve to biceps (short head) for hand closure.`,
+Myoelectric prostheses sense surface EMG signals. Targeted muscle reinnervation creates stronger signals and allows more complex motions than body-powered prostheses. For synergistic function in above-elbow amputation, the median nerve is transferred to the biceps (short head) for hand closure.`,
 
     'hand-tendons': `# Flexor Tendons
 
 ## Exam
-Flexor digitorum superficialis (FDS). Actively flexes proximal interphalangeal joint (PIPJ) with other digits in extension. Orientation of tendons (wrist level): middle and ring finger tendons volar to index and small finger tendons. Small finger FDS absent in ~15% of people.
-Flexor digitorum profundus (FDP). Actively flexes distal interphalangeal joint (DIPJ) with other digits in extension. Linburg-Comstock anomaly: congenital adhesion between FPL and FDP index finger proximal to carpal tunnel.
-Tenodesis effect. Passively extend wrist, assess digital cascade for abnormalities.
-Lumbrical muscle. Actively flexes MCPJ. Originates from FDP in proximal palm, insert on radial lateral band.
+The flexor digitorum superficialis (FDS) actively flexes the proximal interphalangeal joint (PIPJ) and is tested with other digits in extension. At the wrist level, the middle and ring finger tendons lie volar to the index and small finger tendons. The small finger FDS is absent in approximately 15% of people.
+
+The flexor digitorum profundus (FDP) actively flexes the distal interphalangeal joint (DIPJ) and is tested with other digits in extension. The Linburg-Comstock anomaly is a congenital adhesion between the FPL and FDP to the index finger proximal to the carpal tunnel.
+
+The tenodesis effect is assessed by passively extending the wrist and observing the digital cascade for abnormalities.
+
+The lumbrical muscles actively flex the MCPJ. They originate from the FDP in the proximal palm and insert on the radial lateral band.
 
 ## Injuries
-5 zones from distal to proximal. I distal to FDS insertion. II between FDS insertion to A1 pulley/distal palmar crease. III between A1 pulley and carpal tunnel. IV carpal tunnel. V forearm.
+There are 5 flexor zones from distal to proximal: Zone I is distal to the FDS insertion, Zone II is between the FDS insertion and the A1 pulley/distal palmar crease, Zone III is between the A1 pulley and carpal tunnel, Zone IV is the carpal tunnel, and Zone V is the forearm.
 
 ## Zone II
-Treatment involves repair within 2 weeks. Strength of repair related to # of core strands, suture size, locking suture, suture location (should be dorsal). 1cm bites optimal suture distance for repair. Repair of one FDS associated with decreased tendon resistance compared to both FDS slips.
-Post-operative care occupational therapy for 3-6 months. Early active motion begins first few days after repair (same rupture risk, better range of motion compared to other protocols). Modified Duran early passive motion protocol, typically don't start active motion until 3-4 weeks after repair.
+Treatment involves repair within 2 weeks. The strength of repair is related to the number of core strands, suture size, use of locking suture, and suture location (which should be dorsal). One-centimeter bites are the optimal suture distance for repair. Repair of one FDS slip is associated with decreased tendon resistance compared to repairing both FDS slips.
+
+Post-operative care includes occupational therapy for 3-6 months. Early active motion begins the first few days after repair, with the same rupture risk but better range of motion compared to other protocols. The modified Duran early passive motion protocol typically does not start active motion until 3-4 weeks after repair.
 
 ## Staged flexor tendon repair
-Necessary after >2 weeks from injury or significant damage to pulleys.
-Attritional changes occur to flexor tendon over time.
-Treatment includes 2-stage reconstruction. Stage 1: place silicone rod from DIPJ to central palm or distal forearm, allow capsule to recreate pulley system for 12 weeks. Stage 2: exchange silicone rod for tendon autograft.
-Treatment includes Paneva-Holevich (2-stage reconstruction variation): suture FDS to FDP, place silicone rod distally at stage 1, use FDS as tendon autograft to distal FDP stump at stage 2.
+Staged repair is necessary after more than 2 weeks from injury or with significant damage to pulleys, as attritional changes occur to the flexor tendon over time.
+
+Two-stage reconstruction involves Stage 1, where a silicone rod is placed from the DIPJ to the central palm or distal forearm, allowing the capsule to recreate the pulley system over 12 weeks. Stage 2 involves exchanging the silicone rod for a tendon autograft.
+
+The Paneva-Holevich variation involves suturing the FDS to the FDP and placing the silicone rod distally at Stage 1, then using the FDS as the tendon autograft to the distal FDP stump at Stage 2.
 
 ## Secondary flexor tendon surgery
-e.g., tenolysis need passive greater than active motion, stable soft tissues.
-Wait at least 6 months after initial repair.
+Secondary surgery, such as tenolysis, requires passive motion greater than active motion and stable soft tissues. It should be performed at least 6 months after initial repair.
 
 ## Partial lacerations
-Can trial conservative therapy up to 90% laceration (unless there's triggering).
+Conservative therapy can be trialed for up to 90% lacerations unless there is triggering.
 
 ## Jersey finger
-Flexor zone I (FDP) distal rupture.
-Classification I avulsion to palm. II retraction to PIPJ with bone segment. III retraction to DIPJ with bone segment. IV fracture, tendon avulsion. V comminuted distal phalanx fracture.
-Treatment includes types I: repair <1 week, II, III repair <3 weeks.
+Jersey finger is a flexor zone I (FDP) distal rupture. The classification includes Type I (avulsion to palm), Type II (retraction to PIPJ with bone segment), Type III (retraction to DIPJ with bone segment), Type IV (fracture with tendon avulsion), and Type V (comminuted distal phalanx fracture). Type I injuries should be repaired within 1 week, while Types II and III should be repaired within 3 weeks.
 
 ## Pulley injuries
 
 ### A1 pulley
-Odd numbered pulleys originate from volar plate.
-Stenosing tenosynovitis (trigger finger). Flexed posture of digit, usually able to manually reduce. Risk factors include diabetes. Treatment includes steroid injection. Treatment includes A1 pulley release if recurrent, advanced disease. Wait 12 weeks after steroid injection before surgery.
+Odd-numbered pulleys originate from the volar plate. Stenosing tenosynovitis (trigger finger) presents with a flexed posture of the digit that is usually manually reducible. Risk factors include diabetes. Treatment includes steroid injection, with A1 pulley release indicated for recurrent or advanced disease. Surgery should be delayed 12 weeks after steroid injection.
 
 ### A2 pulley
-Arises from bone.
-50% of pulley needed to prevent tendon bowstringing.
-Closed rupture of pulley. Associated with rock climbing positions. Treatment includes rest, ice, ring splint. Treatment includes tendon autograft pulley reconstruction.
+The A2 pulley arises from bone. At least 50% of the pulley is needed to prevent tendon bowstringing. Closed rupture of the pulley is associated with rock climbing positions and is treated with rest, ice, and ring splinting. Tendon autograft pulley reconstruction may be needed for severe injuries.
 
 # Extensor Tendons
 
 ## Anatomy
-VIII zones Progress from distal to proximal (odd over joints, even over bones).
-Zone VII Extensor retinaculum.
-Zone VIII forearm.
-Most distal forearm muscle belly for extensor tendons extensor indicis proprius (EIP).
+There are 8 extensor zones that progress from distal to proximal, with odd zones over joints and even zones over bones. Zone VII is the extensor retinaculum, and Zone VIII is the forearm. The extensor indicis proprius (EIP) has the most distal forearm muscle belly of the extensor tendons.
 
 ## Exam
-Central slip (extensor zone III) injury. Main tendon for PIPJ extension. Diagnosis involves Elson test: cannot actively extend DIPJ in flexed MCPJ and PIPJ position with intact central slip due to lateral bands (but can extend PIPJ due to intrinsics). Treatment includes PIPJ extension splinting for 4-6 weeks or surgical repair.
-Intubated/non-cooperative patient Assess tenodesis effect (passively flex the wrist, assess digital extension).
+Central slip (extensor zone III) injury affects the main tendon for PIPJ extension. The Elson test is diagnostic: the patient cannot actively extend the DIPJ when the MCPJ and PIPJ are flexed if the central slip is intact (due to lateral bands), but can extend the PIPJ (due to intrinsics). Treatment includes PIPJ extension splinting for 4-6 weeks or surgical repair.
+
+For intubated or non-cooperative patients, assess the tenodesis effect by passively flexing the wrist and observing digital extension.
 
 ## Injuries
 
 ### Zone III-V lacerations
-Treatment includes repair and relative motion extension splint (better motion outcomes compared to traditional splint/motion protocols).
+Treatment includes repair and relative motion extension splinting, which provides better motion outcomes compared to traditional splint and motion protocols.
 
 ### Proximal interphalangeal joint flexion contracture
-Test intrinsic/extrinsic tightness with Bunnell test.
-Treatment includes release volar plate, checkrein ligaments.
+The Bunnell test is used to assess intrinsic and extrinsic tightness. Treatment includes release of the volar plate and checkrein ligaments.
 
-### Boutonierre deformity
-Central slip injury PIPJ flexes, DIPJ extends in collapse pattern.
-Can be traumatic or inflammatory.
-Diagnosis involves loss of active IPJ extension against force, abnormal Elson's test.
-Treatment includes splint with PIPJ extended, DIPJ free.
+### Boutonniere deformity
+Boutonniere deformity results from central slip injury causing the PIPJ to flex and DIPJ to extend in a collapse pattern. It can be traumatic or inflammatory. Diagnosis is made by finding loss of active IPJ extension against force and an abnormal Elson test. Treatment includes splinting with the PIPJ extended and the DIPJ free.
 
 ### Swan neck deformity
-PIPJ extends, DIPJ flexes (extensor lag).
-The most common from distal phalanx injury with nonunion (bony mallet), then zone I extensor tendon injury (soft tissue mallet).
-Acute/subacute mallet finger (extensor zone I). Treatment includes splint in extension x 6-8 weeks. Treatment includes pin DIPJ in extension if unable to tolerate splint or volar subluxation of distal phalanx.
+Swan neck deformity causes the PIPJ to extend and the DIPJ to flex (extensor lag). It most commonly results from distal phalanx injury with nonunion (bony mallet), followed by zone I extensor tendon injury (soft tissue mallet).
+
+For acute or subacute mallet finger (extensor zone I), treatment includes splinting in extension for 6-8 weeks. Pinning the DIPJ in extension is indicated if the patient is unable to tolerate splinting or has volar subluxation of the distal phalanx.
 
 ### Sagittal band injury
-Maintains position of extensor tendon over the metacarpal head.
-Symptoms include swelling, inability to extend MCPJ from flexed position.
-Treatment includes relative extension splinting; direct repair (acute) or reconstruction (chronic).
+The sagittal band maintains the position of the extensor tendon over the metacarpal head. Symptoms include swelling and inability to extend the MCPJ from a flexed position. Treatment includes relative extension splinting for acute injuries with direct repair, or reconstruction for chronic injuries.
 
 ### Extensor pollicis longus rupture
-Inability to extend thumb IPJ or retropulse thumb.
-3rd extensor compartment, ulnar to Lister's tubercle in distal radius.
-Attritional ruptures occur with closed management of non-displaced distal radius fractures.
-Treatment includes tendon transfer: EIP to extensor pollicis longus.
+This injury causes inability to extend the thumb IPJ or retropulse the thumb. The EPL is located in the 3rd extensor compartment, ulnar to Lister's tubercle in the distal radius. Attritional ruptures can occur with closed management of non-displaced distal radius fractures. Treatment is tendon transfer of the EIP to the extensor pollicis longus.
 
 ### 1st extensor compartment tendinopathy (De Quervain's)
-Symptoms include radial styloid pain, swelling of radial/distal forearm, worse with thumb movements.
-Diagnosis involves Eichoff test with pain to radial styloid with ulnar deviation of wrist with thumb flexed in palm.
-Treatment includes steroid injection, immobilization, surgical release.
-Non-surgical treatment less effective when septum between abductor pollicis longus and extensor pollicis brevis exists.
+De Quervain's tenosynovitis presents with radial styloid pain, swelling of the radial and distal forearm, and pain that worsens with thumb movements. The Eichhoff test demonstrates pain at the radial styloid with ulnar deviation of the wrist while the thumb is flexed in the palm. Treatment includes steroid injection, immobilization, and surgical release. Non-surgical treatment is less effective when a septum exists between the abductor pollicis longus and extensor pollicis brevis.
 
 ### Intersection syndrome
-Diagnosis involves pain 4-5cm proximal to Lister's tubercle, swelling, worse with wrist extension.
-Treatment includes splint, steroid injection; 2nd extensor compartment release.
+Intersection syndrome presents with pain 4-5cm proximal to Lister's tubercle, swelling, and worsening with wrist extension. Treatment includes splinting and steroid injection, with 2nd extensor compartment release for refractory cases.
 
 ### Lumbrical-plus deformity
-Paradoxical extension of the IPJ with active flexion of remaining digits.
-Due to shortening of the FDP and lumbrical muscle.`,
+Lumbrical-plus deformity causes paradoxical extension of the IPJ with active flexion of the remaining digits. It is caused by shortening of the FDP and lumbrical muscle.`,
 
     'replantation-vascular': `# Replantation
 
-The most common table saws (#1) for adults.
-Relative indications Thumb, child, multiple digits, flexor zone I, proximal amputations (e.g., wrist, forearm).
-Relative contraindications Ring avulsion, single-digit flexor zone II, multi-segmental injury.
+Table saws are the most common cause of digital amputation in adults. Relative indications for replantation include thumb amputation, pediatric patients, multiple digit amputations, flexor zone I injuries, and proximal amputations (e.g., wrist, forearm). Relative contraindications include ring avulsion injuries, single-digit flexor zone II injuries, and multi-segmental injuries.
 
 ## Timing of replantation
-Digits no muscle tissue, more tolerant of ischemia. Cold ischemia time 24 hours (case reports with longer ischemic times). Warm ischemia time up to 12 hours.
-Proximal amputations. Cold ischemia time 12 hours. Warm ischemia time 6 hours. Consider arterial shunts to restore blood flow within 6 hours (may need to prioritize reperfusion over bony stabilization pending time from injury); muscle most susceptible to ischemia.
+Digits have no muscle tissue and are more tolerant of ischemia. Cold ischemia time for digits is up to 24 hours (with case reports of longer ischemic times), and warm ischemia time is up to 12 hours.
+
+Proximal amputations have shorter ischemia tolerances. Cold ischemia time is 12 hours, and warm ischemia time is 6 hours. Consider arterial shunts to restore blood flow within 6 hours, and it may be necessary to prioritize reperfusion over bony stabilization depending on time from injury. Muscle tissue is most susceptible to ischemia.
 
 ## Repair
-Options digit-by-digit sequence (one digit at a time) vs structure-by-structure (bone, tendon, microsurgical repairs).
-Favorable factors mechanism of injury (#1), number of veins repaired, better outcomes at high-volume centers.
-Use vein grafts for large gap arterial injuries (>2cm).
+Surgical options include digit-by-digit sequence (completing one digit at a time) versus structure-by-structure approach (completing all bone, then all tendon, then all microsurgical repairs). The mechanism of injury is the most important favorable factor, followed by the number of veins repaired. Better outcomes are achieved at high-volume centers. Vein grafts should be used for large gap arterial injuries greater than 2cm.
 
 ## Prostheses
-Forearm-level amputation. Wrist disarticulation preserves forearm rotation. Transradial better prosthetic fitting (need 5cm of ulna length distal to elbow to fit prosthesis).
+For forearm-level amputation, wrist disarticulation preserves forearm rotation. Transradial amputation provides better prosthetic fitting but requires at least 5cm of ulna length distal to the elbow to fit a prosthesis.
 
 # Other Vascular Diseases
 
 ## Hypothenar hammer syndrome
-Symptoms include ischemic changes to ring and small finger, cold sensitivity, coolness, finger ulceration, distal emoblization.
-Diagnosis involves digital-brachial index (<0.7 abnormal, <0.5 associated with tissue loss).
-Diagnosis involves angiogram with tortuous ulnar artery at proximal hand level.
-Treatment includes aspirin, calcium-channel blockers (1st line if mild).
-Treatment includes surgery: ulnar artery segment with vascular reconstruction (if moderate/severe symptoms), ligation if fingers perfused.
+Hypothenar hammer syndrome presents with ischemic changes to the ring and small fingers, cold sensitivity, coolness, finger ulceration, and distal embolization. Diagnosis is made with digital-brachial index (less than 0.7 is abnormal, and less than 0.5 is associated with tissue loss) and angiogram showing a tortuous ulnar artery at the proximal hand level. First-line treatment for mild cases includes aspirin and calcium-channel blockers. Surgical treatment involves ulnar artery segmental resection with vascular reconstruction for moderate to severe symptoms, or ligation if the fingers are adequately perfused.
 
 ## Acute upper extremity arterial embolism
-Diagnosis involves Doppler US, CT or MR angiography, formal angiography.
-Treatment includes heparin gtt (1st), then surgery if amenable location of clot.
+Diagnosis is made with Doppler ultrasound, CT or MR angiography, or formal angiography. First-line treatment is heparin infusion, followed by surgery if the clot is in an amenable location.
 
 ## IV extravasation
-Treatment includes surgery: full-thickness skin necrosis, chronic ulceration, persistent pain, known caustic agent (e.g., certain chemotherapeutics).
+Surgical indications include full-thickness skin necrosis, chronic ulceration, persistent pain, or exposure to known caustic agents (e.g., certain chemotherapeutics).
 
 ## Pseudoaneurysm
-Symptoms include pulsatile, rapidly enlarging mass.
-Treatment includes IR if small, otherwise explore and repair vessel.
+Pseudoaneurysm presents as a pulsatile, rapidly enlarging mass. Small pseudoaneurysms can be treated with interventional radiology, while larger ones require surgical exploration and vessel repair.
 
 ## Supracondylar humerus fractures
-It is associated with distal ischemia from brachial artery involvement.
-Treatment includes closed reduction, reassess pulses.
-If no return of pulses, angiographic imaging.
+Supracondylar humerus fractures are associated with distal ischemia from brachial artery involvement. Treatment includes closed reduction with reassessment of pulses. If pulses do not return, angiographic imaging is indicated.
 
 ## Brachial arterial line
-The most common median nerve injury.
+Brachial arterial lines are most commonly associated with median nerve injury.
 
 # Other Hand Emergencies
 
 ## High-pressure injection injury
-Paint solvents, oils at >2,000 psi.
-Can cause vascular compromise, severe damage to soft tissues, compartment syndrome, infections.
-Diagnosis involves XR if radiopaque material injected.
-Treatment includes emergent debridement.
-High amputation rate (30%), worse with treatment delays.`,
+High-pressure injection injuries involve paint solvents or oils at pressures greater than 2,000 psi. These can cause vascular compromise, severe damage to soft tissues, compartment syndrome, and infections. X-ray is obtained if radiopaque material was injected. Treatment requires emergent debridement. The amputation rate is high (30%) and worsens with treatment delays.`,
 
     'wrist-forearm-injuries': `# Carpal Injuries
 
 ## Scaphoid fracture
-The most common carpal fracture.
-Diagnosis involves anatomic snuff box tenderness.
-Diagnosis involves XR (scaphoid view: wrist 20 degrees ulnar deviation, 20 degrees extension).
-Diagnosis involves MRI best test for occult fractures or evaluate for union.
-Treatment involves Distal pole cast x 6-12 weeks or surgery for displacement, faster return to activities. Waist and proximal pole consider screw fixation. Retrograde blood supply, proximal pole most prone to nonunion. Scaphoid nonunion advanced collapse (SNAC) arthritic pattern from scaphoid nonunion. Treatment includes scaphoidectomy and 4-corner fusion vs proximal row carpectomy.
+The scaphoid fracture is the most common carpal fracture. Diagnosis is made by anatomic snuff box tenderness. X-ray with scaphoid view (wrist in 20 degrees of ulnar deviation and 20 degrees of extension) is obtained, and MRI is the best test for occult fractures or to evaluate for union.
+
+Distal pole fractures are treated with casting for 6-12 weeks or surgery for displacement, which allows faster return to activities. Waist and proximal pole fractures should be considered for screw fixation. Due to retrograde blood supply, the proximal pole is most prone to nonunion. Scaphoid nonunion advanced collapse (SNAC) is an arthritic pattern resulting from scaphoid nonunion, treated with scaphoidectomy and 4-corner fusion or proximal row carpectomy.
 
 ## Hamate
-Hook of hamate fracture. Symptoms include ulnar nerve symptoms, pain, flexor tendon injuries (decreased grip strength). The most common tendon rupture small finger flexor. Dx XR (carpal tunnel view), CT scan.
+Hook of hamate fractures present with ulnar nerve symptoms, pain, and flexor tendon injuries causing decreased grip strength. The small finger flexor is the most common tendon to rupture. Diagnosis is made with X-ray (carpal tunnel view) or CT scan.
 
 ## Wrist ligament injuries
 
 ### Scapholunate ligament injuries
-Scapholunate advanced collapse (SLAC) arthritic pattern. Starts as a dorsal intersegmental instability (DISI) deformity; scaphoid flexes, lunate extends. Arthritis develops proximal row then midcarpal (radioscaphoid, scaphocapitate, capitolunate, then radiolunate). Diagnosis involves XR with scapholunate gap >3mm, scapholunate angle >70 degrees on lateral, contralateral side with clenched fist view (axial loading of wrist). Diagnosis involves arthroscopy (most accurate). Treatment includes scaphoidectomy and four-corner fusion or proximal row carpectomy.
+Scapholunate advanced collapse (SLAC) is an arthritic pattern that starts as a dorsal intersegmental instability (DISI) deformity, where the scaphoid flexes and the lunate extends. Arthritis develops in the proximal row first, then progresses to the midcarpal joints (radioscaphoid, scaphocapitate, capitolunate, then radiolunate). Diagnosis is made by X-ray showing a scapholunate gap greater than 3mm, scapholunate angle greater than 70 degrees on lateral view, or comparison with the contralateral side using clenched fist view (axial loading of the wrist). Arthroscopy is the most accurate diagnostic test. Treatment includes scaphoidectomy with four-corner fusion or proximal row carpectomy.
 
 ### Lunate dislocation
-Mayfield classification predictable progression of intrinsic ligament injuries. I Scapholunate ligament (SL) injury. II lunocapitate ligament injury. III lunotriquetral ligament injury. IV volar dislocation of lunate out of fossa.
-Short radiolunate ligament generally remains intact.
-Symptoms include acute median nerve sensation changes (acute carpal tunnel syndrome).
-Diagnosis involves XR with changes in Gilula's lines on PA; spilled teacup or volar lunate laterally.
-Treatment includes immediate closed reduction followed by ORIF +/- carpal tunnel release (urgent if irreducible or persistent median-nerve symptoms after reduction).
-Preserves 65-70% wrist flexion/extension, 80% grip strength compared to uninjured side.
-XR shows post-traumatic arthritis.
+The Mayfield classification describes the predictable progression of intrinsic ligament injuries: Stage I is scapholunate ligament injury, Stage II is lunocapitate ligament injury, Stage III is lunotriquetral ligament injury, and Stage IV is volar dislocation of the lunate out of the fossa. The short radiolunate ligament generally remains intact.
+
+Symptoms include acute median nerve sensation changes (acute carpal tunnel syndrome). Diagnosis is made by X-ray showing changes in Gilula's lines on PA view, and a spilled teacup sign or volar lunate position on lateral view. Treatment includes immediate closed reduction followed by ORIF with or without carpal tunnel release (urgent if irreducible or persistent median-nerve symptoms after reduction). This preserves 65-70% of wrist flexion and extension and 80% of grip strength compared to the uninjured side. X-ray may show post-traumatic arthritis.
 
 ### Volar intersegmental instability (VISI)
-Triquetrum extends, lunate flexes.
+In VISI, the triquetrum extends and the lunate flexes.
 
 ## Distal radius fractures
-Similar functional and radiographic outcomes with short- vs long-arm casting; with less shoulder pain with short-arm cast.
+Short-arm and long-arm casting have similar functional and radiographic outcomes, with less shoulder pain when using short-arm casts.
 
 # Wrist Kinematics
 
-Proximal row scaphoid flexes the wrist, triquetrum extends, kept neutral by lunate.
-Distal row allows dart thrower's motion (radial inclination in extension and moves to ulnar inclination in flexion).
-Ulnar variance Diagnosis involves lateral XR most accurate view.
+In the proximal row, the scaphoid flexes the wrist and the triquetrum extends it, while the lunate keeps them neutral. The distal row allows dart thrower's motion (radial inclination in extension that moves to ulnar inclination in flexion). Ulnar variance is most accurately measured on lateral X-ray.
 
 # Compartment Syndrome
 
 ## Acute
-Symptoms include severe pain, possible numbness.
-Risk factors include obtunded, crush injury, reperfusion injury (TNF alpha release).
-Diagnosis involves pain with passive stretch, paresthesia, paralysis, pallor, pulselessness (late) on exam.
-Diagnosis involves compartment manometry (compartment pressure >30 or within 30 of diastolic blood pressure).
-Diagnosis involves lab changes (hyperkalemia, metabolic acidosis, hypocalcemia).
-Rhabdomyolysis can progress to acute kidney injury.
-Treatment includes compartment release.
+Acute compartment syndrome presents with severe pain and possible numbness. Risk factors include obtunded patients, crush injuries, and reperfusion injury (with TNF alpha release). Examination findings include pain with passive stretch, paresthesia, paralysis, pallor, and pulselessness (a late finding). Compartment manometry is diagnostic, with elevated compartment pressure greater than 30mmHg or within 30mmHg of diastolic blood pressure. Laboratory changes include hyperkalemia, metabolic acidosis, and hypocalcemia. Rhabdomyolysis can progress to acute kidney injury. Treatment is emergent compartment release.
 
 ## Chronic
-Volkmann ischemic contracture. Affects deep volar compartment 1st. Treatment includes occupational therapy. Treatment includes surgical tendon lengthening (mild), flexor pronator slide (moderate), superficialis to profundus (severe), free functional muscle transfer (severe).
+Volkmann ischemic contracture is a chronic compartment syndrome that affects the deep volar compartment first. Treatment includes occupational therapy, surgical tendon lengthening for mild cases, flexor pronator slide for moderate cases, and superficialis to profundus transfer or free functional muscle transfer for severe cases.
 
 # Elbow and Forearm Pathology
 
 ## Extensor carpi radialis brevis (ECRB) enthesopathy (lateral epicondylitis)
-Degenerative changes at attachment of ECRB to lateral epicondyle.
-Diagnosis involves lateral elbow tenderness with hyperextension of middle finger (ECRB inserts on base of third metacarpal).
-Treatment includes occupational therapy/activity modification/stretching exercises, corticosteroid injection, surgical debridement (outcomes the same regardless of treatment).
+Lateral epicondylitis involves degenerative changes at the attachment of the ECRB to the lateral epicondyle. Diagnosis is made by lateral elbow tenderness with hyperextension of the middle finger (the ECRB inserts on the base of the third metacarpal). Treatment includes occupational therapy, activity modification, stretching exercises, corticosteroid injection, and surgical debridement, with similar outcomes regardless of treatment modality.
 
 ## Distal radioulnar joint instability
-It is associated with Essex Lopresti, Galeazzi injuries affecting the interosseous membrane.`,
+Distal radioulnar joint instability is associated with Essex-Lopresti and Galeazzi injuries that affect the interosseous membrane.`,
 
     'hand-tumors': `# Cysts
 
 ## Digital mucous cyst
-Secondary to distal interphalangeal osteoarthritis, can involve nail fold.
-Diagnosis involves XR with osteophyte at distal interphalangeal joint.
-Treatment includes excise cyst cavity, remove osteophyte.
+Digital mucous cysts are secondary to distal interphalangeal osteoarthritis and can involve the nail fold. X-ray shows an osteophyte at the distal interphalangeal joint. Treatment involves excising the cyst cavity and removing the osteophyte.
 
 ## Ganglion cyst
-The most common dorsal wrist (~60% of all ganglion cysts) from scapholunate area; volar cysts possible (The most common radioscaphoid area).
-Symptoms include wax/wane in size.
-Diagnosis involves transilluminates on exam.
-Treatment includes excision (~50% recurrence risk).
+Ganglion cysts most commonly occur on the dorsal wrist (approximately 60% of all ganglion cysts) originating from the scapholunate area. Volar cysts are also possible, most commonly from the radioscaphoid area. They characteristically wax and wane in size and transilluminate on examination. Treatment is excision, with approximately 50% recurrence risk.
 
 # Benign Soft-Tissue Masses
 
 ## Glomus tumor
-The most common subungual.
-Symptoms include blueish appearance, severe pain with localized pressure, sensitive to cold, pinpoint sensitivity, paroxysmal pain.
-Diagnosis involves cold-water test, pain decreases with inflation of blood-pressure cuff.
-Diagnosis involves MRI T2 (lesion is bright).
-Treatment includes complete surgical excision.
+Glomus tumors most commonly occur in the subungual region. They present with a bluish appearance, severe pain with localized pressure, cold sensitivity, pinpoint sensitivity, and paroxysmal pain. Diagnosis is made with the cold-water test and by demonstrating pain decrease with inflation of a blood-pressure cuff. MRI shows the lesion as bright on T2-weighted images. Treatment is complete surgical excision.
 
 ## Giant cell tumor of tendon sheath
-Tan, multi-lobulated mass.
-Diagnosis involves does not transilluminate on exam.
-Diagnosis involves XR can invade bone cortex, MRI decreased T1/T2 intensity.
-Diagnosis involves histiocytoid mononuclear cells on pathology.
-Treatment includes marginal excision.
-Can invade into digital nerve.
-The most common recurrence.
+Giant cell tumor of the tendon sheath presents as a tan, multi-lobulated mass that does not transilluminate on examination. X-ray may show bone cortex invasion, and MRI demonstrates decreased T1 and T2 intensity. Pathology shows histiocytoid mononuclear cells. Treatment is marginal excision. These tumors can invade into the digital nerve and have a high recurrence rate.
 
 ## Extensor digitorum brevis manus
-2-3% of population.
-Near radiocarpal joint just distal to extensor retinaculum.
-No transillumination.
+This anatomic variant occurs in 2-3% of the population. It is located near the radiocarpal joint just distal to the extensor retinaculum and does not transilluminate.
 
 ## Schwannoma
-The most common nerve tumor.
-Benign (with rare malignancy potential) peripheral nerve tumor from glial cells.
-Diagnosis involves painless smooth, non-adherent mass, + Tinel sign in nerve distribution on exam.
-Diagnosis involves MRI.
-Treatment includes excision (intra fascicular).
+Schwannoma is the most common nerve tumor. It is a benign peripheral nerve tumor arising from glial cells with rare malignancy potential. On examination, it presents as a painless, smooth, non-adherent mass with a positive Tinel sign in the nerve distribution. Diagnosis is confirmed with MRI. Treatment is intrafascicular excision.
 
 ## Enchondroma
-The most common bone tumor of hand.
-Abnormal cartilage deposit in bone; prone to pathologic fractures.
-Rare syndromic associations (Mafucci: venous malformations, Ollier disease: can progress to chondrosarcoma).
-Treatment includes observe if asymptomatic.
-Treatment involves curettage and bone grafting.
+Enchondroma is the most common bone tumor of the hand. It is an abnormal cartilage deposit in bone that is prone to pathologic fractures. Rare syndromic associations include Maffucci syndrome (with venous malformations) and Ollier disease (which can progress to chondrosarcoma). Asymptomatic lesions are observed, while symptomatic lesions are treated with curettage and bone grafting.
 
 ## Giant cell tumors of the bone
-Benign, locally aggressive.
-Diagnosis involves CT chest (rare pulmonary metastasis).
-Treatment includes curettage and bone grafting for early, resection and bone reconstruction for late.
+Giant cell tumors of the bone are benign but locally aggressive. CT of the chest is obtained to evaluate for rare pulmonary metastasis. Early lesions are treated with curettage and bone grafting, while late lesions require resection and bone reconstruction.
 
 ## Osteoid osteoma
-Benign bone tumor arising from osteoblasts.
-Symptoms include focal bony pain relieved by NSAIDs.
-Diagnosis involves CT.
-Treatment includes NSAIDs.
+Osteoid osteoma is a benign bone tumor arising from osteoblasts. It presents with focal bony pain that is relieved by NSAIDs. Diagnosis is made with CT. Treatment is NSAIDs.
 
 # Malignancies
 
-## Melonychia
-Biopsy for >3mm streak crossing eponychial fold (risk of acral lentiginous melanoma).
-Treatment includes wide local excision with local flap or FTSG reconstruction, amputation for advanced cases.
-Prognosis related to tumor stage.
+## Melanonychia
+Biopsy is indicated for streaks greater than 3mm that cross the eponychial fold due to the risk of acral lentiginous melanoma. Treatment includes wide local excision with local flap or FTSG reconstruction, with amputation for advanced cases. Prognosis is related to tumor stage.
 
 ## Soft-tissue sarcomas
-Can be in upper or lower extremity.
-Diagnosis involves imaging or incisional biopsy (longitudinal).
-Diagnosis involves anaplastic cells on histopathology.
-Treatment includes wide-local excision (1cm margin or more) and radiation therapy for limb salvage.
-Amputation to above nearest proximal joint for advanced cases, older patients.
-No routine lymph node sampling unless clinical evidence of nodal involvement.
+Soft-tissue sarcomas can occur in the upper or lower extremity. Diagnosis is made with imaging or incisional biopsy (using a longitudinal incision). Histopathology shows anaplastic cells. Treatment includes wide local excision with margins of 1cm or more and radiation therapy for limb salvage. Amputation to above the nearest proximal joint is considered for advanced cases or older patients. Routine lymph node sampling is not performed unless there is clinical evidence of nodal involvement.
 
 ## Bony sarcomas
-Chondrosarcoma The most common malignant non-skin tumor of the hand (SCC is most common overall).
-Osteosarcoma can metastasize to lung.
+Chondrosarcoma is the most common malignant non-skin tumor of the hand, though squamous cell carcinoma is the most common overall. Osteosarcoma can metastasize to the lung.
 
 ## Nerve tumors
-Malignant peripheral nerve sheath tumors metastasizes to lung.`,
+Malignant peripheral nerve sheath tumors metastasize to the lung.`,
 
     'hand-inflammation-infections': `# Osteoarthritis
 
 ## Thumb carpometacarpal (CMC) arthritis
-The most common site of hand arthritis.
-Diagnosis involves XR. Eaton classification: symptoms don't correlate with imaging. I: joint space narrowing. II: small osteophytes. III: large osteophytes. IV: collapse changes: scapho-trapezoid-trapezium (STT) joint. Eaton stress view: thumbs pushed together, assess laxity/subluxation. Roberts view: hyperpronated thumb to evaluate trapeziometacarpal joint.
-Treatment includes trapeziectomy. Ligament reconstruction with tendon interposition (LRTI) commonly performed; associated with higher complication rate than trapeziectomy alone. Thumb metacarpophalangeal joint (MCPJ) hyperextends to compensate for advanced collapse; need to correct >30 degrees MCPJ hyperextension. Treatment includes MCPJ fusion.
+Thumb CMC arthritis is the most common site of hand arthritis. Diagnosis is made with X-ray. The Eaton classification stages the disease, though symptoms do not correlate with imaging: Stage I shows joint space narrowing, Stage II shows small osteophytes, Stage III shows large osteophytes, and Stage IV shows collapse changes involving the scapho-trapezoid-trapezium (STT) joint. The Eaton stress view (thumbs pushed together) assesses laxity and subluxation, while the Roberts view (hyperpronated thumb) evaluates the trapeziometacarpal joint.
+
+Treatment includes trapeziectomy. Ligament reconstruction with tendon interposition (LRTI) is commonly performed but is associated with a higher complication rate than trapeziectomy alone. The thumb metacarpophalangeal joint (MCPJ) hyperextends to compensate for advanced collapse, and MCPJ hyperextension greater than 30 degrees requires correction with MCPJ fusion.
 
 ## Scaphotrapeziotrapezoidal (STT) arthritis
-Can occur in isolation or with CMC arthritis.
-Diagnosis involves no axial thumb pain or subluxation of thumb differentiates from CMC arthritis.
-Diagnosis involves XR.
-Treatment includes OT, steroid injection; STT arthrodesis.
+STT arthritis can occur in isolation or with CMC arthritis. It is differentiated from CMC arthritis by the absence of axial thumb pain or subluxation of the thumb. Diagnosis is made with X-ray. Treatment includes occupational therapy and steroid injection, with STT arthrodesis for refractory cases.
 
 ## Flexor tendon rupture
-Attritional from radiocarpal arthritis.
-Diagnosis involves imaging to assess for osteophytes.
-Treatment includes resect osteophyte, tendon graft reconstruction.
+Attritional flexor tendon rupture results from radiocarpal arthritis. Imaging is used to assess for osteophytes. Treatment involves resecting the osteophyte and tendon graft reconstruction.
 
 # Inflammatory Arthritis
 
 ## Rheumatoid arthritis
-Can progress to advanced wrist arthritis, attritional extensor tendon ruptures, digital deformities (e.g., Boutonniere, swan neck deformities).
-Wrist collapse. Loss of carpal height, weakening of intrinsic ligaments. Causes ulnar subluxation of carpus, radial deviation of metacarpals. Digits go into ulnar drift and attenuate radial sagittal bands.
-Extensor tendon ruptures. Attritional ruptures from chronic inflammatory tenosynovitis. Extensor pollicis longus rupture The most common tendon rupture, occurs around Lister's tubercle. Caput ulna (Vaughan-Jackson syndrome) ruptures of extensor digitorum communis and digit minimi around ulna due to arthritis, progresses radial to ulnar. Tx Darrach (distal ulna head resection); Sauve-Kapandji (distal radioulnar joint fusion) for arthritis without caput ulna.
-Digital deformities. Boutonniere (Digits): PIPJ flexes, DIPJ extends; PIPJ synovitis attenuates central slip, stretches volar plate; lateral bands compensate with volar translocation. Treatment includes OT/splinting; Fowler tenotomy (release terminal extensor tendon). Boutonniere (Thumb): Due to metacarpophalangeal joint (MCPJ) synovitis. Swan neck: PIPJ extends, DIPJ flexes. Treatment includes OT/splinting; spiral oblique retinacular ligament reconstruction.
+Rheumatoid arthritis can progress to advanced wrist arthritis, attritional extensor tendon ruptures, and digital deformities such as boutonniere and swan neck deformities.
+
+Wrist collapse involves loss of carpal height and weakening of intrinsic ligaments, causing ulnar subluxation of the carpus and radial deviation of the metacarpals. The digits develop ulnar drift with attenuation of the radial sagittal bands.
+
+Extensor tendon ruptures are attritional ruptures from chronic inflammatory tenosynovitis. Extensor pollicis longus rupture is the most common tendon rupture and occurs around Lister's tubercle. Caput ulna (Vaughan-Jackson syndrome) involves ruptures of the extensor digitorum communis and digiti minimi around the ulna due to arthritis, progressing from radial to ulnar. Treatment is Darrach procedure (distal ulna head resection) or Sauve-Kapandji procedure (distal radioulnar joint fusion) for arthritis without caput ulna.
+
+Digital deformities include boutonniere deformity of the digits, where the PIPJ flexes and DIPJ extends due to PIPJ synovitis attenuating the central slip and stretching the volar plate, with lateral bands compensating through volar translocation. Treatment includes occupational therapy and splinting, with Fowler tenotomy (release of terminal extensor tendon) for surgical cases. Boutonniere of the thumb is due to MCPJ synovitis. Swan neck deformity causes the PIPJ to extend and DIPJ to flex, treated with occupational therapy and splinting, or spiral oblique retinacular ligament reconstruction.
 
 ## Gout
-Deposition of crystals in joint spaces (common to wrist, elbow).
-Diagnosis involves negatively birefringent crystals on wrist aspirate.
-Treatment includes colchicine.
+Gout is caused by deposition of crystals in joint spaces, commonly affecting the wrist and elbow. Diagnosis is made by finding negatively birefringent crystals on wrist aspirate. Treatment includes colchicine.
 
 ## Pseudogout
-Diagnosis involves + birefringent crystals on wrist aspirate.
+Diagnosis is made by finding positively birefringent crystals on wrist aspirate.
 
 ## Psoriatic arthritis
-Preferentially affects DIPJ, nail bed.
+Psoriatic arthritis preferentially affects the DIPJ and nail bed.
 
 # Other Inflammatory Conditions
 
 ## Raynaud's disease
-Idiopathic peripheral vasoconstriction of the digits.
-Due to overactive alpha-2 receptors.
+Raynaud's disease is idiopathic peripheral vasoconstriction of the digits due to overactive alpha-2 receptors.
 
 ## Raynaud's phenomenon
-It is associated with underlying rheumatologic disease (The most common sclerodermia/CREST).
-Symptoms include small, non-healing ulcers at fingertips, color changes, chronic pain.
-Treatment includes calcium-channel blockers, then botulinum toxin.
-Botulinum toxin inhibits Rho/Rho kinase, decrease substance P secretion, decrease C-fiber receptors.
-Inject botulinum toxin to perivascular area at distal palm.
-Treatment involves wrist, arch, and digital sympathectomy (severe, intractable cases).
+Raynaud's phenomenon is associated with underlying rheumatologic disease, most commonly scleroderma or CREST syndrome. Symptoms include small, non-healing ulcers at the fingertips, color changes, and chronic pain. First-line treatment is calcium-channel blockers, followed by botulinum toxin. Botulinum toxin inhibits Rho/Rho kinase, decreases substance P secretion, and decreases C-fiber receptors. It is injected into the perivascular area at the distal palm. Wrist, arch, and digital sympathectomy is reserved for severe, intractable cases.
 
 ## Digital clubbing
-Due to increased vascular connective tissue.
+Digital clubbing is due to increased vascular connective tissue.
 
 ## Dupuytren's contracture
-Progressive palmar fascia contracture.
-Largely genetic etiology.
-Due to myofibroblasts.
-Central cord pretendinous cord extension, affects metacarpophalangeal joint (MCPJ).
-Spiral cord at proximal phalanx, displaces neurovascular bundle volarly and centrally.
-Natatory cord webspace.
-Retrovascular cord dorsal to neurovascular bundle at DIPJ.
-PIPJ contracture most associated with recurrence after surgical treatment.
-Treatment includes clostridium histolyticum (CCH) injection (inject then break cord 1-3 days later; Complications include include skin breakdown #1, transient numbness).
-Treatment includes needle aponeurotomy +/- fat grafting (fat grafting inhibits myofibroblast proliferation).
-Treatment includes surgical aponeurectemy (Complications include include flare reaction, complex regional pain syndrome; Treatment includes conservative).
+Dupuytren's contracture is a progressive palmar fascia contracture with largely genetic etiology, caused by myofibroblasts. The central cord is a pretendinous cord extension that affects the metacarpophalangeal joint (MCPJ). The spiral cord is located at the proximal phalanx and displaces the neurovascular bundle volarly and centrally. The natatory cord affects the webspace. The retrovascular cord is dorsal to the neurovascular bundle at the DIPJ. PIPJ contracture is most associated with recurrence after surgical treatment.
+
+Treatment options include clostridium histolyticum (CCH) injection, where the cord is injected and then broken 1-3 days later. Complications include skin breakdown (most common) and transient numbness. Needle aponeurotomy with or without fat grafting is another option, as fat grafting inhibits myofibroblast proliferation. Surgical aponeurectomy can be complicated by flare reaction and complex regional pain syndrome, which are treated conservatively.
 
 # Infections
 
 ## Bacterial
 
 ### Fight bite
-Human tooth to the extensor hood of the MCPJ from punching someone.
-High rate of deep infection (MCPJ septic arthritis), extensor tendon injury.
-Treatment includes amoxicillin/clavulanic acid, MCPJ exploration, joint irrigation.
-The most common group-A strep, staph aureus, eikenella.
+Fight bite occurs when a human tooth punctures the extensor hood of the MCPJ from punching someone. There is a high rate of deep infection (MCPJ septic arthritis) and extensor tendon injury. The most common organisms are group A streptococcus, Staphylococcus aureus, and Eikenella. Treatment includes amoxicillin/clavulanic acid, MCPJ exploration, and joint irrigation.
 
 ### Animal bites
-Cat bites tend to cause deep injury, dog bites tend to be avulsive.
-Dog bites (unprovoked attacks): Assess dog rabies vaccine status; contact local authorities, quarantine/observe dog for 10 days if rabies vaccine up to date, otherwise testing needed.
-Rabies treatment repair lacerations after immunoglobulin injected into wound.
-The most common staph aureus, Pasteurella.
-Treatment includes antibiotics; incision and drainage, loosely close wounds. 1st line: Amoxicillin/clavulanic acid. 2nd line (PCN allergy): clindamycin, TMP/SMZ. 3rd line: fluoroquinolones, doxycycline.
+Cat bites tend to cause deep puncture injuries, while dog bites tend to be avulsive. For unprovoked dog attacks, the dog's rabies vaccine status should be assessed and local authorities contacted. The dog should be quarantined and observed for 10 days if the rabies vaccine is up to date; otherwise, testing is needed. For rabies treatment, lacerations are repaired after immunoglobulin is injected into the wound. The most common organisms are Staphylococcus aureus and Pasteurella. Treatment includes antibiotics with incision and drainage, loosely closing wounds. First-line antibiotics are amoxicillin/clavulanic acid. Second-line options for penicillin allergy include clindamycin and TMP/SMZ. Third-line options include fluoroquinolones and doxycycline.
 
 ### Flexor tenosynovitis
-Inoculation of flexor tendon sheath by direct puncture or bacteremia.
-Diagnosis involves Kanavel signs: diffuse swelling, flexed posture of digit, tenderness over flexor sheath (#1), and pain with passive extension.
-Treatment includes antibiotics; irrigation of flexor tendon sheath between A1 and A5 pulleys.
+Flexor tenosynovitis results from inoculation of the flexor tendon sheath by direct puncture or bacteremia. Diagnosis is made by identifying the Kanavel signs: diffuse swelling, flexed posture of the digit, tenderness over the flexor sheath (most specific sign), and pain with passive extension. Treatment includes antibiotics and irrigation of the flexor tendon sheath between the A1 and A5 pulleys.
 
 ### IV drug use
-The most common staph (MRSA).
-Treatment includes vancomycin.
+Staphylococcus (MRSA) is the most common organism in IV drug users. Treatment includes vancomycin.
 
 ### Deep-space hand infections
-Radial to ulnar spread via radial bursa communicating to Parona's space then going to ulnar bursa (horseshoe abscess).
+Deep-space infections can spread from radial to ulnar via the radial bursa communicating to Parona's space, then to the ulnar bursa (horseshoe abscess).
 
 ## Viral
 
 ### Human papilloma virus
-The most common warts in children, most spontaneously resolve.
+HPV warts are the most common viral skin lesion in children, and most spontaneously resolve.
 
 ### Herpetic whitlow
-Small vesicular rash, then blisters.
-Diagnosis involves Tzank smear, antibodies titers.
-Treatment includes observation, anti-viral (acyclovir) if diagnosed within first 72 hours.`,
+Herpetic whitlow presents as a small vesicular rash that progresses to blisters. Diagnosis is made with Tzank smear and antibody titers. Treatment is observation, with antiviral therapy (acyclovir) if diagnosed within the first 72 hours.`,
 
     'congenital-pediatric-hand': `# Embryology
 
 ## Extremity development
-Occurs during gestational weeks 4-8.
-Proximal distal apical epidermal ridge (formed from FGFR proteins; cause of amelia).
-Anteroposterior axis Zone of polarizing activity (mirror foot duplication of zone of polarizing activity).
-Radio ulnar Formed from sonic hedgehog protein (responsible for mirror hand).
-Volar BMP and Engrailed-1.
-Dorsal Formed from Wnt7a → LMX1B (Nail-patella syndrome autosomal dominant LMX1B defect).
+Extremity development occurs during gestational weeks 4-8. The proximal-distal axis is established by the apical epidermal ridge, formed from FGFR proteins, with defects causing amelia. The anteroposterior axis is established by the zone of polarizing activity, with duplication causing mirror foot deformity. The radio-ulnar axis is formed from sonic hedgehog protein and is responsible for mirror hand deformity. The volar surface is formed by BMP and Engrailed-1. The dorsal surface is formed by Wnt7a leading to LMX1B expression, with nail-patella syndrome being an autosomal dominant LMX1B defect.
 
 ## Bone ossification
-Clavicle and femur first long bones to ossify at 8 weeks.
+The clavicle and femur are the first long bones to ossify at 8 weeks.
 
 # Diseases
 
 ## Syndactyly
-Due to failure of apoptosis of web spaces.
-Classification Simple or complex (based on bone involvement), complete or incomplete (based on skin involvement).
-Treatment includes surgical release. Dorsal flap for webspace, full-thickness skin grafts for digits. Perform at 1 year of age. Release one webspace at a time.
+Syndactyly is due to failure of apoptosis of the web spaces. It is classified as simple or complex (based on bone involvement) and complete or incomplete (based on skin involvement). Treatment involves surgical release using a dorsal flap for the webspace and full-thickness skin grafts for the digits. Surgery is performed at 1 year of age, releasing one webspace at a time.
 
 ## Polydactyly
-Post axial (ulnar).
-Pre-axial (thumb duplication). Wassel classification: I to VII (IV most common). Numbering goes from distal to proximal. Odd have a bifid bone, even have two independent bones at same bony level. VII: anything else not otherwise classified.
+Post-axial polydactyly involves the ulnar side. Pre-axial polydactyly involves thumb duplication and is classified using the Wassel classification (I to VII, with IV being most common). Numbering goes from distal to proximal. Odd numbers have a bifid bone, and even numbers have two independent bones at the same bony level. Type VII includes anything else not otherwise classified.
 
 ## Congenital trigger thumb
-Symptoms include thumb IPJ held in flexion.
-Diagnosis involves Notta nodule to A1 pulley.
-Treatment includes pulley release for fixed deformity > 1 year old.
+Congenital trigger thumb presents with the thumb IPJ held in flexion. Diagnosis is made by palpating a Notta nodule at the A1 pulley. Treatment is pulley release for fixed deformity in children older than 1 year.
 
 ## Amniotic-band syndrome
-It is associated with cleft lip, body wall defects, equinovarus, imperforate anus.
-Diagnosis involves ranges from mild skin depression to severe proximal edema on exam, acrosyndactyly.
-Patterson classification. I simple constriction ring. II constriction ring with lymphedema. III constriction ring with acrosyndactyly. IV amputation at any level.
-Treatment includes surgical release of band for worsening swelling, distal discoloration of limb.
-Staged releases (one half at a time for circumferential bands).
-Edema improves in a few weeks.
+Amniotic-band syndrome is associated with cleft lip, body wall defects, equinovarus, and imperforate anus. Examination findings range from mild skin depression to severe proximal edema, with acrosyndactyly. The Patterson classification includes: Stage I (simple constriction ring), Stage II (constriction ring with lymphedema), Stage III (constriction ring with acrosyndactyly), and Stage IV (amputation at any level). Treatment involves surgical release of the band for worsening swelling or distal discoloration of the limb, with staged releases (one half at a time for circumferential bands). Edema improves within a few weeks.
 
 ## Congenital compartment syndrome
-Risk factors include amniotic bands, oligohydramnios.
-Symptoms include unilateral edema, bullae formation.
-Treatment includes compartment release.
+Risk factors include amniotic bands and oligohydramnios. Symptoms include unilateral edema and bullae formation. Treatment is compartment release.
 
 ## Camptodactyly
-Painless proximal interphalangeal joint flexion contracture; The most common small finger.
+Camptodactyly is a painless proximal interphalangeal joint flexion contracture, most commonly affecting the small finger.
 
 ## Clinodactyly
-Painless radial inclination of distal phalanx; The most common small finger.
+Clinodactyly is painless radial inclination of the distal phalanx, most commonly affecting the small finger.
 
 ## Thumb hypoplasia
-Blauth classification. Type I no treatment needed. Type II (mild) first-webspace deepening (e.g., 4-flap Z plasty), UCL repair for instability. Type III A stable carpometacarpal (CMC) joint; Tx (if needed) flexor digitorum superficialis (FDS) tendon transfer to ulnar collateral ligament (UCL). B unstable CMC, and type IV and V Pollicization index finger placed into thumb ray position. extensor indicis → proprius extensor pollicis longus. extensor digitorum communis → abductor pollicis longus. palmar interosseous → adductor pollicis. dorsal interosseous → abductor pollicis brevis. flexor digitorum profundus → flexor pollicis longus.
+The Blauth classification guides treatment: Type I requires no treatment. Type II (mild) is treated with first-webspace deepening (e.g., 4-flap Z-plasty) and UCL repair for instability. Type IIIA has a stable carpometacarpal (CMC) joint and may be treated with flexor digitorum superficialis (FDS) tendon transfer to the ulnar collateral ligament (UCL) if needed. Type IIIB has an unstable CMC joint. Types IIIB, IV, and V are treated with pollicization, where the index finger is placed into the thumb ray position. The tendon transfers include: extensor indicis proprius to extensor pollicis longus, extensor digitorum communis to abductor pollicis longus, palmar interosseous to adductor pollicis, dorsal interosseous to abductor pollicis brevis, and flexor digitorum profundus to flexor pollicis longus.
 
 # Trauma
 
 ## Pediatric fractures
-Can involve epiphysis (growth plate).
-Salter-Harris fractures for epiphyseal fractures (involve the growth plate). I: S - Same level. II: A - Above. III: L - Lower. IV: T - Through. V: R - Rest.
+Pediatric fractures can involve the epiphysis (growth plate). Salter-Harris fractures are epiphyseal fractures involving the growth plate: Type I affects the same level, Type II is above the growth plate, Type III is lower (into the joint), Type IV is through the growth plate and joint, and Type V is a compression or rest injury.
 
 ## Seymour fracture
-Open epiphyseal fracture of distal phalanx with nail bed transection, germinal matrix gets entrapped.
-Treatment includes irrigation, open reduction; pinning if unstable.
+Seymour fracture is an open epiphyseal fracture of the distal phalanx with nail bed transection, where the germinal matrix gets entrapped. Treatment includes irrigation and open reduction, with pinning if unstable.
 
 ## Pediatric supracondylar fractures
-Common in ages 5-7.
-Diagnosis involves assess perfusion; if compromised, first perform closed reduction, observe for mild cases.
-Brachial artery exploration if perfusion compromised after closed reduction.
+Pediatric supracondylar fractures are common in ages 5-7. Perfusion must be assessed, and if compromised, closed reduction is performed first. Mild cases are observed, and brachial artery exploration is performed if perfusion remains compromised after closed reduction.
 
 ## Amputations
-The most common male.
-The most common crush in door (crush in window #2).
+Pediatric amputations are most common in males and are most commonly caused by crush injury in doors (with window crush being second most common).
 
 # Congenital Syndromes
 
 ## Radial longitudinal deficiency
-Most are associated with syndromes.
-Can have thumb hypoplasia/absence.
+Most cases of radial longitudinal deficiency are associated with syndromes and can have thumb hypoplasia or absence.
 
 ## Fanconi's anemia
-Absent radius, sometimes thumb hypoplasia.
-Progresses to aplastic anemia at age 4-5 (can be life threatening).
-Diagnosis involves CBC, then chromosomal breakage testing.
-Treatment includes refer to hematologist.
+Fanconi's anemia presents with absent radius and sometimes thumb hypoplasia. It progresses to aplastic anemia at age 4-5, which can be life threatening. Diagnosis involves CBC followed by chromosomal breakage testing. Treatment includes referral to a hematologist.
 
 ## Thrombocytopenia/absent radius
 Diagnosis involves CBC.
 
-## Holt Oram
-Autosomal Dominant.
-Radial longitudinal deficiency, cardiac abnormality (VSD).
+## Holt-Oram syndrome
+Holt-Oram syndrome is autosomal dominant and presents with radial longitudinal deficiency and cardiac abnormality (VSD).
 
 ## VACTERL
-Vertebral, anorectal, cardiac, trachea-esophageal, renal, limb abnormalities.
-Diagnosis involves renal US.
+VACTERL association includes vertebral, anorectal, cardiac, tracheo-esophageal, renal, and limb abnormalities. Diagnosis involves renal ultrasound.
 
 # Pediatric Brachial Plexopathy
 
-Observe ~6 months for development of upper extremity motor function.
-Diagnosis involves MRI to evaluate for nerve-root level injury.`,
+Pediatric brachial plexopathy is observed for approximately 6 months for development of upper extremity motor function. MRI is used to evaluate for nerve-root level injury.`,
 
     'lower-extremity': `# Anatomy
 
 ## Lower extremity nerves
-Tibial gastrocnemius, soleus, plantaris, popliteus, flexor digitorum longus, flexor hallucis longus (FHL). Diagnosis involves plantarflexion, sensation to plantar surface of the foot.
-Femoral anterior thighs muscles. Diagnosis involves leg extension.
-Obturator medial thigh muscles. Diagnosis involves thigh adduction.
-Peroneal nerve lateral and anterior compartments. Associated with proximal tibiofibular joint dislocation. Diagnosis involves absent dorsiflexion of the foot, sensation to lateral foot. Treatment includes nerve repair, nerve grafting, nerve transfer FHL (tibial nerve) to AT if severe injury.
-Medial plantar nerve. Continuation of the tibial nerve.
+The tibial nerve innervates the gastrocnemius, soleus, plantaris, popliteus, flexor digitorum longus, and flexor hallucis longus (FHL). It is tested by plantarflexion and sensation to the plantar surface of the foot.
+
+The femoral nerve innervates the anterior thigh muscles and is tested by leg extension.
+
+The obturator nerve innervates the medial thigh muscles and is tested by thigh adduction.
+
+The peroneal nerve innervates the lateral and anterior compartments and is associated with proximal tibiofibular joint dislocation. Injury presents with absent dorsiflexion of the foot and loss of sensation to the lateral foot. Treatment includes nerve repair, nerve grafting, or nerve transfer of FHL (tibial nerve) to anterior tibialis for severe injury.
+
+The medial plantar nerve is a continuation of the tibial nerve.
 
 ## Lower extremity muscles
-Superficial posterior gastrocnemius and soleus. Diagnosis involves plantarflexion.
-Deep posterior toe flexors. Dx FHL with flexion of great toe.
-Anterior anterior tibial, toe extenders. Diagnosis involves dorsiflexion, inversion.
-Lateral peroneus muscles. Diagnosis involves ankle eversion.
-Plantaris tendon. Located between medial gastrocnemius muscle and soleus, medial to Achilles tendon. Used as a tendon autograft.
+The superficial posterior compartment contains the gastrocnemius and soleus, which are tested by plantarflexion.
+
+The deep posterior compartment contains the toe flexors. The FHL is tested with flexion of the great toe.
+
+The anterior compartment contains the anterior tibialis and toe extensors, tested by dorsiflexion and inversion.
+
+The lateral compartment contains the peroneus muscles, tested by ankle eversion.
+
+The plantaris tendon is located between the medial gastrocnemius muscle and soleus, medial to the Achilles tendon. It is used as a tendon autograft.
 
 ## Popliteal fossa
-Contain popliteal artery, tibial nerve, common popliteal nerve.
-Bordered by medial head of gastrocnemius, semimembranosus, lateral head of gastrocnemius, and biceps femoris.
+The popliteal fossa contains the popliteal artery, tibial nerve, and common peroneal nerve. It is bordered by the medial head of gastrocnemius, semimembranosus, lateral head of gastrocnemius, and biceps femoris.
 
 ## Toe anatomy
-Perfusion with dominant dorsal system in 70% of patients, plantar system in 30%, equivocal 10%.
-Diagnosis involves lateral angiogram before toe-to-thumb transfer.
+Toe perfusion has a dominant dorsal system in 70% of patients, plantar system in 30%, and equivocal in 10%. A lateral angiogram is obtained before toe-to-thumb transfer.
 
 # Lower Extremity Trauma
 
 ## Fracture fixation
-Bony stabilization increases with interfragmentary compression.
-Primary bone healing compression plates, lag screws, tension bands.
-Secondary bone healing intramedullary nailing, bridge plating, external fixation, K wires support relative stability.
+Bony stabilization increases with interfragmentary compression. Primary bone healing is achieved with compression plates, lag screws, and tension bands. Secondary bone healing occurs with intramedullary nailing, bridge plating, external fixation, and K-wires, which support relative stability.
 
 ## Open fractures
-IV cephalosporin (in first 3 hours) or equivalent x 72 hours.
-Restore length with reduction, splinting.
-Assess pulses.
+IV cephalosporin or equivalent is given within the first 3 hours and continued for 72 hours. Length is restored with reduction and splinting. Pulses must be assessed.
 
 ## Gustilo classification
-I Clean wound, <1cm.
-II Clean wound, >1cm.
-III A Adequate soft tissue for coverage. B Inadequate soft tissue for coverage, periosteal stripping. C Arterial injury requiring repair.
+Type I is a clean wound less than 1cm. Type II is a clean wound greater than 1cm. Type IIIA has adequate soft tissue for coverage. Type IIIB has inadequate soft tissue for coverage with periosteal stripping. Type IIIC has arterial injury requiring repair.
 
-## Secondary-bone reconstruction
-Masquelet two-stage reconstruction. 1st stage antibiotic spacer placement, allow 4-8 weeks for pseudomembrane to form. 2nd stage replace antibiotic spacer with cancellous bone graft into pseudomembrane.
-Ilizarov/bone transport. Perform osteotomy away from fracture site, then distraction osteogenesis. Bone forms by intramembranous ossification.
-Capanna technique. Free fibula free flap inside bone allograft. Used for large-gap sarcoma bony reconstruction.
+## Secondary bone reconstruction
+The Masquelet technique is a two-stage reconstruction. Stage 1 involves antibiotic spacer placement, with 4-8 weeks allowed for pseudomembrane to form. Stage 2 replaces the antibiotic spacer with cancellous bone graft into the pseudomembrane.
+
+The Ilizarov technique (bone transport) involves performing an osteotomy away from the fracture site followed by distraction osteogenesis. Bone forms by intramembranous ossification.
+
+The Capanna technique uses a free fibula flap inside a bone allograft and is used for large-gap sarcoma bony reconstruction.
 
 ## Limb salvage
-Risk factors include popliteal artery injury, ankle/foot fractures.
-Ideally, soft-tissue coverage within 10 days from injury.
-Can be performed with tibial nerve injury (if nerve is reparable).
-Traumatic amputations occur The most common due to ischemia; good functional outcomes in appropriately selected patients.
+Risk factors for limb loss include popliteal artery injury and ankle/foot fractures. Ideally, soft-tissue coverage is achieved within 10 days from injury. Limb salvage can be performed with tibial nerve injury if the nerve is reparable. Traumatic amputations most commonly occur due to ischemia, with good functional outcomes in appropriately selected patients.
 
 ## Morel-Lavallée lesion
-Soft-tissue fascial shear injury with intact skin.
-Prone to seroma, lymphatic disruption.
-Diagnosis involves MRI for chronic injuries.
-Treatment includes compression bandaging, percutaneous aspiration, +/- sclerosing agents.
+A Morel-Lavallée lesion is a soft-tissue fascial shear injury with intact skin that is prone to seroma and lymphatic disruption. MRI is used for chronic injuries. Treatment includes compression bandaging, percutaneous aspiration, and possibly sclerosing agents.
 
 # Lower Extremity Reconstruction
 
 ## Flaps
-Pedicled. Propeller. Identify subcutaneous perforator to island of skin. The most common failure due to venous congestion from kinking.
-Free tissue transfer. Muscle flaps Fill dead space better. Fasciocutaneous flaps Decreased donor-site morbidity.
+Pedicled propeller flaps identify a subcutaneous perforator to an island of skin. The most common cause of failure is venous congestion from kinking.
+
+Free tissue transfer options include muscle flaps, which fill dead space better, and fasciocutaneous flaps, which have decreased donor-site morbidity.
 
 ## Tissue Expansion
-Lower extremity placement has highest complication rate in the body.
+Lower extremity tissue expander placement has the highest complication rate in the body.
 
 # Vascular Diseases
 
 ## Lower extremity
-Peripheral arterial disease. Claudication that progresses from rest pain to tissue loss. Diagnosis involves palpate pulses, Doppler exam. Diagnosis involves ankle-brachial index. >1 normal. 0.7-0.9 claudication. <0.5 rest pain, tissue loss. Diagnosis involves toe-brachial index for non-compressible vessels (diabetes mellitus).
-Venous insufficiency ulcers. Treatment includes elevate, serial compression dressings (Unna boot).
-Lymphedema. The most common cause obesity (U.S.), filiarsis infection (worldwide). Diagnosis involves Staging:  0: clinically normal, identified on lymphoscintigraphy. 1: clinically apparent, improves with limb elevation. 2: pitting edema, does not improve with elevation. 3: fibrosis of soft tissues.
-Neuropathic foot ulcers. Treat non-infected, non-ischemic ulcers with contact casting. Treatment includes granulocyte-stimulating factor use associated with decreased need for below-knee amputation. Treatment includes medical honey draws fluid from deep to superficial by osmosis. Treatment includes hyberbaric oxygen indicated for exposed bone.
+Peripheral arterial disease presents as claudication that progresses from rest pain to tissue loss. Diagnosis involves palpating pulses and Doppler examination. The ankle-brachial index is used: greater than 1 is normal, 0.7-0.9 indicates claudication, and less than 0.5 indicates rest pain and tissue loss. Toe-brachial index is used for non-compressible vessels in diabetes mellitus.
+
+Venous insufficiency ulcers are treated with elevation and serial compression dressings (Unna boot).
+
+Lymphedema is most commonly caused by obesity in the United States and filariasis infection worldwide. Staging includes: Stage 0 is clinically normal but identified on lymphoscintigraphy, Stage 1 is clinically apparent and improves with limb elevation, Stage 2 shows pitting edema that does not improve with elevation, and Stage 3 shows fibrosis of soft tissues.
+
+Neuropathic foot ulcers that are non-infected and non-ischemic are treated with contact casting. Granulocyte-stimulating factor use is associated with decreased need for below-knee amputation. Medical honey draws fluid from deep to superficial by osmosis. Hyperbaric oxygen is indicated for exposed bone.
 
 # Aesthetic
 
@@ -1281,120 +1021,159 @@ Submuscular position for implant associated with lowest complication rate.`
     'cleft-lip-palate': `## Cleft Lip and Palate
 
 ### Embryology, Epidemiology, and Genetics
-**Embryology** Cleft lip (median nasal prominences don't fuse), Cleft palate (medial and lateral palatine processes don't fuse).
-**Genetics** One sibling affected 2.5% risk, Two siblings 10%, Parent and sibling 17%, Van der Woude (autosomal dominant) 50% risk.
-**Epidemiology** Cleft lip/palate 1 700 (M F 2 1, 15% syndromic), Cleft palate only 1 1500 (M F 1 2, 50% syndromic).
+Cleft lip occurs when the median nasal prominences fail to fuse, while cleft palate results from failure of the medial and lateral palatine processes to fuse.
+
+The genetic risk varies with family history: when one sibling is affected, there is a 2.5% risk; with two affected siblings, the risk increases to 10%; and when a parent and sibling are affected, the risk is 17%. Van der Woude syndrome is autosomal dominant with a 50% transmission risk.
+
+Cleft lip with or without palate occurs in approximately 1 in 700 births, with a male to female ratio of 2:1 and 15% being syndromic. Isolated cleft palate occurs in approximately 1 in 1500 births, with a male to female ratio of 1:2 and 50% being syndromic.
 
 ### Cleft Care
-**Cleft Lip** Repair at 3-6 months, establish muscular continuity.
-**Cleft Palate** Repair at ~1 year, worse speech with delayed repair.
-**VPI** Treatment includes buccal musculomucosal flaps, sphincter pharyngoplasty (highest OSA risk), pharyngeal flap.
-**Alveolar Bone Grafting** Time with permanent canine (~age 8-12).
-**Orthognathic** LeFort I for Class III occlusion.
-**CHARGE syndrome** #2 syndromic cleft (Coloboma, Heart, Atresia, Retardation, Genital, Ear).`,
+Cleft lip is typically repaired at 3-6 months of age to establish muscular continuity.
+
+Cleft palate is repaired at approximately 1 year of age, with delayed repair associated with worse speech outcomes.
+
+Velopharyngeal insufficiency (VPI) is treated with buccal musculomucosal flaps, sphincter pharyngoplasty (which has the highest risk of obstructive sleep apnea), or pharyngeal flap.
+
+Alveolar bone grafting is timed with the eruption of the permanent canine, typically at age 8-12 years.
+
+Orthognathic surgery with LeFort I osteotomy is performed for Class III malocclusion.
+
+CHARGE syndrome is the second most common syndromic cleft, characterized by Coloboma, Heart defects, Atresia choanae, growth Retardation, Genital anomalies, and Ear abnormalities.`,
 
     'facial-fractures': `## Facial Fractures and Skull
 
 ### Fractures
-**Frontal Sinus** Posterior table fractures risk CSF leak (Diagnosis involves beta-2 transferrin).
-**Orbital** Floor fractures MC, repair for sizable defects/persistent diplopia; Entrapment The most common in pediatrics (prompt repair needed).
-**NOE Fractures** Risk telecanthus (Markowitz classification), canalicular injury, CSF leak.
-**ZMC Fracture** 2-point fixation (simple), 3-point (complex).
-**Base of Skull** Contraindication to nasotracheal intubation.
+Frontal sinus posterior table fractures carry a risk of CSF leak, which is diagnosed using beta-2 transferrin testing.
+
+Orbital floor fractures are the most common orbital fracture. They are repaired for sizable defects or persistent diplopia. Entrapment is most common in pediatric patients and requires prompt repair.
+
+Naso-orbito-ethmoid (NOE) fractures carry risk of telecanthus (classified by Markowitz), canalicular injury, and CSF leak.
+
+Zygomaticomaxillary complex (ZMC) fractures are treated with 2-point fixation for simple fractures and 3-point fixation for complex fractures.
+
+Skull base fractures are a contraindication to nasotracheal intubation.
 
 ### Reconstruction
-**Scalp** Flap if exposed cranium, tissue expansion between galea and temporalis.
-**Cranioplasty** >6 sq cm defect; PEEK (The most common complication infection), Methylmethacrylate (exothermic), Hydroxyapatite.
-**Positional Plagiocephaly** Treatment includes repositioning, helmet molding >3 months.`,
+Scalp reconstruction with exposed cranium requires a flap. Tissue expansion is placed between the galea and temporalis.
+
+Cranioplasty is indicated for defects greater than 6 square centimeters. Materials include PEEK (with infection being the most common complication), methylmethacrylate (which is exothermic), and hydroxyapatite.
+
+Positional plagiocephaly is treated with repositioning and helmet molding for patients older than 3 months.`,
 
     'facial-paralysis': `## Facial Paralysis
 
 ### Anatomy
-**Main trunk** 6-8mm distal to tympanomastoid suture.
-**Frontal branch** Pitanguy's line (0.5cm below tragus to 1.5cm above lateral brow).
+The main trunk of the facial nerve is located 6-8mm distal to the tympanomastoid suture. The frontal branch travels along Pitanguy's line, extending from 0.5cm below the tragus to 1.5cm above the lateral brow.
 
 ### Etiologies
-**Bell's palsy** 80-90% resolve, Treatment includes steroids if early.
-**Möbius** CN VI, VII absence; Treatment includes temporalis transfer or free gracilis.
-**Parry-Romberg** Progressive hemifacial atrophy, starts late teens; Treatment includes methotrexate, volume replacement.
+Bell's palsy resolves in 80-90% of cases and is treated with steroids if diagnosed early.
+
+Möbius syndrome involves absence of cranial nerves VI and VII and is treated with temporalis transfer or free gracilis muscle transfer.
+
+Parry-Romberg syndrome causes progressive hemifacial atrophy that typically starts in the late teens and is treated with methotrexate and volume replacement.
 
 ### Reanimation
-**Dynamic** Free muscle transfer (cross-facial graft vs masseteric nerve), temporalis turnover.
-**Static** Autologous slings (lowest complication rate).`,
+Dynamic reanimation includes free muscle transfer (using cross-facial nerve graft versus masseteric nerve) and temporalis turnover.
+
+Static reanimation uses autologous slings, which have the lowest complication rate.`,
 
     'ear-reconstruction': `## Ear Reconstruction
 
 ### Congenital
-**Embryology** 1st cleft (EAC), 1st/2nd arches (helix - 6 hillocks), Preauricular sinus (incomplete fusion).
-**Anomalies** Microtia, Cryptotia (upper 1/3 adherent), Stahl ear (accessory 3rd crus), Lop ear.
+The external auditory canal develops from the 1st cleft. The helix develops from the 1st and 2nd arches (forming from 6 hillocks). Preauricular sinus results from incomplete fusion.
+
+Congenital anomalies include microtia, cryptotia (where the upper third is adherent), Stahl ear (with an accessory 3rd crus), and lop ear.
 
 ### Reconstruction
-**Neonatal Molding** Start by 2 weeks (up to 3 months), The most common complication skin ulceration.
-**Autologous** Rib cartilage framework, Nagata (2-stage), Brent (3-stage).
-**TPF flap** Based on superficial temporal artery, workhorse for coverage.
-**Replantation** Venous repair doesn't change success, leech therapy if no vein anastomosis.
+Neonatal molding should be started by 2 weeks of age (up to 3 months), with skin ulceration being the most common complication.
+
+Autologous reconstruction uses a rib cartilage framework, with the Nagata technique being 2-stage and the Brent technique being 3-stage.
+
+The temporoparietal fascia (TPF) flap is based on the superficial temporal artery and is the workhorse flap for ear coverage.
+
+For ear replantation, venous repair does not change success rates. Leech therapy is used if no vein anastomosis is possible.
 
 ### Aesthetic
-**Prominent ear** Otoplasty age 6-7, Mustardé suture (antihelical fold), Furnas suture (conchal-mastoid angle).`,
+Prominent ear is corrected with otoplasty at age 6-7 years. The Mustardé suture creates the antihelical fold, and the Furnas suture corrects the conchal-mastoid angle.`,
 
     'mandible-dental-orthognathic': `## Mandible, Orthognathic, and Dental
 
 ### Mandible Fractures
-**Locations** Parasymphyseal (ORIF +/- MMF), Angle (ORIF, intra-oral approach), Condylar (generally closed with MMF).
-**Fixation** Champy technique (external oblique ridge), Reconstruction plate (load-bearing).
-**Free flap** Fibula for >5cm defects or XRT setting.
+Parasymphyseal fractures are treated with ORIF with or without MMF. Angle fractures are treated with ORIF using an intra-oral approach. Condylar fractures are generally treated with closed reduction and MMF.
+
+The Champy technique places fixation at the external oblique ridge. Reconstruction plates are used for load-bearing applications.
+
+Free fibula flap is used for defects greater than 5cm or in the setting of radiation therapy.
 
 ### Tumors
-**Ameloblastoma** The most common mandibular tumor, Treatment includes segmental mandibulectomy.
-**OKC** #2 benign, associated with Gorlin syndrome (PTCH1).
-**Periapical cyst** The most common cyst, from necrotic pulp.
+Ameloblastoma is the most common mandibular tumor and is treated with segmental mandibulectomy.
+
+Odontogenic keratocyst (OKC) is the second most common benign tumor and is associated with Gorlin syndrome (PTCH1 mutation).
+
+Periapical cyst is the most common cyst and arises from necrotic pulp.
 
 ### TMJ
-**TMD** The most common women 20-40, pain on palpation of mastication muscles.
-**Masseteric Hypertrophy** The most common from bruxism, Treatment includes botulinum toxin.
+Temporomandibular disorder (TMD) is most common in women aged 20-40 and presents with pain on palpation of mastication muscles.
+
+Masseteric hypertrophy is most commonly caused by bruxism and is treated with botulinum toxin.
 
 ### Orthognathic
-**Class II** BSSO for mandibular advancement.
-**Class III** LeFort I for maxillary advancement.
-**Vertical Maxillary Excess** "Gummy smile", Tx LeFort I impaction.`,
+Class II malocclusion is treated with bilateral sagittal split osteotomy (BSSO) for mandibular advancement.
+
+Class III malocclusion is treated with LeFort I osteotomy for maxillary advancement.
+
+Vertical maxillary excess ("gummy smile") is treated with LeFort I impaction.`,
 
     'head-neck-tumors': `## Head and Neck Tumors
 
 ### Embryology
-**Pharyngeal Arches** 1(CN V-mastication), 2(CN VII-facial), 3(CN IX-stylopharyngeus), 4(CN X-pharyngeal/laryngeal), 6(CN XI-SCM/trapezius).
+The pharyngeal arches are innervated as follows: the 1st arch (CN V, mastication), 2nd arch (CN VII, facial expression), 3rd arch (CN IX, stylopharyngeus), 4th arch (CN X, pharyngeal and laryngeal muscles), and 6th arch (CN XI, SCM and trapezius).
 
 ### Oral Cancer
-**SCC** Neck dissection for T2+ tumors, Chyle leak The most common complication (triglycerides >110 mg/dL).
-**Reconstruction** Free flaps, Total laryngopharyngeal (ALT better speech, jejunum easier inset).
-**Oropharyngeal** HPV associated with better outcomes.
+Squamous cell carcinoma requires neck dissection for T2 or larger tumors. Chyle leak is the most common complication (diagnosed with triglycerides greater than 110 mg/dL in the drain output).
+
+Free flaps are used for reconstruction. For total laryngopharyngeal reconstruction, the ALT flap provides better speech while the jejunal flap has easier inset.
+
+Oropharyngeal cancer associated with HPV has better outcomes.
 
 ### Glandular
-**Parotid** 80% of salivary tumors, 80% benign.
-Pleomorphic adenoma (80% of benign), Warthin tumors (cystic, bilateral, smokers).
-Mucoepidermoid (The most common malignant, The most common in children), Adenoid cystic (perineural invasion).
-**Minor Salivary** 50% malignant, The most common in palate, Adenoid cystic MC.
+The parotid gland accounts for 80% of salivary tumors, with 80% being benign.
+
+Pleomorphic adenoma is the most common benign tumor (80% of benign tumors). Warthin tumors are cystic, bilateral, and associated with smoking.
+
+Mucoepidermoid carcinoma is the most common malignant salivary tumor and the most common in children. Adenoid cystic carcinoma has a propensity for perineural invasion.
+
+Minor salivary gland tumors are 50% malignant, most commonly occur in the palate, and adenoid cystic carcinoma is the most common type.
 
 ### Lip Reconstruction
-Primary closure (≤1/3), Lip switch flaps (1/3-1/2: Abbe, Estlander), Regional (>1/2: Karapandzic, Bernard-Webster).`,
+Primary closure is used for defects up to one-third of the lip. Lip switch flaps (Abbe and Estlander) are used for defects involving one-third to one-half of the lip. Regional flaps (Karapandzic and Bernard-Webster) are used for defects involving more than one-half of the lip.`,
 
     'congenital-syndromes': `## Congenital Syndromes
 
 ### Craniosynostosis
-**Apert** Bicoronal, complex syndactyly, FGFR2.
-**Crouzon** Complex craniosynostosis, midface retrusion, normal extremities, FGFR2.
-**Pfeiffer** Cloverleaf skull, exorbitism, broad thumbs, FGFR2.
-**Saethre-Chotzen** Bilateral coronal, low ears, ptosis, TWIST.
-**Sagittal** Scaphocephaly, Treatment includes endoscopic (early) vs open vault (late).
+Apert syndrome presents with bicoronal craniosynostosis, complex syndactyly, and is caused by FGFR2 mutations.
+
+Crouzon syndrome presents with complex craniosynostosis and midface retrusion but normal extremities, and is caused by FGFR2 mutations.
+
+Pfeiffer syndrome presents with cloverleaf skull, exorbitism, and broad thumbs, and is caused by FGFR2 mutations.
+
+Saethre-Chotzen syndrome presents with bilateral coronal craniosynostosis, low-set ears, and ptosis, and is caused by TWIST mutations.
+
+Sagittal craniosynostosis causes scaphocephaly and is treated with endoscopic surgery if diagnosed early or open vault surgery if diagnosed late.
 
 ### Cleft Syndromes
-**Treacher Collins** Microtia, colobomas, cleft palate, retrognathia, TCOF1.
-**Robin Sequence** Cleft palate, micrognathia, glossoptosis, Treatment includes prone positioning, mandibular distraction.
-**Van der Woude** Lower lip pits, cleft palate, IRF6 (50% transmission).
-**Velocardiofacial** 22q11.2 deletion, cleft (submucous), cardiac, hypocalcemia.
+Treacher Collins syndrome presents with microtia, colobomas, cleft palate, and retrognathia, and is caused by TCOF1 mutations.
+
+Robin sequence presents with cleft palate, micrognathia, and glossoptosis. Treatment includes prone positioning and mandibular distraction.
+
+Van der Woude syndrome presents with lower lip pits and cleft palate, is caused by IRF6 mutations, and has a 50% transmission rate.
+
+Velocardiofacial syndrome (22q11.2 deletion) presents with submucous cleft palate, cardiac anomalies, and hypocalcemia.
 
 ### Other
-**Goldenhar** #2 congenital facial malformation, hemifacial microsomia, epibulbar dermoids.
-**Beckwith-Wiedemann** Macrosomia, omphalocele, macroglossia, chromosome 11.`,
+Goldenhar syndrome is the second most common congenital facial malformation and presents with hemifacial microsomia and epibulbar dermoids.
+
+Beckwith-Wiedemann syndrome presents with macrosomia, omphalocele, and macroglossia, and involves chromosome 11.`,
   },
   'breast-cosmetic': {
     'breast-augmentation': `# Breast Augmentation
@@ -1402,706 +1181,663 @@ Primary closure (≤1/3), Lip switch flaps (1/3-1/2: Abbe, Estlander), Regional 
 ## Breast Implants
 
 ### Aesthetic ideal
-45 55 upper pole to lower pole volume.
+The ideal upper pole to lower pole volume ratio is 45:55.
 
 ### FDA Approval
-FDA approved age >22 for aesthetic indications. Carries a black box warning. Requires specialized consent form.
+FDA approval is for patients older than 22 years for aesthetic indications. Breast implants carry a black box warning and require a specialized consent form.
 
 ### Choices in Augmentation Mammaplasty
 
-**Shell** .
-Smooth.
-Textured.
+Shell options include smooth and textured.
 
-**Filling** .
-Saline.
-Silicone. Modern cohesive gels with less rippling, rupture. Increased cross-linking of silicone improves form stability. More prone to rotation of implant.
+Filling options include saline and silicone. Modern cohesive silicone gels have less rippling and rupture. Increased cross-linking of silicone improves form stability but makes implants more prone to rotation.
 
-**Pocket selection** .
-Subpectoral/dual plane (MC). Should perform if upper pole pinch test <2cm. Used for pseudoptosis.
-Subglandular.
+Pocket selection options include subpectoral/dual plane (most common) and subglandular. Subpectoral placement should be performed if the upper pole pinch test is less than 2cm. Dual plane is used for pseudoptosis.
 
-**Incision selection** .
-Inframammary fold (IMF).
-Periareolar.
-Trans-axillary.
+Incision selection options include inframammary fold (IMF), periareolar, and trans-axillary.
 
 ### Surveillance
-MRI or US first 5-6 years then every 2-3 years to evaluate for silent rupture.
+MRI or ultrasound is performed at 5-6 years, then every 2-3 years to evaluate for silent rupture.
 
 ### Breast Cancer Screening
-Mammography Eklund view (displaces the implant toward the chest and pulls the breast tissue anteriorly).
+Mammography uses the Eklund view, which displaces the implant toward the chest and pulls the breast tissue anteriorly.
 
 ## Complications
 
-**MC** reoperation for size.
-**Capsular contracture**. Baker grading I Normal. II Palpable. III Visible. IV Painful. The most common cause biofilm. Subclinical infection associated with indwelling medical devices. Forms due to extracellular polymeric substance matrix causing a surface for bacterial adherence. Slow bacterial growth rate reduces antibiotic efficacy. Reduced risk with IMF incision, subpectoral placement, and textured implants. No evidence to support extended antibiotic courses to prevent.
-**Double capsule**. RF OCPs. Symptoms include painless enlargement, becomes firm years after implantation.
-**Double bubble**. Two transverse creases at lower pole of breast due to incomplete scoring or release of former IMF when lowering it with an implant. Risk factors include superiorly displaced native IMF. Treatment includes release superficial fascial attachments to skin.
-**Snoopy nose deformity**. Gland descends, implant stays in place. Treatment includes mastopexy.
-**Animation deformity**. Treatment includes change from subpectoral to subglandular plane, +/- acellular dermal matrix or mesh.
-**Rupture**. Dx MRI.
-**Galactocele** milk-filled cyst caused by lactiferous duct blockage.
-**Pneumothorax**. Symptoms include shortness of breath, chest tightness. Diagnosis involves chest xray.
-**Infection**. Atypical mycobacterial infections. More common with cosmetic tourism. Doesn't respond to antibiotics, causes non-healing wounds. Diagnosis involves acid-fast stain and mycobacterial culture. Treatment includes remove implant, debride.
-**Breast-implant-associated-ALCL (BIA-ALCL)**: See chapter 3: breast reconstruction.
-**Breast implant illness**. Symptoms include vague systemic symptoms (fatigue, brain fog, headaches, anxiety). Diagnosis involves clinical diagnosis, no definitive laboratory or imaging test, consider work up for autoimmune disease. Treatment includes explantation (widely variable outcomes reported). +/- capsulectomy studies don't show a difference in outcomes. Worse outcomes when known autoimmune disease.`,
+Reoperation for size is the most common complication.
+
+Capsular contracture is graded using the Baker system: Grade I is normal, Grade II is palpable, Grade III is visible, and Grade IV is painful. The most common cause is biofilm, a subclinical infection associated with indwelling medical devices. Biofilm forms due to an extracellular polymeric substance matrix that provides a surface for bacterial adherence. The slow bacterial growth rate reduces antibiotic efficacy. Risk is reduced with IMF incision, subpectoral placement, and textured implants. There is no evidence to support extended antibiotic courses for prevention.
+
+Double capsule has oral contraceptives as a risk factor. It presents with painless enlargement that becomes firm years after implantation.
+
+Double bubble presents as two transverse creases at the lower pole of the breast due to incomplete scoring or release of the former IMF when lowering it with an implant. Risk factors include a superiorly displaced native IMF. Treatment involves releasing superficial fascial attachments to skin.
+
+Snoopy nose deformity occurs when the gland descends but the implant stays in place. Treatment is mastopexy.
+
+Animation deformity is treated by changing from subpectoral to subglandular plane, with or without acellular dermal matrix or mesh.
+
+Rupture is diagnosed with MRI.
+
+Galactocele is a milk-filled cyst caused by lactiferous duct blockage.
+
+Pneumothorax presents with shortness of breath and chest tightness and is diagnosed with chest x-ray.
+
+Atypical mycobacterial infections are more common with cosmetic tourism, do not respond to antibiotics, and cause non-healing wounds. Diagnosis is made with acid-fast stain and mycobacterial culture. Treatment involves implant removal and debridement.
+
+Breast-implant-associated ALCL (BIA-ALCL) is covered in the breast reconstruction section.
+
+Breast implant illness presents with vague systemic symptoms including fatigue, brain fog, headaches, and anxiety. It is a clinical diagnosis with no definitive laboratory or imaging test, and workup for autoimmune disease should be considered. Treatment is explantation with widely variable reported outcomes. Capsulectomy studies do not show a difference in outcomes. Worse outcomes occur when there is known autoimmune disease.`,
 
     'breast-reduction-mastopexy': `# Breast Reduction and Mastopexy
 
 ## Embryology
 
 ### Ectoderm
-Mammary ridge exists from axilla to inguinal region (milk line). Begins week 5-6. Remaining ridge involutes during development.
-**Diseases** **Polymastia** accessory breast tissue due to incomplete mammary ridge involution. Can occur in axilla. Symptoms include swelling of mass during menses. Diagnosis involves glandular tissue in lower dermis/fat on pathology. **Supranumery nipple** additional nipple due to incomplete involution of ectodermal ridge along milk line. Polythelia >2 supranumery nipples. Associated with renal cancers and kidney disease. **Amastia** mammary ridge absent, breast and nipple absent. **Amazia** no breast tissue, nipple present. **Inverted nipples** failure of mesenchyme to proliferate.
+The mammary ridge exists from axilla to inguinal region (milk line) and begins at week 5-6. The remaining ridge involutes during development.
+
+Polymastia is accessory breast tissue due to incomplete mammary ridge involution that can occur in the axilla. It presents with swelling of the mass during menses, and diagnosis is made by finding glandular tissue in the lower dermis or fat on pathology.
+
+Supernumerary nipple is an additional nipple due to incomplete involution of the ectodermal ridge along the milk line. Polythelia refers to more than 2 supernumerary nipples and is associated with renal cancers and kidney disease.
+
+Amastia occurs when the mammary ridge is absent, with both breast and nipple absent. Amazia refers to absent breast tissue with the nipple present.
+
+Inverted nipples result from failure of mesenchyme to proliferate.
 
 ### Epithelial Cells
-Responsible for development of lactiferous ducts.
+Epithelial cells are responsible for development of lactiferous ducts.
 
 ### Mesoderm
-Development of breast parenchyma.
+The mesoderm is responsible for development of breast parenchyma.
 
 ## Breast Aging
 
 ### Puberty breast development
-Surge of insulin-like growth factor 1 (IGF-1) from breast tissue stimulates pituitary gland.
-Estrogen duct growth.
-Progesterone lobular development.
-Tanner staging ages 8-13.
+A surge of insulin-like growth factor 1 (IGF-1) from breast tissue stimulates the pituitary gland. Estrogen promotes duct growth, while progesterone promotes lobular development. Tanner staging is used for ages 8-13.
 
 ### Menopause
-Decrease in progesterone and estrogen.
-Breast involution replacement of parenchyma with fat.
-Cooper ligaments laxity.
-Decreased elasticity increased ptosis.
+Menopause is characterized by decreased progesterone and estrogen. Breast involution involves replacement of parenchyma with fat. Cooper ligaments become lax, and decreased elasticity leads to increased ptosis.
 
 ## Breast Reduction
 
 ### Anatomic Considerations
-**Blood supply** Superior internal mammary perforators (60%). Lateral lateral thoracic artery. Medial internal mammary perforators. Inferior external mammary perforators.
-**Nerve supply** Sensation intercostal nerves (lateral and anterior cutaneous branches). Nipple-areola complex (NAC) T4 anterolateral and anteromedial branches.
+The blood supply includes superior sources (internal mammary perforators accounting for 60%), lateral sources (lateral thoracic artery), medial sources (internal mammary perforators), and inferior sources (external mammary perforators).
+
+Sensory innervation comes from intercostal nerves (lateral and anterior cutaneous branches). The nipple-areola complex (NAC) is supplied by T4 anterolateral and anteromedial branches.
 
 ### Planning
-Sternal notch to nipple distance 19-21cm ideal.
-Nipple to inframammary fold 5-7cm.
-Regnault ptosis classification Grade 0 no ptosis. Grade I nipple at level of IMF. Grade II nipple below IMF but above lower pole. Grade III nipple below lower pole (points downward). Pseudoptosis gland below IMF but nipple above.
+The ideal sternal notch to nipple distance is 19-21cm. The nipple to inframammary fold distance should be 5-7cm.
+
+The Regnault ptosis classification includes: Grade 0 (no ptosis), Grade I (nipple at level of IMF), Grade II (nipple below IMF but above lower pole), and Grade III (nipple below lower pole, pointing downward). Pseudoptosis refers to the gland being below the IMF but the nipple remaining above.
 
 ### Pedicle Selection
-**Inferior pedicle**. The most common used. Maintains inferior blood supply and sensation. Better for large reductions. Can accommodate up to 1500g resection.
-**Superior pedicle**. Better nipple projection. Good for moderate reductions (<1000g). Better upper pole fullness.
-**Superomedial pedicle**. Based on internal mammary perforators. Good projection and sensation.
-**Free nipple graft**. For massive reductions (>1500g) or compromised vascularity. Loss of sensation and inability to breastfeed.
+The inferior pedicle is most commonly used. It maintains inferior blood supply and sensation, is better for large reductions, and can accommodate up to 1500g resection.
+
+The superior pedicle provides better nipple projection, is good for moderate reductions (less than 1000g), and achieves better upper pole fullness.
+
+The superomedial pedicle is based on internal mammary perforators and provides good projection and sensation.
+
+The free nipple graft is used for massive reductions (greater than 1500g) or compromised vascularity but results in loss of sensation and inability to breastfeed.
 
 ### Incision Patterns
-**Wise pattern (anchor/inverted T)**. The most common used. Better for larger reductions. Visible scar in IMF.
-**Vertical (lollipop)**. Better aesthetics with less scar. Good for moderate reductions. Technique: Lejour, Hall-Findlay.
-**Periareolar (Benelli)**. Minimal scar. Limited resection. Higher risk of areolar spreading, nipple flattening.
+The Wise pattern (anchor/inverted T) is most commonly used, is better for larger reductions, and leaves a visible scar in the IMF.
+
+The vertical (lollipop) pattern has better aesthetics with less scarring and is good for moderate reductions. Techniques include Lejour and Hall-Findlay.
+
+The periareolar (Benelli) pattern has minimal scarring but allows limited resection and has higher risk of areolar spreading and nipple flattening.
 
 ### Complications
-**Nipple necrosis**. Risk factors include smoking, diabetes, large reduction, tension. Treatment includes local wound care, observation for demarcation.
-**Fat necrosis**. Firm mass, oil cysts. Diagnosis involves mammography, ultrasound. Treatment includes observation, excision if symptomatic.
-**Infection**. Treatment includes antibiotics, drainage if abscess.
-**Hematoma**. Early <24 hours, evacuation needed. Late observation.
-**Wound dehiscence**. The most common at T-junction. Treatment includes local wound care, secondary closure if needed.
-**Hypertrophic scarring**. Treatment includes silicone, steroids, revision.
-**Loss of sensation**. Usually temporary, can be permanent.
-**Inability to breastfeed**. Higher with free nipple graft, superior pedicle.
+Nipple necrosis has risk factors including smoking, diabetes, large reduction, and tension. Treatment includes local wound care and observation for demarcation.
+
+Fat necrosis presents as a firm mass with oil cysts and is diagnosed with mammography and ultrasound. Treatment is observation, with excision if symptomatic.
+
+Infection is treated with antibiotics and drainage if an abscess is present.
+
+Hematoma occurring early (less than 24 hours) requires evacuation, while late hematomas are observed.
+
+Wound dehiscence is most common at the T-junction and is treated with local wound care and secondary closure if needed.
+
+Hypertrophic scarring is treated with silicone, steroids, and revision.
+
+Loss of sensation is usually temporary but can be permanent.
+
+Inability to breastfeed is higher with free nipple graft and superior pedicle techniques.
 
 ## Mastopexy
 
 ### Indications
-Breast ptosis without volume excess.
-Can combine with augmentation.
+Mastopexy is indicated for breast ptosis without volume excess and can be combined with augmentation.
 
 ### Augmentation-Mastopexy
-Two options Single stage higher revision rate. Two stages perform mastopexy then return later to perform augmentation.
+Single-stage procedures have a higher revision rate. Two-stage procedures involve performing mastopexy first, then returning later to perform augmentation.
 
 ## Benign Breast Diseases
 
 ### Fibroadenoma
-Giant fibroadenoma single solitary mass with asymmetric, rapid enlargement of one breast.
-Symptoms include firm, rubbery nodule.
-Diagnosis involves US.
-Diagnosis involves epithelial and stromal proliferation on pathology.
+Giant fibroadenoma is a single solitary mass with asymmetric, rapid enlargement of one breast. It presents as a firm, rubbery nodule and is diagnosed with ultrasound. Pathology shows epithelial and stromal proliferation.
 
 ### Juvenile breast hypertrophy
-Breast enlargement >3.3 lbs. during puberty.
-Diagnosis involves stromal tissue hypertrophy on pathology.
+Juvenile breast hypertrophy involves breast enlargement greater than 3.3 pounds during puberty. Pathology shows stromal tissue hypertrophy.
 
 ### Phyllodes tumor
-Generally benign, high recurrence, rare risk of metastasis.
-Symptoms include painless breast mass.
-Treatment includes wide surgical margins (>1cm).
+Phyllodes tumors are generally benign but have high recurrence and rare risk of metastasis. They present as a painless breast mass and are treated with wide surgical margins (greater than 1cm).
 
 ### Tuberous breast deformity
-Hypomastia/asymmetry, elevated IMF, constricted base, herniated/widened areola.
-Treatment includes periareolar radial scoring, tissue expander versus implant.
+Tuberous breast deformity presents with hypomastia/asymmetry, elevated IMF, constricted base, and herniated/widened areola. Treatment includes periareolar radial scoring and tissue expander or implant.
 
 ### Symptomatic galactocele/galactorrhea
-Swelling of breasts, milky discharge, no signs of infection or fever.
-Thought to be secondary to breast denervation after surgery.
-Diagnosis involves prolactin.
-Treatment includes bromocriptine (dopamine agonist).
+Galactorrhea presents with swelling of breasts and milky discharge without signs of infection or fever. It is thought to be secondary to breast denervation after surgery. Prolactin levels are measured for diagnosis. Treatment is bromocriptine (a dopamine agonist).
 
 ### Mondor disease
-Diagnosis involves superficial thrombophlebitis with erythematous, tender cord in the breast.
-Treatment includes self-resolves in 4-6 weeks, NSAIDs/pain control.
+Mondor disease presents with superficial thrombophlebitis showing an erythematous, tender cord in the breast. It self-resolves in 4-6 weeks and is managed with NSAIDs for pain control.
 
 ## Breast Cancer Screening
 
 ### Palpable mass on exam
-Diagnosis involves diagnostic MMG with US.
+A palpable mass is evaluated with diagnostic mammography and ultrasound.
 
 ### Breast cancer screening prior to reduction
-Screening MMG should be performed if age >40.
+Screening mammography should be performed if the patient is older than 40.
 
 ### Occult breast cancer in reduction mammaplasty specimen
-Occurs 0.4% overall, increased to 5.5% with personal history of cancer.`,
+Occult breast cancer occurs in 0.4% overall, increasing to 5.5% with a personal history of cancer.`,
 
     'breast-reconstruction': `# Breast Reconstruction
 
 ## Breast Cancer Overview
 
 ### Mastectomy Types
-**Total (simple) mastectomy**. Removal of breast tissue, nipple-areola complex. Preserves pectoralis major muscle.
-**Modified radical mastectomy**. Total mastectomy + axillary lymph node dissection. Preserves pectoralis muscles.
-**Skin-sparing mastectomy**. Preserves breast skin envelope. Removes nipple-areola complex. Better aesthetic outcomes.
-**Nipple-sparing mastectomy**. Preserves nipple-areola complex and breast skin. Relative indications no ptosis, tumor <5cm, tumor >1cm from nipple, no multi-centric disease. Contraindications include axillary disease, lymphovascular invasion, HER2/neu (H2N)+ on pathology. Nipple necrosis rate associated with incision. Lateral inframammary is lowest, periareolar is highest.
-**Contralateral prophylactic mastectomy**. Indications include genetic predisposition, high family risk, patient preference. Increases overall surgical risks compared to unilateral mastectomy.
-**Breast-conserving therapy (partial mastectomy [lumpectomy]/XRT)**. Removal of mass with margins, generally with adjuvant XRT. Contraindications include include multi-centric disease, diffuse calcifications on imaging, history of chest radiation, current pregnancy. Reconstruction after breast-conserving therapy not covered by all insurers.
+Total (simple) mastectomy involves removal of breast tissue and nipple-areola complex while preserving the pectoralis major muscle.
+
+Modified radical mastectomy combines total mastectomy with axillary lymph node dissection while preserving the pectoralis muscles.
+
+Skin-sparing mastectomy preserves the breast skin envelope but removes the nipple-areola complex, providing better aesthetic outcomes.
+
+Nipple-sparing mastectomy preserves the nipple-areola complex and breast skin. Relative indications include no ptosis, tumor less than 5cm, tumor more than 1cm from the nipple, and no multi-centric disease. Contraindications include axillary disease, lymphovascular invasion, and HER2/neu positivity on pathology. Nipple necrosis rate is associated with incision type, with lateral inframammary being lowest and periareolar being highest.
+
+Contralateral prophylactic mastectomy is indicated for genetic predisposition, high family risk, or patient preference. It increases overall surgical risks compared to unilateral mastectomy.
+
+Breast-conserving therapy (partial mastectomy or lumpectomy) involves removal of the mass with margins, generally with adjuvant radiation. Contraindications include multi-centric disease, diffuse calcifications on imaging, history of chest radiation, and current pregnancy. Reconstruction after breast-conserving therapy is not covered by all insurers.
 
 ### Neoadjuvant chemotherapy
-Can shrink tumor to allow partial mastectomy instead of total mastectomy.
+Neoadjuvant chemotherapy can shrink tumors to allow partial mastectomy instead of total mastectomy.
 
 ### Hormonal therapy
-**Tamoxifen (pre-menopausal)**. Selective estrogen receptor modifier. Consider holding perioperatively due to possible increased thrombosis risk.
-**Aromatase inhibitors (post-menopausal)**. Prevents peripheral conversion of estrogen. Does not need to be held perioperatively for elective surgery.
+Tamoxifen is used in pre-menopausal patients and is a selective estrogen receptor modifier. It should be considered for holding perioperatively due to possible increased thrombosis risk.
+
+Aromatase inhibitors are used in post-menopausal patients and prevent peripheral conversion of estrogen. They do not need to be held perioperatively for elective surgery.
 
 ### Radiation (XRT)
-Indications include for post-mastectomy XRT tumor >5cm, >3 lymph nodes, + margin.
-Indicated in nearly all partial mastectomies (breast-conserving therapy) for cancer. Absolute contraindications for breast-conserving therapy: early pregnancy, multi-centric tumor, diffuse microcalcifications, inflammatory breast cancer, persistently positive margins.
-The most common skin dyspigmentation.
-Increases failure with implant-based reconstruction, fibrosis to autologous reconstruction. If unknown need for post-mastectomy XRT, reconstruct with tissue expanders, not definitive flap.
-Chronic wound after XRT. Biopsy to evaluate for recurrence. Evaluate for rib osteoradionecrosis.
+Post-mastectomy radiation is indicated for tumors greater than 5cm, more than 3 positive lymph nodes, or positive margins.
+
+Radiation is indicated in nearly all partial mastectomies (breast-conserving therapy) for cancer. Absolute contraindications for breast-conserving therapy include early pregnancy, multi-centric tumor, diffuse microcalcifications, inflammatory breast cancer, and persistently positive margins.
+
+Skin dyspigmentation is the most common radiation side effect.
+
+Radiation increases failure rates with implant-based reconstruction and causes fibrosis with autologous reconstruction. If the need for post-mastectomy radiation is unknown, tissue expanders should be used rather than definitive flap reconstruction.
+
+Chronic wounds after radiation require biopsy to evaluate for recurrence and evaluation for rib osteoradionecrosis.
 
 ## Implant-Based Reconstruction
 
 ### Pocket Positions
-Pre-pectoral and subpectoral pocket positions MC.
-**Pre-pectoral pocket**. Better medial placement, decreased risk of animation deformity. Higher implant rippling, higher upper pole contour deformity, higher cost.
+Pre-pectoral and subpectoral pocket positions are most commonly used.
+
+The pre-pectoral pocket allows better medial placement and has decreased risk of animation deformity, but has higher implant rippling, higher upper pole contour deformity, and higher cost.
 
 ### Antibiotics Management
-Perioperative (prophylactic dose then 24 hours post op) use only, higher infection risk with prolonged courses.
+Antibiotics should be limited to perioperative use (prophylactic dose then 24 hours postoperatively). Prolonged courses increase infection risk.
 
 ### Types of Tissue Expanders
-The most common saline filled via integrated port.
-Others air, carbon dioxide rapid expansion, can't deflate.
-Not MRI compatible (due to magnet on port).
+Saline-filled expanders with integrated ports are most common. Other options include air and carbon dioxide for rapid expansion, but these cannot be deflated. Expanders are not MRI compatible due to the magnet on the port.
 
 ### Complications
-**Post-mastectomy XRT effects on implant**. The most common cause of explantation. Increases capsular contracture (#1 risk factor), seroma, wound-healing problems, infections. Implant/TE exposure in setting of XRT: explant device in OR.
-**Risk factors include for salvage failure** deep infection (#1), XRT, obesity, seroma, diabetes mellitus.
-**Infected tissue expander, implant**. The most common organism staph aureus (overall), The most common gram negative pseudomonas. Breast implant funnels decrease risk of bacterial contamination.
-**Mastectomy skin necrosis**. Treatment includes nitroglycerin ointment initially.
-**Breast-implant-associated ALCL (BIA-ALCL)**. Risk factors include history of textured implant (or tissue expander). Contralateral side affected 5% of cases. Symptoms include delayed seroma. Diagnosis involves ultrasound, fine-needle aspiration for cytology. Fluid cytometry: CD30+, ALK-. Wright-Giemsa stain. The most common bacteria: ralstonia. Treatment includes bilateral explantation (risk of contralateral involvement ~5%), total capsulectomy, oncology referral.
-**Cyanoacrylate contact dermatitis**. 10-15% incidence, erythema limited to area of incision. Type IV immune response (T-cell mediated to foreign agent). Treatment includes remove offending agent, topical steroids.
-**Post-mastectomy pain syndrome**. Symptoms include unilateral chest wall, axilla, upper arm pain from intercostobrachial nerve. Treatment includes gabapentin.
+Post-mastectomy radiation is the most common cause of explantation. It increases capsular contracture (the number one risk factor), seroma, wound-healing problems, and infections. Implant or tissue expander exposure in the setting of radiation requires device explantation in the operating room.
+
+Risk factors for salvage failure include deep infection (the number one risk factor), radiation, obesity, seroma, and diabetes mellitus.
+
+For infected tissue expanders or implants, Staphylococcus aureus is the most common organism overall, and Pseudomonas is the most common gram-negative organism. Breast implant funnels decrease the risk of bacterial contamination.
+
+Mastectomy skin necrosis is initially treated with nitroglycerin ointment.
+
+Breast-implant-associated ALCL (BIA-ALCL) has textured implant or tissue expander history as a risk factor. The contralateral side is affected in 5% of cases. It presents with delayed seroma and is diagnosed with ultrasound and fine-needle aspiration for cytology. Fluid cytometry shows CD30 positive and ALK negative on Wright-Giemsa stain. Ralstonia is the most commonly associated bacteria. Treatment includes bilateral explantation (due to approximately 5% risk of contralateral involvement), total capsulectomy, and oncology referral.
+
+Cyanoacrylate contact dermatitis has 10-15% incidence and presents with erythema limited to the incision area. It is a Type IV immune response (T-cell mediated to foreign agent). Treatment includes removing the offending agent and topical steroids.
+
+Post-mastectomy pain syndrome presents with unilateral chest wall, axilla, and upper arm pain from the intercostobrachial nerve. Treatment includes gabapentin.
 
 ## Autologous Reconstruction
 
 ### Abdominal-Based Flaps
 
-**Pre-existing scars** .
-Subcostal scar worst for flap perfusion.
-Pffanenstiel incision sacrifices superficial drainage of flap, reduces venous congestion of the flap.
+Regarding pre-existing scars, subcostal scars are the worst for flap perfusion. A Pfannenstiel incision sacrifices superficial drainage of the flap but reduces venous congestion of the flap.
 
-**Transverse rectus abdominus musculocutaneous (TRAM) flap**:.
-Often pedicled, can be ipsilateral or contralateral.
-Arterial supply superior epigastric artery (need intact internal mammary artery [IMA]). Hartrampf zones (from better to worse perfusion) I ipsilateral rectus abdominus skin. II contralateral rectus abdominus skin. III ipsilateral lateral abdominal skin. IV contralateral lateral abdominal skin.
-Can perform surgical delay (divide inferior epigastric artery) 2 weeks prior to reduce fat necrosis. Consider for higher BMIs.
+The transverse rectus abdominis musculocutaneous (TRAM) flap is often pedicled and can be ipsilateral or contralateral. Its arterial supply is the superior epigastric artery (requiring an intact internal mammary artery). The Hartrampf zones from best to worst perfusion are: Zone I (ipsilateral rectus abdominis skin), Zone II (contralateral rectus abdominis skin), Zone III (ipsilateral lateral abdominal skin), and Zone IV (contralateral lateral abdominal skin). Surgical delay (dividing the inferior epigastric artery 2 weeks prior) can reduce fat necrosis and should be considered for higher BMI patients.
 
-**Deep inferior epigastric artery perforator (DIEP) free tissue transfer**:.
-Modified Hartrampf zones.
-Perforators through rectus abdominus muscle.
-Pedicle deep inferior epigastric artery and vein.
-Spares rectus muscle (lower donor morbidity than TRAM).
-Imaging CTA to map perforators pre-operatively.
-Complications include include Abdominal bulge, hernia lower than TRAM but still possible. Fat necrosis peripheral zones III and IV at risk. Flap loss <5%. Donor site seroma.
+The deep inferior epigastric artery perforator (DIEP) flap uses modified Hartrampf zones. Perforators pass through the rectus abdominis muscle. The pedicle is the deep inferior epigastric artery and vein. It spares the rectus muscle, resulting in lower donor morbidity than TRAM. CTA is used preoperatively to map perforators. Complications include abdominal bulge and hernia (lower than TRAM but still possible), fat necrosis (peripheral zones III and IV are at risk), flap loss (less than 5%), and donor site seroma.
 
-**Superficial inferior epigastric artery (SIEA) flap**:.
-Rare use due to small, inconsistent vessels.
-Pedicle superficial inferior epigastric artery.
-Advantage no fascial violation.
-Present in only ~30% of patients with adequate caliber.
+The superficial inferior epigastric artery (SIEA) flap is rarely used due to small, inconsistent vessels. The pedicle is the superficial inferior epigastric artery. Its advantage is no fascial violation. Adequate caliber vessels are present in only approximately 30% of patients.
 
 ### Other Autologous Options
 
-**Latissimus dorsi flap** .
-Pedicled flap based on thoracodorsal artery.
-Often needs implant for volume.
-Good for partial defects, salvage reconstruction.
-The donor site has back contour deformity, seroma.
-Advantage reliable, well-vascularized tissue.
+The latissimus dorsi flap is a pedicled flap based on the thoracodorsal artery. It often needs an implant for volume and is good for partial defects and salvage reconstruction. Donor site morbidity includes back contour deformity and seroma. Its advantage is reliable, well-vascularized tissue.
 
-**Transverse upper gracilis (TUG) flap**:.
-Free flap from medial thigh.
-Pedicle medial circumflex femoral artery (ascending branch).
-Good for small to moderate breasts.
-The donor site has medial thigh scar.
+The transverse upper gracilis (TUG) flap is a free flap from the medial thigh. The pedicle is the ascending branch of the medial circumflex femoral artery. It is good for small to moderate breasts. Donor site morbidity includes a medial thigh scar.
 
-**Profunda artery perforator (PAP) flap**:.
-Free flap from posterior thigh.
-Pedicle profunda femoris perforators.
-Alternative to DIEP for patients without adequate abdominal tissue.
-Can be harvested in prone position simultaneously with mastectomy.
+The profunda artery perforator (PAP) flap is a free flap from the posterior thigh. The pedicle is profunda femoris perforators. It is an alternative to DIEP for patients without adequate abdominal tissue and can be harvested in the prone position simultaneously with mastectomy.
 
-**Stacked flaps** .
-Two flaps anastomosed to single recipient vessels.
-For larger volume needs.
-Common bilateral PAP, bilateral TUG.
+Stacked flaps involve two flaps anastomosed to single recipient vessels for larger volume needs. Common combinations include bilateral PAP and bilateral TUG.
 
 ### Timing of Reconstruction
-**Immediate** At time of mastectomy. Advantages Single surgery, better aesthetics, psychological benefit. Disadvantages Longer surgery, may delay adjuvant therapy if complications.
-**Delayed** After mastectomy and adjuvant therapy complete. Advantages Staging procedures, all cancer treatment complete. Disadvantages Additional surgery, chest wall changes from XRT.
+Immediate reconstruction occurs at the time of mastectomy. Advantages include single surgery, better aesthetics, and psychological benefit. Disadvantages include longer surgery and potential delay of adjuvant therapy if complications occur.
+
+Delayed reconstruction occurs after mastectomy and adjuvant therapy are complete. Advantages include staging procedures and completion of all cancer treatment. Disadvantages include additional surgery and chest wall changes from radiation.
 
 ### Nipple-Areola Reconstruction
-Timing 3-6 months after breast mound reconstruction.
-**Nipple techniques** Local flaps C-V flap, skate flap, star flap. Nipple sharing from contralateral. 3D tattooing (non-surgical).
-**Areola techniques** Tattooing (most common). Skin graft from inner thigh, labia.
-Expected flattening of reconstructed nipple over time.`,
+Nipple-areola reconstruction is performed 3-6 months after breast mound reconstruction.
+
+Nipple techniques include local flaps (C-V flap, skate flap, star flap), nipple sharing from the contralateral breast, and 3D tattooing (non-surgical).
+
+Areola techniques include tattooing (most common) and skin grafts from the inner thigh or labia.
+
+Expected flattening of the reconstructed nipple occurs over time.`,
 
     'facial-rejuvenation': `# Facial Rejuvenation
 
 ## Facial Analysis
-Divide face into vertical thirds (upper, mid, lower) and horizontal fifths.
+The face is divided into vertical thirds (upper, mid, lower) and horizontal fifths.
 
 ## Non-Surgical Rejuvenation
 
 ### Botulinum Toxin A
-**MOA** SNAP-25 blocks acetylcholine at pre-synapse neurotransmitter terminal.
-**FDA aesthetic indications** forehead, glabella, lateral eye rhytids. **Glabellar lines**. Procerus horizontal rhytids between nose and medial eyebrow. Corrugator vertical rhytids between nose and eyebrow. Usual dose ~20 units. **Frontalis** horizontal forehead lines, brow elevator.
-**Many non-aesthetic indications** migraines, hemifacial dyskinesia, blepharospasm, cervical dystonia, post-stroke upper limb spasticity, urinary problems, etc. **Hyperhidrosis**. Symptoms include bilateral symmetrical sweating, occurs >6 months, onset <25 years, occurs >1 week. Tx ~50 units/axilla.
-**Complications**. LD50 (lethal dose for 50% of patients): ~3000 units for a 70kg patient. Eyelid ptosis occurs due to spread to levator palpebrae superioris. Treatment includes apraclonidine (alpha-adrenergic agonist) eye gtts (acts on Muller's muscle).
-Unknown use in pregnancy.
+The mechanism of action involves SNAP-25 blocking acetylcholine at the pre-synaptic neurotransmitter terminal.
+
+FDA aesthetic indications include forehead, glabella, and lateral eye rhytids. Glabellar lines include procerus (horizontal rhytids between the nose and medial eyebrow) and corrugator (vertical rhytids between the nose and eyebrow), with a usual dose of approximately 20 units. Frontalis treatment addresses horizontal forehead lines and is a brow elevator.
+
+Non-aesthetic indications include migraines, hemifacial dyskinesia, blepharospasm, cervical dystonia, post-stroke upper limb spasticity, and urinary problems. Hyperhidrosis presents with bilateral symmetrical sweating, occurs for more than 6 months, has onset before age 25, and occurs more than weekly. Treatment is approximately 50 units per axilla.
+
+Regarding complications, the LD50 (lethal dose for 50% of patients) is approximately 3000 units for a 70kg patient. Eyelid ptosis occurs due to spread to the levator palpebrae superioris and is treated with apraclonidine (an alpha-adrenergic agonist) eye drops, which act on Muller's muscle.
+
+Use in pregnancy is unknown.
 
 ### Hyaluronic Acid Fillers
-**Characteristics**. G' (modulus): higher value increases stiffness of product.
-**Complications**. **Acute arterial compromise/tissue necrosis**. Risk factors include glabella, nasolabial area near ala. Symptoms include skin discoloration, worsening pain. Treatment includes inject hyaluronidase. **Blindness**. Intra-vascular occlusion of central retinal artery. Due to embolism from dorsal nasal artery to internal carotid. Treatment includes immediate retrobulbar injection of hyaluronidase (within 60 minutes).
+Regarding characteristics, the G' modulus indicates stiffness, with higher values increasing product stiffness.
+
+Complications include acute arterial compromise and tissue necrosis. Risk factors include the glabella and nasolabial area near the ala. Symptoms include skin discoloration and worsening pain. Treatment involves injecting hyaluronidase.
+
+Blindness occurs from intravascular occlusion of the central retinal artery due to embolism from the dorsal nasal artery to the internal carotid. Treatment requires immediate retrobulbar injection of hyaluronidase (within 60 minutes).
 
 ### Chemical Peels
 
-**Superficial** .
-**Glycolic acid peel**. Affects epidermis. Endpoint transparent frosting. Can neutralize with 1% sodium bicarbonate.
-**Salicylic acid/Jessner**. Superficial peel. Epidermis (basal layer).
+Superficial peels include glycolic acid, which affects the epidermis with an endpoint of transparent frosting and can be neutralized with 1% sodium bicarbonate. Salicylic acid and Jessner peels are also superficial and reach the epidermis (basal layer).
 
-**Intermediate** .
-**TCA**. Reaches upper (papillary) dermis. Endpoint: white frosting. Complication: hyperpigmentation. Risk factors include higher Fitzpatrick skin types (IV, V, VI). Treatment includes hydroquinone.
+Intermediate peels include TCA, which reaches the upper (papillary) dermis with a white frosting endpoint. The main complication is hyperpigmentation, with risk factors including higher Fitzpatrick skin types (IV, V, VI). Treatment includes hydroquinone.
 
-**Deep** .
-**Phenol Croton**. Reaches mid dermis (upper reticular dermis). Need cardiac monitoring, electrolyte monitoring. Complication: ventricular dysrhythmia. Related to speed of application. Monitor for 15 minutes after application.
-Chemical peels safe to apply to non-undermined areas at same time as rhytidectomy.
+Deep peels include phenol-croton, which reaches the mid dermis (upper reticular dermis). Cardiac and electrolyte monitoring are required. Ventricular dysrhythmia is a complication related to the speed of application. Monitoring for 15 minutes after application is necessary.
+
+Chemical peels are safe to apply to non-undermined areas at the same time as rhytidectomy.
 
 ### Laser
-**CO2, Erbium ablative lasers** The most common for skin resurfacing. Chromophore water (erbium has higher affinity). Prophylaxis with antiviral for HSV due to risk of reactivation. Pretreat for post-inflammatory hyperpigmentation in higher Fitzpatrick skin types (>IV). Treatment includes hydroquinone. The mechanism of action is blocks conversion of tyrosine to dihydroxyphenylalanine to decrease melanin production. **Complications** Hypertrophic scarring. Decrease fluence (energy density), smaller treatment area, avoiding multiple passes. Need to be off isotretinoin for >6 months to reduce risk of abnormal scarring. Hyperpigmentation.
+CO2 and erbium ablative lasers are the most common for skin resurfacing. The chromophore is water (erbium has higher affinity). Antiviral prophylaxis for HSV is required due to the risk of reactivation. Pretreatment for post-inflammatory hyperpigmentation is needed in higher Fitzpatrick skin types (greater than IV) using hydroquinone, which works by blocking conversion of tyrosine to dihydroxyphenylalanine to decrease melanin production.
+
+Complications include hypertrophic scarring, which is reduced by decreasing fluence (energy density), using smaller treatment areas, and avoiding multiple passes. Patients need to be off isotretinoin for more than 6 months to reduce the risk of abnormal scarring. Hyperpigmentation is another complication.
 
 ## Surgical Rejuvenation
 
 ### Hair Disorders
 
-**Male pattern alopecia (androgenic alopecia)**:.
-The most common cause of hair loss.
-Norwood-Hamilton classification (I-VII).
-Treatment includes minoxidil.
+Male pattern alopecia (androgenic alopecia) is the most common cause of hair loss. It is classified using the Norwood-Hamilton classification (I-VII). Treatment includes minoxidil.
 
-**Alopecia areata** .
-T-cell mediated autoimmune response affecting regional hair follicles.
-Treatment includes steroid injection.
+Alopecia areata is a T-cell mediated autoimmune response affecting regional hair follicles. Treatment includes steroid injection.
 
-**Trichotillomania** .
-Psychiatric etiology of pulling hair.
-Treatment includes psychiatry referral.
+Trichotillomania has a psychiatric etiology involving pulling of hair. Treatment includes psychiatry referral.
 
-**Hair removal** .
-Intermittent pulsed light targets melanin of hair follicles.
-Electrolysis patients with low skin melanin (Fitzpatrick type I).
+Hair removal uses intermittent pulsed light that targets melanin of hair follicles. Electrolysis is used for patients with low skin melanin (Fitzpatrick type I).
 
-**Hair grafting** .
-Micrografts 1 to 2 follicles.
-Minigrafts 3-4 follicles.
-Hair grafts will initially enter catagen phase and then telogen phase a few weeks later. Can take several months before new hairs appear.
+Hair grafting uses micrografts (1 to 2 follicles) and minigrafts (3-4 follicles). Hair grafts initially enter the catagen phase and then the telogen phase a few weeks later. It can take several months before new hairs appear.
 
 ### Browlift
-**Pretrichial** shortens forehead length.
-**Transcoronal** short forehead.
-**Endoscopic**. Higher risk of supraorbital nerve injury (numbness to forehead).
+The pretrichial approach shortens forehead length. The transcoronal approach is used for short foreheads. The endoscopic approach has higher risk of supraorbital nerve injury (numbness to forehead).
 
 ### Rhytidectomy
 
-**Anatomy** .
-Superficial musculoaponeuotic system (SMAS) contiguous with temperoparietal fascia and platysma.
+The superficial musculoaponeurotic system (SMAS) is contiguous with the temporoparietal fascia and platysma.
 
-**Techniques** .
-**Posterior incision**. Excision of skin to improve neck skin. Curving along hairline won't distort it.
-**SMAS tightening**. Decreases tension on skin closure.
-**Minimal access cranial suspension (MACS lift)**. Less skin excision than other techniques; need to extend postauricular incision if needed to remove more skin.
-**Short-scar rhytidectomy** similar jawline changes but worse neck management than full-scar rhytidectomy.
+The posterior incision excises skin to improve neck skin. Curving along the hairline will not distort it.
 
-**Complications** .
-**Hematoma**. Risk factors include hypertension, male. Treatment includes blood-pressure control with clonidine.
-**Skin loss**. Treatment includes observe, let demarcate, heal by secondary intention.
-**Nerve injuries**. Often self-resolve. Immediate post-operative changes The most common from local injection. In clinic, usually nerve injuries are a neuropraxia. Treatment includes observe for up to 6 months. Highest risk area sub-SMAS near lateral malar eminence.
-**Marginal mandibular nerve injury**. Innervates depressor labii inferioris, depressor anguli oris, mentalis. Location deep to platysma and superficial to the facial vein. Diagnosis involves unable to evert lower lip, purse lips, whistle.
-**Cervical branch**. Diagnosis involves lower teeth less visible with full smile on affected side.
-**Great auricular nerve injury**. Sensation to ear lobe. McKinney's point becomes superficial at midpoint of the sternocleidomastoid (SCM) 6.5cm inferior to the external auditory of SCM. Over resection of skin adjacent to earlobe.
-**Parotid duct injury**. Conservative management bland diet, percutaneous drainage, scopolamine patch, glycopyrrolate, botulinum toxin injection.
-**Sialocele**. Injury to submandibular gland. Sx Unilateral facial swelling, pain.
+SMAS tightening decreases tension on skin closure.
+
+The minimal access cranial suspension (MACS lift) requires less skin excision than other techniques but may need extension of the postauricular incision to remove more skin.
+
+Short-scar rhytidectomy achieves similar jawline changes but has worse neck management than full-scar rhytidectomy.
+
+Hematoma is a complication with risk factors including hypertension and male sex. Treatment includes blood pressure control with clonidine.
+
+Skin loss is treated with observation, allowing demarcation, and healing by secondary intention.
+
+Nerve injuries often self-resolve. Immediate postoperative changes are most commonly from local injection. In clinic, nerve injuries are usually neuropraxia and are treated with observation for up to 6 months. The highest risk area is sub-SMAS near the lateral malar eminence.
+
+Marginal mandibular nerve injury affects the depressor labii inferioris, depressor anguli oris, and mentalis. The nerve is located deep to the platysma and superficial to the facial vein. It presents with inability to evert the lower lip, purse lips, or whistle.
+
+Cervical branch injury presents with lower teeth being less visible with full smile on the affected side.
+
+Great auricular nerve injury affects sensation to the ear lobe. McKinney's point is where the nerve becomes superficial at the midpoint of the sternocleidomastoid (SCM), 6.5cm inferior to the external auditory canal. It occurs from over-resection of skin adjacent to the earlobe.
+
+Parotid duct injury is managed conservatively with a bland diet, percutaneous drainage, scopolamine patch, glycopyrrolate, or botulinum toxin injection.
+
+Sialocele is an injury to the submandibular gland that presents with unilateral facial swelling and pain.
 
 ### Buccal Fat Reduction
-There are three anterior, intermediate, and posterior. Parotid duct passes through anterior lobe (posterior portion).
+The buccal fat pad has three lobes: anterior, intermediate, and posterior. The parotid duct passes through the posterior portion of the anterior lobe.
 
 ### Genioplasty
 
-**Anatomy** .
-**Genioglossus**. Nerve hypoglossal (CN XII). Runs parallel with the posterior digastric muscle. Injury affects ipsilateral tongue paralysis.
+The genioglossus is innervated by the hypoglossal nerve (CN XII) and runs parallel with the posterior digastric muscle. Injury causes ipsilateral tongue paralysis.
 
-**Osseous** .
-Osteotomy to slide inferior mandible anteriorly.
+Osseous genioplasty involves osteotomy to slide the inferior mandible anteriorly.
 
-**Implant** .
-Porous polyethylene. Allows soft-tissue ingrowth.
-Silicone.
+Implant options include porous polyethylene (which allows soft-tissue ingrowth) and silicone.
 
-**Mandibular contouring** .
-Treatment includes square jaw.
+Mandibular contouring is used to treat a square jaw.
 
 ### Neck Rejuvenation
-Assess skin quality, location of excess (e.g., central, lateral), platysma banding, skin excess.
-Treatment includes cryolipolysis, suction-assisted lipectomy, direct excision, lower rhytidectomy.`,
+Assessment includes skin quality, location of excess (central versus lateral), platysma banding, and skin excess. Treatment options include cryolipolysis, suction-assisted lipectomy, direct excision, and lower rhytidectomy.`,
 
     'rhinoplasty': `# Rhinoplasty and Nasal Reconstruction
 
 ## Anatomy
 
 ### Upper Lateral Cartilages
-**Keystone area** junction to nasal bones. Cartilage is posterior to nasal bones. Inverted-V deformity if disrupted and not corrected.
+The keystone area is the junction to the nasal bones, where cartilage is posterior to the nasal bones. An inverted-V deformity occurs if this area is disrupted and not corrected.
 
 ### Internal Nasal Valve
-The most common area of nasal-breathing obstruction.
-Septum, upper lateral cartilage, inferior turbinate.
+The internal nasal valve is the most common area of nasal-breathing obstruction. It is formed by the septum, upper lateral cartilage, and inferior turbinate.
 
 ### Depressor Septi Nasi
-Anomalous muscle from upper lip to septum.
-Changes nose/lip relationship when animated.
+The depressor septi nasi is an anomalous muscle from the upper lip to the septum that changes the nose/lip relationship when animated.
 
 ## Nasal Analysis
 
 ### Assess Patency of Internal Nasal Valves
-**Cottle maneuver** distract cheek laterally, ask if nasal breathing improves.
-**Rhinomonometry** objective measurement.
+The Cottle maneuver involves distracting the cheek laterally and asking if nasal breathing improves. Rhinomanometry provides objective measurement.
 
 ### Bulbous Tip
-Convex lower lateral cartilages, wide domal width (less than 4mm), wide angle of divergence.
+A bulbous tip is characterized by convex lower lateral cartilages, wide domal width (less than 4mm), and wide angle of divergence.
 
 ## Nasal Reconstruction
 
 ### Nasal Subunits
-Sidewalls, ala, soft triangles, dorsum, nasal tip, columella.
+The nasal subunits include the sidewalls, ala, soft triangles, dorsum, nasal tip, and columella.
 
 ### Reconstruction
 
-**<1.5cm defects** .
-Healing by secondary intention, primary closure, local flaps (e.g., bilobed).
+Defects less than 1.5cm can be managed with healing by secondary intention, primary closure, or local flaps (such as bilobed flaps).
 
-**1.5-2.5cm defects** .
-Local flaps (e.g., bilobed).
+Defects between 1.5 and 2.5cm are reconstructed with local flaps (such as bilobed flaps).
 
-**>2.5cm or full-thickness defects** .
-Paramedian forehead flap. Pedicle supratrochlear artery. Three stages transfer, intermediate debulking (optional), pedicle division at 3 weeks. Excellent color and texture match. Frontalis muscle orbicularis oris innervated by facial nerve. Can develop forehead paralysis without reinnervation.
+Defects greater than 2.5cm or full-thickness defects require the paramedian forehead flap. The pedicle is the supratrochlear artery. The procedure has three stages: transfer, intermediate debulking (optional), and pedicle division at 3 weeks. It provides excellent color and texture match. The frontalis muscle is innervated by the facial nerve and can develop forehead paralysis without reinnervation.
 
-**Nasal lining** .
-Septal mucosal flap, folded forehead flap, free mucosal graft, full-thickness skin graft.
+Nasal lining options include septal mucosal flap, folded forehead flap, free mucosal graft, and full-thickness skin graft.
 
-**Nasal support** .
-Cartilage grafts septum, ear, rib.
-Bone grafts calvarium, iliac crest.
+Nasal support is provided by cartilage grafts (from septum, ear, or rib) and bone grafts (from calvarium or iliac crest).
 
 ## Rhinoplasty Techniques
 
 ### Dorsal Hump Reduction
-Rasp for bony hump.
-Scalpel or scissors for cartilaginous hump.
-May need osteotomies to close open roof.
+A rasp is used for bony humps. A scalpel or scissors is used for cartilaginous humps. Osteotomies may be needed to close an open roof.
 
 ### Tip Refinement
-Cephalic trim of lower lateral cartilages. Leave at least 6mm strip to maintain support.
-Interdomal and intradomal sutures.
-Tip grafts shield, cap, onlay.
+Cephalic trim of the lower lateral cartilages is performed, leaving at least a 6mm strip to maintain support. Interdomal and intradomal sutures are placed. Tip grafts include shield, cap, and onlay grafts.
 
 ### Nasal Dorsal Hump Augmentation
-Treatment includes septal cartilage or alloplastic materials (acellular dermal matrix, silicone, ePTFE).
+Treatment includes septal cartilage or alloplastic materials (acellular dermal matrix, silicone, or ePTFE).
 
 ### Decreased Nasal Tip Support
-Treatment includes septal extension graft, columellar strut graft.
+Treatment includes septal extension graft and columellar strut graft.
 
 ### Alar Flaring
-Assess for alar flare reduction at end of case as changing projection can affect alar width.
+Alar flare reduction should be assessed at the end of the case, as changing projection can affect alar width.
 
 ### Complications
 
-**Inverted-V deformity** collapse of upper lateral cartilages from bony nose.
-Treatment includes spreader grafts or auto spreader flaps.
+Inverted-V deformity is collapse of the upper lateral cartilages from the bony nose. Treatment includes spreader grafts or auto spreader flaps.
 
-**Alar notching** .
-The most common cephalic trim over resected.
+Alar notching is most commonly caused by over-resection during cephalic trim.
 
-**Difficulty with nasal breathing** .
-Internal nasal valve from separating upper lateral cartilage.
-Treatment includes spreader grafts or auto spreader flaps. Increase radius of internal nasal valve.
+Difficulty with nasal breathing from the internal nasal valve occurs from separating the upper lateral cartilage. Treatment includes spreader grafts or auto spreader flaps to increase the radius of the internal nasal valve.
 
-**External nasal valve** from over resection of lower lateral cartilages .
-Diagnosis involves inward rotation and malposition of lower lateral crura.
-Treatment includes lateral crural strut graft.`,
+External nasal valve problems occur from over-resection of the lower lateral cartilages. It presents with inward rotation and malposition of the lower lateral crura. Treatment includes lateral crural strut graft.`,
 
     'eye-aesthetic-reconstructive': `# Eye Aesthetic and Reconstructive
 
 ## Pre-Operative Evaluation
 
 ### Ptosis
-**Marginal reflex distance (MRD)-1**: light reflex on cornea to upper eyelid margin in primary gaze, usual 4-5mm.
-**Hering's law** equal innervation of bilateral levator palpebral muscles. Test phenylephrine to stimulate Muller muscle to raise more ptotic eyelid and decrease levator innervation and observe if contralateral eyelid falls.
+Marginal reflex distance 1 (MRD-1) is the distance from the light reflex on the cornea to the upper eyelid margin in primary gaze, normally 4-5mm.
+
+Hering's law states that there is equal innervation of bilateral levator palpebral muscles. Testing involves phenylephrine to stimulate Muller muscle to raise the more ptotic eyelid and decrease levator innervation, then observing if the contralateral eyelid falls.
 
 ### Horizontal Laxity
-Slant from medial to lateral canthus. Can become negative (downward slanting) with age. Treatment includes canthopexy or canthoplasty.
+The slant from medial to lateral canthus can become negative (downward slanting) with age. Treatment includes canthopexy or canthoplasty.
 
 ### Malar Vector
-Relationship of globe to malar soft tissues. Can become negative over time from deficient lid support. Risk factors include for lid ectropion. Treatment includes canthopexy or canthoplasty.
+The malar vector describes the relationship of the globe to malar soft tissues. It can become negative over time from deficient lid support and is a risk factor for lid ectropion. Treatment includes canthopexy or canthoplasty.
 
 ### Canalicular/Lacrimal Injury
-**RF** medial canthus injuries. Associated with epiphora, telecanthus, ptosis. Anterior displacement of eye punctum affects lacrimal drainage. Commonly in setting of naso-orbito-ethmoidal fractures.
-**Dx Jones tests**. I inject fluorescein to medial canaliculus, observe for drainage through the nose (through inferior meatus) for 5 minutes. II if no drainage, irrigate medial canaliculus with saline, observe for drainage to diagnose a partial obstruction.
-**Tx** silicone stent x 3-6 months (acute), dacrocystorhinostomy (chronic, salvage).
+Risk factors include medial canthus injuries. It is associated with epiphora, telecanthus, and ptosis. Anterior displacement of the eye punctum affects lacrimal drainage. This commonly occurs in the setting of naso-orbito-ethmoidal fractures.
+
+Diagnosis uses the Jones tests. Jones test I involves injecting fluorescein to the medial canaliculus and observing for drainage through the nose (through the inferior meatus) for 5 minutes. Jones test II, if no drainage occurs, involves irrigating the medial canaliculus with saline and observing for drainage to diagnose a partial obstruction.
+
+Treatment includes silicone stent for 3-6 months for acute injuries and dacryocystorhinostomy for chronic or salvage cases.
 
 ### Refractory Surgery
-**Timing of blepharoplasty after corneal surgery (e.g., LASIK)**. 6 months. Increased risk for dry eyes via change to corneal reflex arc. Eye tear film production:  Outer: lipid (prevents evaporation). Middle: aqueous (lubricates). Inner: mucin (nourishes cornea). Produced by Meibomian glands.
+The timing of blepharoplasty after corneal surgery (such as LASIK) should be 6 months. There is increased risk for dry eyes due to changes to the corneal reflex arc. The tear film has three layers: outer lipid (prevents evaporation), middle aqueous (lubricates), and inner mucin (nourishes cornea). It is produced by the Meibomian glands.
 
 ### Rheumatologic Disease
-**Sjogren's syndrome**. Symptoms include dry eyes, dry mouth, polyarthritis. Diagnosis involves anti-SSA and anti-SSB serum test.
+Sjogren's syndrome presents with dry eyes, dry mouth, and polyarthritis. Diagnosis involves anti-SSA and anti-SSB serum tests.
 
 ## Ptosis Repair
 
 ### Pre-operative Evaluation
-**Levator function** (downward to upward gaze):  Normal: >12mm. Good: 8-12mm. Fair: 5-7mm. Poor: <4mm.
+Levator function is assessed from downward to upward gaze: normal is greater than 12mm, good is 8-12mm, fair is 5-7mm, and poor is less than 4mm.
 
 ### Options
-**Fasanella-Servat** (tarsus/Muller resection): minimal ptosis, good levator function.
-**Levator advancement** fair levator function. Senile levator dehiscence suture levator aponeurosis to tarsal plate. Levator is located deep to pre-aponeurotic central fat pad.
-**Frontalis sling** poor levator function, use non-absorbable biomaterials.
+The Fasanella-Servat procedure (tarsus/Muller resection) is used for minimal ptosis with good levator function.
+
+Levator advancement is used for fair levator function. Senile levator dehiscence is treated by suturing the levator aponeurosis to the tarsal plate. The levator is located deep to the pre-aponeurotic central fat pad.
+
+Frontalis sling is used for poor levator function using non-absorbable biomaterials.
 
 ## Eyelid Reconstruction
 
 ### Direct Closure
-It can pentagonal excision and closure.
+Direct closure can be achieved with pentagonal excision and closure.
 
 ### Lamella
-**Anterior** skin. Can be skin grafts, flaps (e.g., Tripier). Post-burn contracture. Treatment includes contracture release, skin grafting.
-**Middle** tarsus. Cartilage grafts (e.g., ear) or acellular dermal matrix.
-**Posterior** conjunctival. Can be oral mucosa grafts (e.g., palate) or lid-switch flaps.
+The anterior lamella is skin, which can be reconstructed with skin grafts or flaps (such as Tripier flaps). Post-burn contracture is treated with contracture release and skin grafting.
+
+The middle lamella is tarsus, which can be reconstructed with cartilage grafts (such as ear cartilage) or acellular dermal matrix.
+
+The posterior lamella is conjunctiva, which can be reconstructed with oral mucosa grafts (from the palate) or lid-switch flaps.
 
 ### Upper Eyelid Flaps
-**Cutler-Beard flap**. Lower to upper eyelid switch. Full thickness upper eyelid defects >2/3.
+The Cutler-Beard flap is a lower to upper eyelid switch used for full-thickness upper eyelid defects greater than two-thirds.
 
 ### Lower Eyelid Flaps
-**Hughes tarsoconjunctival flap**.
-Upper to lower lid switch.
+The Hughes tarsoconjunctival flap is an upper to lower lid switch.
 
 ## Aesthetic Eyelid Surgery
 
 ### Upper Blepharoplasty
-Skin excision up to medial punctum.
-**Complications**. Nasal skin webbing from excessive medial skin resection. **Lagophthalmos** incomplete eyelid closure. Treatment includes taping, observation. **Transient ptosis**. Caused by swelling, bruising. Treatment includes observe, usually resolves in a few days. **Lacrimal gland injury** dry eye. **Meibomian gland injury** dry eyes, can be injured with skin-only excision. Produce oil that reduce tear evaporation. **Loss of ocular protection**. Injury to extra-canthal orbicularis oculi muscle innervated by zygomatic branch.
+Skin excision extends up to the medial punctum.
+
+Complications include nasal skin webbing from excessive medial skin resection. Lagophthalmos (incomplete eyelid closure) is treated with taping and observation. Transient ptosis is caused by swelling and bruising and usually resolves in a few days with observation. Lacrimal gland injury causes dry eye. Meibomian gland injury causes dry eyes and can occur even with skin-only excision; these glands produce oil that reduces tear evaporation. Loss of ocular protection results from injury to the extra-canthal orbicularis oculi muscle, which is innervated by the zygomatic branch.
 
 ### Lower Lid Blepharoplasty
 
-**Approaches** .
-Subconjunctival/skin muscle flap highest rate of ectropion.
-Subtarsal.
-Transconjunctival lowest rate of ectropion.
+The subconjunctival/skin muscle flap approach has the highest rate of ectropion. The subtarsal approach is another option. The transconjunctival approach has the lowest rate of ectropion.
 
-**Management of tear trough** .
-Release of orbital retaining ligament, fat repositioning.
-Anatomic landmark levator labii superioris.
+Management of the tear trough involves release of the orbital retaining ligament and fat repositioning. The anatomic landmark is the levator labii superioris.
 
-**Complications** .
-**Lower lid malposition**. The most common horizontal laxity of tarsoligamentous sling. Diagnosis involves snap-back test (distract 8mm). Treatment includes tarsal strip.
-**Injury to inferior oblique**, divides medial/central fat compartments. Symptoms include elevate, abduct the eye.
-**Retrobulbar hematoma**. Symptoms include pain, diminished visual acuity (decreased perception of red light initially), bruising, proptosis, decreased ocular movements. Treatment includes immediate lateral canthotomy, STAT ophthalmology consult, then mannitol, furosemide and then OR for orbital decompression.
-**Chemosis**. Prolapse of conjunctiva. Treatment includes lubrication, eye patching. Treatment includes conjunctivotomy for severe or refractory.
-**Lateral scleral show**. Inadequate canthal support.
+Lower lid malposition is the most common complication, caused by horizontal laxity of the tarsoligamentous sling. It is diagnosed with the snap-back test (distract 8mm). Treatment includes tarsal strip.
+
+Injury to the inferior oblique, which divides the medial and central fat compartments, presents with inability to elevate and abduct the eye.
+
+Retrobulbar hematoma presents with pain, diminished visual acuity (decreased perception of red light initially), bruising, proptosis, and decreased ocular movements. Treatment includes immediate lateral canthotomy, emergent ophthalmology consult, then mannitol and furosemide, followed by the operating room for orbital decompression.
+
+Chemosis is prolapse of the conjunctiva and is treated with lubrication and eye patching. Conjunctivotomy is performed for severe or refractory cases.
+
+Lateral scleral show results from inadequate canthal support.
 
 ### Eyelid Fat
 
-**Normal anatomy** .
-Retro orbicularis oculi fat (ROOF) in upper eyelid.
-Sub orbicularis oculis fat (SOOF) in lower eyelid.
+The retro-orbicularis oculi fat (ROOF) is located in the upper eyelid. The sub-orbicularis oculi fat (SOOF) is located in the lower eyelid.
 
-**Eyelid Xanthelasmas** .
-Excess fat deposits, affects lower eyelids.
-Treatment includes chemical peels, cryotherapy, laser ablation, direct excision and closure (no margins).
+Eyelid xanthelasmas are excess fat deposits that affect the lower eyelids. Treatment includes chemical peels, cryotherapy, laser ablation, or direct excision and closure (no margins needed).
 
 ## Congenital
 
 ### Blepharoptosis
-Delay treatment until age 3 unless significant visual obstruction due to anesthetic risk.
+Treatment is delayed until age 3 unless there is significant visual obstruction, due to anesthetic risk.
 
 ### Insensate Cornea
-Diagnosis involves recurrent ulcerations.
-Treatment includes supratrochlear to right scleral limbus nerve transfer.
+Insensate cornea presents with recurrent ulcerations. Treatment includes supratrochlear to scleral limbus nerve transfer.
 
 ### Limbal Dermoids
-Benign congenital tumors of the outer globe.`,
+Limbal dermoids are benign congenital tumors of the outer globe.`,
 
     'body-contouring': `# Body Contouring
 
 ## Liposuction
 
 ### Overview
-Long-term reduction of subcutaneous fat in treated areas without change in untreated areas when weight stable.
+Liposuction provides long-term reduction of subcutaneous fat in treated areas without change in untreated areas when weight is stable.
 
 ### Wetting Solution
-Isotonic fluid with epinephrine, lidocaine. Max dose lidocaine 35mg/kg (some studies suggest up to 55). Fluid present in 10-30% of aspirate. Peak lidocaine levels reached at 8-18 hours from injection, quicker above the clavicles.
-**Techniques**. **Dry** no tumescence. Estimated blood loss (EBL) 20-40% of aspirate. **Wet** 200-300cc tumescence per area. **Superwet** 1 1 ratio. EBL 1% of aspirate. **Tumescence** 2-3 1 ratio.
+The wetting solution is isotonic fluid with epinephrine and lidocaine. The maximum dose of lidocaine is 35mg/kg (some studies suggest up to 55mg/kg). Fluid is present in 10-30% of the aspirate. Peak lidocaine levels are reached at 8-18 hours from injection, with faster absorption above the clavicles.
+
+Techniques include: dry (no tumescence, with estimated blood loss 20-40% of aspirate), wet (200-300cc tumescence per area), superwet (1:1 ratio, with estimated blood loss 1% of aspirate), and tumescent (2-3:1 ratio).
 
 ### High-Volume Liposuction
->5000cc, should be performed with overnight observation due to risk for volume shifts.
+High-volume liposuction (greater than 5000cc) should be performed with overnight observation due to risk for volume shifts.
 
 ### Devices
-**Suction-assisted versus ultrasound-assisted**. No change in outcome. Less surgeon fatigue with ultrasound.
-**Laser-assisted** less post-operative pain.
-Length of cannula related to flow resistance.
-Cannula size related to efficiency and risk of contour abnormality.
+Suction-assisted and ultrasound-assisted liposuction show no change in outcome, though there is less surgeon fatigue with ultrasound. Laser-assisted liposuction has less postoperative pain.
+
+Cannula length is related to flow resistance. Cannula size is related to efficiency and risk of contour abnormality.
 
 ### Lymphedema
-Relative contraindication for aesthetic indications if pitting edema.
+Lymphedema with pitting edema is a relative contraindication for aesthetic liposuction.
 
 ### Complications
-**Contour abnormalities**. Avoid zones of adherence (e.g., lateral gluteal depression). Use crisscrossing cannula passes with multiple vectors.
+Contour abnormalities are avoided by avoiding zones of adherence (such as the lateral gluteal depression) and using crisscrossing cannula passes with multiple vectors.
 
 ### Fat Grafting
 
-**Adipose-derived stem cells** .
-Can differentiate into fibroblasts, keratinocytes directly.
-Anatomic areas with highest composition abdomen, inner thighs.
+Adipose-derived stem cells can differentiate into fibroblasts and keratinocytes directly. Anatomic areas with the highest stem cell composition are the abdomen and inner thighs.
 
-**Gluteal fat grafting** .
-Avoid intra-muscular injection/downward trajectory, large cannula (>4mm), inject only while in motion.
-**Complication** fat embolism, generally within 72 hours from surgery. Symptoms include shortness of breath, confusion, petechial rash. Treatment includes cardiopulmonary support.
+For gluteal fat grafting, avoid intramuscular injection and downward trajectory, use large cannulas (greater than 4mm), and inject only while in motion.
+
+Fat embolism is a complication that generally occurs within 72 hours from surgery. It presents with shortness of breath, confusion, and petechial rash. Treatment includes cardiopulmonary support.
 
 ### Non-Invasive Options
 
-**Cryolipolysis** .
-The mechanism of action is adipocyte apoptosis through crystallization at -5 to -15 degrees Celsius and ischemia/reperfusion injury.
-20-25% reduction of fat in treatment area.
-Complications include include The most common transient hypoesthesia. Paradoxical adipose hyperplasia. Abnormal focal increase in subcutaneous fat within treatment area. Risk factors include large applicator, male, Hispanic, abdominal site. Treatment includes observe for 6 months, liposuction.
+Cryolipolysis works through adipocyte apoptosis caused by crystallization at -5 to -15 degrees Celsius and ischemia/reperfusion injury. It achieves 20-25% reduction of fat in the treatment area.
+
+The most common complication is transient hypoesthesia. Paradoxical adipose hyperplasia is an abnormal focal increase in subcutaneous fat within the treatment area. Risk factors include large applicator, male sex, Hispanic ethnicity, and abdominal site. Treatment involves observation for 6 months, then liposuction if needed.
 
 ## Abdominoplasty
 
 ### Planning
-Scarpa's fascia superficial to rectus fascia.
-Superior extent of dissection costal margin.
+Scarpa's fascia is superficial to the rectus fascia. The superior extent of dissection is the costal margin.
 
 ### Technique
-Muscle plication repair diastasis recti.
-Umbilical transposition.
-Skin undermining and excision.
+Muscle plication repairs diastasis recti. The procedure includes umbilical transposition, skin undermining, and excision.
 
 ### Complications
-**Hematoma** The most common complication. Risk factors include male.
-**Seroma** The most common delayed complication.
-**Wound dehiscence** T-junction MC.
-**Skin/fat necrosis** Lateral dog ears, excessive tension.
-**Umbilical necrosis** Over-dissection, tension.
-**Abdominal bulge/hernia** Inadequate fascial repair.
-**DVT/PE** Use Caprini score for prophylaxis.
-**Sensory changes** Hypesthesia common, usually improves.
+Hematoma is the most common complication, with male sex as a risk factor.
+
+Seroma is the most common delayed complication.
+
+Wound dehiscence is most common at the T-junction.
+
+Skin and fat necrosis occur at lateral dog ears and areas of excessive tension.
+
+Umbilical necrosis results from over-dissection and tension.
+
+Abdominal bulge and hernia result from inadequate fascial repair.
+
+DVT and PE prophylaxis is guided by the Caprini score.
+
+Sensory changes and hypesthesia are common but usually improve.
 
 ### Variations
-**Mini-abdominoplasty** Limited undermining, no umbilical transposition.
-**Extended abdominoplasty** Includes flanks.
-**Circumferential abdominoplasty (lower body lift)**. Addresses: abdomen, flanks, back, buttocks, lateral thighs.
-**Belt lipectomy** Similar to lower body lift.
+Mini-abdominoplasty involves limited undermining with no umbilical transposition.
+
+Extended abdominoplasty includes the flanks.
+
+Circumferential abdominoplasty (lower body lift) addresses the abdomen, flanks, back, buttocks, and lateral thighs.
+
+Belt lipectomy is similar to lower body lift.
 
 ## Massive Weight Loss Surgery
 
 ### Post-Bariatric Body Contouring
-**Timing** After weight stabilization (>6 months), nutritional optimization.
-**Staged procedures** Due to extensive surgery required.
-**Body regions** Arms, breasts, abdomen, thighs, buttocks.
+Timing is after weight stabilization (more than 6 months) and nutritional optimization. Staged procedures are used due to the extensive surgery required. Body regions addressed include arms, breasts, abdomen, thighs, and buttocks.
 
 ### Lower Body Lift
-Circumferential excision at waistline.
-Addresses Abdomen, flanks, back, buttocks, lateral thighs.
-Lifts buttocks and lateral thighs.
-Higher complication rate than isolated abdominoplasty.
+The lower body lift involves circumferential excision at the waistline. It addresses the abdomen, flanks, back, buttocks, and lateral thighs, and lifts the buttocks and lateral thighs. It has a higher complication rate than isolated abdominoplasty.
 
 ### Corset Abdominoplasty
-Addresses both vertical and horizontal excess.
-Trim torso circumferentially.
+Corset abdominoplasty addresses both vertical and horizontal excess by trimming the torso circumferentially.
 
 ### Panniculectomy
-Removal of pannus only.
-Considered functional operation for persistent and recurrent intertriginous ulcerations.
-No umbilical transposition, no muscle plication.
-Less costly than abdominoplasty.
+Panniculectomy involves removal of the pannus only. It is considered a functional operation for persistent and recurrent intertriginous ulcerations. It does not include umbilical transposition or muscle plication and is less costly than abdominoplasty.
 
 ### Upper Body Lift
-Addresses Back rolls, bra rolls, lateral chest.
-Incisions Along bra line.
+The upper body lift addresses back rolls, bra rolls, and the lateral chest, with incisions along the bra line.
 
 ### Medial Thighplasty
-Vertical incision along medial thigh.
-Addresses medial thigh laxity.
+Medial thighplasty uses a vertical incision along the medial thigh and addresses medial thigh laxity.
 
 ### Complications
-Similar to abdominoplasty but higher rates.
-Seroma, wound dehiscence, skin necrosis common.
-**Lymphedema** Prolonged edema with circumferential technique. Femoral triangle contains lymphatic channels.
-DVT/PE prophylaxis critical.
+Complications are similar to abdominoplasty but occur at higher rates. Seroma, wound dehiscence, and skin necrosis are common.
+
+Lymphedema can result from prolonged edema with circumferential technique, as the femoral triangle contains lymphatic channels.
+
+DVT and PE prophylaxis is critical.
 
 ## Extremity Surgeries
 
 ### Brachioplasty (Arm Lift)
 
-**Indications** Excess upper arm skin.
+Brachioplasty is indicated for excess upper arm skin.
 
-**Techniques** .
-Liposuction. Pinch test of 1.5 to 3cm with good skin tone/no laxity.
-Liposuction-assisted brachioplasty. Facilitates soft-tissue dissection.
-Scar location posteromedial most concealed.
+Liposuction alone is used when the pinch test is 1.5 to 3cm with good skin tone and no laxity. Liposuction-assisted brachioplasty facilitates soft-tissue dissection. The posteromedial scar location is most concealed.
 
-**Complications** .
-Hypertrophic scarring (#1), wound-healing problems.
-**Injury to medial antebrachial cutaneous nerve**. Superficial at 14cm proximal to elbow, travels in medial arm next to basilic vein. Protect by leaving 1cm of fat at deep fascia. No risk with posterior resection.
+The most common complication is hypertrophic scarring, followed by wound-healing problems.
+
+The medial antebrachial cutaneous nerve is superficial at 14cm proximal to the elbow and travels in the medial arm next to the basilic vein. It is protected by leaving 1cm of fat at the deep fascia. There is no risk of injury with posterior resection.
 
 ### Thighplasty/Thigh Lift
 
-**Complications** .
-Prolonged edema with circumferential technique.
-Femoral triangle is where lymphatic channels are.
+Complications include prolonged edema with circumferential technique. The femoral triangle is where the lymphatic channels are located.
 
 ## Genital Aesthetic Surgery
 
 ### Labiaplasty
-**Complications** Hematoma. Risk factors include male.
+Hematoma is a complication, with male sex (in transgender patients) as a risk factor.
 
 ### Vaginal Rejuvenation
-**Vaginoplasty**. **Clitoral hood reduction**. Excise laterally, not anteriorly/clitoral frenulum. Complication injury to sensory nerves at anterior hood.
-**Laser rejuvenation** not shown to improve symptoms in post-menopausal women.
+For clitoral hood reduction, excision should be lateral, not anterior or at the clitoral frenulum, as injury to sensory nerves at the anterior hood is a complication.
+
+Laser rejuvenation has not been shown to improve symptoms in post-menopausal women.
 
 ## Others
 
 ### HIV-Associated Lipodystrophy
-Diagnosis involves atrophy of malar and temporal fat, development of buffalo hump/cervical fat deposits associated with use of HAART medications.
-Treatment includes fat grafting, poly-l-lactic acid filler to face, liposuction to buffalo hump.`,
+HIV-associated lipodystrophy presents with atrophy of malar and temporal fat and development of buffalo hump and cervical fat deposits associated with HAART medications.
+
+Treatment includes fat grafting and poly-L-lactic acid filler to the face, and liposuction to the buffalo hump.`,
   },
   'core-surgical': {
     'anesthesia': `# Anesthesia
