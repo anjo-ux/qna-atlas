@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { ArrowLeft, Bookmark } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -9,7 +9,6 @@ import { loadQuestions } from '@/utils/parseQuestions';
 import { Section } from '@/types/question';
 import { useQuestionStats } from '@/hooks/useQuestionStats';
 import { cn } from '@/lib/utils';
-import { useQuery } from '@tanstack/react-query';
 import { queryClient } from '@/lib/queryClient';
 
 interface BookmarksProps {
@@ -17,13 +16,17 @@ interface BookmarksProps {
 }
 
 export function BookmarksPage({ onBack }: BookmarksProps) {
-  // Query directly with staleTime: 0 to always refetch on this page
-  // This ensures bookmarks are updated immediately when removed from any component
-  const { data: bookmarks = [], isLoading } = useQuery({
-    queryKey: ['/api/bookmarks'],
-    staleTime: 0, // Always consider stale to ensure fresh data
-    gcTime: 1000 * 60 * 5, // Keep in cache for 5 minutes
-  });
+  const { bookmarks, isLoading } = useBookmarks();
+  const previousBookmarkCountRef = useRef(bookmarks.length);
+  
+  // When bookmarks change (e.g., one is removed), refetch to ensure UI syncs
+  useEffect(() => {
+    if (bookmarks.length < previousBookmarkCountRef.current) {
+      console.log('[BookmarksPage] Bookmark was removed, refetching...');
+      queryClient.refetchQueries({ queryKey: ['/api/bookmarks'] });
+    }
+    previousBookmarkCountRef.current = bookmarks.length;
+  }, [bookmarks.length]);
   const [sections, setSections] = useState<Section[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const { getQuestionResponse, recordResponse } = useQuestionStats();
