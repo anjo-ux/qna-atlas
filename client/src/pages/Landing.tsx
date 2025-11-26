@@ -41,10 +41,10 @@ export default function Landing() {
             <div className="flex justify-center mb-4">
               <img src={atlasLogo} alt="Plastic Surgery Atlas" className="w-24 h-24 object-contain drop-shadow-lg" />
             </div>
-            <h2 className="text-5xl font-bold gradient-text">
+            <h2 className="text-5xl font-bold gradient-text leading-tight">
               Plastic Surgery Atlas
             </h2>
-            <p className="text-xl text-muted-foreground">
+            <p className="text-xl text-muted-foreground leading-normal">
               Master comprehensive plastic surgery knowledge through interactive questions, detailed explanations, and structured learning paths
             </p>
             <div className="pt-4 flex gap-3 justify-center">
@@ -62,26 +62,26 @@ export default function Landing() {
             <Card variant="glass" className="glow-primary transition-glow">
               <CardHeader>
                 <CardTitle className="gradient-text">Comprehensive Learning</CardTitle>
-                <CardDescription>
+                <CardDescription className="leading-normal">
                   Organized by surgical specialties and topics
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-2">
                 <div className="flex items-start gap-2">
                   <Check className="w-5 h-5 text-secondary mt-0.5 flex-shrink-0" />
-                  <span className="text-muted-foreground">
+                  <span className="text-muted-foreground leading-normal">
                     500+ carefully curated questions
                   </span>
                 </div>
                 <div className="flex items-start gap-2">
                   <Check className="w-5 h-5 text-secondary mt-0.5 flex-shrink-0" />
-                  <span className="text-muted-foreground">
+                  <span className="text-muted-foreground leading-normal">
                     Detailed explanations for every answer
                   </span>
                 </div>
                 <div className="flex items-start gap-2">
                   <Check className="w-5 h-5 text-secondary mt-0.5 flex-shrink-0" />
-                  <span className="text-muted-foreground">
+                  <span className="text-muted-foreground leading-normal">
                     Reference materials and study guides
                   </span>
                 </div>
@@ -91,26 +91,26 @@ export default function Landing() {
             <Card variant="glass" className="glow-accent transition-glow">
               <CardHeader>
                 <CardTitle className="gradient-text">Track Your Progress</CardTitle>
-                <CardDescription>
+                <CardDescription className="leading-normal">
                   Monitor mastery across all topics
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-2">
                 <div className="flex items-start gap-2">
                   <Check className="w-5 h-5 text-secondary mt-0.5 flex-shrink-0" />
-                  <span className="text-muted-foreground">
+                  <span className="text-muted-foreground leading-normal">
                     Performance analytics by topic
                   </span>
                 </div>
                 <div className="flex items-start gap-2">
                   <Check className="w-5 h-5 text-secondary mt-0.5 flex-shrink-0" />
-                  <span className="text-muted-foreground">
+                  <span className="text-muted-foreground leading-normal">
                     Sync progress across devices
                   </span>
                 </div>
                 <div className="flex items-start gap-2">
                   <Check className="w-5 h-5 text-secondary mt-0.5 flex-shrink-0" />
-                  <span className="text-muted-foreground">
+                  <span className="text-muted-foreground leading-normal">
                     Resume tests anytime
                   </span>
                 </div>
@@ -123,7 +123,7 @@ export default function Landing() {
               <CardTitle className="text-primary">Start Your Journey</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              <p className="text-foreground">
+              <p className="text-foreground leading-normal">
                 Join surgeons studying for board certification and continuing education. Create an account to unlock the full learning experience with progress tracking, custom tests, and personalized recommendations.
               </p>
               <Button onClick={handleLogin} data-testid="button-sign-up" className="bg-primary hover:bg-primary/90">
