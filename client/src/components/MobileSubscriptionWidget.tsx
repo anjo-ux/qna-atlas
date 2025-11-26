@@ -29,7 +29,11 @@ interface SubscriptionDetails {
   transactionCount: number;
 }
 
-export function MobileSubscriptionWidget() {
+interface MobileSubscriptionWidgetProps {
+  hasEmoryAccess?: boolean;
+}
+
+export function MobileSubscriptionWidget({ hasEmoryAccess = false }: MobileSubscriptionWidgetProps) {
   const [isChangingPlan, setIsChangingPlan] = useState(false);
 
   const { data: subscription } = useQuery<SubscriptionDetails>({
@@ -94,7 +98,12 @@ export function MobileSubscriptionWidget() {
           <div>
             <p className="text-xs text-muted-foreground font-medium">Current Plan</p>
             <p className="font-semibold text-foreground mt-1">
-              {subscription?.plan ? `${subscription.plan.charAt(0).toUpperCase() + subscription.plan.slice(1)}` : 'Free Trial'}
+              {subscription?.plan 
+                ? `${subscription.plan.charAt(0).toUpperCase() + subscription.plan.slice(1)}`
+                : hasEmoryAccess 
+                ? 'Institutional Access'
+                : 'Free Trial'
+              }
             </p>
           </div>
           <div>

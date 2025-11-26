@@ -492,7 +492,7 @@ export function Settings({ onBack, subscription }: SettingsProps) {
               </Card>
 
               {/* Mobile Subscription Section */}
-              <MobileSubscriptionWidget />
+              <MobileSubscriptionWidget hasEmoryAccess={hasEmoryAccess} />
             </div>
           </div>
         </div>
