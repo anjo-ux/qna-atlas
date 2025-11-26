@@ -12,6 +12,7 @@ import { TestModeWizard } from '@/components/TestModeWizard';
 import { ArrowLeft, ChevronDown, ChevronUp, ChevronRight, ChevronLeft, ChevronRight as ChevronRightIcon, Check, X, Circle } from 'lucide-react';
 import { useQuestionStats, QuestionResponse } from '@/hooks/useQuestionStats';
 import { useTestSessions, TestSession } from '@/hooks/useTestSessions';
+import { useBookmarks } from '@/hooks/useBookmarks';
 import { cn } from '@/lib/utils';
 
 interface TestModeProps {
@@ -31,6 +32,7 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
     new Set(sections.flatMap(s => s.subsections.map(ss => ss.id)))
   );
   const [useAllQuestions, setUseAllQuestions] = useState(true);
+  const [useBookmarkedOnly, setUseBookmarkedOnly] = useState(false);
   const [expandedSections, setExpandedSections] = useState<Set<string>>(
     new Set(sections.map(s => s.id))
   );
@@ -44,6 +46,7 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
 
   const { recordResponse } = useQuestionStats();
   const { createSession, updateSession, completeSession, getInProgressSessions, getCompletedSessions, deleteSession, sessions } = useTestSessions();
+  const { bookmarks } = useBookmarks();
 
   // Helper function to find section and subsection IDs for a question
   const findSectionAndSubsectionForQuestion = (questionId: string): { sectionId: string; subsectionId: string } => {
@@ -74,7 +77,15 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
 
     let questions: Question[] = [];
     
-    if (useAllQuestions) {
+    if (useBookmarkedOnly) {
+      // Get bookmarked questions only
+      const bookmarkedIds = new Set(bookmarks.map(b => b.questionId));
+      sections.forEach(section => {
+        section.subsections.forEach(subsection => {
+          questions.push(...subsection.questions.filter(q => bookmarkedIds.has(q.id)));
+        });
+      });
+    } else if (useAllQuestions) {
       sections.forEach(section => {
         section.subsections.forEach(subsection => {
           questions.push(...subsection.questions);
@@ -91,7 +102,7 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
     }
     
     return questions;
-  }, [sections, selectedSubsections, useAllQuestions, isPreview, previewQuestions]);
+  }, [sections, selectedSubsections, useAllQuestions, useBookmarkedOnly, bookmarks, isPreview, previewQuestions]);
 
   const handleStartTest = async () => {
     if (availableQuestions.length === 0) {
@@ -360,27 +371,71 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
 
             {/* Question Source */}
             <Card className="p-4">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-sm font-semibold">Select Questions From</h2>
-                <div className="flex items-center gap-2">
-                  <Label htmlFor="all-select-toggle" className="text-xs font-medium">{useAllQuestions ? 'All' : 'Select'}</Label>
-                  <Switch
-                    id="all-select-toggle"
-                    checked={useAllQuestions}
-                    onCheckedChange={setUseAllQuestions}
-                  />
-                </div>
-              </div>
+              <h2 className="text-sm font-semibold mb-4">Select Questions From</h2>
 
-              {useAllQuestions ? (
-                <div className="p-3 bg-accent/10 rounded-lg border border-accent/20">
+              <div className="space-y-3">
+                {/* Bookmarked Option */}
+                {bookmarks.length > 0 && (
+                  <div
+                    className={cn(
+                      "p-3 rounded-lg border-2 cursor-pointer transition-colors",
+                      useBookmarkedOnly
+                        ? "border-primary bg-primary/10"
+                        : "border-border bg-muted/30 hover:bg-muted/50"
+                    )}
+                    onClick={() => {
+                      setUseBookmarkedOnly(true);
+                      setUseAllQuestions(false);
+                    }}
+                  >
+                    <p className="font-medium text-foreground text-sm">Bookmarked Questions</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Test on {bookmarks.length} bookmarked question{bookmarks.length !== 1 ? 's' : ''}
+                    </p>
+                  </div>
+                )}
+
+                {/* All Questions Option */}
+                <div
+                  className={cn(
+                    "p-3 rounded-lg border-2 cursor-pointer transition-colors",
+                    useAllQuestions && !useBookmarkedOnly
+                      ? "border-primary bg-primary/10"
+                      : "border-border bg-muted/30 hover:bg-muted/50"
+                  )}
+                  onClick={() => {
+                    setUseAllQuestions(true);
+                    setUseBookmarkedOnly(false);
+                  }}
+                >
                   <p className="font-medium text-foreground text-sm">All Available Questions</p>
                   <p className="text-xs text-muted-foreground mt-1">
                     Randomly select from all {availableQuestions.length} questions across all sections
                   </p>
                 </div>
-              ) : (
-                <div className="border border-border rounded-lg p-4 bg-muted/30 space-y-3">
+
+                {/* Selected Sections Option */}
+                <div
+                  className={cn(
+                    "p-3 rounded-lg border-2 cursor-pointer transition-colors",
+                    !useAllQuestions && !useBookmarkedOnly
+                      ? "border-primary bg-primary/10"
+                      : "border-border bg-muted/30 hover:bg-muted/50"
+                  )}
+                  onClick={() => {
+                    setUseAllQuestions(false);
+                    setUseBookmarkedOnly(false);
+                  }}
+                >
+                  <p className="font-medium text-foreground text-sm">Select Sections</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Choose specific topics to test
+                  </p>
+                </div>
+              </div>
+
+              {!useAllQuestions && !useBookmarkedOnly && (
+                <div className="border border-border rounded-lg p-4 bg-muted/30 space-y-3 mt-4">
                   {sections.map(section => (
                     <div key={section.id}>
                       <button
@@ -437,8 +492,9 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
             <Button
               size="lg"
               onClick={handleStartTest}
-              disabled={!useAllQuestions && selectedSubsections.size === 0}
+              disabled={(!useAllQuestions && !useBookmarkedOnly && selectedSubsections.size === 0) || availableQuestions.length === 0}
               className="w-full"
+              data-testid="button-start-test"
             >
               Start Test ({Math.min(questionCount, availableQuestions.length)} questions)
             </Button>
