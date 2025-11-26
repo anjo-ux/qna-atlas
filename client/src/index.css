@@ -9,7 +9,12 @@ All colors MUST be HSL.
 @layer base {
   /* Eraser cursor when in eraser mode */
   .eraser-mode {
-    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"><rect x="2" y="2" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.5" rx="1"/><path d="M14 2 L18 6 L6 18 L2 14 Z" fill="currentColor" opacity="0.3" stroke="currentColor" stroke-width="1"/></svg>') 10 10, auto;
+    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M19 2H9l-7 7v10c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-6 18H5V9h8v11zm7-11h-2v9h2v-9z" fill="currentColor"/></svg>') 12 12, auto !important;
+    user-select: none;
+  }
+  
+  .eraser-mode * {
+    user-select: none;
   }
 
   :root {

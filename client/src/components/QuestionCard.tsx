@@ -169,6 +169,12 @@ export function QuestionCard({
 
 
   const handleTextSelection = () => {
+    // Don't allow highlighting when in eraser mode
+    if (isEraserMode) {
+      window.getSelection()?.removeAllRanges();
+      return;
+    }
+
     const selection = window.getSelection();
     if (!selection || selection.isCollapsed) return;
 
