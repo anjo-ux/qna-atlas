@@ -148,7 +148,15 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-gradient-to-br from-blue-200 via-purple-100 to-pink-200 dark:bg-background text-foreground antialiased;
+    background: linear-gradient(135deg, #d4b5fd 0%, #e9d5ff 25%, #fbcfe8 75%, #fce7f3 100%);
+    color: hsl(var(--foreground));
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body.dark {
+    background: hsl(var(--background));
   }
   
   h1, h2, h3, h4, h5, h6 {
