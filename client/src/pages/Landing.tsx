@@ -70,7 +70,7 @@ export default function Landing() {
                 <div className="flex items-start gap-2">
                   <Check className="w-5 h-5 text-secondary mt-0.5 flex-shrink-0" />
                   <span className="text-muted-foreground leading-normal">
-                    2500+ carefully curated questions.
+                    <strong>2500+ carefully curated questions.</strong>
                   </span>
                 </div>
                 <div className="flex items-start gap-2">
@@ -99,7 +99,7 @@ export default function Landing() {
                 <div className="flex items-start gap-2">
                   <Check className="w-5 h-5 text-secondary mt-0.5 flex-shrink-0" />
                   <span className="text-muted-foreground leading-normal">
-                    Spaced repetition algorithm to optimize learning.
+                    <strong>Spaced repetition algorithm to optimize learning.</strong>
                   </span>
                 </div>
                 <div className="flex items-start gap-2">
