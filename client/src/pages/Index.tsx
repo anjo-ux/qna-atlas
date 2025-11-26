@@ -359,7 +359,7 @@ export default function Index() {
               
               <div className="flex-1">
                 <h1 className="text-2xl sm:text-3xl font-bold text-primary">
-                  Plastic Surgery In-Training Exam Review
+                  Plastic Surgery Atlas
                 </h1>
                 <p className="text-sm text-muted-foreground mt-1">
                   {currentSubsection ? currentSubsection.title : 'Select a section to begin'}
