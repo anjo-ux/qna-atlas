@@ -22,6 +22,7 @@ import { useQuestionStats } from '@/hooks/useQuestionStats';
 import { useHighlights } from '@/hooks/useHighlights';
 import { useGlobalSearch } from '@/hooks/useGlobalSearch';
 import { useBookmarks } from '@/hooks/useBookmarks';
+import { useSpacedRepetition } from '@/hooks/useSpacedRepetition';
 import { useLocation } from 'wouter';
 import { toast } from 'sonner';
 
@@ -49,10 +50,7 @@ export default function Index() {
   const [isCheckingSubscription, setIsCheckingSubscription] = useState(true);
   const [showPreviewWizard, setShowPreviewWizard] = useState(false);
   const { bookmarks } = useBookmarks();
-  const { dueCount } = useSpacedRepetition ? (async () => {
-    const mod = await import('@/hooks/useSpacedRepetition');
-    return mod.useSpacedRepetition();
-  })() : { dueCount: 0 };
+  const { dueCount } = useSpacedRepetition();
 
   const {
     recordResponse,
@@ -399,6 +397,22 @@ export default function Index() {
                 {bookmarks.length > 0 && (
                   <span className="absolute -top-2 -right-2 bg-accent text-accent-foreground text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
                     {bookmarks.length > 99 ? '99+' : bookmarks.length}
+                  </span>
+                )}
+              </Button>
+
+              {/* Spaced Repetition Button */}
+              <Button
+                onClick={() => setLocation('/spaced-repetition')}
+                variant="outline"
+                className="gap-2 relative"
+                data-testid="button-spaced-repetition"
+              >
+                <Brain className="h-4 w-4" />
+                <span className="hidden md:inline">Review</span>
+                {dueCount > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-primary text-primary-foreground text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                    {dueCount > 99 ? '99+' : dueCount}
                   </span>
                 )}
               </Button>
