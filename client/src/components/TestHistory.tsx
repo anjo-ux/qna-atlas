@@ -12,11 +12,12 @@ const capitalizeWords = (str: string) => {
 interface TestHistoryProps {
   sessions: TestSession[];
   onResume?: (session: TestSession) => void;
+  onReview?: (session: TestSession) => void;
   onDelete?: (sessionId: string) => void;
   maxItems?: number;
 }
 
-export function TestHistory({ sessions, onResume, onDelete, maxItems }: TestHistoryProps) {
+export function TestHistory({ sessions, onResume, onReview, onDelete, maxItems }: TestHistoryProps) {
   // Sort by most recent first
   const sortedSessions = [...sessions].sort((a, b) => b.createdAt - a.createdAt);
   const displaySessions = maxItems ? sortedSessions.slice(0, maxItems) : sortedSessions;
@@ -82,7 +83,7 @@ export function TestHistory({ sessions, onResume, onDelete, maxItems }: TestHist
                       <>
                         <span className="hidden sm:inline">•</span>
                         <span className="text-success font-semibold">
-                          {correctAnswers} correct ({accuracy}%)
+                          {correctAnswers} Correct ({accuracy}%)
                         </span>
                       </>
                     )}
@@ -101,6 +102,19 @@ export function TestHistory({ sessions, onResume, onDelete, maxItems }: TestHist
                   >
                     <Play className="h-3 w-3" />
                     <span className="hidden sm:inline">Resume</span>
+                  </Button>
+                )}
+
+                {isComplete && onReview && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => onReview(session)}
+                    className="gap-1"
+                    data-testid={`button-review-test-${session.id}`}
+                  >
+                    <Play className="h-3 w-3" />
+                    <span className="hidden sm:inline">Review</span>
                   </Button>
                 )}
 
