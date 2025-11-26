@@ -359,13 +359,13 @@ export default function Index() {
                 <Home className="h-5 w-5" />
               </Button>
               
-              <div className="flex-1 flex items-center gap-2">
+              <div className="flex items-center gap-2 min-w-0">
                 <img 
                   src="/atlas-logo.png" 
                   alt="Atlas Logo" 
-                  className="h-8 w-8 object-contain"
+                  className="h-8 w-8 object-contain flex-shrink-0"
                 />
-                <h1 className="text-lg sm:text-xl font-bold text-primary">
+                <h1 className="hidden sm:block text-lg sm:text-xl font-bold text-primary truncate">
                   Atlas Review
                 </h1>
               </div>
