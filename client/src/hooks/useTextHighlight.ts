@@ -123,26 +123,26 @@ export function useTextHighlight(
       }
     });
 
-    // Add event delegation for eraser mode using mousedown (more reliable than click)
-    const handleMouseDown = (e: MouseEvent) => {
+    // Setup eraser click handler
+    const handleClick = (e: Event) => {
       if (!isEraserMode) return;
+      const event = e as MouseEvent;
+      const element = event.target as HTMLElement;
       
-      const target = e.target as HTMLElement;
-      const mark = target.closest('mark[data-highlight-id]');
-      
-      if (mark) {
-        e.preventDefault();
-        e.stopPropagation();
-        const highlightId = mark.getAttribute('data-highlight-id');
+      // Check if clicking on a mark
+      if (element.tagName === 'MARK' && element.hasAttribute('data-highlight-id')) {
+        event.preventDefault();
+        event.stopPropagation();
+        const highlightId = element.getAttribute('data-highlight-id');
         if (highlightId && removeHighlightRef.current) {
           removeHighlightRef.current(highlightId);
         }
       }
     };
 
-    container.addEventListener('mousedown', handleMouseDown, true);
+    container.addEventListener('click', handleClick, { capture: true });
     return () => {
-      container.removeEventListener('mousedown', handleMouseDown, true);
+      container.removeEventListener('click', handleClick, { capture: true });
     };
   }, [highlights, content, containerRef, isEraserMode]);
 }
