@@ -267,7 +267,7 @@ export function HomePage({ sections, onReviewIncorrect, onStartTest, onResumeTes
 
       {/* Progress Overview */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
-        <Card className="p-4 md:p-6 glass-card glow-primary transition-glow">
+        <Card className="p-4 md:p-6 glass-card glow-primary transition-glow hover:glow-primary">
           <h2 className="text-lg md:text-xl font-semibold mb-4 flex items-center gap-2 gradient-text">
             <TrendingUp className="h-5 w-5 text-primary" />
             Overall Progress
@@ -292,7 +292,7 @@ export function HomePage({ sections, onReviewIncorrect, onStartTest, onResumeTes
           </div>
         </Card>
 
-        <Card className="p-4 md:p-6 glass-card glow-accent transition-glow">
+        <Card className="p-4 md:p-6 glass-card glow-accent transition-glow hover:glow-accent">
           <h2 className="text-lg md:text-xl font-semibold mb-4 gradient-text">Recent Activity (7 Days)</h2>
           <div className="space-y-4">
             <div className="flex justify-between items-center p-3 md:p-4 bg-muted/50 rounded-lg gap-2">
@@ -321,7 +321,7 @@ export function HomePage({ sections, onReviewIncorrect, onStartTest, onResumeTes
 
       {/* Recent Tests */}
       {recentSessions.length > 0 && (
-        <Card className="p-4 md:p-6">
+        <Card className="p-4 md:p-6 glass-card">
           <div className="flex items-center gap-2 mb-6">
             <Zap className="h-5 w-5 text-primary" />
             <h2 className="text-lg md:text-xl font-semibold">Recent Tests</h2>
