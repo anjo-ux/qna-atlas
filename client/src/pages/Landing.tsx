@@ -122,7 +122,7 @@ export default function Landing() {
             <CardHeader>
               <CardTitle className="text-primary">Start Your Journey</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3">
+            <CardContent className="space-y-6">
               <p className="text-foreground leading-normal">
                 Join surgeons studying for board certification and continuing education. Create an account to unlock the full learning experience with progress tracking, custom tests, and personalized recommendations.
               </p>
