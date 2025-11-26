@@ -118,7 +118,7 @@ export function BookmarksPage({ onBack }: BookmarksProps) {
           {/* Search Bar */}
           <div className="mb-6">
             <Input
-              placeholder="Search bookmarked questions..."
+              placeholder="Search Bookmarked Questions"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full bg-white/5 border-white/10 backdrop-blur-sm"
@@ -131,7 +131,7 @@ export function BookmarksPage({ onBack }: BookmarksProps) {
             <Card className="p-8 text-center">
               <div className="space-y-2">
                 <Bookmark className="h-12 w-12 mx-auto text-muted-foreground/30" />
-                <p className="text-lg font-semibold">No bookmarked questions</p>
+                <p className="text-lg font-semibold">No Bookmarked Questions</p>
                 <p className="text-sm text-muted-foreground">
                   {bookmarkedQuestions.length === 0
                     ? 'Click the flag icon on any question to bookmark it and review it here.'
