@@ -37,7 +37,7 @@ export function TestModeWizard({ open, onClose, onContinue }: TestModeWizardProp
           </Card>
           <Card className="p-3 bg-accent/5 border-accent/20">
             <p className="font-medium text-sm text-foreground">Question Status Indicators</p>
-            <p className="text-xs text-muted-foreground mt-1">Blue circle = unanswered, checkmark = answered, X = incorrect</p>
+            <p className="text-xs text-muted-foreground mt-1">Blue Circle = Unanswered, Checkmark = Answered, X = Incorrect</p>
           </Card>
           <Card className="p-3 bg-chart-1/5 border-chart-1/20">
             <p className="font-medium text-sm text-foreground">Jump to Any Question</p>
