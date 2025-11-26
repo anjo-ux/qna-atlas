@@ -164,7 +164,6 @@ export function BookmarksPage({ onBack }: BookmarksProps) {
               ))}
             </div>
           )}
-        </div>
       </div>
     </div>
   );
