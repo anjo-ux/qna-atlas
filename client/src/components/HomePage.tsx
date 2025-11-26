@@ -351,7 +351,7 @@ export function HomePage({ sections, onReviewIncorrect, onStartTest, onResumeTes
                       </span>
                       <span className="font-semibold text-primary">{percentage}%</span>
                       {answeredQuestions > 0 && (
-                        <span className="text-success">({accuracy}% accurate)</span>
+                        <span className="text-success">{accuracy}% Accuracy</span>
                       )}
                     </div>
                   </div>
@@ -376,12 +376,12 @@ export function HomePage({ sections, onReviewIncorrect, onStartTest, onResumeTes
                           </span>
                           {answered > 0 && (
                             <span className="text-success min-w-fit text-right">
-                              {correct} correct ({subAccuracy}%)
+                              {correct} Correct
                             </span>
                           )}
                           {answered === 0 && (
                             <span className="text-muted-foreground text-right">
-                              Not started
+                              Not Started
                             </span>
                           )}
                         </div>
