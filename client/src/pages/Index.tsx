@@ -344,7 +344,7 @@ export default function Index() {
       {/* Main Content */}
       <div className="flex-1 flex flex-col min-h-screen overflow-hidden">
         {/* Header */}
-        <header className="sticky top-0 z-10 glass-surface border-glass">
+        <header className="glass-surface border-glass">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4">
             {/* Top Row: Home, Title, Actions */}
             <div className="flex items-center gap-4 mb-4">
