@@ -92,42 +92,13 @@ export function useHighlights() {
   }, []);
 
   const addHighlight = useCallback((highlight: Omit<Highlight, 'id'>) => {
-    // Find all highlights that overlap with the new one
-    const overlappingHighlights = highlights.filter(h =>
-      h.sectionId === highlight.sectionId &&
-      h.subsectionId === highlight.subsectionId &&
-      h.location === highlight.location &&
-      (highlight.location === 'question' ? h.questionId === highlight.questionId : true) &&
-      // Check for overlap
-      h.startOffset < highlight.endOffset && h.endOffset > highlight.startOffset
-    );
-
-    if (overlappingHighlights.length === 0) {
-      // No overlap, just add the new highlight
-      const newHighlight: Highlight = {
-        ...highlight,
-        id: `hl-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      };
-      saveHighlights([...highlights, newHighlight]);
-      return newHighlight.id;
-    } else {
-      // Merge overlapping highlights
-      const mergedStart = Math.min(highlight.startOffset, ...overlappingHighlights.map(h => h.startOffset));
-      const mergedEnd = Math.max(highlight.endOffset, ...overlappingHighlights.map(h => h.endOffset));
-      const mergedText = highlight.text; // Use the newly selected text as the merged text
-
-      // Remove overlapping highlights and add the merged one
-      const filteredHighlights = highlights.filter(h => !overlappingHighlights.includes(h));
-      const mergedHighlight: Highlight = {
-        ...highlight,
-        id: `hl-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-        startOffset: mergedStart,
-        endOffset: mergedEnd,
-        text: mergedText,
-      };
-      saveHighlights([...filteredHighlights, mergedHighlight]);
-      return mergedHighlight.id;
-    }
+    // Simply add the new highlight without merging - allow multiple highlights to coexist
+    const newHighlight: Highlight = {
+      ...highlight,
+      id: `hl-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+    };
+    saveHighlights([...highlights, newHighlight]);
+    return newHighlight.id;
   }, [highlights, saveHighlights]);
 
   const removeHighlight = useCallback((id: string) => {
