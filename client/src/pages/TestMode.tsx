@@ -507,7 +507,7 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
               className="w-full"
               data-testid="button-start-test"
             >
-              Start Test ({Math.min(questionCount, availableQuestions.length)} questions)
+              Start Test ({Math.min(questionCount, availableQuestions.length)} Questions)
             </Button>
           </div>
         </div>

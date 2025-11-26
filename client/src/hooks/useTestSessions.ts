@@ -35,7 +35,7 @@ export function useTestSessions() {
       id: dbSession.id,
       createdAt: new Date(dbSession.createdAt).getTime(),
       completedAt: dbSession.completedAt ? new Date(dbSession.completedAt).getTime() : undefined,
-      status: dbSession.status,
+      status: dbSession.status as 'in-progress' | 'completed',
       questionCount: dbSession.questionCount,
       selectedSectionIds: dbSession.selectedSectionIds,
       useAllQuestions: dbSession.useAllQuestions,
