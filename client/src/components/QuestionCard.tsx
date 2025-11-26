@@ -39,6 +39,7 @@ export function QuestionCard({
 }: QuestionCardProps) {
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(savedResponse?.selectedAnswer || null);
   const [showExplanation, setShowExplanation] = useState(!!savedResponse);
+  const [isEraserMode, setIsEraserMode] = useState(false);
 
   const {
     activeColor,
@@ -133,7 +134,7 @@ export function QuestionCard({
 
   // Apply highlights to question text
   const questionContent = parsed.text + '\n' + parsed.choices.map(c => `${c.letter}. ${c.text}`).join('\n');
-  useTextHighlight(questionRef, highlights, questionContent);
+  useTextHighlight(questionRef, highlights, questionContent, isEraserMode, removeHighlight);
 
   const correctAnswer = useMemo(() => {
     // Extract correct answer from the answer text
@@ -223,6 +224,8 @@ export function QuestionCard({
             onColorChange={setActiveColor}
             onAddNote={handleAddNote}
             onClearHighlights={handleClearHighlights}
+            isEraserMode={isEraserMode}
+            onEraserToggle={() => setIsEraserMode(!isEraserMode)}
           />
           <Button
             size="icon"

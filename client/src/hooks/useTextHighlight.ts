@@ -11,7 +11,9 @@ const HIGHLIGHT_COLORS: Record<string, string> = {
 export function useTextHighlight(
   containerRef: React.RefObject<HTMLElement>,
   highlights: Highlight[],
-  content: string
+  content: string,
+  isEraserMode: boolean = false,
+  onRemoveHighlight?: (id: string) => void
 ) {
   const previousHighlights = useRef<string>('');
 
@@ -97,7 +99,15 @@ export function useTextHighlight(
             mark.textContent = highlightedText;
             mark.className = `${HIGHLIGHT_COLORS[highlight.color]} px-1 rounded cursor-pointer transition-all hover:opacity-80`;
             mark.setAttribute('data-highlight-id', highlight.id);
-            mark.title = 'Double-click to remove';
+            mark.title = isEraserMode ? 'Click to delete' : 'Double-click to remove';
+            
+            // Add click handler for eraser mode
+            if (isEraserMode && onRemoveHighlight) {
+              mark.addEventListener('click', (e) => {
+                e.stopPropagation();
+                onRemoveHighlight(highlight.id);
+              });
+            }
 
             const parent = textNode.parentNode;
             if (!parent) continue;
@@ -113,5 +123,5 @@ export function useTextHighlight(
         }
       }
     });
-  }, [highlights, content, containerRef]);
+  }, [highlights, content, containerRef, isEraserMode, onRemoveHighlight]);
 }
