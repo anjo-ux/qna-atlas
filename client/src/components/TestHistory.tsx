@@ -5,6 +5,10 @@ import { TestSession } from '@/hooks/useTestSessions';
 import { Clock, CheckCircle2, Play, Trash2, AlertCircle } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 
+const capitalizeWords = (str: string) => {
+  return str.replace(/\b\w/g, (char) => char.toUpperCase());
+};
+
 interface TestHistoryProps {
   sessions: TestSession[];
   onResume?: (session: TestSession) => void;
@@ -71,11 +75,9 @@ export function TestHistory({ sessions, onResume, onDelete, maxItems }: TestHist
                     })}
                   </div>
                   <div className="flex flex-col sm:flex-row sm:items-center gap-2 text-sm text-muted-foreground">
-                    <span>{formatDistanceToNow(createdDate, { addSuffix: true })}</span>
+                    <span>{capitalizeWords(formatDistanceToNow(createdDate, { addSuffix: true }))}</span>
                     <span className="hidden sm:inline">•</span>
-                    <span>
-                      {totalAnswered} / {session.questionCount} answered
-                    </span>
+                    <span>Answered</span>
                     {isComplete && (
                       <>
                         <span className="hidden sm:inline">•</span>

@@ -368,7 +368,7 @@ export default function Index() {
                     Atlas Review
                   </h1>
                   <p className="text-sm text-muted-foreground mt-1">
-                    {currentSubsection ? currentSubsection.title : 'Select a section to begin'}
+                    {currentSubsection ? currentSubsection.title : 'Select a section to begin.'}
                   </p>
                 </div>
               </div>
