@@ -89,14 +89,16 @@ export function SpacedRepetitionPage({ onBack }: SpacedRepetitionProps) {
         </div>
 
         {/* Search */}
-        <Input
-          type="text"
-          placeholder="Search"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="bg-white/5 border-white/10 backdrop-blur-sm"
-          data-testid="input-search-spaced-repetition"
-        />
+        <div className="glass-surface border-glass rounded-md px-3 py-2">
+          <Input
+            type="text"
+            placeholder="Search"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="bg-transparent border-0 focus-visible:ring-0"
+            data-testid="input-search-spaced-repetition"
+          />
+        </div>
       </div>
 
       {/* Content */}
