@@ -11,6 +11,7 @@ interface HighlightToolbarProps {
   isEraserMode?: boolean;
   onEraserToggle?: () => void;
   disabled?: boolean;
+  isCompressed?: boolean;
 }
 
 const COLORS: { value: HighlightColor; label: string; class: string }[] = [
@@ -28,21 +29,83 @@ export function HighlightToolbar({
   isEraserMode = false,
   onEraserToggle,
   disabled = false,
+  isCompressed = false,
 }: HighlightToolbarProps) {
+  if (isCompressed) {
+    return (
+      <div className="flex flex-wrap items-center gap-1 p-1.5 bg-accent/5 border border-border rounded-lg">
+        <div className="flex items-center gap-0.5">
+          <Highlighter className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
+        </div>
+        
+        <div className="flex items-center gap-0.5">
+          {COLORS.map((color) => (
+            <button
+              key={color.value}
+              onClick={() => onColorChange(color.value)}
+              disabled={disabled || isEraserMode}
+              className={cn(
+                "w-5 h-5 rounded border-2 transition-all hover:scale-110 flex-shrink-0",
+                color.class,
+                activeColor === color.value && !isEraserMode ? 'border-foreground ring-2 ring-ring' : 'border-border',
+                (disabled || isEraserMode) && 'opacity-50 cursor-not-allowed'
+              )}
+              title={color.label}
+            />
+          ))}
+        </div>
+
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={onAddNote}
+          disabled={disabled}
+          className="h-6 w-6 flex-shrink-0"
+          title="Add note"
+        >
+          <StickyNote className="h-3.5 w-3.5" />
+        </Button>
+        <Button
+          variant={isEraserMode ? 'default' : 'ghost'}
+          size="icon"
+          onClick={onEraserToggle}
+          disabled={disabled}
+          className="h-6 w-6 flex-shrink-0"
+          data-testid="button-eraser-toggle"
+          title="Eraser mode"
+        >
+          <Eraser className="h-3.5 w-3.5" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={onClearHighlights}
+          disabled={disabled}
+          className="h-6 w-6 flex-shrink-0"
+          title="Clear highlights"
+        >
+          <Trash2 className="h-3.5 w-3.5" />
+        </Button>
+      </div>
+    );
+  }
+
+  // Full-width version with text labels
   return (
-    <div className="flex flex-wrap items-center gap-1 p-1.5 bg-accent/5 border border-border rounded-lg">
-      <div className="flex items-center gap-0.5">
-        <Highlighter className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
+    <div className="flex items-center gap-2 p-2 bg-accent/5 border border-border rounded-lg">
+      <div className="flex items-center gap-1 pr-2 border-r border-border">
+        <Highlighter className="h-4 w-4 text-muted-foreground" />
+        <span className="text-xs text-muted-foreground hidden sm:inline">Highlight:</span>
       </div>
       
-      <div className="flex items-center gap-0.5">
+      <div className="flex items-center gap-1">
         {COLORS.map((color) => (
           <button
             key={color.value}
             onClick={() => onColorChange(color.value)}
             disabled={disabled || isEraserMode}
             className={cn(
-              "w-5 h-5 rounded border-2 transition-all hover:scale-110 flex-shrink-0",
+              "w-6 h-6 rounded border-2 transition-all hover:scale-110",
               color.class,
               activeColor === color.value && !isEraserMode ? 'border-foreground ring-2 ring-ring' : 'border-border',
               (disabled || isEraserMode) && 'opacity-50 cursor-not-allowed'
@@ -52,37 +115,39 @@ export function HighlightToolbar({
         ))}
       </div>
 
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={onAddNote}
-        disabled={disabled}
-        className="h-6 w-6 flex-shrink-0"
-        title="Add note"
-      >
-        <StickyNote className="h-3.5 w-3.5" />
-      </Button>
-      <Button
-        variant={isEraserMode ? 'default' : 'ghost'}
-        size="icon"
-        onClick={onEraserToggle}
-        disabled={disabled}
-        className="h-6 w-6 flex-shrink-0"
-        data-testid="button-eraser-toggle"
-        title="Eraser mode"
-      >
-        <Eraser className="h-3.5 w-3.5" />
-      </Button>
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={onClearHighlights}
-        disabled={disabled}
-        className="h-6 w-6 flex-shrink-0"
-        title="Clear highlights"
-      >
-        <Trash2 className="h-3.5 w-3.5" />
-      </Button>
+      <div className="flex items-center gap-1 pl-2 border-l border-border">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={onAddNote}
+          disabled={disabled}
+          className="gap-2 h-8"
+        >
+          <StickyNote className="h-4 w-4" />
+          <span className="hidden sm:inline">Note</span>
+        </Button>
+        <Button
+          variant={isEraserMode ? 'default' : 'ghost'}
+          size="sm"
+          onClick={onEraserToggle}
+          disabled={disabled}
+          className="gap-2 h-8"
+          data-testid="button-eraser-toggle"
+        >
+          <Eraser className="h-4 w-4" />
+          <span className="hidden sm:inline">Eraser</span>
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={onClearHighlights}
+          disabled={disabled}
+          className="gap-2 h-8"
+        >
+          <Trash2 className="h-4 w-4" />
+          <span className="hidden sm:inline">Clear</span>
+        </Button>
+      </div>
     </div>
   );
 }

@@ -541,6 +541,7 @@ export default function Index() {
                     subsectionTitle={currentReferenceTitle}
                     sectionId={selectedSection || ''}
                     subsectionId={selectedSubsection || ''}
+                    isCompressed={viewMode === 'split'}
                   />
                 </div>
               )}

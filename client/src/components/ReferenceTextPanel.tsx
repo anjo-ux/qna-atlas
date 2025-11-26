@@ -11,13 +11,15 @@ interface ReferenceTextPanelProps {
   subsectionTitle: string;
   sectionId: string;
   subsectionId: string;
+  isCompressed?: boolean;
 }
 
 export function ReferenceTextPanel({ 
   content, 
   subsectionTitle, 
   sectionId, 
-  subsectionId 
+  subsectionId,
+  isCompressed = false
 }: ReferenceTextPanelProps) {
   const {
     activeColor,
@@ -105,6 +107,7 @@ export function ReferenceTextPanel({
           onColorChange={setActiveColor}
           onAddNote={handleAddNote}
           onClearHighlights={handleClearHighlights}
+          isCompressed={isCompressed}
         />
       </div>
       <ScrollArea className="flex-1">
