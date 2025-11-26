@@ -454,7 +454,7 @@ export default function Index() {
               </div>
             </div>
 
-            {/* Mobile View Toggle */}
+            {/* Mobile View Toggle - No split view on mobile */}
             <div className="flex sm:hidden items-center gap-2 bg-accent/5 rounded-lg p-1">
               <Button
                 onClick={handleStartTest}
@@ -469,13 +469,6 @@ export default function Index() {
                 onClick={() => setViewMode('reference')}
               >
                 <BookOpen className="h-4 w-4" />
-              </Button>
-              <Button
-                variant={viewMode === 'split' ? 'default' : 'ghost'}
-                size="icon"
-                onClick={() => setViewMode('split')}
-              >
-                <Columns2 className="h-4 w-4" />
               </Button>
               <Button
                 variant={viewMode === 'questions' ? 'default' : 'ghost'}
@@ -534,14 +527,14 @@ export default function Index() {
             />
           ) : (
             <div className={cn(
-              "flex-1 flex flex-col sm:flex-row",
-              viewMode === 'split' ? "divide-y sm:divide-y-0 sm:divide-x divide-border" : ""
+              "flex-1 flex flex-col lg:flex-row",
+              viewMode === 'split' ? "divide-y lg:divide-y-0 lg:divide-x divide-border" : ""
             )}>
               {/* Reference Text Panel */}
               {(viewMode === 'reference' || viewMode === 'split') && (
                 <div className={cn(
                   "overflow-hidden",
-                  viewMode === 'split' ? "h-1/2 sm:h-auto sm:w-1/2" : "flex-1"
+                  viewMode === 'split' ? "lg:w-2/5 lg:flex-shrink-0" : "flex-1"
                 )}>
                   <ReferenceTextPanel 
                     content={currentReferenceContent}
@@ -556,7 +549,7 @@ export default function Index() {
               {(viewMode === 'questions' || viewMode === 'split') && (
                 <div className={cn(
                   "overflow-auto",
-                  viewMode === 'split' ? "h-1/2 sm:h-auto sm:w-1/2" : "flex-1"
+                  viewMode === 'split' ? "lg:w-3/5 lg:flex-1" : "flex-1"
                 )}>
                   <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
                     <div className="space-y-4">
