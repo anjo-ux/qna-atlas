@@ -52,6 +52,21 @@ export default function Index() {
   const { bookmarks } = useBookmarks();
   const { dueCount } = useSpacedRepetition();
 
+  // Handle responsive view mode: reference on small screens, split on large
+  useEffect(() => {
+    const handleResize = () => {
+      const isLargeScreen = window.innerWidth >= 1024; // lg breakpoint
+      setViewMode(isLargeScreen ? 'split' : 'reference');
+    };
+
+    // Set initial view mode
+    handleResize();
+
+    // Update on window resize
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   const {
     recordResponse,
     getQuestionResponse,
@@ -366,7 +381,7 @@ export default function Index() {
                   className="h-8 w-8 object-contain flex-shrink-0"
                 />
                 <h1 className="text-lg sm:text-xl font-bold text-primary truncate">
-                  Atlas Review
+                  Atlas
                 </h1>
               </div>
 
