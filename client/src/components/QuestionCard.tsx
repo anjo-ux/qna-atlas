@@ -106,20 +106,23 @@ export function QuestionCard({
         const afterMarker = questionText.substring(lastMarkerIndex + 1);
         
         // Parse concatenated choices: "A) TextB) TextC) Text..." or "A ) TextB ) TextC ) Text..."
-        // Match letter with optional space, then ) or ., then the text
-        const choicePattern = /([A-E])\s*[.)]\s*([^A-E]*?)(?=(?:[A-E]\s*[.)]|$))/g;
+        // Use lookahead to find where the NEXT choice marker starts, capturing all text in between
+        // This handles choice text that contains letters A-E
+        const choicePattern = /([A-E])\s*[.)]\s*(.*?)(?=\s*[A-E]\s*[.)]\s*|$)/g;
         let match;
+        const extractedChoices: { letter: string; text: string }[] = [];
         
         while ((match = choicePattern.exec(afterMarker)) !== null) {
           const letter = match[1];
           const text = match[2].trim();
           if (text) {
-            choices.push({ letter, text });
+            extractedChoices.push({ letter, text });
           }
         }
         
-        // If we found choices, use the part before the marker as the question
-        if (choices.length > 0) {
+        // Validate we got a reasonable number of choices (at least 2, at most 5)
+        if (extractedChoices.length >= 2 && extractedChoices.length <= 5) {
+          choices.push(...extractedChoices);
           questionText = beforeMarker;
         }
       }
