@@ -21,26 +21,6 @@ export function ReferenceTextPanel({
   subsectionId,
   isCompressed = false
 }: ReferenceTextPanelProps) {
-  const [containerWidth, setContainerWidth] = useState<number>(0);
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  // Track container width for responsive compression
-  useEffect(() => {
-    const resizeObserver = new ResizeObserver((entries) => {
-      if (entries[0]) {
-        setContainerWidth(entries[0].contentRect.width);
-      }
-    });
-
-    if (containerRef.current) {
-      resizeObserver.observe(containerRef.current);
-    }
-
-    return () => resizeObserver.disconnect();
-  }, []);
-
-  // Only compress when container is actually too narrow (< 400px)
-  const shouldCompress = containerWidth < 400;
   const {
     activeColor,
     setActiveColor,
@@ -116,7 +96,7 @@ export function ReferenceTextPanel({
   }
 
   return (
-    <div className="h-full flex flex-col relative" ref={containerRef}>
+    <div className="h-full flex flex-col relative">
       <div className="border-b border-border p-4 bg-accent/5 space-y-3">
         <div>
           <h2 className="text-lg font-semibold text-foreground">Reference Material</h2>
@@ -127,7 +107,7 @@ export function ReferenceTextPanel({
           onColorChange={setActiveColor}
           onAddNote={handleAddNote}
           onClearHighlights={handleClearHighlights}
-          isCompressed={shouldCompress}
+          isCompressed={isCompressed}
         />
       </div>
       <ScrollArea className="flex-1">
