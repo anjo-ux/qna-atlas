@@ -493,7 +493,6 @@ export function Settings({ onBack, subscription }: SettingsProps) {
               {/* Mobile Subscription Section */}
               <MobileSubscriptionWidget />
             </div>
-            </div>
           </div>
         </div>
       </div>
