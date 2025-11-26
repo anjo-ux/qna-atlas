@@ -13,6 +13,7 @@ import { ArrowLeft, ChevronDown, ChevronUp, ChevronRight, ChevronLeft, ChevronRi
 import { useQuestionStats, QuestionResponse } from '@/hooks/useQuestionStats';
 import { useTestSessions, TestSession } from '@/hooks/useTestSessions';
 import { useBookmarks } from '@/hooks/useBookmarks';
+import { useAuth } from '@/hooks/useAuth';
 import { cn } from '@/lib/utils';
 
 interface TestModeProps {
@@ -47,6 +48,7 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
   const { recordResponse } = useQuestionStats();
   const { createSession, updateSession, completeSession, getInProgressSessions, getCompletedSessions, deleteSession, sessions } = useTestSessions();
   const { bookmarks } = useBookmarks();
+  const { isAuthenticated } = useAuth();
 
   // Helper function to find section and subsection IDs for a question
   const findSectionAndSubsectionForQuestion = (questionId: string): { sectionId: string; subsectionId: string } => {
@@ -258,6 +260,10 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
   };
 
   const handleFinishTest = () => {
+    if (isPreview && !isAuthenticated) {
+      window.location.href = '/api/auth';
+      return;
+    }
     if (currentSession) {
       completeSession(currentSession.id);
     }
@@ -265,6 +271,10 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
   };
 
   const handleSaveAndExit = () => {
+    if (isPreview && !isAuthenticated) {
+      window.location.href = '/api/auth';
+      return;
+    }
     // Progress is already saved via updateSession calls as user answers questions
     // Just return to setup to show the test in "Resume" section
     setTestState('setup');
