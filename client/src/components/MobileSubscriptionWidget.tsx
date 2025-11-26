@@ -82,7 +82,7 @@ export function MobileSubscriptionWidget() {
   const isTrialOrExpired = !subscription?.plan || subscription?.status === 'trial' || subscription?.status === 'expired';
 
   return (
-    <Card className="p-6 lg:hidden bg-gradient-to-br from-chart-1/10 to-chart-2/10 border-chart-1/20">
+    <Card className="p-6 bg-gradient-to-br from-chart-1/10 to-chart-2/10 border-chart-1/20">
       <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
         <CreditCard className="h-5 w-5" />
         Subscription
