@@ -128,7 +128,7 @@ export function BookmarksPage({ onBack }: BookmarksProps) {
                 Bookmarked Questions
               </h1>
               <p className="text-sm text-muted-foreground mt-1">
-                {filteredQuestions.length} of {bookmarkedQuestions.length} question{bookmarkedQuestions.length !== 1 ? 's' : ''}
+                {bookmarkedQuestions.length} Question{bookmarkedQuestions.length !== 1 ? 's' : ''}
               </p>
             </div>
           </div>
