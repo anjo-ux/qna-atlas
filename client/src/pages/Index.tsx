@@ -344,7 +344,8 @@ export default function Index() {
         {/* Header */}
         <header className="sticky top-0 z-10 backdrop-blur-lg bg-background/80 border-b border-border">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4">
-            <div className="flex items-center gap-4">
+            {/* Top Row: Home, Title, Actions */}
+            <div className="flex items-center gap-4 mb-4">
               
               <Button
                 variant="ghost"
@@ -434,7 +435,7 @@ export default function Index() {
             </div>
 
             {/* Mobile View Toggle */}
-            <div className="flex sm:hidden items-center gap-2 mt-4 bg-accent/5 rounded-lg p-1">
+            <div className="flex sm:hidden items-center gap-2 bg-accent/5 rounded-lg p-1">
               <Button
                 onClick={handleStartTest}
                 variant="outline"
@@ -464,10 +465,12 @@ export default function Index() {
                 <FileQuestion className="h-4 w-4" />
               </Button>
             </div>
+          </div>
 
-            {/* Search Bar */}
-            {currentSubsection && viewMode !== 'reference' && (
-              <div className="mt-4 relative" ref={searchRef}>
+          {/* Bottom Row: Search Bar - Always Visible */}
+          <div className="border-t border-border/50 bg-background/50 px-4 sm:px-6 lg:px-8 py-3">
+            <div className="container mx-auto">
+              <div className="relative" ref={searchRef}>
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                 <Input
                   type="text"
@@ -479,7 +482,8 @@ export default function Index() {
                       setShowSearchResults(true);
                     }
                   }}
-                  className="pl-10"
+                  className="pl-10 max-w-md"
+                  data-testid="input-search"
                 />
                 {showSearchResults && searchQuery.trim().length >= 2 && (
                   <SearchResults
@@ -489,7 +493,7 @@ export default function Index() {
                   />
                 )}
               </div>
-            )}
+            </div>
           </div>
         </header>
 
