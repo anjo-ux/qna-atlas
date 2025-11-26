@@ -37,16 +37,24 @@ export function useBookmarks() {
   const removeBookmarkMutation = useMutation({
     mutationFn: async (questionId: string) => {
       console.log('[Bookmark] Removing bookmark for question:', questionId);
-      return await apiRequest(`/api/bookmarks/${questionId}`, {
-        method: 'DELETE',
-      });
+      try {
+        const response = await apiRequest(`/api/bookmarks/${questionId}`, {
+          method: 'DELETE',
+        });
+        console.log('[Bookmark] Delete API response:', response);
+        return response;
+      } catch (error) {
+        console.error('[Bookmark] apiRequest threw error:', error);
+        throw error;
+      }
     },
     onSuccess: () => {
+      console.log('[Bookmark] onSuccess called - bookmark removed successfully');
       toast.success('Bookmark removed!');
       queryClient.invalidateQueries({ queryKey: ['/api/bookmarks'] });
     },
     onError: (error: any) => {
-      console.error('[Bookmark] Error removing bookmark:', error);
+      console.error('[Bookmark] onError called - Error removing bookmark:', error);
       const message = error.message || 'Failed to remove bookmark';
       toast.error(message);
     },
@@ -60,10 +68,19 @@ export function useBookmarks() {
   // Toggle bookmark
   const toggleBookmark = async (questionId: string, sectionId: string, subsectionId: string) => {
     console.log('[Bookmark] Toggle called with:', { questionId, sectionId, subsectionId });
-    if (isBookmarked(questionId)) {
-      await removeBookmarkMutation.mutateAsync(questionId);
-    } else {
-      await addBookmarkMutation.mutateAsync({ questionId, sectionId, subsectionId });
+    try {
+      if (isBookmarked(questionId)) {
+        console.log('[Bookmark] Question is bookmarked, calling removeBookmarkMutation');
+        await removeBookmarkMutation.mutateAsync(questionId);
+        console.log('[Bookmark] removeBookmarkMutation completed');
+      } else {
+        console.log('[Bookmark] Question is not bookmarked, calling addBookmarkMutation');
+        await addBookmarkMutation.mutateAsync({ questionId, sectionId, subsectionId });
+        console.log('[Bookmark] addBookmarkMutation completed');
+      }
+    } catch (error) {
+      console.error('[Bookmark] toggleBookmark caught error:', error);
+      throw error;
     }
   };
 

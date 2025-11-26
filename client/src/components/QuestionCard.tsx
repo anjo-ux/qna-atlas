@@ -265,7 +265,15 @@ export function QuestionCard({
                 sectionId,
                 subsectionId,
               });
-              toggleBookmark(question.id, sectionId, subsectionId);
+              (async () => {
+                try {
+                  console.log('[QuestionCard] Bookmark button handler: attempting to toggle bookmark');
+                  await toggleBookmark(question.id, sectionId, subsectionId);
+                  console.log('[QuestionCard] Bookmark toggle completed successfully');
+                } catch (error) {
+                  console.error('[QuestionCard] Bookmark toggle error:', error);
+                }
+              })();
             }}
             disabled={isBookmarkPending}
             data-testid={`button-bookmark-${question.id}`}
