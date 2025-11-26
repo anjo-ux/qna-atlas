@@ -440,6 +440,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.claims.sub;
       const bookmarks = await storage.getUserBookmarks(userId);
+      // Disable caching for bookmarks to ensure fresh data is always returned
+      res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
       res.json(bookmarks);
     } catch (error) {
       console.error("Error fetching bookmarks:", error);
