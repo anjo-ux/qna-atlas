@@ -22,9 +22,10 @@ export function useBookmarks() {
         body: JSON.stringify(data),
       });
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       toast.success('Question bookmarked!');
-      queryClient.invalidateQueries({ queryKey: ['/api/bookmarks'] });
+      // Force an immediate refetch instead of just invalidating
+      await queryClient.refetchQueries({ queryKey: ['/api/bookmarks'] });
     },
     onError: (error: any) => {
       console.error('[Bookmark] Error adding bookmark:', error);
@@ -48,10 +49,13 @@ export function useBookmarks() {
         throw error;
       }
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       console.log('[Bookmark] onSuccess called - bookmark removed successfully');
       toast.success('Bookmark removed!');
-      queryClient.invalidateQueries({ queryKey: ['/api/bookmarks'] });
+      // Force an immediate refetch instead of just invalidating
+      // This ensures all components get the updated bookmarks data
+      await queryClient.refetchQueries({ queryKey: ['/api/bookmarks'] });
+      console.log('[Bookmark] Bookmarks refetched after removal');
     },
     onError: (error: any) => {
       console.error('[Bookmark] onError called - Error removing bookmark:', error);
