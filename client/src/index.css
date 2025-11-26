@@ -72,7 +72,7 @@ html, body {
     --muted: 210 20% 94%;
     --muted-foreground: 210 15% 55%;
 
-    --accent: 180 100% 50%;
+    --accent: 180 100% 35%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84% 60%;
@@ -143,7 +143,7 @@ html, body {
     --muted: 210 25% 25%;
     --muted-foreground: 210 15% 65%;
 
-    --accent: 180 100% 55%;
+    --accent: 180 100% 45%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84% 65%;
