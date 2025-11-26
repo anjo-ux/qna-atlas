@@ -152,7 +152,7 @@ export function HomePage({ sections, onReviewIncorrect, onStartTest, onResumeTes
     <div className="p-4 md:p-6 lg:p-8 max-w-7xl mx-auto space-y-6 md:space-y-8 animate-fade-in overflow-auto flex-1">
       {/* Welcome Header */}
       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-        <div className="space-y-2">
+        <div className="space-y-2 min-w-0">
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground">
             Plastic Surgery In-Training Exam Review
           </h1>
@@ -163,18 +163,18 @@ export function HomePage({ sections, onReviewIncorrect, onStartTest, onResumeTes
             {!user && "Track your progress and master your knowledge."}
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1 sm:gap-2 md:gap-3 flex-shrink-0">
           <ThemeToggle />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="gap-2" data-testid="button-user-menu">
-                <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
+              <Button variant="ghost" className="gap-1 sm:gap-2 px-2 sm:px-3" data-testid="button-user-menu">
+                <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
                   {(() => {
                     const IconComponent = getAvatarIcon();
                     return <IconComponent className="w-4 h-4 text-primary" />;
                   })()}
                 </div>
-                <span className="hidden md:inline">{user?.firstName || user?.email?.split('@')[0]}</span>
+                <span className="hidden sm:inline truncate">{user?.firstName || user?.email?.split('@')[0]}</span>
               </Button>
             </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
