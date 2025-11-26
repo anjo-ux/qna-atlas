@@ -347,7 +347,7 @@ export default function Index() {
         <header className="glass-surface border-glass">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-3 pb-2">
             {/* Top Row: Home, Title, Actions */}
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 sm:gap-4 min-w-0">
               
               <Button
                 variant="ghost"
@@ -359,67 +359,74 @@ export default function Index() {
                 <Home className="h-5 w-5" />
               </Button>
               
-              <div className="flex-1 flex items-center gap-2">
+              <div className="flex-1 min-w-0 flex items-center gap-2">
                 <img 
                   src="/atlas-logo.png" 
                   alt="Atlas Logo" 
-                  className="h-8 w-8 object-contain"
+                  className="h-8 w-8 object-contain flex-shrink-0"
                 />
-                <h1 className="text-lg sm:text-xl font-bold text-primary">
+                <h1 className="text-lg sm:text-xl font-bold text-primary truncate">
                   Atlas Review
                 </h1>
               </div>
+
+              {/* Bookmarks Button - Hidden on xs */}
+              <Button
+                onClick={() => setLocation('/bookmarks')}
+                variant="outline"
+                size="icon"
+                className="hidden sm:flex flex-shrink-0"
+                data-testid="button-bookmarks"
+                title="Bookmarks"
+              >
+                <div className="relative">
+                  <Bookmark className="h-4 w-4" />
+                  {bookmarks.length > 0 && (
+                    <span className="absolute -top-2 -right-2 bg-accent text-accent-foreground text-xs font-bold rounded-full h-4 w-4 flex items-center justify-center text-[10px]">
+                      {bookmarks.length > 99 ? '99' : bookmarks.length}
+                    </span>
+                  )}
+                </div>
+              </Button>
+
+              {/* Spaced Repetition Button - Hidden on xs */}
+              <Button
+                onClick={() => setLocation('/spaced-repetition')}
+                variant="outline"
+                size="icon"
+                className="hidden sm:flex flex-shrink-0"
+                data-testid="button-spaced-repetition"
+                title="Spaced Repetition"
+              >
+                <div className="relative">
+                  <Brain className="h-4 w-4" />
+                  {dueCount > 0 && (
+                    <span className="absolute -top-2 -right-2 bg-primary text-primary-foreground text-xs font-bold rounded-full h-4 w-4 flex items-center justify-center text-[10px]">
+                      {dueCount > 99 ? '99' : dueCount}
+                    </span>
+                  )}
+                </div>
+              </Button>
+
+              {/* Test Button - Hidden on xs */}
+              <Button
+                onClick={handleStartTest}
+                variant="outline"
+                size="icon"
+                className="hidden sm:flex flex-shrink-0"
+                title="Test"
+              >
+                <Zap className="h-4 w-4" />
+              </Button>
 
               {/* Settings Button */}
               <Button
                 onClick={() => setScreenMode('settings')}
                 variant="outline"
                 size="icon"
-                className="lg:hidden"
+                className="flex-shrink-0"
               >
                 <Settings className="h-5 w-5" />
-              </Button>
-
-              {/* Bookmarks Button */}
-              <Button
-                onClick={() => setLocation('/bookmarks')}
-                variant="outline"
-                className="gap-2 relative"
-                data-testid="button-bookmarks"
-              >
-                <Bookmark className="h-4 w-4" />
-                <span className="hidden md:inline">Bookmarks</span>
-                {bookmarks.length > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-accent text-accent-foreground text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
-                    {bookmarks.length > 99 ? '99+' : bookmarks.length}
-                  </span>
-                )}
-              </Button>
-
-              {/* Spaced Repetition Button */}
-              <Button
-                onClick={() => setLocation('/spaced-repetition')}
-                variant="outline"
-                className="gap-2 relative"
-                data-testid="button-spaced-repetition"
-              >
-                <Brain className="h-4 w-4" />
-                <span className="hidden md:inline">Review</span>
-                {dueCount > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-primary text-primary-foreground text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
-                    {dueCount > 99 ? '99+' : dueCount}
-                  </span>
-                )}
-              </Button>
-
-              {/* Test Button */}
-              <Button
-                onClick={handleStartTest}
-                variant="outline"
-                className="gap-2"
-              >
-                <Zap className="h-4 w-4" />
-                <span className="hidden md:inline">Test</span>
               </Button>
 
               {/* View Mode Toggle */}
