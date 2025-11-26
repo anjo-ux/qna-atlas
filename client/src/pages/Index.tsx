@@ -370,53 +370,46 @@ export default function Index() {
                 </h1>
               </div>
 
-              {/* Bookmarks Button - Hidden on xs */}
+              {/* Bookmarks Button - Icon only on mobile, full on sm+ */}
               <Button
                 onClick={() => setLocation('/bookmarks')}
                 variant="outline"
-                size="icon"
-                className="hidden sm:flex flex-shrink-0"
+                className="hidden sm:flex gap-2 relative flex-shrink-0"
                 data-testid="button-bookmarks"
-                title="Bookmarks"
               >
-                <div className="relative">
-                  <Bookmark className="h-4 w-4" />
-                  {bookmarks.length > 0 && (
-                    <span className="absolute -top-2 -right-2 bg-accent text-accent-foreground text-xs font-bold rounded-full h-4 w-4 flex items-center justify-center text-[10px]">
-                      {bookmarks.length > 99 ? '99' : bookmarks.length}
-                    </span>
-                  )}
-                </div>
+                <Bookmark className="h-4 w-4" />
+                <span className="hidden md:inline">Bookmarks</span>
+                {bookmarks.length > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-accent text-accent-foreground text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                    {bookmarks.length > 99 ? '99+' : bookmarks.length}
+                  </span>
+                )}
               </Button>
 
-              {/* Spaced Repetition Button - Hidden on xs */}
+              {/* Spaced Repetition Button - Icon only on mobile, full on sm+ */}
               <Button
                 onClick={() => setLocation('/spaced-repetition')}
                 variant="outline"
-                size="icon"
-                className="hidden sm:flex flex-shrink-0"
+                className="hidden sm:flex gap-2 relative flex-shrink-0"
                 data-testid="button-spaced-repetition"
-                title="Spaced Repetition"
               >
-                <div className="relative">
-                  <Brain className="h-4 w-4" />
-                  {dueCount > 0 && (
-                    <span className="absolute -top-2 -right-2 bg-primary text-primary-foreground text-xs font-bold rounded-full h-4 w-4 flex items-center justify-center text-[10px]">
-                      {dueCount > 99 ? '99' : dueCount}
-                    </span>
-                  )}
-                </div>
+                <Brain className="h-4 w-4" />
+                <span className="hidden md:inline">Review</span>
+                {dueCount > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-primary text-primary-foreground text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                    {dueCount > 99 ? '99+' : dueCount}
+                  </span>
+                )}
               </Button>
 
-              {/* Test Button - Hidden on xs */}
+              {/* Test Button - Icon only on mobile, text on sm+ */}
               <Button
                 onClick={handleStartTest}
                 variant="outline"
-                size="icon"
-                className="hidden sm:flex flex-shrink-0"
-                title="Test"
+                className="hidden sm:flex gap-2 flex-shrink-0"
               >
                 <Zap className="h-4 w-4" />
+                <span className="hidden md:inline">Test</span>
               </Button>
 
               {/* Settings Button */}
