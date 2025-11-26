@@ -546,6 +546,27 @@ export class DatabaseStorage implements IStorage {
       .where(eq(subscriptionTransactions.userId, userId))
       .orderBy(desc(subscriptionTransactions.createdAt));
   }
+
+  // Theme preference operations
+  async getThemePreference(userId: string): Promise<string> {
+    const [user] = await db
+      .select({ themePreference: users.themePreference })
+      .from(users)
+      .where(eq(users.id, userId));
+    return user?.themePreference || 'light';
+  }
+
+  async updateThemePreference(userId: string, theme: string): Promise<string> {
+    const [updated] = await db
+      .update(users)
+      .set({
+        themePreference: theme,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, userId))
+      .returning({ themePreference: users.themePreference });
+    return updated?.themePreference || 'light';
+  }
 }
 
 export const storage = new DatabaseStorage();

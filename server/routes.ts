@@ -118,6 +118,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get user's theme preference
+  app.get('/api/theme', async (req: any, res) => {
+    try {
+      if (!req.isAuthenticated() || !req.user?.claims?.sub) {
+        return res.json({ theme: 'light' });
+      }
+      
+      const userId = req.user.claims.sub;
+      const theme = await storage.getThemePreference(userId);
+      res.json({ theme });
+    } catch (error) {
+      console.error("Error fetching theme preference:", error);
+      res.json({ theme: 'light' });
+    }
+  });
+
+  // Update user's theme preference
+  app.post('/api/theme', async (req: any, res) => {
+    try {
+      if (!req.isAuthenticated() || !req.user?.claims?.sub) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      const userId = req.user.claims.sub;
+      const { theme } = req.body;
+      
+      if (!theme || (theme !== 'light' && theme !== 'dark')) {
+        return res.status(400).json({ message: "Invalid theme" });
+      }
+      
+      const updatedTheme = await storage.updateThemePreference(userId, theme);
+      res.json({ theme: updatedTheme });
+    } catch (error) {
+      console.error("Error updating theme preference:", error);
+      res.status(500).json({ message: "Failed to update theme preference" });
+    }
+  });
+
   // Add login connection
   app.post('/api/auth/connections/:provider', async (req: any, res) => {
     try {
