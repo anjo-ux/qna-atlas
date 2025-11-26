@@ -469,7 +469,7 @@ export default function Index() {
 
           {/* Bottom Row: Search Bar - Always Visible */}
           <div className="border-t border-border/50 bg-background/50 px-4 sm:px-6 lg:px-8 py-3">
-            <div className="container mx-auto">
+            <div className="w-full">
               <div className="relative" ref={searchRef}>
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                 <Input
@@ -482,7 +482,7 @@ export default function Index() {
                       setShowSearchResults(true);
                     }
                   }}
-                  className="pl-10 max-w-md"
+                  className="pl-10 w-full"
                   data-testid="input-search"
                 />
                 {showSearchResults && searchQuery.trim().length >= 2 && (
