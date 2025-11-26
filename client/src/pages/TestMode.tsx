@@ -367,7 +367,7 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
             )}
             {/* Question Count */}
             <Card className="p-4">
-              <h2 className="text-sm font-semibold mb-3">Number of Questions</h2>
+              <h2 className="text-sm font-semibold mb-3">Total Questions</h2>
               <RadioGroup value={questionCount.toString()} onValueChange={(v) => setQuestionCount(parseInt(v) as any)}>
                 <div className="space-y-2">
                   {[10, 20, 30, 40].map(count => (
@@ -401,7 +401,7 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
                   >
                     <p className="font-medium text-foreground text-sm">Bookmarked Questions</p>
                     <p className="text-xs text-muted-foreground mt-1">
-                      Test on {bookmarks.length} bookmarked question{bookmarks.length !== 1 ? 's' : ''}
+                      Test on all {bookmarks.length} bookmarked questions.{bookmarks.length !== 1 ? 's' : ''}
                     </p>
                   </div>
                 )}
@@ -421,7 +421,7 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
                 >
                   <p className="font-medium text-foreground text-sm">All Available Questions</p>
                   <p className="text-xs text-muted-foreground mt-1">
-                    Randomly select from all {availableQuestions.length} questions across all sections
+                    Randomly select from all {availableQuestions.length} questions across all sections.
                   </p>
                 </div>
 
@@ -440,7 +440,7 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
                 >
                   <p className="font-medium text-foreground text-sm">Select Sections</p>
                   <p className="text-xs text-muted-foreground mt-1">
-                    Choose specific topics to test
+                    Choose specific topics to test from each section.
                   </p>
                 </div>
               </div>

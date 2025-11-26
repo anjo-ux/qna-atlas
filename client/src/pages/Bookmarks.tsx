@@ -53,6 +53,21 @@ export function BookmarksPage({ onBack }: BookmarksProps) {
     fetchData();
   }, []);
 
+  // Reload sections when bookmarks change to ensure fresh data
+  useEffect(() => {
+    if (bookmarks.length > 0 && sections.length === 0) {
+      const fetchData = async () => {
+        try {
+          const questionsData = await loadQuestions();
+          setSections(questionsData);
+        } catch (error) {
+          console.error('Error loading questions:', error);
+        }
+      };
+      fetchData();
+    }
+  }, [bookmarks, sections.length]);
+
   // Build bookmarked questions with section/subsection info
   // This useMemo will re-run whenever bookmarks changes, including when items are deleted
   const bookmarkedQuestions = useMemo(() => {
