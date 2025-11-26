@@ -598,7 +598,7 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
         </div>
 
         {/* Main Content */}
-        <div className="flex flex-col flex-1 overflow-hidden w-full">
+        <div className="flex flex-col flex-1 overflow-hidden w-full min-w-0">
           <div className="p-3 md:p-4 border-b border-border bg-accent/5 flex-shrink-0">
             <div className="flex items-center justify-between gap-3">
               <div className="flex-1 min-w-0">
