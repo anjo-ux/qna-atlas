@@ -537,8 +537,8 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
             </div>
           </div>
           
-          <div className="p-2">
-            <div className="grid grid-cols-5 gap-2">
+          <div className="flex-1 overflow-y-auto p-2">
+            <div className="grid grid-cols-2 gap-2">
               {testQuestions.map((question, index) => {
                 const status = getQuestionStatus(index);
                 const isCurrent = index === currentQuestionIndex;
