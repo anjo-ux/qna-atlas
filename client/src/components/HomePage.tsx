@@ -8,7 +8,7 @@ import { useTestSessions } from '@/hooks/useTestSessions';
 import { useAuth } from '@/hooks/useAuth';
 import { TestHistory } from '@/components/TestHistory';
 import { Section } from '@/types/question';
-import { BookOpen, CheckCircle2, XCircle, TrendingUp, Target, ChevronRight, RotateCcw, AlertCircle, Zap, LogOut, User, Settings, Eye } from 'lucide-react';
+import { BookOpen, CheckCircle2, XCircle, TrendingUp, Target, ChevronRight, RotateCcw, AlertCircle, Zap, LogOut, User, Settings, Eye, Smile, Sparkles, Heart, Rocket, Brain, Flame, Crown, Coffee, Moon, Sun, Star } from 'lucide-react';
 import { useMemo } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
@@ -34,6 +34,27 @@ export function HomePage({ sections, onReviewIncorrect, onStartTest, onResumeTes
   const { sessions, deleteSession } = useTestSessions();
   const { user, logout } = useAuth();
   const overallStats = getAllStats();
+
+  const AVATAR_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
+    smile: Smile,
+    sparkles: Sparkles,
+    zap: Zap,
+    heart: Heart,
+    rocket: Rocket,
+    brain: Brain,
+    flame: Flame,
+    crown: Crown,
+    coffee: Coffee,
+    moon: Moon,
+    sun: Sun,
+    star: Star,
+  };
+
+  const getAvatarIcon = () => {
+    const iconId = user?.avatarIcon || 'smile';
+    const IconComponent = AVATAR_ICONS[iconId] || Smile;
+    return IconComponent;
+  };
   
   const accuracyPercentage = overallStats.total > 0 
     ? Math.round((overallStats.correct / overallStats.total) * 100) 
@@ -144,12 +165,12 @@ export function HomePage({ sections, onReviewIncorrect, onStartTest, onResumeTes
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="gap-2" data-testid="button-user-menu">
-              <Avatar className="w-8 h-8">
-                <AvatarImage src={user?.profileImageUrl || ''} />
-                <AvatarFallback>
-                  {user?.firstName?.[0] || user?.email?.[0] || 'U'}
-                </AvatarFallback>
-              </Avatar>
+              <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
+                {(() => {
+                  const IconComponent = getAvatarIcon();
+                  return <IconComponent className="w-4 h-4 text-primary" />;
+                })()}
+              </div>
               <span className="hidden md:inline">{user?.firstName || user?.email?.split('@')[0]}</span>
             </Button>
           </DropdownMenuTrigger>
