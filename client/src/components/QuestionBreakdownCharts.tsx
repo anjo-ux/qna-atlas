@@ -97,7 +97,7 @@ export function QuestionBreakdownCharts() {
 
       {/* Correct vs Incorrect */}
       <Card variant="glass" className="p-6 glow-accent transition-glow flex flex-col">
-        <h3 className="text-lg font-semibold mb-4 gradient-text">Answer Accuracy</h3>
+        <h3 className="text-lg font-semibold mb-4 gradient-text">Accuracy</h3>
         <div className="flex-1 flex items-center justify-center">
           {stats.total > 0 ? (
             <ResponsiveContainer width="100%" height={280}>
