@@ -25,6 +25,8 @@ export function HighlightToolbar({
   onColorChange,
   onAddNote,
   onClearHighlights,
+  isEraserMode = false,
+  onEraserToggle,
   disabled = false,
 }: HighlightToolbarProps) {
   return (
@@ -39,12 +41,12 @@ export function HighlightToolbar({
           <button
             key={color.value}
             onClick={() => onColorChange(color.value)}
-            disabled={disabled}
+            disabled={disabled || isEraserMode}
             className={cn(
               "w-6 h-6 rounded border-2 transition-all hover:scale-110",
               color.class,
-              activeColor === color.value ? 'border-foreground ring-2 ring-ring' : 'border-border',
-              disabled && 'opacity-50 cursor-not-allowed'
+              activeColor === color.value && !isEraserMode ? 'border-foreground ring-2 ring-ring' : 'border-border',
+              (disabled || isEraserMode) && 'opacity-50 cursor-not-allowed'
             )}
             title={color.label}
           />
@@ -61,6 +63,17 @@ export function HighlightToolbar({
         >
           <StickyNote className="h-4 w-4" />
           <span className="hidden sm:inline">Note</span>
+        </Button>
+        <Button
+          variant={isEraserMode ? 'default' : 'ghost'}
+          size="sm"
+          onClick={onEraserToggle}
+          disabled={disabled}
+          className="gap-2 h-8"
+          data-testid="button-eraser-toggle"
+        >
+          <Eraser className="h-4 w-4" />
+          <span className="hidden sm:inline">Eraser</span>
         </Button>
         <Button
           variant="ghost"
