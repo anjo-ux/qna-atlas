@@ -27,7 +27,7 @@ import { getUniversityOptions } from '@/data/universities';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { queryClient } from '@/lib/queryClient';
-import { Upload } from 'lucide-react';
+import { Smile, Sparkles, Zap, Heart, Rocket, Brain, Flame, Crown, Coffee, Moon, Sun, Star } from 'lucide-react';
 
 interface SettingsProps {
   onBack: () => void;
@@ -42,7 +42,6 @@ export function Settings({ onBack, subscription }: SettingsProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [openCombobox, setOpenCombobox] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Determine if Emory affiliation grants free access
   const hasEmoryAccess = user?.institutionalAffiliation?.toLowerCase().includes('emory');
@@ -53,8 +52,23 @@ export function Settings({ onBack, subscription }: SettingsProps) {
     firstName: user?.firstName || '',
     lastName: user?.lastName || '',
     institutionalAffiliation: user?.institutionalAffiliation || '',
-    profileImageUrl: user?.profileImageUrl || '',
+    avatarIcon: user?.avatarIcon || 'smile',
   });
+
+  const AVATAR_ICONS = [
+    { id: 'smile', name: 'Smile', icon: Smile },
+    { id: 'sparkles', name: 'Sparkles', icon: Sparkles },
+    { id: 'zap', name: 'Zap', icon: Zap },
+    { id: 'heart', name: 'Heart', icon: Heart },
+    { id: 'rocket', name: 'Rocket', icon: Rocket },
+    { id: 'brain', name: 'Brain', icon: Brain },
+    { id: 'flame', name: 'Flame', icon: Flame },
+    { id: 'crown', name: 'Crown', icon: Crown },
+    { id: 'coffee', name: 'Coffee', icon: Coffee },
+    { id: 'moon', name: 'Moon', icon: Moon },
+    { id: 'sun', name: 'Sun', icon: Sun },
+    { id: 'star', name: 'Star', icon: Star },
+  ];
 
   const universities = useMemo(() => {
     return getUniversityOptions().map(u => u.value);
@@ -74,7 +88,7 @@ export function Settings({ onBack, subscription }: SettingsProps) {
         firstName: user.firstName || '',
         lastName: user.lastName || '',
         institutionalAffiliation: user.institutionalAffiliation || '',
-        profileImageUrl: user.profileImageUrl || '',
+        avatarIcon: user.avatarIcon || 'smile',
       });
     }
   }, [user]);
@@ -99,15 +113,9 @@ export function Settings({ onBack, subscription }: SettingsProps) {
     { name: 'Microsoft', connected: false, icon: '💻' },
   ];
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setFormData({ ...formData, profileImageUrl: reader.result as string });
-      };
-      reader.readAsDataURL(file);
-    }
+  const getAvatarIcon = (iconId: string) => {
+    const avatar = AVATAR_ICONS.find(a => a.id === iconId);
+    return avatar ? avatar.icon : Smile;
   };
 
   const handleSave = async () => {
@@ -121,7 +129,7 @@ export function Settings({ onBack, subscription }: SettingsProps) {
           firstName: formData.firstName,
           lastName: formData.lastName,
           institutionalAffiliation: formData.institutionalAffiliation,
-          profileImageUrl: formData.profileImageUrl,
+          avatarIcon: formData.avatarIcon,
         }),
       });
 
@@ -171,7 +179,7 @@ export function Settings({ onBack, subscription }: SettingsProps) {
     formData.firstName !== (user?.firstName || '') ||
     formData.lastName !== (user?.lastName || '') ||
     formData.institutionalAffiliation !== (user?.institutionalAffiliation || '') ||
-    formData.profileImageUrl !== (user?.profileImageUrl || '');
+    formData.avatarIcon !== (user?.avatarIcon || 'smile');
 
   const handleAddConnection = (provider: string) => {
     window.location.href = `/api/login?provider=${provider}&action=connect`;
@@ -247,27 +255,26 @@ export function Settings({ onBack, subscription }: SettingsProps) {
               {/* Profile Section */}
               <Card className="p-6">
                 <h2 className="text-lg font-semibold text-foreground mb-4">Profile Information</h2>
-                <div className="flex items-center gap-4 mb-6">
-                  <div className="relative group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
-                    <Avatar className="h-16 w-16">
-                      <AvatarImage src={formData.profileImageUrl || user?.profileImageUrl} />
-                      <AvatarFallback>{getInitials()}</AvatarFallback>
-                    </Avatar>
-                    <div className="absolute inset-0 bg-black/40 rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                      <Upload className="h-5 w-5 text-white" />
-                    </div>
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      accept="image/*"
-                      onChange={handleImageUpload}
-                      className="hidden"
-                      data-testid="input-profile-image"
-                    />
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Profile Picture</p>
-                    <p className="font-medium">{user?.firstName} {user?.lastName}</p>
+                <div className="mb-6">
+                  <p className="text-sm text-muted-foreground mb-3">Avatar Icon</p>
+                  <div className="grid grid-cols-6 gap-2">
+                    {AVATAR_ICONS.map((avatar) => {
+                      const IconComponent = avatar.icon;
+                      const isSelected = formData.avatarIcon === avatar.id;
+                      return (
+                        <Button
+                          key={avatar.id}
+                          variant={isSelected ? 'default' : 'outline'}
+                          size="icon"
+                          onClick={() => setFormData({ ...formData, avatarIcon: avatar.id })}
+                          title={avatar.name}
+                          data-testid={`button-avatar-${avatar.id}`}
+                          className="h-12 w-12"
+                        >
+                          <IconComponent className="h-6 w-6" />
+                        </Button>
+                      );
+                    })}
                   </div>
                 </div>
 
