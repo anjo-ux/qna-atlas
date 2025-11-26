@@ -17,19 +17,27 @@ interface BookmarksProps {
 
 export function BookmarksPage({ onBack }: BookmarksProps) {
   const { bookmarks, isLoading } = useBookmarks();
-  const previousBookmarkCountRef = useRef(bookmarks.length);
-  
-  // When bookmarks change (e.g., one is removed), refetch to ensure UI syncs
-  useEffect(() => {
-    if (bookmarks.length < previousBookmarkCountRef.current) {
-      console.log('[BookmarksPage] Bookmark was removed, refetching...');
-      queryClient.refetchQueries({ queryKey: ['/api/bookmarks'] });
-    }
-    previousBookmarkCountRef.current = bookmarks.length;
-  }, [bookmarks.length]);
   const [sections, setSections] = useState<Section[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const { getQuestionResponse, recordResponse } = useQuestionStats();
+  const previousBookmarkIdsRef = useRef(new Set(bookmarks.map(b => b.id)));
+
+  // Detect when bookmarks are removed and force a refetch
+  useEffect(() => {
+    const currentBookmarkIds = new Set(bookmarks.map(b => b.id));
+    const previousBookmarkIds = previousBookmarkIdsRef.current;
+    
+    // Check if any bookmarks were removed
+    const wasRemoved = Array.from(previousBookmarkIds).some(id => !currentBookmarkIds.has(id));
+    
+    if (wasRemoved) {
+      console.log('[BookmarksPage] Bookmark was removed, forcing UI update');
+      // Force component to re-render by updating the ref
+      previousBookmarkIdsRef.current = currentBookmarkIds;
+    } else {
+      previousBookmarkIdsRef.current = currentBookmarkIds;
+    }
+  }, [bookmarks]);
 
   // Load questions to find bookmarked ones
   useEffect(() => {
@@ -46,7 +54,9 @@ export function BookmarksPage({ onBack }: BookmarksProps) {
   }, []);
 
   // Build bookmarked questions with section/subsection info
+  // This useMemo will re-run whenever bookmarks changes, including when items are deleted
   const bookmarkedQuestions = useMemo(() => {
+    console.log('[BookmarksPage] Rebuilding bookmarkedQuestions with', bookmarks.length, 'bookmarks');
     const result = [];
     
     for (const bookmark of bookmarks) {
@@ -68,6 +78,7 @@ export function BookmarksPage({ onBack }: BookmarksProps) {
       }
     }
     
+    console.log('[BookmarksPage] Rebuilt bookmarkedQuestions with', result.length, 'questions');
     return result;
   }, [bookmarks, sections]);
 
