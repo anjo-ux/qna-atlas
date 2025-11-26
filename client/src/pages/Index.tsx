@@ -49,6 +49,7 @@ export default function Index() {
   const [subscription, setSubscription] = useState<any>(null);
   const [isCheckingSubscription, setIsCheckingSubscription] = useState(true);
   const [showPreviewWizard, setShowPreviewWizard] = useState(false);
+  const [isMobileLayout, setIsMobileLayout] = useState(window.innerWidth < 1024);
   const { bookmarks } = useBookmarks();
   const { dueCount } = useSpacedRepetition();
 
@@ -90,6 +91,25 @@ export default function Index() {
 
     fetchData();
   }, []);
+
+  // Handle window resize for responsive mobile layout
+  useEffect(() => {
+    const handleResize = () => {
+      const isSmall = window.innerWidth < 1024;
+      setIsMobileLayout(isSmall);
+      
+      // Auto-close nav and settings on small screens
+      if (isSmall) {
+        setIsNavOpen(false);
+        if (screenMode === 'settings') {
+          setScreenMode('study');
+        }
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [screenMode]);
 
   // Close search results when clicking outside
   useEffect(() => {
@@ -327,8 +347,8 @@ export default function Index() {
         {isNavOpen ? <ChevronLeft className="h-5 w-5" /> : <ChevronRight className="h-5 w-5" />}
       </Button>
 
-      {/* Navigation Sidebar - Collapsible */}
-      {isNavOpen && (
+      {/* Navigation Sidebar - Collapsible (hidden on mobile layout) */}
+      {isNavOpen && !isMobileLayout && (
         <div className="w-80 flex-shrink-0 transition-all duration-300 overflow-hidden">
           <Navigation
             sections={sections}
@@ -339,6 +359,23 @@ export default function Index() {
             onClose={() => setIsNavOpen(false)}
           />
         </div>
+      )}
+      
+      {/* Mobile Navigation Overlay */}
+      {isNavOpen && isMobileLayout && (
+        <>
+          <div className="fixed inset-0 bg-black/50 z-40" onClick={() => setIsNavOpen(false)} />
+          <div className="absolute left-12 top-16 w-80 glass-surface border-glass rounded-lg shadow-lg z-50 max-h-96 overflow-y-auto">
+            <Navigation
+              sections={sections}
+              selectedSection={selectedSection}
+              selectedSubsection={selectedSubsection}
+              onNavigate={handleNavigate}
+              isOpen={isNavOpen}
+              onClose={() => setIsNavOpen(false)}
+            />
+          </div>
+        </>
       )}
 
       {/* Main Content */}
