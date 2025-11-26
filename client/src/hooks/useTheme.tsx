@@ -16,7 +16,9 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   });
 
   useEffect(() => {
-    const root = document.documentElement;
+    const html = document.documentElement;
+    const body = document.body;
+    const root = document.getElementById('root');
     
     let effectiveTheme = theme;
     if (theme === 'system') {
@@ -24,9 +26,13 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     }
 
     if (effectiveTheme === 'dark') {
-      root.classList.add('dark');
+      html.classList.add('dark');
+      body.classList.add('dark');
+      if (root) root.classList.add('dark');
     } else {
-      root.classList.remove('dark');
+      html.classList.remove('dark');
+      body.classList.remove('dark');
+      if (root) root.classList.remove('dark');
     }
 
     localStorage.setItem('theme', theme);

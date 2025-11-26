@@ -215,8 +215,12 @@ html, body {
   }
 
   body.dark {
-    background: hsl(var(--background));
-    background-attachment: fixed;
+    background: hsl(var(--background)) !important;
+    background-attachment: fixed !important;
+  }
+
+  #root.dark {
+    background: hsl(var(--background)) !important;
   }
   
   h1, h2, h3, h4, h5, h6 {
