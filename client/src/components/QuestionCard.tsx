@@ -12,6 +12,7 @@ import { StickyNote } from '@/components/StickyNote';
 import { useTextHighlight } from '@/hooks/useTextHighlight';
 import { QuestionResponse } from '@/hooks/useQuestionStats';
 import { Bookmark } from 'lucide-react';
+import { queryClient } from '@/lib/queryClient';
 
 interface QuestionCardProps {
   question: Question;
@@ -270,6 +271,10 @@ export function QuestionCard({
                   console.log('[QuestionCard] Bookmark button handler: attempting to toggle bookmark');
                   await toggleBookmark(question.id, sectionId, subsectionId);
                   console.log('[QuestionCard] Bookmark toggle completed successfully');
+                  // Force a fresh fetch of bookmarks to ensure all views update
+                  console.log('[QuestionCard] Force refetching bookmarks...');
+                  await queryClient.refetchQueries({ queryKey: ['/api/bookmarks'] });
+                  console.log('[QuestionCard] Bookmarks refetch completed');
                 } catch (error) {
                   console.error('[QuestionCard] Bookmark toggle error:', error);
                 }
