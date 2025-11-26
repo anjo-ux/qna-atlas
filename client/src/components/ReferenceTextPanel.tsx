@@ -5,6 +5,7 @@ import { HighlightToolbar } from '@/components/HighlightToolbar';
 import { StickyNote } from '@/components/StickyNote';
 import { useHighlights } from '@/hooks/useHighlights';
 import { useTextHighlight } from '@/hooks/useTextHighlight';
+import { cn } from '@/lib/utils';
 
 interface ReferenceTextPanelProps {
   content: string;
@@ -26,6 +27,7 @@ export function ReferenceTextPanel({
     setActiveColor,
     addHighlight,
     removeHighlight,
+    batchRemoveHighlights,
     addNote,
     updateNote,
     removeNote,
@@ -34,6 +36,7 @@ export function ReferenceTextPanel({
     getNotesForSection,
   } = useHighlights();
 
+  const [isEraserMode, setIsEraserMode] = useState(false);
   const [highlightedContent, setHighlightedContent] = useState(content);
   const highlights = getHighlightsForSection(sectionId, subsectionId, 'reference');
   const notes = getNotesForSection(sectionId, subsectionId, 'reference');
@@ -42,7 +45,35 @@ export function ReferenceTextPanel({
   // Apply highlights to rendered content
   useTextHighlight(contentRef, highlights, content);
 
+  // Setup global eraser click handler
+  useEffect(() => {
+    if (!isEraserMode) return;
+
+    const handleDocumentClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (target.tagName === 'MARK' && target.hasAttribute('data-highlight-id')) {
+        e.preventDefault();
+        e.stopPropagation();
+        const highlightId = target.getAttribute('data-highlight-id');
+        if (highlightId) {
+          removeHighlight(highlightId);
+        }
+      }
+    };
+
+    document.addEventListener('click', handleDocumentClick, true);
+    return () => {
+      document.removeEventListener('click', handleDocumentClick, true);
+    };
+  }, [isEraserMode, removeHighlight]);
+
   const handleTextSelection = () => {
+    // Don't allow highlighting when in eraser mode
+    if (isEraserMode) {
+      window.getSelection()?.removeAllRanges();
+      return;
+    }
+
     const selection = window.getSelection();
     if (!selection || selection.isCollapsed) return;
 
@@ -82,7 +113,7 @@ export function ReferenceTextPanel({
   };
 
   const handleClearHighlights = () => {
-    highlights.forEach(h => removeHighlight(h.id));
+    batchRemoveHighlights(highlights.map(h => h.id));
   };
 
   if (!content) {
@@ -107,24 +138,17 @@ export function ReferenceTextPanel({
           onColorChange={setActiveColor}
           onAddNote={handleAddNote}
           onClearHighlights={handleClearHighlights}
+          isEraserMode={isEraserMode}
+          onEraserToggle={() => setIsEraserMode(!isEraserMode)}
           isCompressed={isCompressed}
         />
       </div>
       <ScrollArea className="flex-1">
         <div 
           ref={contentRef}
-          className="p-6 prose prose-sm dark:prose-invert max-w-none"
+          className={cn("p-6 prose prose-sm dark:prose-invert max-w-none", isEraserMode && "eraser-mode")}
           data-reference-content
           onMouseUp={handleTextSelection}
-          onDoubleClick={(e) => {
-            const target = e.target as HTMLElement;
-            if (target.tagName === 'MARK') {
-              const highlightId = target.getAttribute('data-highlight-id');
-              if (highlightId) {
-                removeHighlight(highlightId);
-              }
-            }
-          }}
         >
           <ReactMarkdown
             components={{
