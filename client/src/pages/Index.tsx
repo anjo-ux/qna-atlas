@@ -570,8 +570,8 @@ export default function Index() {
                               {searchQuery
                                 ? `${filteredQuestions.length} ${filteredQuestions.length === 1 ? 'result' : 'results'} found`
                                 : filterMode === 'incorrect'
-                                ? `${filteredQuestions.length} incorrect ${filteredQuestions.length === 1 ? 'question' : 'questions'}`
-                                : `${currentSubsection.questions.length} ${currentSubsection.questions.length === 1 ? 'question' : 'questions'}`
+                                ? `${filteredQuestions.length} Incorrect ${filteredQuestions.length === 1 ? 'Question' : 'Questions'}`
+                                : `${currentSubsection.questions.length} ${currentSubsection.questions.length === 1 ? 'Question' : 'Questions'}`
                               }
                             </p>
                           </div>
