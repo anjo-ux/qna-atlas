@@ -343,9 +343,9 @@ export default function Index() {
         data-testid="button-toggle-nav"
       >
         {isNavOpen ? (
-          <ChevronDown className="h-4 w-4 text-muted-foreground flex-shrink-0" style={{ transform: 'rotate(90deg)' }} />
+          <ChevronDown className="h-4 w-4 text-muted-foreground flex-shrink-0 font-bold" style={{ transform: 'rotate(90deg)', strokeWidth: 3 }} />
         ) : (
-          <ChevronUp className="h-4 w-4 text-muted-foreground flex-shrink-0" style={{ transform: 'rotate(-90deg)' }} />
+          <ChevronUp className="h-4 w-4 text-muted-foreground flex-shrink-0 font-bold" style={{ transform: 'rotate(-90deg)', strokeWidth: 3 }} />
         )}
         <span 
           className="text-xs font-semibold text-muted-foreground select-none"
@@ -355,18 +355,18 @@ export default function Index() {
             letterSpacing: '0.05em'
           }}
         >
-          All Content
+           All Content 
         </span>
         {isNavOpen ? (
-          <ChevronUp className="h-4 w-4 text-muted-foreground flex-shrink-0" style={{ transform: 'rotate(-90deg)' }} />
+          <ChevronUp className="h-4 w-4 text-muted-foreground flex-shrink-0 font-bold" style={{ transform: 'rotate(-90deg)', strokeWidth: 3 }} />
         ) : (
-          <ChevronDown className="h-4 w-4 text-muted-foreground flex-shrink-0" style={{ transform: 'rotate(-90deg)' }} />
+          <ChevronDown className="h-4 w-4 text-muted-foreground flex-shrink-0 font-bold" style={{ transform: 'rotate(-90deg)', strokeWidth: 3 }} />
         )}
       </button>
 
       {/* Navigation Sidebar - Collapsible (hidden on mobile layout) */}
       {isNavOpen && !isMobileLayout && (
-        <div className="w-80 flex-shrink-0 transition-all duration-300 overflow-hidden">
+        <div className="w-80 flex-shrink-0 transition-all duration-300 overflow-hidden" style={{ height: '160px' }}>
           <Navigation
             sections={sections}
             selectedSection={selectedSection}
