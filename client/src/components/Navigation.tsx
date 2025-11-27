@@ -60,7 +60,7 @@ export function Navigation({
       <aside className="w-full h-full border-r border-border bg-gradient-to-b from-card via-card to-muted/30 flex flex-col shadow-lg">
         <div className="p-6 border-b border-border bg-gradient-to-r from-primary/10 to-accent/10 flex items-center justify-between">
           <div className="flex-1">
-            <h2 className="text-lg font-semibold text-foreground">Sections</h2>
+            <h2 className="text-lg font-semibold text-foreground">Sections ({sections.length})</h2>
             <p className="text-sm text-muted-foreground mt-1">
               {sections.reduce((acc, s) => acc + s.subsections.length, 0)} Subsections
             </p>
