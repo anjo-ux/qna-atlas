@@ -347,7 +347,7 @@ export default function Index() {
       <header className="glass-surface border-glass w-full">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-3 pb-2">
             {/* Top Row: Home, Title, Actions */}
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4 flex-wrap">
               
               <Button
                 variant="ghost"
