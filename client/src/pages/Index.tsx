@@ -360,7 +360,7 @@ export default function Index() {
         {isNavOpen ? (
           <ChevronUp className="h-4 w-4 text-muted-foreground flex-shrink-0" style={{ transform: 'rotate(-90deg)' }} />
         ) : (
-          <ChevronDown className="h-4 w-4 text-muted-foreground flex-shrink-0" style={{ transform: 'rotate(90deg)' }} />
+          <ChevronDown className="h-4 w-4 text-muted-foreground flex-shrink-0" style={{ transform: 'rotate(-90deg)' }} />
         )}
       </button>
 
