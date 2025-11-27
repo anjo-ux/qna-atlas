@@ -10,7 +10,7 @@ import { QuestionCard } from '@/components/QuestionCard';
 import { TestHistory } from '@/components/TestHistory';
 import { TestModeWizard } from '@/components/TestModeWizard';
 import { DetailedTestResults } from '@/components/DetailedTestResults';
-import { ArrowLeft, ChevronDown, ChevronUp, ChevronRight, ChevronLeft, ChevronRight as ChevronRightIcon, Check, X, Circle, Maximize2, Minimize2 } from 'lucide-react';
+import { ArrowLeft, ChevronDown, ChevronUp, ChevronRight, ChevronLeft, ChevronRight as ChevronRightIcon, Check, X, Circle, Maximize2, Minimize2, CheckCircle2, XCircle } from 'lucide-react';
 import { useQuestionStats, QuestionResponse } from '@/hooks/useQuestionStats';
 import { useTestSessions, TestSession } from '@/hooks/useTestSessions';
 import { useBookmarks } from '@/hooks/useBookmarks';
@@ -778,44 +778,50 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
                 <ArrowLeft className="h-5 w-5" />
               </Button>
               <h1 className="text-3xl font-bold text-foreground">Review Answers</h1>
-          </div>
-        </div>
-
-        <div className="flex-1 overflow-auto p-6">
-          <div className="max-w-2xl mx-auto space-y-6">
-            <Card className="p-8 text-center">
-              <div className="space-y-4">
-                <div className="text-6xl font-bold text-primary">{testResults.accuracy}%</div>
-                <div className="text-2xl font-semibold text-foreground">
-                  {testResults.correct} / {testResults.total} Correct
-                </div>
-              </div>
-            </Card>
-
-            <div className="grid grid-cols-3 gap-4">
-              <Card className="p-6 text-center">
-                <p className="text-sm text-muted-foreground mb-2">Answered</p>
-                <p className="text-3xl font-bold">{testResults.total}</p>
-              </Card>
-              <Card className="p-6 text-center bg-success/10 border-success/20">
-                <p className="text-sm text-muted-foreground mb-2">Correct</p>
-                <p className="text-3xl font-bold text-success">{testResults.correct}</p>
-              </Card>
-              <Card className="p-6 text-center bg-destructive/10 border-destructive/20">
-                <p className="text-sm text-muted-foreground mb-2">Incorrect</p>
-                <p className="text-3xl font-bold text-destructive">{testResults.total - testResults.correct}</p>
-              </Card>
             </div>
+          </div>
 
-            <Button onClick={() => setTestState('setup')} className="w-full">
-              Create Another Test
-            </Button>
-            <Button onClick={onBack} variant="outline" className="w-full">
-              Home
-            </Button>
+          <div className="flex-1 overflow-auto p-6">
+            <div className="max-w-2xl mx-auto space-y-6">
+              {testQuestions.map((question, index) => (
+                <Card key={question.id} variant="glass" className="p-4">
+                  <div className="mb-3">
+                    <div className="flex items-center gap-2 mb-2">
+                      {responses[question.id]?.isCorrect ? (
+                        <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400" />
+                      ) : (
+                        <XCircle className="h-5 w-5 text-red-600 dark:text-red-400" />
+                      )}
+                      <p className="font-semibold">Question {index + 1}</p>
+                    </div>
+                    <p className="text-sm text-foreground/90">{question.question}</p>
+                  </div>
+                  <div className="bg-muted/50 rounded p-3 text-sm">
+                    <p className="text-muted-foreground mb-1">Your answer:</p>
+                    <p className="font-medium">{responses[question.id]?.selectedAnswer || 'Not answered'}</p>
+                  </div>
+                </Card>
+              ))}
+            </div>
           </div>
         </div>
-      </div>
+      );
+    }
+
+    return (
+      <DetailedTestResults
+        sections={sections}
+        testQuestions={testQuestions}
+        responses={responses}
+        onBack={() => {
+          setTestState('setup');
+          setCurrentQuestionIndex(0);
+          setResponses({});
+          setCurrentSession(null);
+          setTestQuestions([]);
+        }}
+        onReview={() => setIsReviewMode(true)}
+      />
     );
   }
 
