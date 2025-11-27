@@ -34,8 +34,8 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
   const [useAllQuestions, setUseAllQuestions] = useState(true);
   const [useBookmarkedOnly, setUseBookmarkedOnly] = useState(false);
   const [useIncorrectOnly, setUseIncorrectOnly] = useState(false);
-  const [showAllAnsweredQuestions, setShowAllAnsweredQuestions] = useState(false);
-  const [showAllAnsweredInSections, setShowAllAnsweredInSections] = useState(false);
+  const [showUnansweredOnly, setShowUnansweredOnly] = useState(true);
+  const [showUnansweredOnlyInSections, setShowUnansweredOnlyInSections] = useState(true);
   const [expandedSections, setExpandedSections] = useState<Set<string>>(
     new Set(sections.map(s => s.id))
   );
@@ -187,14 +187,7 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
       });
     } else if (useAllQuestions) {
       // Get all questions, optionally filtered by answered state
-      if (showAllAnsweredQuestions) {
-        // Include all questions regardless of answered state
-        sections.forEach(section => {
-          section.subsections.forEach(subsection => {
-            questions.push(...subsection.questions);
-          });
-        });
-      } else {
+      if (showUnansweredOnly) {
         // Filter out answered ones from global dashboard (default)
         const answeredIds = new Set(globalResponses.map(r => r.questionId));
         sections.forEach(section => {
@@ -202,19 +195,17 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
             questions.push(...subsection.questions.filter(q => !answeredIds.has(q.id)));
           });
         });
-      }
-    } else {
-      // Get selected sections, optionally filtered by answered state
-      if (showAllAnsweredInSections) {
+      } else {
         // Include all questions regardless of answered state
         sections.forEach(section => {
           section.subsections.forEach(subsection => {
-            if (selectedSubsections.has(subsection.id)) {
-              questions.push(...subsection.questions);
-            }
+            questions.push(...subsection.questions);
           });
         });
-      } else {
+      }
+    } else {
+      // Get selected sections, optionally filtered by answered state
+      if (showUnansweredOnlyInSections) {
         // Filter out answered ones from global dashboard (default)
         const answeredIds = new Set(globalResponses.map(r => r.questionId));
         sections.forEach(section => {
@@ -224,11 +215,20 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
             }
           });
         });
+      } else {
+        // Include all questions regardless of answered state
+        sections.forEach(section => {
+          section.subsections.forEach(subsection => {
+            if (selectedSubsections.has(subsection.id)) {
+              questions.push(...subsection.questions);
+            }
+          });
+        });
       }
     }
     
     return questions;
-  }, [sections, selectedSubsections, useAllQuestions, useBookmarkedOnly, useIncorrectOnly, bookmarks, getGlobalIncorrectIds, isPreview, previewQuestions, globalResponses, showAllAnsweredQuestions, showAllAnsweredInSections]);
+  }, [sections, selectedSubsections, useAllQuestions, useBookmarkedOnly, useIncorrectOnly, bookmarks, getGlobalIncorrectIds, isPreview, previewQuestions, globalResponses, showUnansweredOnly, showUnansweredOnlyInSections]);
 
   const handleStartTest = async () => {
     if (availableQuestions.length === 0) {
@@ -773,18 +773,18 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
                             {useAllQuestions && !useBookmarkedOnly && !useIncorrectOnly && (
                               <div className="flex items-center gap-2">
                                 <span className="text-xs text-muted-foreground">
-                                  {showAllAnsweredQuestions ? "All" : "Unanswered"}
+                                  {showUnansweredOnly ? "Unanswered" : "All"}
                                 </span>
                                 <Switch
-                                  checked={showAllAnsweredQuestions}
-                                  onCheckedChange={setShowAllAnsweredQuestions}
+                                  checked={showUnansweredOnly}
+                                  onCheckedChange={setShowUnansweredOnly}
                                   onClick={(e) => e.stopPropagation()}
                                 />
                               </div>
                             )}
                           </div>
                           <p className="text-xs text-muted-foreground">
-                            Randomly select from all {showAllAnsweredQuestions ? allQuestionsCount : allUnansweredCount} questions across all sections.
+                            Randomly select from all {showUnansweredOnly ? allUnansweredCount : allQuestionsCount} questions across all sections.
                           </p>
                         </div>
 
@@ -807,11 +807,11 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
                             {!useAllQuestions && !useBookmarkedOnly && !useIncorrectOnly && (
                               <div className="flex items-center gap-2">
                                 <span className="text-xs text-muted-foreground">
-                                  {!showAllAnsweredInSections ? "Unanswered" : "All"}
+                                  {showUnansweredOnlyInSections ? "Unanswered" : "All"}
                                 </span>
                                 <Switch
-                                  checked={showAllAnsweredInSections}
-                                  onCheckedChange={setShowAllAnsweredInSections}
+                                  checked={showUnansweredOnlyInSections}
+                                  onCheckedChange={setShowUnansweredOnlyInSections}
                                   onClick={(e) => e.stopPropagation()}
                                 />
                               </div>
@@ -865,7 +865,7 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
                                         className="flex-shrink-0"
                                       />
                                       <Label htmlFor={`subsection-${subsection.id}`} className="cursor-pointer text-xs flex-1">
-                                        {subsection.title} <span className="text-muted-foreground">({getUnansweredCountForSubsection(subsection, showAllAnsweredInSections)})</span>
+                                        {subsection.title} <span className="text-muted-foreground">({getUnansweredCountForSubsection(subsection, !showUnansweredOnlyInSections)})</span>
                                       </Label>
                                     </div>
                                   ))}
