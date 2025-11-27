@@ -512,9 +512,9 @@ export default function Index() {
           data-testid="button-toggle-nav"
         >
           {isNavOpen ? (
-            <ChevronDown className="h-4 w-4 text-muted-foreground flex-shrink-0 font-bold" style={{ transform: 'rotate(90deg)', strokeWidth: 3 }} />
+            <ChevronDown className="h-4 w-4 text-muted-foreground flex-shrink-0 font-bold" style={{ strokeWidth: 3 }} />
           ) : (
-            <ChevronUp className="h-4 w-4 text-muted-foreground flex-shrink-0 font-bold" style={{ transform: 'rotate(-90deg)', strokeWidth: 3 }} />
+            <ChevronUp className="h-4 w-4 text-muted-foreground flex-shrink-0 font-bold" style={{ strokeWidth: 3 }} />
           )}
           <span 
             className="text-xs font-semibold text-muted-foreground select-none"
@@ -527,9 +527,9 @@ export default function Index() {
              All Content 
           </span>
           {isNavOpen ? (
-            <ChevronDown className="h-4 w-4 text-muted-foreground flex-shrink-0 font-bold" style={{ transform: 'rotate(90deg)', strokeWidth: 3 }} />
+            <ChevronUp className="h-4 w-4 text-muted-foreground flex-shrink-0 font-bold" style={{ strokeWidth: 3 }} />
           ) : (
-            <ChevronUp className="h-4 w-4 text-muted-foreground flex-shrink-0 font-bold" style={{ transform: 'rotate(-90deg)', strokeWidth: 3 }} />
+            <ChevronDown className="h-4 w-4 text-muted-foreground flex-shrink-0 font-bold" style={{ strokeWidth: 3 }} />
           )}
         </button>
 
