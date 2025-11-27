@@ -15,9 +15,10 @@ interface TestHistoryProps {
   onReview?: (session: TestSession) => void;
   onDelete?: (sessionId: string) => void;
   maxItems?: number;
+  startIndex?: number;
 }
 
-export function TestHistory({ sessions, onResume, onReview, onDelete, maxItems }: TestHistoryProps) {
+export function TestHistory({ sessions, onResume, onReview, onDelete, maxItems, startIndex = 1 }: TestHistoryProps) {
   // Sort by most recent first
   const sortedSessions = [...sessions].sort((a, b) => b.createdAt - a.createdAt);
   const displaySessions = maxItems ? sortedSessions.slice(0, maxItems) : sortedSessions;
@@ -34,7 +35,7 @@ export function TestHistory({ sessions, onResume, onReview, onDelete, maxItems }
 
   return (
     <div className="space-y-3">
-      {displaySessions.map((session) => {
+      {displaySessions.map((session, index) => {
         const totalAnswered = Object.keys(session.responses).length;
         const correctAnswers = Object.values(session.responses).filter(r => r.isCorrect).length;
         const accuracy = totalAnswered > 0 ? Math.round((correctAnswers / totalAnswered) * 100) : 0;
@@ -50,7 +51,7 @@ export function TestHistory({ sessions, onResume, onReview, onDelete, maxItems }
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-2">
                   <h3 className="font-semibold text-foreground truncate">
-                    Test - {session.questionCount} Questions
+                    #{startIndex + index}
                   </h3>
                   <div className="flex items-center gap-1">
                     {isComplete ? (

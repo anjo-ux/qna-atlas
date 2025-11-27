@@ -454,6 +454,7 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
                       sessions={inProgressSessions.slice(0, resumeTestsToShow)}
                       onResume={handleResumeTest}
                       onDelete={deleteSession}
+                      startIndex={1}
                     />
                     {inProgressSessions.length > resumeTestsToShow && (
                       <Button
@@ -475,6 +476,7 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
                       sessions={completedSessions.slice(0, completedTestsToShow)}
                       onReview={handleReviewTest}
                       onDelete={deleteSession}
+                      startIndex={1}
                     />
                     {completedSessions.length > completedTestsToShow && (
                       <Button
