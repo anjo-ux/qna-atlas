@@ -56,7 +56,7 @@ export default function Landing() {
               Master comprehensive plastic surgery knowledge through interactive questions, detailed explanations, and structured learning paths
             </p>
             <div className="pt-4 flex gap-3 justify-center">
-              <Button size="lg" onClick={handleLogin} data-testid="button-get-started" className="glow-primary transition-glow">
+              <Button size="lg" onClick={handleSignUp} data-testid="button-get-started" className="glow-primary transition-glow">
                 Get Started
               </Button>
               <Button size="lg" variant="outline" onClick={() => setShowPreviewWizard(true)} data-testid="button-preview" className="transition-glow hover:glow-primary">
