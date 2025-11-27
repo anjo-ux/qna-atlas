@@ -108,6 +108,12 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
     loadSavedResponses();
   }, [isAuthenticated, currentSession, testState]);
 
+  // Trigger recalculation whenever globalResponses changes
+  useEffect(() => {
+    // This effect ensures that the memos recalculate when globalResponses updates
+    // This is important because globalResponses loads asynchronously from localStorage
+  }, [globalResponses]);
+
   // Calculate count of all unanswered questions (used for display only)
   const allUnansweredCount = useMemo(() => {
     if (isPreview && previewQuestions && previewQuestions.length > 0) {
