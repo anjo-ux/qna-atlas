@@ -353,85 +353,92 @@ export default function Index() {
       <header className="glass-surface border-glass w-full sticky top-0 z-50">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-3 pb-2">
             {/* Top Row: Home, Title, Actions */}
-            <div className="flex items-center gap-4 flex-wrap justify-start">
-              
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleGoHome();
-                  (e.currentTarget as HTMLButtonElement).blur();
-                }}
-                className="hover:bg-primary/10 flex-shrink-0 outline-none focus-visible:ring-0"
-                title="Go to Dashboard"
-              >
-                <Home className="h-5 w-5" />
-              </Button>
-              
-              <div className="flex items-center gap-2 min-w-0">
-                <img 
-                  src="/atlas-logo.png" 
-                  alt="Atlas Logo" 
-                  className="h-8 w-8 object-contain flex-shrink-0"
-                />
-                <h1 className="hidden sm:block text-lg sm:text-xl font-bold text-primary truncate">
-                  Atlas Review
-                </h1>
+            <div className="flex items-center gap-4">
+              {/* Left Section */}
+              <div className="flex items-center gap-4">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleGoHome();
+                    (e.currentTarget as HTMLButtonElement).blur();
+                  }}
+                  className="hover:bg-primary/10 flex-shrink-0 outline-none focus-visible:ring-0"
+                  title="Go to Dashboard"
+                >
+                  <Home className="h-5 w-5" />
+                </Button>
+                
+                <div className="flex items-center gap-2 min-w-0">
+                  <img 
+                    src="/atlas-logo.png" 
+                    alt="Atlas Logo" 
+                    className="h-8 w-8 object-contain flex-shrink-0"
+                  />
+                  <h1 className="hidden sm:block text-lg sm:text-xl font-bold text-primary truncate">
+                    Atlas Review
+                  </h1>
+                </div>
               </div>
 
-              {/* Settings Button */}
-              <Button
-                onClick={() => setScreenMode('settings')}
-                variant="outline"
-                size="icon"
-                className="lg:hidden flex-shrink-0"
-              >
-                <Settings className="h-5 w-5" />
-              </Button>
+              {/* Spacer */}
+              <div className="flex-1"></div>
 
-              {/* Bookmarks Button */}
-              <Button
-                onClick={() => setLocation('/bookmarks')}
-                variant="outline"
-                className="gap-2 relative"
-                data-testid="button-bookmarks"
-              >
-                <Bookmark className="h-4 w-4" />
-                <span className="hidden md:inline">Bookmarks</span>
-                {bookmarks.length > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-accent text-accent-foreground text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
-                    {bookmarks.length > 99 ? '99+' : bookmarks.length}
-                  </span>
-                )}
-              </Button>
+              {/* Right Section */}
+              <div className="flex items-center gap-2 flex-wrap justify-end">
+                {/* Settings Button */}
+                <Button
+                  onClick={() => setScreenMode('settings')}
+                  variant="outline"
+                  size="icon"
+                  className="lg:hidden flex-shrink-0"
+                >
+                  <Settings className="h-5 w-5" />
+                </Button>
 
-              {/* Spaced Repetition Button */}
-              <Button
-                onClick={() => setLocation('/spaced-repetition')}
-                variant="outline"
-                className="gap-2 relative"
-                data-testid="button-spaced-repetition"
-              >
-                <Brain className="h-4 w-4" />
-                <span className="hidden md:inline">Review</span>
-                {dueCount > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-primary text-primary-foreground text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
-                    {dueCount > 99 ? '99+' : dueCount}
-                  </span>
-                )}
-              </Button>
+                {/* Bookmarks Button */}
+                <Button
+                  onClick={() => setLocation('/bookmarks')}
+                  variant="outline"
+                  className="gap-2 relative"
+                  data-testid="button-bookmarks"
+                >
+                  <Bookmark className="h-4 w-4" />
+                  <span className="hidden md:inline">Bookmarks</span>
+                  {bookmarks.length > 0 && (
+                    <span className="absolute -top-2 -right-2 bg-accent text-accent-foreground text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                      {bookmarks.length > 99 ? '99+' : bookmarks.length}
+                    </span>
+                  )}
+                </Button>
 
-              {/* Test Button */}
-              <Button
-                onClick={handleStartTest}
-                variant="outline"
-                className="gap-2"
-              >
-                <Zap className="h-4 w-4" />
-                <span className="hidden md:inline">Test</span>
-              </Button>
+                {/* Spaced Repetition Button */}
+                <Button
+                  onClick={() => setLocation('/spaced-repetition')}
+                  variant="outline"
+                  className="gap-2 relative"
+                  data-testid="button-spaced-repetition"
+                >
+                  <Brain className="h-4 w-4" />
+                  <span className="hidden md:inline">Review</span>
+                  {dueCount > 0 && (
+                    <span className="absolute -top-2 -right-2 bg-primary text-primary-foreground text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                      {dueCount > 99 ? '99+' : dueCount}
+                    </span>
+                  )}
+                </Button>
 
+                {/* Test Button */}
+                <Button
+                  onClick={handleStartTest}
+                  variant="outline"
+                  className="gap-2"
+                >
+                  <Zap className="h-4 w-4" />
+                  <span className="hidden md:inline">Test</span>
+                </Button>
+              </div>
             </div>
           </div>
 
