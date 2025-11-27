@@ -514,9 +514,9 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
         </div>
 
         <div className="flex-1 overflow-hidden p-6">
-          <div className="flex gap-6 max-w-6xl mx-auto h-full">
+          <div className="flex flex-col lg:flex-row gap-6 max-w-6xl mx-auto h-full">
             {/* Left Column: Resume and Completed Tests */}
-            <div className="w-1/3 overflow-y-auto">
+            <div className="w-full lg:w-1/3 overflow-y-auto order-2 lg:order-1">
               <div className="space-y-6">
                 {/* In Progress Tests */}
                 <div className="space-y-3">
@@ -601,7 +601,7 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
             </div>
 
             {/* Right Column: Test Creation */}
-            <div className="w-2/3 overflow-y-auto pr-6">
+            <div className="w-full lg:w-2/3 overflow-y-auto pr-6 order-1 lg:order-2">
               <div className="space-y-6">
                 <h2 className="text-lg font-semibold text-foreground">Test Creation</h2>
                 
