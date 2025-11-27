@@ -79,7 +79,7 @@ export async function setupAuth(app: Express) {
   // Register route
   app.post('/api/auth/register', async (req, res) => {
     try {
-      const { email, password, confirmPassword } = req.body;
+      const { email, password, confirmPassword, institutionalAffiliation } = req.body;
 
       // Validation
       if (!email || !password || !confirmPassword) {

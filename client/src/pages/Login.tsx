@@ -1,10 +1,25 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Moon, Sun } from 'lucide-react';
+import { Moon, Sun, ChevronsUpDown, Check } from 'lucide-react';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
 import atlasLogo from '@assets/atlas_1764093111680.png';
 import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
+import { getUniversityOptions } from '@/data/universities';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -13,6 +28,20 @@ export default function Login() {
   const [isSignUp, setIsSignUp] = useState(false);
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isDark, setIsDark] = useState(false);
+  const [institution, setInstitution] = useState('');
+  const [openCombobox, setOpenCombobox] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const universities = useMemo(() => {
+    return getUniversityOptions().map(u => u.value);
+  }, []);
+
+  const filteredUniversities = useMemo(() => {
+    if (!searchQuery) return universities;
+    return universities.filter(uni => 
+      uni.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [searchQuery, universities]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,7 +50,7 @@ export default function Login() {
     try {
       const endpoint = isSignUp ? '/api/auth/register' : '/api/auth/login';
       const payload = isSignUp
-        ? { email, password, confirmPassword }
+        ? { email, password, confirmPassword, institutionalAffiliation: institution }
         : { email, password };
 
       const response = await fetch(endpoint, {
@@ -124,21 +153,77 @@ export default function Login() {
               </div>
 
               {isSignUp && (
-                <div className="space-y-2">
-                  <label htmlFor="confirmPassword" className="text-sm font-medium">
-                    Confirm Password
-                  </label>
-                  <Input
-                    id="confirmPassword"
-                    type="password"
-                    placeholder="Confirm password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    disabled={isLoading}
-                    required
-                    data-testid="input-confirm-password"
-                  />
-                </div>
+                <>
+                  <div className="space-y-2">
+                    <label htmlFor="confirmPassword" className="text-sm font-medium">
+                      Confirm Password
+                    </label>
+                    <Input
+                      id="confirmPassword"
+                      type="password"
+                      placeholder="Confirm password"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      disabled={isLoading}
+                      required
+                      data-testid="input-confirm-password"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Institution</label>
+                    <Popover open={openCombobox} onOpenChange={setOpenCombobox}>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          role="combobox"
+                          aria-expanded={openCombobox}
+                          className="w-full justify-between"
+                          data-testid="select-institution-signup"
+                          disabled={isLoading}
+                        >
+                          {institution || "Select an institution..."}
+                          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-full p-0" align="start">
+                        <Command shouldFilter={false}>
+                          <CommandInput 
+                            placeholder="Search institutions..." 
+                            value={searchQuery}
+                            onValueChange={setSearchQuery}
+                            data-testid="input-institution-search"
+                          />
+                          <CommandEmpty>No institution found.</CommandEmpty>
+                          <CommandList>
+                            <CommandGroup>
+                              {filteredUniversities.map((uni) => (
+                                <CommandItem
+                                  key={uni}
+                                  value={uni}
+                                  onSelect={(currentValue) => {
+                                    setInstitution(currentValue);
+                                    setOpenCombobox(false);
+                                    setSearchQuery('');
+                                  }}
+                                  data-testid={`option-${uni}`}
+                                >
+                                  <Check
+                                    className={cn(
+                                      "mr-2 h-4 w-4",
+                                      institution === uni ? "opacity-100" : "opacity-0"
+                                    )}
+                                  />
+                                  {uni}
+                                </CommandItem>
+                              ))}
+                            </CommandGroup>
+                          </CommandList>
+                        </Command>
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                </>
               )}
 
               <Button
