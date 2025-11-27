@@ -9,6 +9,7 @@ import { Switch } from '@/components/ui/switch';
 import { QuestionCard } from '@/components/QuestionCard';
 import { TestHistory } from '@/components/TestHistory';
 import { TestModeWizard } from '@/components/TestModeWizard';
+import { DetailedTestResults } from '@/components/DetailedTestResults';
 import { ArrowLeft, ChevronDown, ChevronUp, ChevronRight, ChevronLeft, ChevronRight as ChevronRightIcon, Check, X, Circle, Maximize2, Minimize2 } from 'lucide-react';
 import { useQuestionStats, QuestionResponse } from '@/hooks/useQuestionStats';
 import { useTestSessions, TestSession } from '@/hooks/useTestSessions';
@@ -768,6 +769,24 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
   }
 
   if (testState === 'results') {
+    return (
+      <DetailedTestResults
+        sections={sections}
+        testQuestions={testQuestions}
+        responses={responses}
+        onBack={() => {
+          setTestState('setup');
+          setCurrentQuestionIndex(0);
+          setResponses({});
+          setCurrentSession(null);
+          setTestQuestions([]);
+        }}
+        onReview={() => setIsReviewMode(true)}
+      />
+    );
+  }
+
+  if (testState === 'results' && isReviewMode) {
     return (
       <div className="flex-1 flex flex-col overflow-auto">
         <div className="p-6 border-b border-border">
