@@ -98,8 +98,32 @@ function categorizeQuestion(category: string, subcategory: string): { section: s
 }
 
 function decodeHtmlEntities(text: string): string {
+  // First, explicitly handle common HTML entities that might not decode properly
+  const entityMap: Record<string, string> = {
+    '&rsquo;': "'",
+    '&lsquo;': "'",
+    '&apos;': "'",
+    '&#39;': "'",
+    '&quot;': '"',
+    '&#34;': '"',
+    '&ldquo;': '"',
+    '&rdquo;': '"',
+    '&ndash;': '–',
+    '&mdash;': '—',
+    '&nbsp;': ' ',
+    '&amp;': '&',
+    '&lt;': '<',
+    '&gt;': '>',
+  };
+
+  let result = text;
+  for (const [entity, char] of Object.entries(entityMap)) {
+    result = result.replace(new RegExp(entity, 'g'), char);
+  }
+
+  // Then use textarea to catch any remaining entities
   const textarea = document.createElement('textarea');
-  textarea.innerHTML = text;
+  textarea.innerHTML = result;
   return textarea.value;
 }
 

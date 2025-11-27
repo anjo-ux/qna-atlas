@@ -769,32 +769,15 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
   }
 
   if (testState === 'results') {
-    return (
-      <DetailedTestResults
-        sections={sections}
-        testQuestions={testQuestions}
-        responses={responses}
-        onBack={() => {
-          setTestState('setup');
-          setCurrentQuestionIndex(0);
-          setResponses({});
-          setCurrentSession(null);
-          setTestQuestions([]);
-        }}
-        onReview={() => setIsReviewMode(true)}
-      />
-    );
-  }
-
-  if (testState === 'results' && isReviewMode) {
-    return (
-      <div className="flex-1 flex flex-col overflow-auto">
-        <div className="p-6 border-b border-border">
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" size="icon" onClick={() => setTestState('setup')}>
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-            <h1 className="text-3xl font-bold text-foreground">Test Results</h1>
+    if (isReviewMode) {
+      return (
+        <div className="flex-1 flex flex-col overflow-auto">
+          <div className="p-6 border-b border-border">
+            <div className="flex items-center gap-3">
+              <Button variant="ghost" size="icon" onClick={() => setIsReviewMode(false)}>
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
+              <h1 className="text-3xl font-bold text-foreground">Review Answers</h1>
           </div>
         </div>
 
