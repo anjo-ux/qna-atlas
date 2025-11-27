@@ -366,7 +366,7 @@ export default function Index() {
 
       {/* Navigation Sidebar - Collapsible (hidden on mobile layout) */}
       {isNavOpen && !isMobileLayout && (
-        <div className="w-80 flex-shrink-0 transition-all duration-300 overflow-hidden" style={{ height: '160px' }}>
+        <div className="w-80 flex-shrink-0 transition-all duration-300 overflow-hidden h-screen">
           <Navigation
             sections={sections}
             selectedSection={selectedSection}
