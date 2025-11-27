@@ -74,7 +74,7 @@ export function DetailedTestResults({
             </Button>
             <div>
               <h1 className="text-3xl font-bold mb-2">Test Complete</h1>
-              <p className="text-muted-foreground">Detailed performance analysis</p>
+              <p className="text-muted-foreground">Detailed performance analysis.</p>
             </div>
           </div>
           <div className="flex items-center gap-2 bg-primary/10 rounded-lg p-4">
@@ -108,7 +108,7 @@ export function DetailedTestResults({
 
         {/* Section Breakdown */}
         <div>
-          <h2 className="text-xl font-semibold mb-4">Performance by Section</h2>
+          <h2 className="text-xl font-semibold mb-4">Individual Section Performance</h2>
           <div className="space-y-3">
             {filledStats.map(({ section, correct, total }) => {
               const sectionPercentage = Math.round((correct / total) * 100);
@@ -128,12 +128,12 @@ export function DetailedTestResults({
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1">
                       <h3 className="font-semibold text-foreground">{section.title}</h3>
-                      <p className="text-sm text-muted-foreground mt-1">{total} questions</p>
+                      <p className="text-sm text-muted-foreground mt-1">{total} Questions</p>
                     </div>
                     <div className="text-right flex-shrink-0">
                       <p className="text-2xl font-bold">{sectionPercentage}%</p>
                       <p className="text-sm text-muted-foreground">
-                        {correct}/{total} correct
+                        {correct}/{total} Correct
                       </p>
                     </div>
                   </div>

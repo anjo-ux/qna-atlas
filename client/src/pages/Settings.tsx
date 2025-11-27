@@ -269,7 +269,7 @@ export function Settings({ onBack, subscription }: SettingsProps) {
                           onClick={() => setFormData({ ...formData, avatarIcon: avatar.id })}
                           title={avatar.name}
                           data-testid={`button-avatar-${avatar.id}`}
-                          className="h-12 w-12"
+                          className="h-12 w-12 hover:text-white"
                         >
                           <IconComponent className="h-6 w-6" />
                         </Button>
