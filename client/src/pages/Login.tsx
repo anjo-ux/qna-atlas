@@ -93,7 +93,7 @@ export default function Login() {
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <button 
             onClick={() => window.location.href = '/'} 
-            className="flex items-center gap-3 hover-elevate rounded-md p-1"
+            className="flex items-center gap-3 rounded-md p-1 cursor-pointer"
             data-testid="button-home"
           >
             <img src={atlasLogo} alt="Atlas Logo" className="w-8 h-8 object-contain" />

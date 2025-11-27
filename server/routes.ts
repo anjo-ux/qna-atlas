@@ -512,7 +512,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const questionId = req.params.questionId;
       
       await storage.removeBookmark(userId, questionId);
-      res.status(204).send();
+      res.json({ success: true });
     } catch (error) {
       console.error("Error removing bookmark:", error);
       res.status(500).json({ message: "Failed to remove bookmark" });
