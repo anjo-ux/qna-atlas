@@ -110,6 +110,21 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
     loadSavedResponses();
   }, [isAuthenticated, currentSession, testState]);
 
+  // Calculate count of all unanswered questions (used for display only)
+  const allUnansweredCount = useMemo(() => {
+    if (isPreview && previewQuestions && previewQuestions.length > 0) {
+      return previewQuestions.length;
+    }
+    const answeredIds = new Set(globalResponses.map(r => r.questionId));
+    let count = 0;
+    sections.forEach(section => {
+      section.subsections.forEach(subsection => {
+        count += subsection.questions.filter(q => !answeredIds.has(q.id)).length;
+      });
+    });
+    return count;
+  }, [sections, globalResponses, isPreview, previewQuestions]);
+
   // Get all available questions based on selection
   const availableQuestions = useMemo(() => {
     // If in preview mode, use preview questions
@@ -704,7 +719,7 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
                         >
                           <p className="font-medium text-foreground text-sm">All Available Questions</p>
                           <p className="text-xs text-muted-foreground mt-1">
-                            Randomly select from all {availableQuestions.length} questions across all sections.
+                            Randomly select from all {allUnansweredCount} questions across all sections.
                           </p>
                         </div>
 
