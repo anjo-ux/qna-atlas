@@ -497,19 +497,22 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
                 
                 {/* Question Count */}
                 <Card className="p-4">
-                  <Label htmlFor="question-count" className="text-sm font-semibold block mb-3">Total Questions</Label>
-                  <Input
-                    id="question-count"
-                    type="number"
-                    min="1"
-                    max="40"
-                    value={questionCount}
-                    onChange={(e) => {
-                      const value = Math.min(40, Math.max(1, parseInt(e.target.value) || 1));
-                      setQuestionCount(value);
-                    }}
-                    placeholder="Enter number (max 40)"
-                  />
+                  <div className="flex items-center gap-3">
+                    <Label htmlFor="question-count" className="text-sm font-semibold whitespace-nowrap">Total Questions</Label>
+                    <Input
+                      id="question-count"
+                      type="number"
+                      min="1"
+                      max="40"
+                      value={questionCount}
+                      onChange={(e) => {
+                        const value = Math.min(40, Math.max(1, parseInt(e.target.value) || 1));
+                        setQuestionCount(value);
+                      }}
+                      placeholder="Enter number (max 40)"
+                      className="w-24"
+                    />
+                  </div>
                 </Card>
 
               {/* Question Source */}
