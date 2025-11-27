@@ -1,7 +1,7 @@
 import { Section, Question } from '@/types/question';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { CheckCircle2, XCircle, BarChart3 } from 'lucide-react';
+import { CheckCircle2, XCircle, BarChart3, ArrowLeft } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface QuestionResponse {
@@ -68,9 +68,14 @@ export function DetailedTestResults({
       {/* Header */}
       <div className="p-6 border-b border-border bg-accent/5">
         <div className="flex items-start justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-bold mb-2">Test Complete</h1>
-            <p className="text-muted-foreground">Detailed performance analysis</p>
+          <div className="flex items-center gap-3">
+            <Button variant="ghost" size="icon" onClick={onBack} data-testid="button-back">
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <div>
+              <h1 className="text-3xl font-bold mb-2">Test Complete</h1>
+              <p className="text-muted-foreground">Detailed performance analysis</p>
+            </div>
           </div>
           <div className="flex items-center gap-2 bg-primary/10 rounded-lg p-4">
             <BarChart3 className="h-6 w-6 text-primary" />
@@ -185,8 +190,8 @@ export function DetailedTestResults({
         <Button variant="outline" onClick={onBack} className="flex-1" data-testid="button-new-test">
           New Test
         </Button>
-        <Button onClick={onReview} className="flex-1" data-testid="button-review-answers">
-          Review Answers
+        <Button onClick={onReview} className="flex-1" data-testid="button-review-test">
+          Review Test
         </Button>
       </div>
     </div>

@@ -10,7 +10,7 @@ import { QuestionCard } from '@/components/QuestionCard';
 import { TestHistory } from '@/components/TestHistory';
 import { TestModeWizard } from '@/components/TestModeWizard';
 import { DetailedTestResults } from '@/components/DetailedTestResults';
-import { ArrowLeft, ChevronDown, ChevronUp, ChevronRight, ChevronLeft, ChevronRight as ChevronRightIcon, Check, X, Circle, Maximize2, Minimize2, CheckCircle2, XCircle } from 'lucide-react';
+import { ArrowLeft, ChevronDown, ChevronUp, ChevronRight, ChevronLeft, ChevronRight as ChevronRightIcon, Check, X, Circle, Maximize2, Minimize2 } from 'lucide-react';
 import { useQuestionStats, QuestionResponse } from '@/hooks/useQuestionStats';
 import { useTestSessions, TestSession } from '@/hooks/useTestSessions';
 import { useBookmarks } from '@/hooks/useBookmarks';
@@ -769,58 +769,17 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
   }
 
   if (testState === 'results') {
-    if (isReviewMode) {
-      return (
-        <div className="flex-1 flex flex-col overflow-auto">
-          <div className="p-6 border-b border-border">
-            <div className="flex items-center gap-3">
-              <Button variant="ghost" size="icon" onClick={() => setIsReviewMode(false)}>
-                <ArrowLeft className="h-5 w-5" />
-              </Button>
-              <h1 className="text-3xl font-bold text-foreground">Review Answers</h1>
-            </div>
-          </div>
-
-          <div className="flex-1 overflow-auto p-6">
-            <div className="max-w-2xl mx-auto space-y-6">
-              {testQuestions.map((question, index) => (
-                <Card key={question.id} variant="glass" className="p-4">
-                  <div className="mb-3">
-                    <div className="flex items-center gap-2 mb-2">
-                      {responses[question.id]?.isCorrect ? (
-                        <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400" />
-                      ) : (
-                        <XCircle className="h-5 w-5 text-red-600 dark:text-red-400" />
-                      )}
-                      <p className="font-semibold">Question {index + 1}</p>
-                    </div>
-                    <p className="text-sm text-foreground/90">{question.question}</p>
-                  </div>
-                  <div className="bg-muted/50 rounded p-3 text-sm">
-                    <p className="text-muted-foreground mb-1">Your answer:</p>
-                    <p className="font-medium">{responses[question.id]?.selectedAnswer || 'Not answered'}</p>
-                  </div>
-                </Card>
-              ))}
-            </div>
-          </div>
-        </div>
-      );
-    }
-
     return (
       <DetailedTestResults
         sections={sections}
         testQuestions={testQuestions}
         responses={responses}
-        onBack={() => {
-          setTestState('setup');
+        onBack={onBack}
+        onReview={() => {
+          setIsReviewMode(true);
+          setTestState('testing');
           setCurrentQuestionIndex(0);
-          setResponses({});
-          setCurrentSession(null);
-          setTestQuestions([]);
         }}
-        onReview={() => setIsReviewMode(true)}
       />
     );
   }
