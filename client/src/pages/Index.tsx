@@ -339,7 +339,7 @@ export default function Index() {
       {/* Sidebar Toggle Button */}
       <button
         onClick={() => setIsNavOpen(!isNavOpen)}
-        className="flex-shrink-0 rounded-none border-r border-border h-full flex items-center justify-center gap-1 px-1.5 hover:bg-accent/50 transition-colors"
+        className="flex-shrink-0 rounded-none border-r border-border h-full flex flex-col items-center justify-center gap-0.5 px-1.5 hover:bg-accent/50 transition-colors"
         data-testid="button-toggle-nav"
       >
         <ChevronRight className="h-4 w-4 text-muted-foreground flex-shrink-0" />
