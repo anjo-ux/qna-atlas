@@ -149,21 +149,21 @@ export function HomePage({ sections, onReviewIncorrect, onStartTest, onResumeTes
     : 0;
 
   return (
-    <div className="p-4 md:p-6 lg:p-8 max-w-7xl mx-auto space-y-6 md:space-y-8 animate-fade-in overflow-auto flex-1">
+    <div className="p-4 md:p-6 lg:p-8 max-w-7xl mx-auto space-y-3 md:space-y-4 animate-fade-in overflow-auto flex-1">
       {/* Welcome Header */}
       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-        <div className="space-y-2 min-w-0">
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground">
+        <div className="space-y-1 min-w-0">
+          <h1 className="text-base sm:text-lg md:text-xl font-bold text-foreground">
             Plastic Surgery In-Training Exam Review
           </h1>
           <p className="text-muted-foreground text-sm md:text-base">
             {user && (
-              <span>Welcome back, {user.firstName || user.email?.split('@')[0]}. Track your progress and master your knowledge.</span>
+              <span>Welcome back, {user.firstName || user.email?.split('@')[0]}.</span>
             )}
-            {!user && ""}
+            {!user && "Welcome back."}
           </p>
         </div>
-        <div className="flex items-center gap-1 sm:gap-2 md:gap-4 flex-shrink-0">
+        <div className="flex items-center gap-1 sm:gap-2 md:gap-3 flex-shrink-0">
           <ThemeToggle />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
