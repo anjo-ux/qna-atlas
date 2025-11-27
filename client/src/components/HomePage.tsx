@@ -171,7 +171,7 @@ export function HomePage({ sections, onReviewIncorrect, onStartTest, onResumeTes
                 <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
                   {(() => {
                     const IconComponent = getAvatarIcon();
-                    return <IconComponent className="w-4 h-4 text-primary" />;
+                    return <IconComponent className="w-4 h-4 text-primary hover:text-white" />;
                   })()}
                 </div>
                 <span className="hidden sm:inline truncate">{user?.firstName || user?.email?.split('@')[0]}</span>
