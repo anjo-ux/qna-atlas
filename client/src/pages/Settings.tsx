@@ -39,7 +39,6 @@ export function Settings({ onBack, subscription }: SettingsProps) {
   const { getAllStats } = useQuestionStats();
   const overallStats = getAllStats();
   const [isSaving, setIsSaving] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [openCombobox, setOpenCombobox] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [percentile, setPercentile] = useState<number | null>(null);
@@ -183,42 +182,6 @@ export function Settings({ onBack, subscription }: SettingsProps) {
       </div>
 
       <div className="flex-1 flex overflow-hidden">
-        {/* Sidebar Toggle Button */}
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => setSidebarOpen(!sidebarOpen)}
-          className="flex-shrink-0 rounded-none border-r border-border h-full"
-          data-testid="button-toggle-sidebar"
-        >
-          {sidebarOpen ? <ChevronLeft className="h-5 w-5" /> : <ChevronRight className="h-5 w-5" />}
-        </Button>
-
-        {/* Left Sidebar - Collapsible */}
-        {sidebarOpen && (
-          <div className="w-72 border-r border-border flex-shrink-0 overflow-hidden flex flex-col transition-all duration-300">
-            <div className="w-full h-full overflow-y-auto p-6">
-              {hasEmoryAccess ? (
-                <Card className="p-6 bg-green-500/5 border-green-500/20">
-                  <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
-                    <CreditCard className="h-5 w-5" />
-                    Subscription
-                  </h2>
-                  <div className="space-y-3">
-                    <div>
-                      <p className="text-xs text-muted-foreground font-medium">Status</p>
-                      <p className="text-lg font-bold text-green-600 dark:text-green-400 mt-1">Institutional Access</p>
-                    </div>
-                    <p className="text-sm text-foreground">Your Emory University affiliation grants unlimited access to all features.</p>
-                  </div>
-                </Card>
-              ) : (
-                <SubscriptionManager />
-              )}
-            </div>
-          </div>
-        )}
-
         {/* Main Content Area - Scrollable */}
         <div className="flex-1 overflow-y-auto">
           <div className="p-6">
