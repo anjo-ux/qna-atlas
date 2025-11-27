@@ -483,9 +483,9 @@ export default function Index() {
           </div>
 
           {/* Bottom Row: Search Bar - Always Visible */}
-          <div className="border-t border-border/50 glass-surface px-4 sm:px-6 lg:px-8 py-3 relative z-40">
+          <div className="border-t border-border/50 glass-surface px-4 sm:px-6 lg:px-8 py-3">
             <div className="w-full max-w-6xl mx-auto">
-              <div className="relative" ref={searchRef}>
+              <div className="relative z-[9999]" ref={searchRef}>
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                 <Input
                   type="text"
