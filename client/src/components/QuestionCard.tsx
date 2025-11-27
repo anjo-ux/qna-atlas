@@ -196,6 +196,12 @@ export function QuestionCard({
   // Autosave answer selection to database
   const handleAnswerChange = (value: string) => {
     setSelectedAnswer(value);
+    // Remove cross-out if this choice was crossed out
+    setCrossedOutChoices(prev => {
+      const newSet = new Set(prev);
+      newSet.delete(value);
+      return newSet;
+    });
     // Also immediately submit if we're in test mode and have a saved response (user is changing their answer)
     if (isTestMode && savedResponse) {
       const correct = value.toUpperCase() === correctAnswer;
