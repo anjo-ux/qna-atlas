@@ -15,7 +15,7 @@ import { PreviewWizard } from '@/components/PreviewWizard';
 import { TestMode } from './TestMode';
 import { Settings as SettingsPage } from './Settings';
 import { Input } from '@/components/ui/input';
-import { Search, Menu, X, BookOpen, FileQuestion, Columns2, Home, Zap, Settings, ChevronLeft, ChevronRight, Bookmark, Brain } from 'lucide-react';
+import { Search, Menu, X, BookOpen, FileQuestion, Columns2, Home, Zap, Settings, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, Bookmark, Brain } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useQuestionStats } from '@/hooks/useQuestionStats';
@@ -342,7 +342,11 @@ export default function Index() {
         className="flex-shrink-0 rounded-none border-r border-border h-full flex flex-col items-center justify-center gap-0.5 px-1.5 hover:bg-accent/50 transition-colors"
         data-testid="button-toggle-nav"
       >
-        <ChevronRight className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+        {isNavOpen ? (
+          <ChevronDown className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+        ) : (
+          <ChevronUp className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+        )}
         <span 
           className="text-xs font-semibold text-muted-foreground select-none"
           style={{
@@ -353,7 +357,11 @@ export default function Index() {
         >
           All Content
         </span>
-        <ChevronLeft className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+        {isNavOpen ? (
+          <ChevronUp className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+        ) : (
+          <ChevronDown className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+        )}
       </button>
 
       {/* Navigation Sidebar - Collapsible (hidden on mobile layout) */}
