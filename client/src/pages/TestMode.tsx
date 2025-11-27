@@ -142,23 +142,27 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
         });
       });
     } else if (useAllQuestions) {
+      // Get all questions but filter out answered ones
+      const answeredIds = new Set(Object.keys(responses));
       sections.forEach(section => {
         section.subsections.forEach(subsection => {
-          questions.push(...subsection.questions);
+          questions.push(...subsection.questions.filter(q => !answeredIds.has(q.id)));
         });
       });
     } else {
+      // Get selected sections but filter out answered ones
+      const answeredIds = new Set(Object.keys(responses));
       sections.forEach(section => {
         section.subsections.forEach(subsection => {
           if (selectedSubsections.has(subsection.id)) {
-            questions.push(...subsection.questions);
+            questions.push(...subsection.questions.filter(q => !answeredIds.has(q.id)));
           }
         });
       });
     }
     
     return questions;
-  }, [sections, selectedSubsections, useAllQuestions, useBookmarkedOnly, useIncorrectOnly, bookmarks, getGlobalIncorrectIds, isPreview, previewQuestions]);
+  }, [sections, selectedSubsections, useAllQuestions, useBookmarkedOnly, useIncorrectOnly, bookmarks, getGlobalIncorrectIds, isPreview, previewQuestions, responses]);
 
   const handleStartTest = async () => {
     if (availableQuestions.length === 0) {
