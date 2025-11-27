@@ -519,76 +519,84 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
             <div className="w-1/3 overflow-y-auto">
               <div className="space-y-6">
                 {/* In Progress Tests */}
-                {inProgressSessions.length > 0 && (
-                  <div className="space-y-3">
-                    <button
-                      onClick={() => setExpandedResumeTests(!expandedResumeTests)}
-                      className="w-full flex items-center gap-2 hover:opacity-70 transition-opacity"
-                    >
-                      {expandedResumeTests ? (
-                        <ChevronDown className="h-4 w-4 flex-shrink-0" />
-                      ) : (
-                        <ChevronRight className="h-4 w-4 flex-shrink-0" />
-                      )}
-                      <h2 className="text-lg font-semibold text-foreground">Resume Test</h2>
-                    </button>
-                    {expandedResumeTests && (
-                      <>
-                        <TestHistory
-                          sessions={inProgressSessions.slice(0, resumeTestsToShow)}
-                          onResume={handleResumeTest}
-                          onDelete={deleteSession}
-                          startIndex={1}
-                        />
-                        {inProgressSessions.length > resumeTestsToShow && (
-                          <Button
-                            variant="outline"
-                            onClick={() => setResumeTestsToShow(prev => prev + 2)}
-                            className="w-full"
-                          >
-                            Load More Tests
-                          </Button>
-                        )}
-                      </>
+                <div className="space-y-3">
+                  <button
+                    onClick={() => setExpandedResumeTests(!expandedResumeTests)}
+                    className="w-full flex items-center gap-2 hover:opacity-70 transition-opacity"
+                  >
+                    {expandedResumeTests ? (
+                      <ChevronDown className="h-4 w-4 flex-shrink-0" />
+                    ) : (
+                      <ChevronRight className="h-4 w-4 flex-shrink-0" />
                     )}
-                  </div>
-                )}
+                    <h2 className="text-lg font-semibold text-foreground">Resume Test</h2>
+                  </button>
+                  {expandedResumeTests && (
+                    <>
+                      {inProgressSessions.length > 0 ? (
+                        <>
+                          <TestHistory
+                            sessions={inProgressSessions.slice(0, resumeTestsToShow)}
+                            onResume={handleResumeTest}
+                            onDelete={deleteSession}
+                            startIndex={1}
+                          />
+                          {inProgressSessions.length > resumeTestsToShow && (
+                            <Button
+                              variant="outline"
+                              onClick={() => setResumeTestsToShow(prev => prev + 2)}
+                              className="w-full"
+                            >
+                              Load More Tests
+                            </Button>
+                          )}
+                        </>
+                      ) : (
+                        <p className="text-sm text-muted-foreground py-2">No Pending Tests</p>
+                      )}
+                    </>
+                  )}
+                </div>
                 
                 {/* Completed Tests */}
-                {completedSessions.length > 0 && (
-                  <div className="space-y-3">
-                    <button
-                      onClick={() => setExpandedCompletedTests(!expandedCompletedTests)}
-                      className="w-full flex items-center gap-2 hover:opacity-70 transition-opacity"
-                    >
-                      {expandedCompletedTests ? (
-                        <ChevronDown className="h-4 w-4 flex-shrink-0" />
-                      ) : (
-                        <ChevronRight className="h-4 w-4 flex-shrink-0" />
-                      )}
-                      <h2 className="text-lg font-semibold text-foreground">Completed Tests</h2>
-                    </button>
-                    {expandedCompletedTests && (
-                      <>
-                        <TestHistory
-                          sessions={completedSessions.slice(0, completedTestsToShow)}
-                          onReview={handleReviewTest}
-                          onDelete={deleteSession}
-                          startIndex={1}
-                        />
-                        {completedSessions.length > completedTestsToShow && (
-                          <Button
-                            variant="outline"
-                            onClick={() => setCompletedTestsToShow(prev => prev + 5)}
-                            className="w-full"
-                          >
-                            Load More Tests
-                          </Button>
-                        )}
-                      </>
+                <div className="space-y-3">
+                  <button
+                    onClick={() => setExpandedCompletedTests(!expandedCompletedTests)}
+                    className="w-full flex items-center gap-2 hover:opacity-70 transition-opacity"
+                  >
+                    {expandedCompletedTests ? (
+                      <ChevronDown className="h-4 w-4 flex-shrink-0" />
+                    ) : (
+                      <ChevronRight className="h-4 w-4 flex-shrink-0" />
                     )}
-                  </div>
-                )}
+                    <h2 className="text-lg font-semibold text-foreground">Completed Tests</h2>
+                  </button>
+                  {expandedCompletedTests && (
+                    <>
+                      {completedSessions.length > 0 ? (
+                        <>
+                          <TestHistory
+                            sessions={completedSessions.slice(0, completedTestsToShow)}
+                            onReview={handleReviewTest}
+                            onDelete={deleteSession}
+                            startIndex={1}
+                          />
+                          {completedSessions.length > completedTestsToShow && (
+                            <Button
+                              variant="outline"
+                              onClick={() => setCompletedTestsToShow(prev => prev + 5)}
+                              className="w-full"
+                            >
+                              Load More Tests
+                            </Button>
+                          )}
+                        </>
+                      ) : (
+                        <p className="text-sm text-muted-foreground py-2">No Completed Tests</p>
+                      )}
+                    </>
+                  )}
+                </div>
               </div>
             </div>
 
