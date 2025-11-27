@@ -9,6 +9,10 @@ function handleLogin() {
   window.location.href = '/login';
 }
 
+function handleSignUp() {
+  window.location.href = '/signup';
+}
+
 export default function Landing() {
   const [showPreviewWizard, setShowPreviewWizard] = useState(false);
 
@@ -29,9 +33,14 @@ export default function Landing() {
             <img src={atlasLogo} alt="Plastic Surgery Atlas" className="w-8 h-8 object-contain" />
             <h1 className="text-xl font-bold gradient-text">Atlas Review</h1>
           </div>
-          <Button onClick={handleLogin} data-testid="button-login" className="glow-primary transition-glow">
-            Sign In
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button onClick={handleSignUp} data-testid="button-signup-header" variant="outline" className="transition-glow">
+              Sign Up
+            </Button>
+            <Button onClick={handleLogin} data-testid="button-login" className="glow-primary transition-glow">
+              Sign In
+            </Button>
+          </div>
         </div>
       </header>
 
@@ -126,7 +135,7 @@ export default function Landing() {
               <p className="text-foreground leading-normal">
                 Join surgeons studying for in-service training exam and board certification. Create an account to unlock the full learning experience with progress tracking, custom tests, and personalized recommendations.
               </p>
-              <Button onClick={handleLogin} data-testid="button-sign-up" className="bg-primary hover:bg-primary/90">
+              <Button onClick={handleSignUp} data-testid="button-sign-up" className="bg-primary hover:bg-primary/90">
                 Create Free Account
               </Button>
             </CardContent>

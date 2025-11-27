@@ -62,7 +62,7 @@ export default function Login() {
       const data = await response.json();
 
       if (!response.ok) {
-        toast.error(data.message || 'Authentication failed');
+        toast.error(data.message || 'Authentication Failed');
         return;
       }
 
@@ -74,7 +74,7 @@ export default function Login() {
       // Redirect to home
       window.location.href = '/';
     } catch (error) {
-      toast.error('An error occurred. Please try again.');
+      toast.error('An error occurred, please try again.');
       console.error('Auth error:', error);
     } finally {
       setIsLoading(false);
@@ -102,7 +102,7 @@ export default function Login() {
             data-testid="button-home"
           >
             <img src={atlasLogo} alt="Atlas Logo" className="w-8 h-8 object-contain" />
-            <h1 className="text-xl font-bold gradient-text">Atlas Review</h1>
+            <h1 className="text-xl font-bold gradient-text">The Atlas Review</h1>
           </button>
           <button onClick={toggleTheme} className="p-2 hover-elevate rounded-md" data-testid="button-theme-toggle">
             {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
@@ -122,8 +122,8 @@ export default function Login() {
             </CardTitle>
             <CardDescription className="text-center">
               {isSignUp
-                ? 'Start your 30-day free trial of Atlas Review'
-                : 'Access your plastic surgery study materials'}
+                ? 'Start your 30-day free trial of the Atlas Review.'
+                : 'Access your plastic surgery study materials today.'}
             </CardDescription>
           </CardHeader>
 
@@ -152,7 +152,7 @@ export default function Login() {
                 <Input
                   id="password"
                   type="password"
-                  placeholder={isSignUp ? 'Min. 8 characters' : 'Enter password'}
+                  placeholder={isSignUp ? 'Enter Password' : 'Enter Password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   disabled={isLoading}
@@ -170,7 +170,7 @@ export default function Login() {
                     <Input
                       id="confirmPassword"
                       type="password"
-                      placeholder="Confirm password"
+                      placeholder="Confirm Password"
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       disabled={isLoading}
@@ -191,7 +191,7 @@ export default function Login() {
                           data-testid="select-institution-signup"
                           disabled={isLoading}
                         >
-                          {institution || "Select an institution..."}
+                          {institution || "Select Institution"}
                           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                         </Button>
                       </PopoverTrigger>
@@ -260,8 +260,8 @@ export default function Login() {
                 data-testid="button-toggle-auth"
               >
                 {isSignUp
-                  ? 'Already have an account? Sign In'
-                  : "Don't have an account? Sign Up"}
+                  ? 'Sign In Instead'
+                  : "Sign Up Instead"}
               </button>
             </div>
           </CardContent>

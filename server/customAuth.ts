@@ -51,17 +51,17 @@ export async function setupAuth(app: Express) {
       const { email, password } = req.body;
 
       if (!email || !password) {
-        return res.status(400).json({ message: 'Email and password required' });
+        return res.status(400).json({ message: 'Email and password required to login.' });
       }
 
       const user = await storage.getUserByEmail(email);
       if (!user || !user.passwordHash) {
-        return res.status(401).json({ message: 'Invalid email or password' });
+        return res.status(401).json({ message: 'Invalid email or password entered.' });
       }
 
       const isPasswordValid = await verifyPassword(password, user.passwordHash);
       if (!isPasswordValid) {
-        return res.status(401).json({ message: 'Invalid email or password' });
+        return res.status(401).json({ message: 'Invalid email or password entered.' });
       }
 
       // Create session
@@ -72,14 +72,14 @@ export async function setupAuth(app: Express) {
       // Save session before responding
       (req as any).session.save((err: any) => {
         if (err) {
-          console.error('Session save error:', err);
-          return res.status(500).json({ message: 'Session creation failed' });
+          console.error('Session Save Error:', err);
+          return res.status(500).json({ message: 'Session Creation Failed' });
         }
         res.json({ success: true, user });
       });
     } catch (error) {
-      console.error('Login error:', error);
-      res.status(500).json({ message: 'Login failed' });
+      console.error('Login Error:', error);
+      res.status(500).json({ message: 'Login Failed' });
     }
   });
 
@@ -90,29 +90,29 @@ export async function setupAuth(app: Express) {
 
       // Validation
       if (!email || !password || !confirmPassword) {
-        return res.status(400).json({ message: 'All fields required' });
+        return res.status(400).json({ message: 'All fields required.' });
       }
 
       if (password !== confirmPassword) {
-        return res.status(400).json({ message: 'Passwords do not match' });
+        return res.status(400).json({ message: 'Passwords do not match.' });
       }
 
       if (password.length < 8) {
         return res
           .status(400)
-          .json({ message: 'Password must be at least 8 characters' });
+          .json({ message: 'Password must be at least eight characters in length.' });
       }
 
       // Check email validity
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(email)) {
-        return res.status(400).json({ message: 'Invalid email format' });
+        return res.status(400).json({ message: 'Invalid email format, please try again.' });
       }
 
       // Check if email already exists
       const existingUser = await storage.getUserByEmail(email);
       if (existingUser) {
-        return res.status(409).json({ message: 'Email already registered' });
+        return res.status(409).json({ message: 'Email already registered, please login instead.' });
       }
 
       // Create user
