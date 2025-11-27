@@ -35,6 +35,7 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
   );
   const [useAllQuestions, setUseAllQuestions] = useState(true);
   const [useBookmarkedOnly, setUseBookmarkedOnly] = useState(false);
+  const [useIncorrectOnly, setUseIncorrectOnly] = useState(false);
   const [expandedSections, setExpandedSections] = useState<Set<string>>(
     new Set(sections.map(s => s.id))
   );
@@ -48,7 +49,7 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
   const [isReviewMode, setIsReviewMode] = useState(false);
   const hasResumedRef = useRef(false);
 
-  const { recordResponse } = useQuestionStats();
+  const { recordResponse, getIncorrectQuestionIds: getGlobalIncorrectIds } = useQuestionStats();
   const { createSession, updateSession, completeSession, getInProgressSessions, getCompletedSessions, deleteSession, sessions } = useTestSessions();
   const { bookmarks } = useBookmarks();
   const { isAuthenticated } = useAuth();
@@ -122,6 +123,20 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
           questions.push(...subsection.questions.filter(q => bookmarkedIds.has(q.id)));
         });
       });
+    } else if (useIncorrectOnly) {
+      // Get incorrect questions only
+      const incorrectIds = new Set<string>();
+      sections.forEach(section => {
+        section.subsections.forEach(subsection => {
+          const ids = getGlobalIncorrectIds(section.id, subsection.id);
+          ids.forEach(id => incorrectIds.add(id));
+        });
+      });
+      sections.forEach(section => {
+        section.subsections.forEach(subsection => {
+          questions.push(...subsection.questions.filter(q => incorrectIds.has(q.id)));
+        });
+      });
     } else if (useAllQuestions) {
       sections.forEach(section => {
         section.subsections.forEach(subsection => {
@@ -139,7 +154,7 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
     }
     
     return questions;
-  }, [sections, selectedSubsections, useAllQuestions, useBookmarkedOnly, bookmarks, isPreview, previewQuestions]);
+  }, [sections, selectedSubsections, useAllQuestions, useBookmarkedOnly, useIncorrectOnly, bookmarks, getGlobalIncorrectIds, isPreview, previewQuestions]);
 
   const handleStartTest = async () => {
     if (availableQuestions.length === 0) {
@@ -471,6 +486,7 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
                     onClick={() => {
                       setUseBookmarkedOnly(true);
                       setUseAllQuestions(false);
+                      setUseIncorrectOnly(false);
                     }}
                   >
                     <p className="font-medium text-foreground text-sm">Bookmarked Questions</p>
@@ -480,17 +496,49 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
                   </div>
                 )}
 
+                {/* Incorrect Questions Option */}
+                {(() => {
+                  const incorrectIds = new Set<string>();
+                  sections.forEach(section => {
+                    section.subsections.forEach(subsection => {
+                      const ids = getGlobalIncorrectIds(section.id, subsection.id);
+                      ids.forEach(id => incorrectIds.add(id));
+                    });
+                  });
+                  return incorrectIds.size > 0 ? (
+                    <div
+                      className={cn(
+                        "p-3 rounded-lg border-2 cursor-pointer transition-colors",
+                        useIncorrectOnly
+                          ? "border-primary bg-primary/10"
+                          : "border-border bg-muted/30 hover:bg-muted/50"
+                      )}
+                      onClick={() => {
+                        setUseIncorrectOnly(true);
+                        setUseAllQuestions(false);
+                        setUseBookmarkedOnly(false);
+                      }}
+                    >
+                      <p className="font-medium text-foreground text-sm">Incorrect Questions</p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Review all {incorrectIds.size} questions you answered incorrectly.
+                      </p>
+                    </div>
+                  ) : null;
+                })()}
+
                 {/* All Questions Option */}
                 <div
                   className={cn(
                     "p-3 rounded-lg border-2 cursor-pointer transition-colors",
-                    useAllQuestions && !useBookmarkedOnly
+                    useAllQuestions && !useBookmarkedOnly && !useIncorrectOnly
                       ? "border-primary bg-primary/10"
                       : "border-border bg-muted/30 hover:bg-muted/50"
                   )}
                   onClick={() => {
                     setUseAllQuestions(true);
                     setUseBookmarkedOnly(false);
+                    setUseIncorrectOnly(false);
                   }}
                 >
                   <p className="font-medium text-foreground text-sm">All Available Questions</p>
@@ -503,13 +551,14 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
                 <div
                   className={cn(
                     "p-3 rounded-lg border-2 cursor-pointer transition-colors",
-                    !useAllQuestions && !useBookmarkedOnly
+                    !useAllQuestions && !useBookmarkedOnly && !useIncorrectOnly
                       ? "border-primary bg-primary/10"
                       : "border-border bg-muted/30 hover:bg-muted/50"
                   )}
                   onClick={() => {
                     setUseAllQuestions(false);
                     setUseBookmarkedOnly(false);
+                    setUseIncorrectOnly(false);
                   }}
                 >
                   <p className="font-medium text-foreground text-sm">Select Sections</p>
@@ -519,7 +568,7 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
                 </div>
               </div>
 
-              {!useAllQuestions && !useBookmarkedOnly && (
+              {!useAllQuestions && !useBookmarkedOnly && !useIncorrectOnly && (
                 <div className="border border-border rounded-lg p-4 bg-muted/30 space-y-3 mt-4">
                   {sections.map(section => (
                     <div key={section.id}>
@@ -577,7 +626,7 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
             <Button
               size="lg"
               onClick={handleStartTest}
-              disabled={(!useAllQuestions && !useBookmarkedOnly && selectedSubsections.size === 0) || availableQuestions.length === 0}
+              disabled={(!useAllQuestions && !useBookmarkedOnly && !useIncorrectOnly && selectedSubsections.size === 0) || availableQuestions.length === 0}
               className="w-full"
               data-testid="button-start-test"
             >
