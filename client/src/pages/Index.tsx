@@ -412,7 +412,7 @@ export default function Index() {
                 onClick={() => setScreenMode('settings')}
                 variant="outline"
                 size="icon"
-                className="lg:hidden"
+                className="lg:hidden flex-shrink-0"
               >
                 <Settings className="h-5 w-5" />
               </Button>
