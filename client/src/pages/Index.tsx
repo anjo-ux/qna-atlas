@@ -111,6 +111,13 @@ export default function Index() {
     return () => window.removeEventListener('resize', handleResize);
   }, [screenMode]);
 
+  // Auto-switch out of split mode when screen becomes too small
+  useEffect(() => {
+    if (isMobileLayout && viewMode === 'split') {
+      setViewMode('questions');
+    }
+  }, [isMobileLayout, viewMode]);
+
   // Close search results when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
