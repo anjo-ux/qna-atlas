@@ -1,8 +1,9 @@
+import { useState } from 'react';
 import { Section } from '@/types/question';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { X } from 'lucide-react';
+import { X, ChevronDown, ChevronRight } from 'lucide-react';
 
 interface NavigationProps {
   sections: Section[];
@@ -21,35 +22,58 @@ export function Navigation({
   isOpen, 
   onClose 
 }: NavigationProps) {
+  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>(
+    sections.reduce((acc, s) => ({ ...acc, [s.id]: true }), {})
+  );
+
+  const toggleSection = (sectionId: string) => {
+    setExpandedSections(prev => ({
+      ...prev,
+      [sectionId]: !prev[sectionId]
+    }));
+  };
+
   const NavContent = () => (
     <ScrollArea className="h-full">
       <div className="space-y-6 p-6">
         {sections.map((section) => (
           <div key={section.id} className="space-y-2">
-            <h3 className="font-semibold text-sm text-foreground mb-3 px-2">
-              {section.title}
-            </h3>
-            <div className="space-y-1">
-              {section.subsections.map((subsection) => (
-                <Button
-                  key={subsection.id}
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => onNavigate(section.id, subsection.id)}
-                  className={cn(
-                    "w-full justify-start text-left font-normal transition-smooth relative overflow-hidden",
-                    selectedSection === section.id && selectedSubsection === subsection.id
-                      ? "bg-gradient-to-r from-primary to-accent text-primary-foreground hover:from-primary/90 hover:to-accent/90 shadow-md"
-                      : "text-muted-foreground hover:text-foreground hover:bg-gradient-to-r hover:from-primary/10 hover:to-accent/10"
-                  )}
-                >
-                  <span className="truncate text-xs relative z-10">{subsection.title}</span>
-                  <span className="ml-auto text-xs opacity-80 relative z-10">
-                    {subsection.questions.length}
-                  </span>
-                </Button>
-              ))}
-            </div>
+            <button
+              onClick={() => toggleSection(section.id)}
+              className="w-full flex items-center gap-2 px-2 mb-3 hover:opacity-70 transition-opacity"
+            >
+              {expandedSections[section.id] ? (
+                <ChevronDown className="h-4 w-4 flex-shrink-0 text-foreground" />
+              ) : (
+                <ChevronRight className="h-4 w-4 flex-shrink-0 text-foreground" />
+              )}
+              <h3 className="font-semibold text-sm text-foreground truncate">
+                {section.title}
+              </h3>
+            </button>
+            {expandedSections[section.id] && (
+              <div className="space-y-1">
+                {section.subsections.map((subsection) => (
+                  <Button
+                    key={subsection.id}
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => onNavigate(section.id, subsection.id)}
+                    className={cn(
+                      "w-full justify-start text-left font-normal transition-smooth relative overflow-hidden",
+                      selectedSection === section.id && selectedSubsection === subsection.id
+                        ? "bg-gradient-to-r from-primary to-accent text-primary-foreground hover:from-primary/90 hover:to-accent/90 shadow-md"
+                        : "text-muted-foreground hover:text-foreground hover:bg-gradient-to-r hover:from-primary/10 hover:to-accent/10"
+                    )}
+                  >
+                    <span className="truncate text-xs relative z-10">{subsection.title}</span>
+                    <span className="ml-auto text-xs opacity-80 relative z-10">
+                      {subsection.questions.length}
+                    </span>
+                  </Button>
+                ))}
+              </div>
+            )}
           </div>
         ))}
       </div>
