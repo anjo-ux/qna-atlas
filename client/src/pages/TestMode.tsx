@@ -30,9 +30,7 @@ type TestState = 'setup' | 'testing' | 'results' | 'review';
 export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, isPreview }: TestModeProps) {
   const [testState, setTestState] = useState<TestState>('setup');
   const [questionCount, setQuestionCount] = useState<number>(10);
-  const [selectedSubsections, setSelectedSubsections] = useState<Set<string>>(
-    new Set(sections.flatMap(s => s.subsections.map(ss => ss.id)))
-  );
+  const [selectedSubsections, setSelectedSubsections] = useState<Set<string>>(new Set());
   const [useAllQuestions, setUseAllQuestions] = useState(true);
   const [useBookmarkedOnly, setUseBookmarkedOnly] = useState(false);
   const [useIncorrectOnly, setUseIncorrectOnly] = useState(false);
