@@ -28,6 +28,8 @@ export default function Login() {
   const [isSignUp, setIsSignUp] = useState(false);
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isDark, setIsDark] = useState(false);
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [institution, setInstitution] = useState('');
   const [openCombobox, setOpenCombobox] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -50,7 +52,7 @@ export default function Login() {
     try {
       const endpoint = isSignUp ? '/api/auth/register' : '/api/auth/login';
       const payload = isSignUp
-        ? { email, password, confirmPassword, institutionalAffiliation: institution }
+        ? { email, password, confirmPassword, firstName, lastName, institutionalAffiliation: institution }
         : { email, password };
 
       const response = await fetch(endpoint, {
@@ -163,6 +165,39 @@ export default function Login() {
 
               {isSignUp && (
                 <>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-2">
+                      <label htmlFor="firstName" className="text-sm font-medium">
+                        First Name
+                      </label>
+                      <Input
+                        id="firstName"
+                        type="text"
+                        placeholder="First"
+                        value={firstName}
+                        onChange={(e) => setFirstName(e.target.value)}
+                        disabled={isLoading}
+                        required
+                        data-testid="input-first-name"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label htmlFor="lastName" className="text-sm font-medium">
+                        Last Name
+                      </label>
+                      <Input
+                        id="lastName"
+                        type="text"
+                        placeholder="Last"
+                        value={lastName}
+                        onChange={(e) => setLastName(e.target.value)}
+                        disabled={isLoading}
+                        required
+                        data-testid="input-last-name"
+                      />
+                    </div>
+                  </div>
+
                   <div className="space-y-2">
                     <label htmlFor="confirmPassword" className="text-sm font-medium">
                       Confirm Password
@@ -255,6 +290,8 @@ export default function Login() {
                   setIsSignUp(!isSignUp);
                   setPassword('');
                   setConfirmPassword('');
+                  setFirstName('');
+                  setLastName('');
                 }}
                 className="text-primary hover:underline font-medium"
                 data-testid="button-toggle-auth"
