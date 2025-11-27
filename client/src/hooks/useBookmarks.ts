@@ -59,7 +59,7 @@ export function useBookmarks() {
     mutationFn: async (questionId: string) => {
       console.log('[Bookmark] Removing bookmark for question:', questionId);
       try {
-        const response = await apiRequest(`/api/bookmarks/${questionId}`, {
+        const response = await apiRequest(`/api/bookmarks/${encodeURIComponent(questionId)}`, {
           method: 'DELETE',
         });
         console.log('[Bookmark] Delete API response:', response);
