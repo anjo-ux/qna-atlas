@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Section } from '@/types/question';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -22,9 +22,20 @@ export function Navigation({
   isOpen, 
   onClose 
 }: NavigationProps) {
-  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>(
-    sections.reduce((acc, s) => ({ ...acc, [s.id]: true }), {})
-  );
+  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>(() => {
+    // Load from localStorage on initial render
+    const saved = localStorage.getItem('navigationExpandedSections');
+    if (saved) {
+      return JSON.parse(saved);
+    }
+    // Default: all sections expanded
+    return sections.reduce((acc, s) => ({ ...acc, [s.id]: true }), {});
+  });
+
+  // Save to localStorage whenever expandedSections changes
+  useEffect(() => {
+    localStorage.setItem('navigationExpandedSections', JSON.stringify(expandedSections));
+  }, [expandedSections]);
 
   const toggleSection = (sectionId: string) => {
     setExpandedSections(prev => ({
