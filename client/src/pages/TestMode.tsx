@@ -47,6 +47,8 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
   const [showQuestionPanel, setShowQuestionPanel] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isReviewMode, setIsReviewMode] = useState(false);
+  const [resumeTestsToShow, setResumeTestsToShow] = useState(5);
+  const [completedTestsToShow, setCompletedTestsToShow] = useState(5);
   const hasResumedRef = useRef(false);
 
   const { recordResponse, getIncorrectQuestionIds: getGlobalIncorrectIds } = useQuestionStats();
@@ -439,42 +441,57 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
           </div>
         </div>
 
-        <div className="flex-1 overflow-auto p-6">
+        <div className="flex-1 overflow-hidden p-6">
           <div className="flex gap-6 max-w-6xl mx-auto h-full">
             {/* Left Column: Resume and Completed Tests */}
-            <div className="w-1/3 space-y-6 overflow-y-auto">
-              {/* In Progress Tests */}
-              {inProgressSessions.length > 0 && (
-                <div className="space-y-3">
-                  <h2 className="text-lg font-semibold text-foreground">Resume Test</h2>
-                  <div className={inProgressSessions.length > 3 ? "max-h-64 overflow-y-auto" : ""}>
+            <div className="w-1/3 overflow-y-auto">
+              <div className="space-y-6">
+                {/* In Progress Tests */}
+                {inProgressSessions.length > 0 && (
+                  <div className="space-y-3">
+                    <h2 className="text-lg font-semibold text-foreground">Resume Test</h2>
                     <TestHistory
-                      sessions={inProgressSessions}
+                      sessions={inProgressSessions.slice(0, resumeTestsToShow)}
                       onResume={handleResumeTest}
                       onDelete={deleteSession}
-                      maxItems={3}
                     />
+                    {inProgressSessions.length > resumeTestsToShow && (
+                      <Button
+                        variant="outline"
+                        onClick={() => setResumeTestsToShow(prev => prev + 5)}
+                        className="w-full"
+                      >
+                        Load More Tests
+                      </Button>
+                    )}
                   </div>
-                </div>
-              )}
-              
-              {/* Completed Tests */}
-              {completedSessions.length > 0 && (
-                <div className="space-y-3">
-                  <h2 className="text-lg font-semibold text-foreground">Completed Tests</h2>
-                  <div className="max-h-96 overflow-y-auto">
+                )}
+                
+                {/* Completed Tests */}
+                {completedSessions.length > 0 && (
+                  <div className="space-y-3">
+                    <h2 className="text-lg font-semibold text-foreground">Completed Tests</h2>
                     <TestHistory
-                      sessions={completedSessions}
+                      sessions={completedSessions.slice(0, completedTestsToShow)}
                       onReview={handleReviewTest}
                       onDelete={deleteSession}
                     />
+                    {completedSessions.length > completedTestsToShow && (
+                      <Button
+                        variant="outline"
+                        onClick={() => setCompletedTestsToShow(prev => prev + 5)}
+                        className="w-full"
+                      >
+                        Load More Tests
+                      </Button>
+                    )}
                   </div>
-                </div>
-              )}
+                )}
+              </div>
             </div>
 
             {/* Right Column: Test Creation */}
-            <div className="w-2/3 space-y-6 overflow-y-auto">
+            <div className="w-2/3 overflow-y-auto pr-6">
               <h2 className="text-lg font-semibold text-foreground">Test Creation</h2>
               
               {/* Question Count */}
