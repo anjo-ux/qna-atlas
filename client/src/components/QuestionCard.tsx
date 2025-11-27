@@ -192,6 +192,17 @@ export function QuestionCard({
     }
   };
 
+  // Autosave answer selection to database
+  const handleAnswerChange = (value: string) => {
+    setSelectedAnswer(value);
+    // Also immediately submit if we're in test mode and have a saved response (user is changing their answer)
+    if (isTestMode && savedResponse) {
+      const correct = value.toUpperCase() === correctAnswer;
+      onAnswerSubmit(question.id, value, correctAnswer, correct);
+      setShowExplanation(true);
+    }
+  };
+
 
   const handleTextSelection = () => {
     // Don't allow highlighting when in eraser mode
@@ -303,7 +314,7 @@ export function QuestionCard({
             </p>
             
             {parsed.choices.length > 0 && (
-              <RadioGroup value={selectedAnswer || ''} onValueChange={setSelectedAnswer}>
+              <RadioGroup value={selectedAnswer || ''} onValueChange={handleAnswerChange}>
                 <div className="space-y-2">
                   {parsed.choices.map((choice) => {
                     const showResult = selectedAnswer && showExplanation;

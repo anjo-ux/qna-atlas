@@ -72,6 +72,38 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
     }
   }, [isPreview, previewQuestions, testState]);
 
+  // Load saved responses when test starts
+  useEffect(() => {
+    const loadSavedResponses = async () => {
+      if (isAuthenticated && currentSession && testState === 'testing' && Object.keys(responses).length === 0) {
+        try {
+          const res = await fetch(`/api/test-sessions/${currentSession.id}/responses`, {
+            credentials: 'include',
+          });
+          if (res.ok) {
+            const savedResponses = await res.json();
+            const responsesMap: Record<string, QuestionResponse> = {};
+            savedResponses.forEach((r: any) => {
+              responsesMap[r.questionId] = {
+                questionId: r.questionId,
+                sectionId: r.sectionId,
+                subsectionId: r.subsectionId,
+                selectedAnswer: r.selectedAnswer,
+                correctAnswer: r.selectedAnswer, // We'll update this from localStorage
+                isCorrect: r.isCorrect,
+                timestamp: new Date(r.answeredAt).getTime(),
+              };
+            });
+            setResponses(responsesMap);
+          }
+        } catch (error) {
+          console.error('Error loading saved responses:', error);
+        }
+      }
+    };
+    loadSavedResponses();
+  }, [isAuthenticated, currentSession, testState]);
+
   // Get all available questions based on selection
   const availableQuestions = useMemo(() => {
     // If in preview mode, use preview questions
@@ -245,6 +277,29 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
             correctAnswer,
             isCorrect,
           });
+
+          // Autosave to database if authenticated
+          if (isAuthenticated && currentSession) {
+            (async () => {
+              try {
+                await fetch('/api/question-responses', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  credentials: 'include',
+                  body: JSON.stringify({
+                    testSessionId: currentSession.id,
+                    questionId,
+                    sectionId: section.id,
+                    subsectionId: subsection.id,
+                    selectedAnswer,
+                    isCorrect,
+                  }),
+                });
+              } catch (error) {
+                console.error('Error saving response:', error);
+              }
+            })();
+          }
           break;
         }
       }

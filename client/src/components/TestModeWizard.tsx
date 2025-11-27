@@ -32,12 +32,12 @@ export function TestModeWizard({ open, onClose, onContinue }: TestModeWizardProp
       content: (
         <div className="space-y-3">
           <Card className="p-3 bg-primary/5 border-primary/20">
-            <p className="font-medium text-sm text-foreground">Use Previous/Next Buttons</p>
-            <p className="text-xs text-muted-foreground mt-1">Navigate forward and backward through questions at your own pace and save your answers, notes, and highlights.</p>
+            <p className="font-medium text-sm text-foreground">Arrow Buttons</p>
+            <p className="text-xs text-muted-foreground mt-1">Navigate forward and backward through questions at your own pace.</p>
           </Card>
           <Card className="p-3 bg-accent/5 border-accent/20">
-            <p className="font-medium text-sm text-foreground">Question Status Indicators</p>
-            <p className="text-xs text-muted-foreground mt-1">Blue Circle = Unanswered, Checkmark = Answered, X = Incorrect</p>
+            <p className="font-medium text-sm text-foreground">Status Indicators</p>
+            <p className="text-xs text-muted-foreground mt-1">Blue is unanswered, green checkmark is answered, red cross is incorrect.</p>
           </Card>
           <Card className="p-3 bg-chart-1/5 border-chart-1/20">
             <p className="font-medium text-sm text-foreground">Navigate</p>
