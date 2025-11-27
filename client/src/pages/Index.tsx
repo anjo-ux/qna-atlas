@@ -353,10 +353,11 @@ export default function Index() {
                 variant="ghost"
                 size="icon"
                 onClick={(e) => {
+                  e.preventDefault();
                   handleGoHome();
                   (e.currentTarget as HTMLButtonElement).blur();
                 }}
-                className="hover:bg-primary/10 flex-shrink-0"
+                className="hover:bg-primary/10 flex-shrink-0 outline-none focus-visible:ring-0"
                 title="Go to Dashboard"
               >
                 <Home className="h-5 w-5" />
