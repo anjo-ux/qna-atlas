@@ -35,6 +35,7 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
   const [useBookmarkedOnly, setUseBookmarkedOnly] = useState(false);
   const [useIncorrectOnly, setUseIncorrectOnly] = useState(false);
   const [showAllAnsweredQuestions, setShowAllAnsweredQuestions] = useState(false);
+  const [showAllAnsweredInSections, setShowAllAnsweredInSections] = useState(false);
   const [expandedSections, setExpandedSections] = useState<Set<string>>(
     new Set(sections.map(s => s.id))
   );
@@ -70,7 +71,10 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
   };
 
   // Helper function to get count of unanswered questions in a subsection
-  const getUnansweredCountForSubsection = (subsection: Subsection): number => {
+  const getUnansweredCountForSubsection = (subsection: Subsection, showAll: boolean = false): number => {
+    if (showAll) {
+      return subsection.questions.length;
+    }
     const answeredIds = new Set(globalResponses.map(r => r.questionId));
     return subsection.questions.filter(q => !answeredIds.has(q.id)).length;
   };
@@ -200,19 +204,31 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
         });
       }
     } else {
-      // Get selected sections but filter out answered ones from global dashboard
-      const answeredIds = new Set(globalResponses.map(r => r.questionId));
-      sections.forEach(section => {
-        section.subsections.forEach(subsection => {
-          if (selectedSubsections.has(subsection.id)) {
-            questions.push(...subsection.questions.filter(q => !answeredIds.has(q.id)));
-          }
+      // Get selected sections, optionally filtered by answered state
+      if (showAllAnsweredInSections) {
+        // Include all questions regardless of answered state
+        sections.forEach(section => {
+          section.subsections.forEach(subsection => {
+            if (selectedSubsections.has(subsection.id)) {
+              questions.push(...subsection.questions);
+            }
+          });
         });
-      });
+      } else {
+        // Filter out answered ones from global dashboard (default)
+        const answeredIds = new Set(globalResponses.map(r => r.questionId));
+        sections.forEach(section => {
+          section.subsections.forEach(subsection => {
+            if (selectedSubsections.has(subsection.id)) {
+              questions.push(...subsection.questions.filter(q => !answeredIds.has(q.id)));
+            }
+          });
+        });
+      }
     }
     
     return questions;
-  }, [sections, selectedSubsections, useAllQuestions, useBookmarkedOnly, useIncorrectOnly, bookmarks, getGlobalIncorrectIds, isPreview, previewQuestions, globalResponses, showAllAnsweredQuestions]);
+  }, [sections, selectedSubsections, useAllQuestions, useBookmarkedOnly, useIncorrectOnly, bookmarks, getGlobalIncorrectIds, isPreview, previewQuestions, globalResponses, showAllAnsweredQuestions, showAllAnsweredInSections]);
 
   const handleStartTest = async () => {
     if (availableQuestions.length === 0) {
@@ -786,8 +802,22 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
                             setUseIncorrectOnly(false);
                           }}
                         >
-                          <p className="font-medium text-foreground text-sm">Select Sections</p>
-                          <p className="text-xs text-muted-foreground mt-1">
+                          <div className="flex items-center justify-between mb-2">
+                            <p className="font-medium text-foreground text-sm">Select Sections</p>
+                            {!useAllQuestions && !useBookmarkedOnly && !useIncorrectOnly && (
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs text-muted-foreground">
+                                  {!showAllAnsweredInSections ? "Unanswered" : "All"}
+                                </span>
+                                <Switch
+                                  checked={showAllAnsweredInSections}
+                                  onCheckedChange={setShowAllAnsweredInSections}
+                                  onClick={(e) => e.stopPropagation()}
+                                />
+                              </div>
+                            )}
+                          </div>
+                          <p className="text-xs text-muted-foreground">
                             Choose specific topics to test from each section.
                           </p>
                         </div>
@@ -835,7 +865,7 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
                                         className="flex-shrink-0"
                                       />
                                       <Label htmlFor={`subsection-${subsection.id}`} className="cursor-pointer text-xs flex-1">
-                                        {subsection.title} <span className="text-muted-foreground">({getUnansweredCountForSubsection(subsection)})</span>
+                                        {subsection.title} <span className="text-muted-foreground">({getUnansweredCountForSubsection(subsection, showAllAnsweredInSections)})</span>
                                       </Label>
                                     </div>
                                   ))}
