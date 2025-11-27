@@ -62,7 +62,7 @@ export function Navigation({
           <div className="flex-1">
             <h2 className="text-lg font-semibold text-foreground">Sections</h2>
             <p className="text-sm text-muted-foreground mt-1">
-              {sections.reduce((acc, s) => acc + s.subsections.length, 0)} subsections
+              Subsections
             </p>
           </div>
           <Button 
