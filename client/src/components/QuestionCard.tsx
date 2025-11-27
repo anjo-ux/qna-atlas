@@ -43,6 +43,7 @@ export function QuestionCard({
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(savedResponse?.selectedAnswer || null);
   const [showExplanation, setShowExplanation] = useState(!!savedResponse);
   const [isEraserMode, setIsEraserMode] = useState(false);
+  const [crossedOutChoices, setCrossedOutChoices] = useState<Set<string>>(new Set());
 
   const {
     activeColor,
@@ -203,6 +204,20 @@ export function QuestionCard({
     }
   };
 
+  // Handle right-click to cross out/uncross out answer choices
+  const handleChoiceRightClick = (e: React.MouseEvent<HTMLDivElement>, choiceLetter: string) => {
+    e.preventDefault();
+    setCrossedOutChoices(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(choiceLetter)) {
+        newSet.delete(choiceLetter);
+      } else {
+        newSet.add(choiceLetter);
+      }
+      return newSet;
+    });
+  };
+
 
   const handleTextSelection = () => {
     // Don't allow highlighting when in eraser mode
@@ -337,10 +352,18 @@ export function QuestionCard({
                       choiceClassName += " hover:bg-accent/5";
                     }
                     
+                    const isCrossedOut = crossedOutChoices.has(choice.letter);
+
                     return (
                       <div
                         key={choice.letter}
-                        className={choiceClassName}
+                        className={cn(
+                          choiceClassName,
+                          "cursor-context-menu",
+                          isCrossedOut && "opacity-50"
+                        )}
+                        onContextMenu={(e) => handleChoiceRightClick(e, choice.letter)}
+                        data-testid={`choice-${question.id}-${choice.letter}`}
                       >
                         <RadioGroupItem 
                           value={choice.letter} 
@@ -351,7 +374,8 @@ export function QuestionCard({
                           htmlFor={`${question.id}-${choice.letter}`}
                           className={cn(
                             "flex-1 cursor-pointer font-normal",
-                            showExplanation && "cursor-default"
+                            showExplanation && "cursor-default",
+                            isCrossedOut && "line-through text-muted-foreground"
                           )}
                         >
                           <span className="font-semibold">{choice.letter}.</span> {choice.text}
