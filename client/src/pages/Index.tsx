@@ -194,9 +194,15 @@ export default function Index() {
   };
 
   const handleGoHome = () => {
-    setSelectedSection(null);
-    setSelectedSubsection(null);
-    setIsNavOpen(false);
+    if (selectedSection === null && selectedSubsection === null) {
+      // Already on home screen, refresh the page
+      window.location.reload();
+    } else {
+      // Navigate to home screen
+      setSelectedSection(null);
+      setSelectedSubsection(null);
+      setIsNavOpen(false);
+    }
   };
 
   const handleReviewIncorrect = () => {
