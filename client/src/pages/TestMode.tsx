@@ -730,7 +730,7 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
               <div className="space-y-4">
                 <div className="text-6xl font-bold text-primary">{testResults.accuracy}%</div>
                 <div className="text-2xl font-semibold text-foreground">
-                  {testResults.correct} out of {testResults.total} Correct
+                  {testResults.correct} / {testResults.total} Correct
                 </div>
               </div>
             </Card>
@@ -754,7 +754,7 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
               Create Another Test
             </Button>
             <Button onClick={onBack} variant="outline" className="w-full">
-              Back to Study
+              Home
             </Button>
           </div>
         </div>

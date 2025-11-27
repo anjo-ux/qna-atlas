@@ -15,92 +15,92 @@ export function TestModeWizard({ open, onClose, onContinue }: TestModeWizardProp
 
   const steps = [
     {
-      title: 'Welcome to Test Mode',
-      description: 'Master the testing experience',
+      title: 'Test Mode Tutorial',
+      description: 'Master the in-service testing experience.',
       icon: Play,
       content: (
         <div className="space-y-4">
-          <p className="text-foreground">Test Mode helps you practice with realistic exam conditions and track your progress.</p>
+          <p className="text-foreground">Test mode helps you practice with realistic exam conditions and track your progress.</p>
           <p className="text-muted-foreground text-sm">Let's walk through the key features to help you get the most out of your study sessions.</p>
         </div>
       ),
     },
     {
       title: 'Navigate Questions',
-      description: 'Move through questions easily',
+      description: 'Move through questions easily.',
       icon: ChevronRight,
       content: (
         <div className="space-y-3">
           <Card className="p-3 bg-primary/5 border-primary/20">
             <p className="font-medium text-sm text-foreground">Use Previous/Next Buttons</p>
-            <p className="text-xs text-muted-foreground mt-1">Navigate forward and backward through questions at your own pace</p>
+            <p className="text-xs text-muted-foreground mt-1">Navigate forward and backward through questions at your own pace and save your answers, notes, and highlights.</p>
           </Card>
           <Card className="p-3 bg-accent/5 border-accent/20">
             <p className="font-medium text-sm text-foreground">Question Status Indicators</p>
             <p className="text-xs text-muted-foreground mt-1">Blue Circle = Unanswered, Checkmark = Answered, X = Incorrect</p>
           </Card>
           <Card className="p-3 bg-chart-1/5 border-chart-1/20">
-            <p className="font-medium text-sm text-foreground">Jump to Any Question</p>
-            <p className="text-xs text-muted-foreground mt-1">Click a question number or status indicator to jump directly to it</p>
+            <p className="font-medium text-sm text-foreground">Navigate</p>
+            <p className="text-xs text-muted-foreground mt-1">Click a question number or status indicator to jump directly to it on the left pane.</p>
           </Card>
         </div>
       ),
     },
     {
-      title: 'Submit Your Answers',
-      description: 'Mark your response',
+      title: 'Answering Questions',
+      description: 'Mark your response, highlight, and cross-out.',
       icon: Zap,
       content: (
         <div className="space-y-3">
           <Card className="p-3 border-l-4 border-l-primary">
-            <p className="font-medium text-sm text-foreground">Select an Option</p>
-            <p className="text-xs text-muted-foreground mt-1">Choose from the available answer options (typically A, B, C, D)</p>
+            <p className="font-medium text-sm text-foreground">Cross-Out Answers</p>
+            <p className="text-xs text-muted-foreground mt-1">Right click on an answer choice to cross it out.</p>
           </Card>
           <Card className="p-3 border-l-4 border-l-chart-1">
             <p className="font-medium text-sm text-foreground">Submit Your Answer</p>
-            <p className="text-xs text-muted-foreground mt-1">Click Submit to record your response. You'll see if you're correct immediately</p>
+            <p className="text-xs text-muted-foreground mt-1">Click Submit to record your response, and you'll see if you're correct immediately.</p>
           </Card>
           <Card className="p-3 border-l-4 border-l-chart-2">
             <p className="font-medium text-sm text-foreground">Review Explanations</p>
-            <p className="text-xs text-muted-foreground mt-1">After submitting, read the detailed explanation to understand the concept</p>
+            <p className="text-xs text-muted-foreground mt-1">After submitting, read the detailed explanation to understand the concept, where you can take notes that persist.</p>
           </Card>
         </div>
       ),
     },
     {
       title: 'Review Results',
-      description: 'Track your performance',
+      description: 'Track your performance.',
       icon: BarChart3,
       content: (
         <div className="space-y-3">
           <Card className="p-3 bg-success/5 border-success/20">
             <p className="font-medium text-sm text-foreground">View Your Score</p>
-            <p className="text-xs text-muted-foreground mt-1">See your total score and accuracy percentage after completing the test</p>
+            <p className="text-xs text-muted-foreground mt-1">See your total score and accuracy percentage after completing the test with detailed report.</p>
           </Card>
           <Card className="p-3 bg-chart-1/5 border-chart-1/20">
             <p className="font-medium text-sm text-foreground">Review Answers</p>
-            <p className="text-xs text-muted-foreground mt-1">Go back through your responses and read explanations for all questions</p>
+            <p className="text-xs text-muted-foreground mt-1">Go back through your responses and read explanations for all questions with your notes.</p>
           </Card>
           <Card className="p-3 bg-destructive/5 border-destructive/20">
-            <p className="font-medium text-sm text-foreground">Focus on Weak Areas</p>
-            <p className="text-xs text-muted-foreground mt-1">Identify incorrect answers and use the filter to review similar topics</p>
+            <p className="font-medium text-sm text-foreground">Highlighting</p>
+            <p className="text-xs text-muted-foreground mt-1">You can highlight in any color and then use the eraser tool to remove highlights one by one as needed, or click clear to remove them all.</p>
           </Card>
         </div>
       ),
     },
     {
       title: 'Resume Anytime',
-      description: 'Save your progress',
+      description: 'Save your progress and return later.',
       icon: RotateCcw,
       content: (
         <div className="space-y-4">
           <Card className="p-4 bg-primary/5 border-primary/20">
-            <p className="text-sm text-foreground font-medium">Tests are Auto-Saved</p>
-            <p className="text-xs text-muted-foreground mt-2">Your progress is saved automatically. You can close and come back to resume your test anytime</p>
+            <p className="text-sm text-foreground font-medium">Tests Auto-Saved</p>
+            <p className="text-xs text-muted-foreground mt-2">Your progress is saved automatically, and you can close and come back to resume your test anytime.</p>
           </Card>
           <Card className="p-4 bg-accent/5 border-accent/20">
             <p className="text-sm text-foreground font-medium">Access From Any Device</p>
-            <p className="text-xs text-muted-foreground mt-2">Log in from any device and pick up exactly where you left off</p>
+            <p className="text-xs text-muted-foreground mt-2">Log in from any device and pick up exactly where you left off.</p>
           </Card>
         </div>
       ),
