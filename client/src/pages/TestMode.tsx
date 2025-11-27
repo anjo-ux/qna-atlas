@@ -440,211 +440,222 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
         </div>
 
         <div className="flex-1 overflow-auto p-6">
-          <div className="max-w-2xl mx-auto space-y-6">
-            {/* In Progress Tests */}
-            {inProgressSessions.length > 0 && (
-              <div className="space-y-3">
-                <h2 className="text-lg font-semibold text-foreground">Resume Test</h2>
-                <div className={inProgressSessions.length > 3 ? "max-h-64 overflow-y-auto" : ""}>
-                  <TestHistory
-                    sessions={inProgressSessions}
-                    onResume={handleResumeTest}
-                    onDelete={deleteSession}
-                    maxItems={3}
-                  />
-                </div>
-              </div>
-            )}
-            
-            {/* Completed Tests */}
-            {completedSessions.length > 0 && (
-              <div className="space-y-3">
-                <h2 className="text-lg font-semibold text-foreground">Completed Tests</h2>
-                <TestHistory
-                  sessions={completedSessions}
-                  onReview={handleReviewTest}
-                  onDelete={deleteSession}
-                />
-              </div>
-            )}
-            {/* Question Count */}
-            <Card className="p-4">
-              <h2 className="text-sm font-semibold mb-3">Total Questions</h2>
-              <RadioGroup value={questionCount.toString()} onValueChange={(v) => setQuestionCount(parseInt(v) as any)}>
-                <div className="space-y-2">
-                  {[10, 20, 30, 40].map(count => (
-                    <div key={count} className="flex items-center space-x-2">
-                      <RadioGroupItem value={count.toString()} id={`count-${count}`} />
-                      <Label htmlFor={`count-${count}`} className="cursor-pointer text-sm">{count} Questions</Label>
-                    </div>
-                  ))}
-                </div>
-              </RadioGroup>
-            </Card>
-
-            {/* Question Source */}
-            <Card className="p-4">
-              <h2 className="text-sm font-semibold mb-4">Select Questions From</h2>
-
-              <div className="space-y-3">
-                {/* Bookmarked Option */}
-                {bookmarks.length > 0 && (
-                  <div
-                    className={cn(
-                      "p-3 rounded-lg border-2 cursor-pointer transition-colors",
-                      useBookmarkedOnly
-                        ? "border-primary bg-primary/10"
-                        : "border-border bg-muted/30 hover:bg-muted/50"
-                    )}
-                    onClick={() => {
-                      setUseBookmarkedOnly(true);
-                      setUseAllQuestions(false);
-                      setUseIncorrectOnly(false);
-                    }}
-                  >
-                    <p className="font-medium text-foreground text-sm">Bookmarked Questions</p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Test on all {bookmarks.length} bookmarked questions.{bookmarks.length !== 1 ? 's' : ''}
-                    </p>
+          <div className="flex gap-6 max-w-6xl mx-auto h-full">
+            {/* Left Column: Resume and Completed Tests */}
+            <div className="w-1/3 space-y-6 overflow-y-auto">
+              {/* In Progress Tests */}
+              {inProgressSessions.length > 0 && (
+                <div className="space-y-3">
+                  <h2 className="text-lg font-semibold text-foreground">Resume Test</h2>
+                  <div className={inProgressSessions.length > 3 ? "max-h-64 overflow-y-auto" : ""}>
+                    <TestHistory
+                      sessions={inProgressSessions}
+                      onResume={handleResumeTest}
+                      onDelete={deleteSession}
+                      maxItems={3}
+                    />
                   </div>
-                )}
+                </div>
+              )}
+              
+              {/* Completed Tests */}
+              {completedSessions.length > 0 && (
+                <div className="space-y-3">
+                  <h2 className="text-lg font-semibold text-foreground">Completed Tests</h2>
+                  <div className="max-h-96 overflow-y-auto">
+                    <TestHistory
+                      sessions={completedSessions}
+                      onReview={handleReviewTest}
+                      onDelete={deleteSession}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
 
-                {/* Incorrect Questions Option */}
-                {(() => {
-                  const incorrectIds = new Set<string>();
-                  sections.forEach(section => {
-                    section.subsections.forEach(subsection => {
-                      const ids = getGlobalIncorrectIds(section.id, subsection.id);
-                      ids.forEach(id => incorrectIds.add(id));
-                    });
-                  });
-                  return incorrectIds.size > 0 ? (
+            {/* Right Column: Test Creation */}
+            <div className="w-2/3 space-y-6 overflow-y-auto">
+              <h2 className="text-lg font-semibold text-foreground">Test Creation</h2>
+              
+              {/* Question Count */}
+              <Card className="p-4">
+                <h2 className="text-sm font-semibold mb-3">Total Questions</h2>
+                <RadioGroup value={questionCount.toString()} onValueChange={(v) => setQuestionCount(parseInt(v) as any)}>
+                  <div className="space-y-2">
+                    {[10, 20, 30, 40].map(count => (
+                      <div key={count} className="flex items-center space-x-2">
+                        <RadioGroupItem value={count.toString()} id={`count-${count}`} />
+                        <Label htmlFor={`count-${count}`} className="cursor-pointer text-sm">{count} Questions</Label>
+                      </div>
+                    ))}
+                  </div>
+                </RadioGroup>
+              </Card>
+
+              {/* Question Source */}
+              <Card className="p-4">
+                <h2 className="text-sm font-semibold mb-4">Select Questions From</h2>
+
+                <div className="space-y-3">
+                  {/* Bookmarked Option */}
+                  {bookmarks.length > 0 && (
                     <div
                       className={cn(
                         "p-3 rounded-lg border-2 cursor-pointer transition-colors",
-                        useIncorrectOnly
+                        useBookmarkedOnly
                           ? "border-primary bg-primary/10"
                           : "border-border bg-muted/30 hover:bg-muted/50"
                       )}
                       onClick={() => {
-                        setUseIncorrectOnly(true);
+                        setUseBookmarkedOnly(true);
                         setUseAllQuestions(false);
-                        setUseBookmarkedOnly(false);
+                        setUseIncorrectOnly(false);
                       }}
                     >
-                      <p className="font-medium text-foreground text-sm">Incorrect Questions</p>
+                      <p className="font-medium text-foreground text-sm">Bookmarked Questions</p>
                       <p className="text-xs text-muted-foreground mt-1">
-                        Review all {incorrectIds.size} questions you answered incorrectly.
+                        Test on all {bookmarks.length} bookmarked questions.{bookmarks.length !== 1 ? 's' : ''}
                       </p>
                     </div>
-                  ) : null;
-                })()}
-
-                {/* All Questions Option */}
-                <div
-                  className={cn(
-                    "p-3 rounded-lg border-2 cursor-pointer transition-colors",
-                    useAllQuestions && !useBookmarkedOnly && !useIncorrectOnly
-                      ? "border-primary bg-primary/10"
-                      : "border-border bg-muted/30 hover:bg-muted/50"
                   )}
-                  onClick={() => {
-                    setUseAllQuestions(true);
-                    setUseBookmarkedOnly(false);
-                    setUseIncorrectOnly(false);
-                  }}
-                >
-                  <p className="font-medium text-foreground text-sm">All Available Questions</p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Randomly select from all {availableQuestions.length} questions across all sections.
-                  </p>
-                </div>
 
-                {/* Selected Sections Option */}
-                <div
-                  className={cn(
-                    "p-3 rounded-lg border-2 cursor-pointer transition-colors",
-                    !useAllQuestions && !useBookmarkedOnly && !useIncorrectOnly
-                      ? "border-primary bg-primary/10"
-                      : "border-border bg-muted/30 hover:bg-muted/50"
-                  )}
-                  onClick={() => {
-                    setUseAllQuestions(false);
-                    setUseBookmarkedOnly(false);
-                    setUseIncorrectOnly(false);
-                  }}
-                >
-                  <p className="font-medium text-foreground text-sm">Select Sections</p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Choose specific topics to test from each section.
-                  </p>
-                </div>
-              </div>
-
-              {!useAllQuestions && !useBookmarkedOnly && !useIncorrectOnly && (
-                <div className="border border-border rounded-lg p-4 bg-muted/30 space-y-3 mt-4">
-                  {sections.map(section => (
-                    <div key={section.id}>
-                      <button
-                        onClick={() => handleToggleSection(section.id)}
-                        className="w-full flex items-center gap-2 mb-2 hover:opacity-70 transition-opacity"
-                      >
-                        {expandedSections.has(section.id) ? (
-                          <ChevronDown className="h-4 w-4 flex-shrink-0" />
-                        ) : (
-                          <ChevronRight className="h-4 w-4 flex-shrink-0" />
+                  {/* Incorrect Questions Option */}
+                  {(() => {
+                    const incorrectIds = new Set<string>();
+                    sections.forEach(section => {
+                      section.subsections.forEach(subsection => {
+                        const ids = getGlobalIncorrectIds(section.id, subsection.id);
+                        ids.forEach(id => incorrectIds.add(id));
+                      });
+                    });
+                    return incorrectIds.size > 0 ? (
+                      <div
+                        className={cn(
+                          "p-3 rounded-lg border-2 cursor-pointer transition-colors",
+                          useIncorrectOnly
+                            ? "border-primary bg-primary/10"
+                            : "border-border bg-muted/30 hover:bg-muted/50"
                         )}
-                        <Checkbox
-                          checked={section.subsections.every(ss => selectedSubsections.has(ss.id))}
-                          onCheckedChange={(checked) => {
-                            const newSelected = new Set(selectedSubsections);
-                            section.subsections.forEach(ss => {
-                              if (checked) {
-                                newSelected.add(ss.id);
-                              } else {
-                                newSelected.delete(ss.id);
-                              }
-                            });
-                            setSelectedSubsections(newSelected);
-                          }}
-                          className="flex-shrink-0"
-                        />
-                        <span className="font-medium text-sm">{section.title}</span>
-                      </button>
+                        onClick={() => {
+                          setUseIncorrectOnly(true);
+                          setUseAllQuestions(false);
+                          setUseBookmarkedOnly(false);
+                        }}
+                      >
+                        <p className="font-medium text-foreground text-sm">Incorrect Questions</p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Review all {incorrectIds.size} questions you answered incorrectly.
+                        </p>
+                      </div>
+                    ) : null;
+                  })()}
 
-                      {expandedSections.has(section.id) && (
-                        <div className="grid grid-cols-2 gap-2 ml-6">
-                          {section.subsections.map(subsection => (
-                            <div key={subsection.id} className="flex items-center gap-2">
-                              <Checkbox
-                                checked={selectedSubsections.has(subsection.id)}
-                                onCheckedChange={() => handleToggleSubsection(subsection.id)}
-                                id={`subsection-${subsection.id}`}
-                                className="flex-shrink-0"
-                              />
-                              <Label htmlFor={`subsection-${subsection.id}`} className="cursor-pointer text-xs flex-1">
-                                {subsection.title} <span className="text-muted-foreground">({subsection.questions.length})</span>
-                              </Label>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  ))}
+                  {/* All Questions Option */}
+                  <div
+                    className={cn(
+                      "p-3 rounded-lg border-2 cursor-pointer transition-colors",
+                      useAllQuestions && !useBookmarkedOnly && !useIncorrectOnly
+                        ? "border-primary bg-primary/10"
+                        : "border-border bg-muted/30 hover:bg-muted/50"
+                    )}
+                    onClick={() => {
+                      setUseAllQuestions(true);
+                      setUseBookmarkedOnly(false);
+                      setUseIncorrectOnly(false);
+                    }}
+                  >
+                    <p className="font-medium text-foreground text-sm">All Available Questions</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Randomly select from all {availableQuestions.length} questions across all sections.
+                    </p>
+                  </div>
+
+                  {/* Selected Sections Option */}
+                  <div
+                    className={cn(
+                      "p-3 rounded-lg border-2 cursor-pointer transition-colors",
+                      !useAllQuestions && !useBookmarkedOnly && !useIncorrectOnly
+                        ? "border-primary bg-primary/10"
+                        : "border-border bg-muted/30 hover:bg-muted/50"
+                    )}
+                    onClick={() => {
+                      setUseAllQuestions(false);
+                      setUseBookmarkedOnly(false);
+                      setUseIncorrectOnly(false);
+                    }}
+                  >
+                    <p className="font-medium text-foreground text-sm">Select Sections</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Choose specific topics to test from each section.
+                    </p>
+                  </div>
                 </div>
-              )}
-            </Card>
 
-            {/* Start Button */}
-            <Button
-              size="lg"
-              onClick={handleStartTest}
-              disabled={(!useAllQuestions && !useBookmarkedOnly && !useIncorrectOnly && selectedSubsections.size === 0) || availableQuestions.length === 0}
-              className="w-full"
-              data-testid="button-start-test"
-            >
-              Start Test ({Math.min(questionCount, availableQuestions.length)} Questions)
-            </Button>
+                {!useAllQuestions && !useBookmarkedOnly && !useIncorrectOnly && (
+                  <div className="border border-border rounded-lg p-4 bg-muted/30 space-y-3 mt-4">
+                    {sections.map(section => (
+                      <div key={section.id}>
+                        <button
+                          onClick={() => handleToggleSection(section.id)}
+                          className="w-full flex items-center gap-2 mb-2 hover:opacity-70 transition-opacity"
+                        >
+                          {expandedSections.has(section.id) ? (
+                            <ChevronDown className="h-4 w-4 flex-shrink-0" />
+                          ) : (
+                            <ChevronRight className="h-4 w-4 flex-shrink-0" />
+                          )}
+                          <Checkbox
+                            checked={section.subsections.every(ss => selectedSubsections.has(ss.id))}
+                            onCheckedChange={(checked) => {
+                              const newSelected = new Set(selectedSubsections);
+                              section.subsections.forEach(ss => {
+                                if (checked) {
+                                  newSelected.add(ss.id);
+                                } else {
+                                  newSelected.delete(ss.id);
+                                }
+                              });
+                              setSelectedSubsections(newSelected);
+                            }}
+                            className="flex-shrink-0"
+                          />
+                          <span className="font-medium text-sm">{section.title}</span>
+                        </button>
+
+                        {expandedSections.has(section.id) && (
+                          <div className="grid grid-cols-2 gap-2 ml-6">
+                            {section.subsections.map(subsection => (
+                              <div key={subsection.id} className="flex items-center gap-2">
+                                <Checkbox
+                                  checked={selectedSubsections.has(subsection.id)}
+                                  onCheckedChange={() => handleToggleSubsection(subsection.id)}
+                                  id={`subsection-${subsection.id}`}
+                                  className="flex-shrink-0"
+                                />
+                                <Label htmlFor={`subsection-${subsection.id}`} className="cursor-pointer text-xs flex-1">
+                                  {subsection.title} <span className="text-muted-foreground">({subsection.questions.length})</span>
+                                </Label>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </Card>
+
+              {/* Start Button */}
+              <Button
+                size="lg"
+                onClick={handleStartTest}
+                disabled={(!useAllQuestions && !useBookmarkedOnly && !useIncorrectOnly && selectedSubsections.size === 0) || availableQuestions.length === 0}
+                className="w-full"
+                data-testid="button-start-test"
+              >
+                Start Test ({Math.min(questionCount, availableQuestions.length)} Questions)
+              </Button>
+            </div>
           </div>
         </div>
       </div>
