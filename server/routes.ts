@@ -12,11 +12,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/auth/user', async (req: any, res) => {
     try {
       // Allow unauthenticated access - return null if not logged in
-      if (!req.isAuthenticated() || !req.user?.claims?.sub) {
+      const userId = req.session?.userId;
+      if (!userId) {
         return res.json(null);
       }
       
-      const userId = req.user.claims.sub;
       const user = await storage.getUser(userId);
       res.json(user);
     } catch (error) {
@@ -28,11 +28,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Update user profile
   app.patch('/api/auth/user', async (req: any, res) => {
     try {
-      if (!req.isAuthenticated() || !req.user?.claims?.sub) {
+      const userId = req.session?.userId;
+      if (!userId) {
         return res.status(401).json({ message: "Unauthorized" });
       }
       
-      const userId = req.user.claims.sub;
       const { username, firstName, lastName, institutionalAffiliation, avatarIcon } = req.body;
       
       const updatedUser = await storage.updateUserProfile(userId, {
@@ -53,11 +53,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Check subscription status
   app.get('/api/subscription', async (req: any, res) => {
     try {
-      if (!req.isAuthenticated() || !req.user?.claims?.sub) {
+      const userId = req.session?.userId;
+      if (!userId) {
         return res.json({ status: 'none', daysRemaining: 0, trialEndsAt: null, isLocked: false });
       }
       
-      const user = await storage.getUser(req.user.claims.sub);
+      const user = await storage.getUser(userId);
       if (!user) {
         return res.json({ status: 'none', daysRemaining: 0, trialEndsAt: null, isLocked: false });
       }
@@ -105,11 +106,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get user's login connections
   app.get('/api/auth/connections', async (req: any, res) => {
     try {
-      if (!req.isAuthenticated() || !req.user?.claims?.sub) {
+      const userId = req.session?.userId;
+      if (!userId) {
         return res.json([]);
       }
-      
-      const userId = req.user.claims.sub;
       const connections = await storage.getLoginConnections(userId);
       res.json(connections.map(c => c.provider));
     } catch (error) {
@@ -121,11 +121,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get user's theme preference
   app.get('/api/theme', async (req: any, res) => {
     try {
-      if (!req.isAuthenticated() || !req.user?.claims?.sub) {
+      const userId = req.session?.userId;
+      if (!userId) {
         return res.json({ theme: 'light' });
       }
-      
-      const userId = req.user.claims.sub;
       const theme = await storage.getThemePreference(userId);
       res.json({ theme });
     } catch (error) {
@@ -137,11 +136,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Update user's theme preference
   app.post('/api/theme', async (req: any, res) => {
     try {
-      if (!req.isAuthenticated() || !req.user?.claims?.sub) {
+      const userId = req.session?.userId;
+      if (!userId) {
         return res.status(401).json({ message: "Unauthorized" });
       }
-      
-      const userId = req.user.claims.sub;
       const { theme } = req.body;
       
       if (!theme || (theme !== 'light' && theme !== 'dark')) {
@@ -159,11 +157,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Add login connection
   app.post('/api/auth/connections/:provider', async (req: any, res) => {
     try {
-      if (!req.isAuthenticated() || !req.user?.claims?.sub) {
+      const userId = req.session?.userId;
+      if (!userId) {
         return res.status(401).json({ message: "Unauthorized" });
       }
-      
-      const userId = req.user.claims.sub;
       const { provider } = req.params;
       
       await storage.addLoginConnection(userId, provider);
@@ -177,11 +174,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Remove login connection
   app.delete('/api/auth/connections/:provider', async (req: any, res) => {
     try {
-      if (!req.isAuthenticated() || !req.user?.claims?.sub) {
+      const userId = req.session?.userId;
+      if (!userId) {
         return res.status(401).json({ message: "Unauthorized" });
       }
-      
-      const userId = req.user.claims.sub;
       const { provider } = req.params;
       
       const connections = await storage.getLoginConnections(userId);
@@ -200,7 +196,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Test Session routes (all protected)
   app.get('/api/test-sessions', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.session?.userId;
       const sessions = await storage.getUserTestSessions(userId);
       res.json(sessions);
     } catch (error) {
@@ -211,7 +207,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/test-sessions/in-progress', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.session?.userId;
       const sessions = await storage.getInProgressSessions(userId);
       res.json(sessions);
     } catch (error) {
@@ -222,7 +218,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/test-sessions/:id', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.session?.userId;
       const session = await storage.getTestSession(req.params.id);
       
       if (!session) {
@@ -242,7 +238,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/test-sessions', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.session?.userId;
       
       // Validate request body
       const validationResult = insertTestSessionSchema.safeParse(req.body);
@@ -268,7 +264,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.patch('/api/test-sessions/:id', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.session?.userId;
       const session = await storage.getTestSession(req.params.id);
       
       if (!session) {
@@ -298,7 +294,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/test-sessions/:id/complete', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.session?.userId;
       const session = await storage.getTestSession(req.params.id);
       
       if (!session) {
@@ -319,7 +315,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete('/api/test-sessions/:id', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.session?.userId;
       const session = await storage.getTestSession(req.params.id);
       
       if (!session) {
@@ -341,7 +337,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Question Response routes (all protected)
   app.post('/api/question-responses', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.session?.userId;
       
       // Validate request body
       const validationResult = insertQuestionResponseSchema.safeParse(req.body);
@@ -370,7 +366,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/test-sessions/:id/responses', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.session?.userId;
       const session = await storage.getTestSession(req.params.id);
       
       if (!session) {
@@ -392,7 +388,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Notes endpoints
   app.get('/api/notes', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.session?.userId;
       const { sectionId, subsectionId } = req.query;
       const userNotes = await storage.getUserNotes(userId, sectionId as string, subsectionId as string);
       res.json(userNotes);
@@ -404,7 +400,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/notes', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.session?.userId;
       const { content, sectionId, subsectionId, location, questionId, positionX, positionY } = req.body;
       
       const note = await storage.createNote({
@@ -427,7 +423,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.patch('/api/notes/:id', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.session?.userId;
       const noteId = req.params.id;
       const { content, positionX, positionY } = req.body;
       
@@ -454,7 +450,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete('/api/notes/:id', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.session?.userId;
       const noteId = req.params.id;
       
       // Verify note belongs to user
@@ -476,7 +472,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Bookmarks routes
   app.get('/api/bookmarks', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.session?.userId;
       const bookmarks = await storage.getUserBookmarks(userId);
       // Disable caching for bookmarks to ensure fresh data is always returned
       res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
@@ -489,7 +485,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/bookmarks', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.session?.userId;
       const { questionId, sectionId, subsectionId } = req.body;
       
       if (!questionId || !sectionId || !subsectionId) {
@@ -512,7 +508,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete('/api/bookmarks/:questionId', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.session?.userId;
       const questionId = req.params.questionId;
       
       await storage.removeBookmark(userId, questionId);
@@ -525,7 +521,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/bookmarks/check/:questionId', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.session?.userId;
       const questionId = req.params.questionId;
       
       const isBookmarked = await storage.isQuestionBookmarked(userId, questionId);
@@ -539,7 +535,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Spaced Repetition routes
   app.get('/api/spaced-repetition/due', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.session?.userId;
       const dueQuestions = await storage.getUserDueQuestions(userId);
       res.json(dueQuestions);
     } catch (error) {
@@ -550,7 +546,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/spaced-repetition/update', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.session?.userId;
       const { questionId, sectionId, subsectionId, quality: rawQuality } = req.body;
 
       if (!questionId || rawQuality === undefined) {
@@ -609,7 +605,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/spaced-repetition/:questionId', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.session?.userId;
       const questionId = req.params.questionId;
       
       const sr = await storage.getSpacedRepetition(userId, questionId);
@@ -623,7 +619,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Topic Analytics routes
   app.get('/api/analytics/topics', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.session?.userId;
       const sectionId = req.query.sectionId as string | undefined;
       
       const topicStats = await storage.getTopicStats(userId, sectionId);
@@ -649,7 +645,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get subscription details
   app.get('/api/subscription/details', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.session?.userId;
       const user = await storage.getUser(userId);
       const activeSubscription = await storage.getUserActiveSubscription(userId);
       const transactions = await storage.getUserSubscriptionTransactions(userId);
@@ -677,7 +673,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Change subscription plan
   app.post('/api/subscription/change', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.session?.userId;
       const { planId } = req.body;
 
       if (!planId) {
@@ -720,7 +716,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Cancel subscription
   app.post('/api/subscription/cancel', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.session?.userId;
       await storage.cancelUserSubscription(userId);
       res.json({ message: "Subscription canceled successfully" });
     } catch (error) {

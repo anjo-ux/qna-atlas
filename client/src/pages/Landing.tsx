@@ -3,7 +3,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Check, Eye } from "lucide-react";
 import { useState } from "react";
 import { PreviewWizard } from "@/components/PreviewWizard";
-import { ThemeToggle } from "@/components/ThemeToggle";
 import atlasLogo from "@assets/atlas_1764093111680.png";
 
 function handleLogin() {
@@ -30,12 +29,9 @@ export default function Landing() {
             <img src={atlasLogo} alt="Plastic Surgery Atlas" className="w-8 h-8 object-contain" />
             <h1 className="text-xl font-bold gradient-text">Atlas Review</h1>
           </div>
-          <div className="flex items-center gap-2">
-            <ThemeToggle />
-            <Button onClick={handleLogin} data-testid="button-login" className="glow-primary transition-glow">
-              Sign In
-            </Button>
-          </div>
+          <Button onClick={handleLogin} data-testid="button-login" className="glow-primary transition-glow">
+            Sign In
+          </Button>
         </div>
       </header>
 
