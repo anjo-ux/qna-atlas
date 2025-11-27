@@ -574,7 +574,7 @@ export default function Index() {
         )}
 
         {/* Main Content Area */}
-        <main className="flex-1 flex overflow-hidden flex-col">
+        <main className="flex-1 flex overflow-auto flex-col">
           {isLoading ? (
             <div className="flex-1 flex items-center justify-center min-h-[400px]">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
