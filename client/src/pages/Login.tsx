@@ -131,6 +131,41 @@ export default function Login() {
 
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
+              {isSignUp && (
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-2">
+                    <label htmlFor="firstName" className="text-sm font-medium">
+                      First Name
+                    </label>
+                    <Input
+                      id="firstName"
+                      type="text"
+                      placeholder="First"
+                      value={firstName}
+                      onChange={(e) => setFirstName(e.target.value)}
+                      disabled={isLoading}
+                      required
+                      data-testid="input-first-name"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label htmlFor="lastName" className="text-sm font-medium">
+                      Last Name
+                    </label>
+                    <Input
+                      id="lastName"
+                      type="text"
+                      placeholder="Last"
+                      value={lastName}
+                      onChange={(e) => setLastName(e.target.value)}
+                      disabled={isLoading}
+                      required
+                      data-testid="input-last-name"
+                    />
+                  </div>
+                </div>
+              )}
+
               <div className="space-y-2">
                 <label htmlFor="email" className="text-sm font-medium">
                   Email
@@ -165,38 +200,6 @@ export default function Login() {
 
               {isSignUp && (
                 <>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-2">
-                      <label htmlFor="firstName" className="text-sm font-medium">
-                        First Name
-                      </label>
-                      <Input
-                        id="firstName"
-                        type="text"
-                        placeholder="First"
-                        value={firstName}
-                        onChange={(e) => setFirstName(e.target.value)}
-                        disabled={isLoading}
-                        required
-                        data-testid="input-first-name"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label htmlFor="lastName" className="text-sm font-medium">
-                        Last Name
-                      </label>
-                      <Input
-                        id="lastName"
-                        type="text"
-                        placeholder="Last"
-                        value={lastName}
-                        onChange={(e) => setLastName(e.target.value)}
-                        disabled={isLoading}
-                        required
-                        data-testid="input-last-name"
-                      />
-                    </div>
-                  </div>
 
                   <div className="space-y-2">
                     <label htmlFor="confirmPassword" className="text-sm font-medium">
