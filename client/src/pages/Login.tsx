@@ -1,4 +1,5 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
+import { useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -22,10 +23,11 @@ import { cn } from '@/lib/utils';
 import { getUniversityOptions } from '@/data/universities';
 
 export default function Login() {
+  const [location] = useLocation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [isSignUp, setIsSignUp] = useState(false);
+  const [isSignUp, setIsSignUp] = useState(location === '/signup');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isDark, setIsDark] = useState(false);
   const [firstName, setFirstName] = useState('');

@@ -33,6 +33,7 @@ function Router() {
     <Switch>
       <Route path="/preview" component={PreviewMode} />
       <Route path="/login" component={Login} />
+      <Route path="/signup" component={Login} />
       {!isAuthenticated ? (
         <Route component={Landing} />
       ) : (
