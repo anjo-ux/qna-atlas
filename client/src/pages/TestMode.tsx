@@ -513,8 +513,8 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
           </div>
         </div>
 
-        <div className="flex-1 overflow-hidden p-6">
-          <div className="flex flex-col lg:flex-row gap-6 max-w-6xl mx-auto h-full">
+        <div className="flex-1 overflow-auto p-6">
+          <div className="flex flex-col lg:flex-row gap-6 max-w-6xl mx-auto">
             {/* Left Column: Resume and Completed Tests */}
             <div className="w-full lg:w-1/3 overflow-y-auto order-2 lg:order-1">
               <div className="space-y-6">
