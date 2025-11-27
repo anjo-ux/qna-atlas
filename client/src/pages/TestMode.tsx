@@ -354,6 +354,19 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
       window.location.href = '/api/auth';
       return;
     }
+    
+    // Sync all test responses to the general question pool (overwrites existing answers)
+    Object.values(responses).forEach(response => {
+      recordResponse({
+        questionId: response.questionId,
+        sectionId: response.sectionId,
+        subsectionId: response.subsectionId,
+        selectedAnswer: response.selectedAnswer,
+        correctAnswer: response.correctAnswer,
+        isCorrect: response.isCorrect,
+      });
+    });
+    
     if (currentSession) {
       completeSession(currentSession.id);
     }
