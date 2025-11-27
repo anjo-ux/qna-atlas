@@ -528,24 +528,66 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
                 <h2 className="text-lg font-semibold text-foreground">Test Creation</h2>
                 
                 {/* Question Count */}
-                <Card className="p-4">
-                  <div className="flex items-center gap-3">
-                    <Label htmlFor="question-count" className="text-sm font-semibold whitespace-nowrap">Total Questions</Label>
-                    <Input
-                      id="question-count"
-                      type="number"
-                      min="1"
-                      max="40"
-                      value={questionCount}
-                      onChange={(e) => {
-                        const value = Math.min(40, Math.max(1, parseInt(e.target.value) || 1));
-                        setQuestionCount(value);
-                      }}
-                      placeholder="Enter number (max 40)"
-                      className="w-24"
-                    />
-                  </div>
-                </Card>
+                {(() => {
+                  let maxQuestions = 40;
+                  let errorMessage = '';
+
+                  // Calculate max based on selected source
+                  if (useBookmarkedOnly) {
+                    maxQuestions = bookmarks.length;
+                  } else if (useIncorrectOnly) {
+                    const incorrectIds = new Set<string>();
+                    sections.forEach(section => {
+                      section.subsections.forEach(subsection => {
+                        const ids = getGlobalIncorrectIds(section.id, subsection.id);
+                        ids.forEach(id => incorrectIds.add(id));
+                      });
+                    });
+                    maxQuestions = incorrectIds.size;
+                  } else if (!useAllQuestions) {
+                    // Selected sections
+                    maxQuestions = availableQuestions.length;
+                  }
+
+                  // Determine error state
+                  const hasError = questionCount > maxQuestions;
+                  if (hasError) {
+                    if (useBookmarkedOnly) {
+                      errorMessage = `Max ${maxQuestions} Bookmarked`;
+                    } else if (useIncorrectOnly) {
+                      errorMessage = `Max ${maxQuestions} Incorrect`;
+                    } else {
+                      errorMessage = 'Max 40 Questions';
+                    }
+                  }
+
+                  return (
+                    <Card className="p-4">
+                      <div className="flex items-center gap-3">
+                        <Label htmlFor="question-count" className="text-sm font-semibold whitespace-nowrap">Total Questions</Label>
+                        <div className="flex items-center gap-2">
+                          <Input
+                            id="question-count"
+                            type="number"
+                            min="1"
+                            value={questionCount}
+                            onChange={(e) => {
+                              const value = Math.max(1, parseInt(e.target.value) || 1);
+                              setQuestionCount(value);
+                            }}
+                            placeholder="Enter number"
+                            className={cn("w-24", hasError && "border-destructive bg-destructive/10")}
+                          />
+                          {hasError && (
+                            <span className="text-xs text-destructive whitespace-nowrap font-medium">
+                              {errorMessage}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </Card>
+                  );
+                })()}
 
               {/* Question Source */}
               <Card className="p-4">
