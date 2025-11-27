@@ -423,7 +423,7 @@ export default function Index() {
               </Button>
 
               {/* View Mode Toggle */}
-              <div className="hidden lg:flex items-center gap-2 bg-accent/5 rounded-lg p-1 w-fit shrink-0">
+              <div className="hidden sm:flex items-center gap-2 bg-accent/5 rounded-lg p-1 w-fit shrink-0">
                 <Button
                   variant={viewMode === 'reference' ? 'default' : 'ghost'}
                   size="sm"
