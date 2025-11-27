@@ -344,7 +344,7 @@ export default function Index() {
       />
 
       {/* Header - Full Width */}
-      <header className="glass-surface border-glass w-full">
+      <header className="glass-surface border-glass w-full sticky top-0 z-50">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-3 pb-2">
             {/* Top Row: Home, Title, Actions */}
             <div className="flex items-center gap-4 flex-wrap justify-start">
