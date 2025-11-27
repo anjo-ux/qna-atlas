@@ -10,7 +10,7 @@ import { QuestionCard } from '@/components/QuestionCard';
 import { TestHistory } from '@/components/TestHistory';
 import { TestModeWizard } from '@/components/TestModeWizard';
 import { DetailedTestResults } from '@/components/DetailedTestResults';
-import { ArrowLeft, ChevronDown, ChevronUp, ChevronRight, ChevronLeft, ChevronRight as ChevronRightIcon, Check, X, Circle, Maximize2, Minimize2 } from 'lucide-react';
+import { ArrowLeft, ChevronDown, ChevronUp, ChevronRight, ChevronLeft, ChevronRight as ChevronRightIcon, Check, X, Circle, Maximize2, Minimize2, ChevronDown as ChevronDownIcon } from 'lucide-react';
 import { useQuestionStats, QuestionResponse } from '@/hooks/useQuestionStats';
 import { useTestSessions, TestSession } from '@/hooks/useTestSessions';
 import { useBookmarks } from '@/hooks/useBookmarks';
@@ -47,8 +47,10 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
   const [showQuestionPanel, setShowQuestionPanel] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isReviewMode, setIsReviewMode] = useState(false);
-  const [resumeTestsToShow, setResumeTestsToShow] = useState(5);
+  const [resumeTestsToShow, setResumeTestsToShow] = useState(2);
   const [completedTestsToShow, setCompletedTestsToShow] = useState(5);
+  const [expandedResumeTests, setExpandedResumeTests] = useState(true);
+  const [expandedCompletedTests, setExpandedCompletedTests] = useState(true);
   const hasResumedRef = useRef(false);
 
   const { recordResponse, getIncorrectQuestionIds: getGlobalIncorrectIds } = useQuestionStats();
@@ -449,21 +451,35 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
                 {/* In Progress Tests */}
                 {inProgressSessions.length > 0 && (
                   <div className="space-y-3">
-                    <h2 className="text-lg font-semibold text-foreground">Resume Test</h2>
-                    <TestHistory
-                      sessions={inProgressSessions.slice(0, resumeTestsToShow)}
-                      onResume={handleResumeTest}
-                      onDelete={deleteSession}
-                      startIndex={1}
-                    />
-                    {inProgressSessions.length > resumeTestsToShow && (
-                      <Button
-                        variant="outline"
-                        onClick={() => setResumeTestsToShow(prev => prev + 5)}
-                        className="w-full"
-                      >
-                        Load More Tests
-                      </Button>
+                    <button
+                      onClick={() => setExpandedResumeTests(!expandedResumeTests)}
+                      className="w-full flex items-center gap-2 hover:opacity-70 transition-opacity"
+                    >
+                      {expandedResumeTests ? (
+                        <ChevronDown className="h-4 w-4 flex-shrink-0" />
+                      ) : (
+                        <ChevronRight className="h-4 w-4 flex-shrink-0" />
+                      )}
+                      <h2 className="text-lg font-semibold text-foreground">Resume Test</h2>
+                    </button>
+                    {expandedResumeTests && (
+                      <>
+                        <TestHistory
+                          sessions={inProgressSessions.slice(0, resumeTestsToShow)}
+                          onResume={handleResumeTest}
+                          onDelete={deleteSession}
+                          startIndex={1}
+                        />
+                        {inProgressSessions.length > resumeTestsToShow && (
+                          <Button
+                            variant="outline"
+                            onClick={() => setResumeTestsToShow(prev => prev + 2)}
+                            className="w-full"
+                          >
+                            Load More Tests
+                          </Button>
+                        )}
+                      </>
                     )}
                   </div>
                 )}
@@ -471,21 +487,35 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
                 {/* Completed Tests */}
                 {completedSessions.length > 0 && (
                   <div className="space-y-3">
-                    <h2 className="text-lg font-semibold text-foreground">Completed Tests</h2>
-                    <TestHistory
-                      sessions={completedSessions.slice(0, completedTestsToShow)}
-                      onReview={handleReviewTest}
-                      onDelete={deleteSession}
-                      startIndex={1}
-                    />
-                    {completedSessions.length > completedTestsToShow && (
-                      <Button
-                        variant="outline"
-                        onClick={() => setCompletedTestsToShow(prev => prev + 5)}
-                        className="w-full"
-                      >
-                        Load More Tests
-                      </Button>
+                    <button
+                      onClick={() => setExpandedCompletedTests(!expandedCompletedTests)}
+                      className="w-full flex items-center gap-2 hover:opacity-70 transition-opacity"
+                    >
+                      {expandedCompletedTests ? (
+                        <ChevronDown className="h-4 w-4 flex-shrink-0" />
+                      ) : (
+                        <ChevronRight className="h-4 w-4 flex-shrink-0" />
+                      )}
+                      <h2 className="text-lg font-semibold text-foreground">Completed Tests</h2>
+                    </button>
+                    {expandedCompletedTests && (
+                      <>
+                        <TestHistory
+                          sessions={completedSessions.slice(0, completedTestsToShow)}
+                          onReview={handleReviewTest}
+                          onDelete={deleteSession}
+                          startIndex={1}
+                        />
+                        {completedSessions.length > completedTestsToShow && (
+                          <Button
+                            variant="outline"
+                            onClick={() => setCompletedTestsToShow(prev => prev + 5)}
+                            className="w-full"
+                          >
+                            Load More Tests
+                          </Button>
+                        )}
+                      </>
                     )}
                   </div>
                 )}
