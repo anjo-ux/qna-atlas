@@ -11,6 +11,7 @@ import Index from "./pages/Index";
 import PreviewMode from "./pages/PreviewMode";
 import NotFound from "./pages/NotFound";
 import Landing from "./pages/Landing";
+import Login from "./pages/Login";
 import { BookmarksPage } from "./pages/Bookmarks";
 import { SpacedRepetitionPage } from "./pages/SpacedRepetition";
 
@@ -31,6 +32,7 @@ function Router() {
   return (
     <Switch>
       <Route path="/preview" component={PreviewMode} />
+      <Route path="/login" component={Login} />
       {!isAuthenticated ? (
         <Route component={Landing} />
       ) : (

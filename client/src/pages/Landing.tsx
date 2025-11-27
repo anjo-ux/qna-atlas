@@ -7,7 +7,7 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import atlasLogo from "@assets/atlas_1764093111680.png";
 
 function handleLogin() {
-  window.location.href = '/api/login';
+  window.location.href = '/login';
 }
 
 export default function Landing() {
