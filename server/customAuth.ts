@@ -86,10 +86,10 @@ export async function setupAuth(app: Express) {
   // Register route
   app.post('/api/auth/register', async (req, res) => {
     try {
-      const { email, password, confirmPassword, institutionalAffiliation } = req.body;
+      const { email, password, confirmPassword, firstName, lastName, institutionalAffiliation } = req.body;
 
       // Validation
-      if (!email || !password || !confirmPassword) {
+      if (!email || !password || !confirmPassword || !firstName || !lastName) {
         return res.status(400).json({ message: 'All fields required.' });
       }
 
@@ -123,6 +123,8 @@ export async function setupAuth(app: Express) {
       const newUser = await storage.upsertUser({
         email,
         passwordHash,
+        firstName,
+        lastName,
         institutionalAffiliation: institutionalAffiliation || '',
         subscriptionStatus: 'trial',
         trialEndsAt,
