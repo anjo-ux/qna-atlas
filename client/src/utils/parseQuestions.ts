@@ -97,17 +97,25 @@ function categorizeQuestion(category: string, subcategory: string): { section: s
   return { section: 'comprehensive', subsection: 'anatomy' };
 }
 
+function decodeHtmlEntities(text: string): string {
+  const textarea = document.createElement('textarea');
+  textarea.innerHTML = text;
+  return textarea.value;
+}
+
 function stripHtml(html: string): string {
-  return html
-    .replace(/<div>/g, '\n')
-    .replace(/<\/div>/g, '')
-    .replace(/<br\s*\/?>/g, '\n')
-    .replace(/<span[^>]*>/g, '')
-    .replace(/<\/span>/g, '')
-    .replace(/&nbsp;/g, ' ')
-    .replace(/<[^>]+>/g, '')
-    .replace(/\\/g, '')
-    .trim();
+  return decodeHtmlEntities(
+    html
+      .replace(/<div>/g, '\n')
+      .replace(/<\/div>/g, '')
+      .replace(/<br\s*\/?>/g, '\n')
+      .replace(/<span[^>]*>/g, '')
+      .replace(/<\/span>/g, '')
+      .replace(/&nbsp;/g, ' ')
+      .replace(/<[^>]+>/g, '')
+      .replace(/\\/g, '')
+      .trim()
+  );
 }
 
 export async function loadQuestions(): Promise<Section[]> {
