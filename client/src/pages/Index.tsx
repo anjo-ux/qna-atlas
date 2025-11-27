@@ -337,15 +337,29 @@ export default function Index() {
       />
 
       {/* Sidebar Toggle Button */}
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={() => setIsNavOpen(!isNavOpen)}
-        className="flex-shrink-0 rounded-none border-r border-border h-full"
-        data-testid="button-toggle-nav"
-      >
-        {isNavOpen ? <ChevronLeft className="h-5 w-5" /> : <ChevronRight className="h-5 w-5" />}
-      </Button>
+      <div className="flex-shrink-0 rounded-none border-r border-border h-full flex items-center justify-center relative">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => setIsNavOpen(!isNavOpen)}
+          className="flex-shrink-0 rounded-none"
+          data-testid="button-toggle-nav"
+        >
+          {isNavOpen ? <ChevronLeft className="h-5 w-5" /> : <ChevronRight className="h-5 w-5" />}
+        </Button>
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <span 
+            className="text-xs font-semibold text-muted-foreground whitespace-nowrap"
+            style={{
+              writingMode: 'vertical-rl',
+              transform: 'rotate(180deg)',
+              letterSpacing: '0.05em'
+            }}
+          >
+            All Content
+          </span>
+        </div>
+      </div>
 
       {/* Navigation Sidebar - Collapsible (hidden on mobile layout) */}
       {isNavOpen && !isMobileLayout && (
