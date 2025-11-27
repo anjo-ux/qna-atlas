@@ -116,6 +116,7 @@ export async function setupAuth(app: Express) {
       const newUser = await storage.upsertUser({
         email,
         passwordHash,
+        institutionalAffiliation: institutionalAffiliation || '',
         subscriptionStatus: 'trial',
         trialEndsAt,
       });

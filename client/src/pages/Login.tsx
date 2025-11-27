@@ -91,10 +91,14 @@ export default function Login() {
       {/* Header */}
       <header className="sticky top-0 z-50 glass-surface border-glass border-b">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
+          <button 
+            onClick={() => window.location.href = '/'} 
+            className="flex items-center gap-3 hover-elevate rounded-md p-1"
+            data-testid="button-home"
+          >
             <img src={atlasLogo} alt="Atlas Logo" className="w-8 h-8 object-contain" />
             <h1 className="text-xl font-bold gradient-text">Atlas Review</h1>
-          </div>
+          </button>
           <button onClick={toggleTheme} className="p-2 hover-elevate rounded-md" data-testid="button-theme-toggle">
             {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
           </button>
