@@ -615,8 +615,8 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
                     });
                     maxQuestions = incorrectIds.size;
                   } else if (!useAllQuestions && selectedSubsections.size > 0) {
-                    // Selected sections - only apply limit if sections are actually selected
-                    maxQuestions = availableQuestions.length;
+                    // Selected sections - only apply limit if sections are actually selected, with 40 question max
+                    maxQuestions = Math.min(40, availableQuestions.length);
                   }
 
                   // Determine error state
@@ -676,7 +676,7 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
                   });
                   maxQuestions = incorrectIds.size;
                 } else if (!useAllQuestions && selectedSubsections.size > 0) {
-                  maxQuestions = availableQuestions.length;
+                  maxQuestions = Math.min(40, availableQuestions.length);
                 }
 
                 hasError = questionCount > maxQuestions && (!(!useAllQuestions && selectedSubsections.size === 0));
