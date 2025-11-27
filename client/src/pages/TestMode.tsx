@@ -68,6 +68,12 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
     return { sectionId: '', subsectionId: '' };
   };
 
+  // Helper function to get count of unanswered questions in a subsection
+  const getUnansweredCountForSubsection = (subsection: Subsection): number => {
+    const answeredIds = new Set(globalResponses.map(r => r.questionId));
+    return subsection.questions.filter(q => !answeredIds.has(q.id)).length;
+  };
+
   // For preview mode, use provided questions directly, skip setup
   useEffect(() => {
     if (isPreview && previewQuestions && previewQuestions.length > 0 && testState === 'setup') {
@@ -790,7 +796,7 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
                                         className="flex-shrink-0"
                                       />
                                       <Label htmlFor={`subsection-${subsection.id}`} className="cursor-pointer text-xs flex-1">
-                                        {subsection.title} <span className="text-muted-foreground">({subsection.questions.length})</span>
+                                        {subsection.title} <span className="text-muted-foreground">({getUnansweredCountForSubsection(subsection)})</span>
                                       </Label>
                                     </div>
                                   ))}
