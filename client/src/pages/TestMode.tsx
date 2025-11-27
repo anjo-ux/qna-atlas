@@ -53,7 +53,7 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
   const [expandedCompletedTests, setExpandedCompletedTests] = useState(true);
   const hasResumedRef = useRef(false);
 
-  const { recordResponse, getIncorrectQuestionIds: getGlobalIncorrectIds } = useQuestionStats();
+  const { recordResponse, getIncorrectQuestionIds: getGlobalIncorrectIds, responses: globalResponses } = useQuestionStats();
   const { createSession, updateSession, completeSession, getInProgressSessions, getCompletedSessions, deleteSession, sessions } = useTestSessions();
   const { bookmarks } = useBookmarks();
   const { isAuthenticated } = useAuth();
@@ -142,16 +142,16 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
         });
       });
     } else if (useAllQuestions) {
-      // Get all questions but filter out answered ones
-      const answeredIds = new Set(Object.keys(responses));
+      // Get all questions but filter out answered ones from global dashboard
+      const answeredIds = new Set(globalResponses.map(r => r.questionId));
       sections.forEach(section => {
         section.subsections.forEach(subsection => {
           questions.push(...subsection.questions.filter(q => !answeredIds.has(q.id)));
         });
       });
     } else {
-      // Get selected sections but filter out answered ones
-      const answeredIds = new Set(Object.keys(responses));
+      // Get selected sections but filter out answered ones from global dashboard
+      const answeredIds = new Set(globalResponses.map(r => r.questionId));
       sections.forEach(section => {
         section.subsections.forEach(subsection => {
           if (selectedSubsections.has(subsection.id)) {
@@ -162,7 +162,7 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
     }
     
     return questions;
-  }, [sections, selectedSubsections, useAllQuestions, useBookmarkedOnly, useIncorrectOnly, bookmarks, getGlobalIncorrectIds, isPreview, previewQuestions, responses]);
+  }, [sections, selectedSubsections, useAllQuestions, useBookmarkedOnly, useIncorrectOnly, bookmarks, getGlobalIncorrectIds, isPreview, previewQuestions, globalResponses]);
 
   const handleStartTest = async () => {
     if (availableQuestions.length === 0) {
