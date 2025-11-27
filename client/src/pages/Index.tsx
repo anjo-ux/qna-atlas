@@ -352,7 +352,10 @@ export default function Index() {
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={handleGoHome}
+                onClick={(e) => {
+                  handleGoHome();
+                  (e.currentTarget as HTMLButtonElement).blur();
+                }}
                 className="hover:bg-primary/10 flex-shrink-0"
                 title="Go to Dashboard"
               >
