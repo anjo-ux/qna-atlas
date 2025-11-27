@@ -34,6 +34,7 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
   const [useAllQuestions, setUseAllQuestions] = useState(true);
   const [useBookmarkedOnly, setUseBookmarkedOnly] = useState(false);
   const [useIncorrectOnly, setUseIncorrectOnly] = useState(false);
+  const [showAllAnsweredQuestions, setShowAllAnsweredQuestions] = useState(false);
   const [expandedSections, setExpandedSections] = useState<Set<string>>(
     new Set(sections.map(s => s.id))
   );
@@ -135,6 +136,20 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
     return count;
   }, [sections, globalResponses, isPreview, previewQuestions]);
 
+  // Calculate count of all questions regardless of answered state
+  const allQuestionsCount = useMemo(() => {
+    if (isPreview && previewQuestions && previewQuestions.length > 0) {
+      return previewQuestions.length;
+    }
+    let count = 0;
+    sections.forEach(section => {
+      section.subsections.forEach(subsection => {
+        count += subsection.questions.length;
+      });
+    });
+    return count;
+  }, [sections, isPreview, previewQuestions]);
+
   // Get all available questions based on selection
   const availableQuestions = useMemo(() => {
     // If in preview mode, use preview questions
@@ -167,13 +182,23 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
         });
       });
     } else if (useAllQuestions) {
-      // Get all questions but filter out answered ones from global dashboard
-      const answeredIds = new Set(globalResponses.map(r => r.questionId));
-      sections.forEach(section => {
-        section.subsections.forEach(subsection => {
-          questions.push(...subsection.questions.filter(q => !answeredIds.has(q.id)));
+      // Get all questions, optionally filtered by answered state
+      if (showAllAnsweredQuestions) {
+        // Include all questions regardless of answered state
+        sections.forEach(section => {
+          section.subsections.forEach(subsection => {
+            questions.push(...subsection.questions);
+          });
         });
-      });
+      } else {
+        // Filter out answered ones from global dashboard (default)
+        const answeredIds = new Set(globalResponses.map(r => r.questionId));
+        sections.forEach(section => {
+          section.subsections.forEach(subsection => {
+            questions.push(...subsection.questions.filter(q => !answeredIds.has(q.id)));
+          });
+        });
+      }
     } else {
       // Get selected sections but filter out answered ones from global dashboard
       const answeredIds = new Set(globalResponses.map(r => r.questionId));
@@ -187,7 +212,7 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
     }
     
     return questions;
-  }, [sections, selectedSubsections, useAllQuestions, useBookmarkedOnly, useIncorrectOnly, bookmarks, getGlobalIncorrectIds, isPreview, previewQuestions, globalResponses]);
+  }, [sections, selectedSubsections, useAllQuestions, useBookmarkedOnly, useIncorrectOnly, bookmarks, getGlobalIncorrectIds, isPreview, previewQuestions, globalResponses, showAllAnsweredQuestions]);
 
   const handleStartTest = async () => {
     if (availableQuestions.length === 0) {
@@ -727,9 +752,23 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
                             setUseIncorrectOnly(false);
                           }}
                         >
-                          <p className="font-medium text-foreground text-sm">All Available Questions</p>
-                          <p className="text-xs text-muted-foreground mt-1">
-                            Randomly select from all {allUnansweredCount} questions across all sections.
+                          <div className="flex items-center justify-between mb-2">
+                            <p className="font-medium text-foreground text-sm">All Available Questions</p>
+                            {useAllQuestions && !useBookmarkedOnly && !useIncorrectOnly && (
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs text-muted-foreground">
+                                  {showAllAnsweredQuestions ? "All" : "Unanswered"}
+                                </span>
+                                <Switch
+                                  checked={showAllAnsweredQuestions}
+                                  onCheckedChange={setShowAllAnsweredQuestions}
+                                  onClick={(e) => e.stopPropagation()}
+                                />
+                              </div>
+                            )}
+                          </div>
+                          <p className="text-xs text-muted-foreground">
+                            Randomly select from all {showAllAnsweredQuestions ? allQuestionsCount : allUnansweredCount} questions across all sections.
                           </p>
                         </div>
 
