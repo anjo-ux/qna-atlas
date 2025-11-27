@@ -492,9 +492,10 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
 
             {/* Right Column: Test Creation */}
             <div className="w-2/3 overflow-y-auto pr-6">
-              <h2 className="text-lg font-semibold text-foreground">Test Creation</h2>
-              
-              {/* Question Count */}
+              <div className="space-y-6">
+                <h2 className="text-lg font-semibold text-foreground">Test Creation</h2>
+                
+                {/* Question Count */}
               <Card className="p-4">
                 <h2 className="text-sm font-semibold mb-3">Total Questions</h2>
                 <RadioGroup value={questionCount.toString()} onValueChange={(v) => setQuestionCount(parseInt(v) as any)}>
@@ -662,16 +663,17 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
                 )}
               </Card>
 
-              {/* Start Button */}
-              <Button
-                size="lg"
-                onClick={handleStartTest}
-                disabled={(!useAllQuestions && !useBookmarkedOnly && !useIncorrectOnly && selectedSubsections.size === 0) || availableQuestions.length === 0}
-                className="w-full"
-                data-testid="button-start-test"
-              >
-                Start Test ({Math.min(questionCount, availableQuestions.length)} Questions)
-              </Button>
+                {/* Start Button */}
+                <Button
+                  size="lg"
+                  onClick={handleStartTest}
+                  disabled={(!useAllQuestions && !useBookmarkedOnly && !useIncorrectOnly && selectedSubsections.size === 0) || availableQuestions.length === 0}
+                  className="w-full"
+                  data-testid="button-start-test"
+                >
+                  Start Test ({Math.min(questionCount, availableQuestions.length)} Questions)
+                </Button>
+              </div>
             </div>
           </div>
         </div>
