@@ -326,7 +326,7 @@ export default function Index() {
   }
 
   return (
-    <div className="flex h-screen overflow-hidden">
+    <div className="flex flex-col h-screen overflow-hidden">
       <PreviewWizard
         open={showPreviewWizard}
         onClose={() => setShowPreviewWizard(false)}
@@ -336,69 +336,8 @@ export default function Index() {
         }}
       />
 
-      {/* Sidebar Toggle Button */}
-      <button
-        onClick={() => setIsNavOpen(!isNavOpen)}
-        className="flex-shrink-0 rounded-none border-r border-border h-full flex flex-col items-center justify-center gap-0.5 px-1.5 hover:bg-accent/50 transition-colors"
-        data-testid="button-toggle-nav"
-      >
-        {isNavOpen ? (
-          <ChevronDown className="h-4 w-4 text-muted-foreground flex-shrink-0 font-bold" style={{ transform: 'rotate(90deg)', strokeWidth: 3 }} />
-        ) : (
-          <ChevronUp className="h-4 w-4 text-muted-foreground flex-shrink-0 font-bold" style={{ transform: 'rotate(-90deg)', strokeWidth: 3 }} />
-        )}
-        <span 
-          className="text-xs font-semibold text-muted-foreground select-none"
-          style={{
-            writingMode: 'vertical-rl',
-            transform: 'rotate(180deg)',
-            letterSpacing: '0.05em'
-          }}
-        >
-           All Content 
-        </span>
-        {isNavOpen ? (
-          <ChevronUp className="h-4 w-4 text-muted-foreground flex-shrink-0 font-bold" style={{ transform: 'rotate(-90deg)', strokeWidth: 3 }} />
-        ) : (
-          <ChevronDown className="h-4 w-4 text-muted-foreground flex-shrink-0 font-bold" style={{ transform: 'rotate(-90deg)', strokeWidth: 3 }} />
-        )}
-      </button>
-
-      {/* Navigation Sidebar - Collapsible (hidden on mobile layout) */}
-      {isNavOpen && !isMobileLayout && (
-        <div className="w-80 flex-shrink-0 transition-all duration-300 overflow-hidden h-screen">
-          <Navigation
-            sections={sections}
-            selectedSection={selectedSection}
-            selectedSubsection={selectedSubsection}
-            onNavigate={handleNavigate}
-            isOpen={isNavOpen}
-            onClose={() => setIsNavOpen(false)}
-          />
-        </div>
-      )}
-      
-      {/* Mobile Navigation Overlay */}
-      {isNavOpen && isMobileLayout && (
-        <>
-          <div className="fixed inset-0 bg-black/50 z-40" onClick={() => setIsNavOpen(false)} />
-          <div className="absolute left-12 top-16 w-80 glass-surface border-glass rounded-lg shadow-lg z-50 max-h-96 overflow-y-auto">
-            <Navigation
-              sections={sections}
-              selectedSection={selectedSection}
-              selectedSubsection={selectedSubsection}
-              onNavigate={handleNavigate}
-              isOpen={isNavOpen}
-              onClose={() => setIsNavOpen(false)}
-            />
-          </div>
-        </>
-      )}
-
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col min-h-screen overflow-hidden">
-        {/* Header */}
-        <header className="glass-surface border-glass">
+      {/* Header - Full Width */}
+      <header className="glass-surface border-glass w-full">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-3 pb-2">
             {/* Top Row: Home, Title, Actions */}
             <div className="flex items-center gap-4">
@@ -564,8 +503,69 @@ export default function Index() {
           </div>
         </header>
 
+      {/* Bottom Section - Sidebar + Main Content */}
+      <div className="flex flex-1 overflow-hidden">
+        {/* Sidebar Toggle Button */}
+        <button
+          onClick={() => setIsNavOpen(!isNavOpen)}
+          className="flex-shrink-0 rounded-none border-r border-border h-full flex flex-col items-center justify-center gap-0.5 px-1.5 hover:bg-accent/50 transition-colors"
+          data-testid="button-toggle-nav"
+        >
+          {isNavOpen ? (
+            <ChevronDown className="h-4 w-4 text-muted-foreground flex-shrink-0 font-bold" style={{ transform: 'rotate(90deg)', strokeWidth: 3 }} />
+          ) : (
+            <ChevronUp className="h-4 w-4 text-muted-foreground flex-shrink-0 font-bold" style={{ transform: 'rotate(-90deg)', strokeWidth: 3 }} />
+          )}
+          <span 
+            className="text-xs font-semibold text-muted-foreground select-none"
+            style={{
+              writingMode: 'vertical-rl',
+              transform: 'rotate(180deg)',
+              letterSpacing: '0.05em'
+            }}
+          >
+             All Content 
+          </span>
+          {isNavOpen ? (
+            <ChevronUp className="h-4 w-4 text-muted-foreground flex-shrink-0 font-bold" style={{ transform: 'rotate(-90deg)', strokeWidth: 3 }} />
+          ) : (
+            <ChevronDown className="h-4 w-4 text-muted-foreground flex-shrink-0 font-bold" style={{ transform: 'rotate(-90deg)', strokeWidth: 3 }} />
+          )}
+        </button>
+
+        {/* Navigation Sidebar - Collapsible (hidden on mobile layout) */}
+        {isNavOpen && !isMobileLayout && (
+          <div className="w-80 flex-shrink-0 transition-all duration-300 overflow-hidden">
+            <Navigation
+              sections={sections}
+              selectedSection={selectedSection}
+              selectedSubsection={selectedSubsection}
+              onNavigate={handleNavigate}
+              isOpen={isNavOpen}
+              onClose={() => setIsNavOpen(false)}
+            />
+          </div>
+        )}
+        
+        {/* Mobile Navigation Overlay */}
+        {isNavOpen && isMobileLayout && (
+          <>
+            <div className="fixed inset-0 bg-black/50 z-40" onClick={() => setIsNavOpen(false)} />
+            <div className="absolute left-12 top-16 w-80 glass-surface border-glass rounded-lg shadow-lg z-50 max-h-96 overflow-y-auto">
+              <Navigation
+                sections={sections}
+                selectedSection={selectedSection}
+                selectedSubsection={selectedSubsection}
+                onNavigate={handleNavigate}
+                isOpen={isNavOpen}
+                onClose={() => setIsNavOpen(false)}
+              />
+            </div>
+          </>
+        )}
+
         {/* Main Content Area */}
-        <main className="flex-1 flex overflow-hidden">
+        <main className="flex-1 flex overflow-hidden flex-col">
           {isLoading ? (
             <div className="flex-1 flex items-center justify-center min-h-[400px]">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
