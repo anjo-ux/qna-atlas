@@ -337,29 +337,24 @@ export default function Index() {
       />
 
       {/* Sidebar Toggle Button */}
-      <div className="flex-shrink-0 rounded-none border-r border-border h-full flex items-center justify-center relative">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => setIsNavOpen(!isNavOpen)}
-          className="flex-shrink-0 rounded-none"
-          data-testid="button-toggle-nav"
+      <button
+        onClick={() => setIsNavOpen(!isNavOpen)}
+        className="flex-shrink-0 rounded-none border-r border-border h-full flex items-center justify-center gap-1 px-1.5 hover:bg-accent/50 transition-colors"
+        data-testid="button-toggle-nav"
+      >
+        <ChevronRight className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+        <span 
+          className="text-xs font-semibold text-muted-foreground select-none"
+          style={{
+            writingMode: 'vertical-rl',
+            transform: 'rotate(180deg)',
+            letterSpacing: '0.05em'
+          }}
         >
-          {isNavOpen ? <ChevronLeft className="h-5 w-5" /> : <ChevronRight className="h-5 w-5" />}
-        </Button>
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <span 
-            className="text-xs font-semibold text-muted-foreground whitespace-nowrap"
-            style={{
-              writingMode: 'vertical-rl',
-              transform: 'rotate(180deg)',
-              letterSpacing: '0.05em'
-            }}
-          >
-            All Content
-          </span>
-        </div>
-      </div>
+          All Content
+        </span>
+        <ChevronLeft className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+      </button>
 
       {/* Navigation Sidebar - Collapsible (hidden on mobile layout) */}
       {isNavOpen && !isMobileLayout && (
