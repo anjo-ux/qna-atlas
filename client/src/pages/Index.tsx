@@ -432,8 +432,39 @@ export default function Index() {
                 <span className="hidden md:inline">Test</span>
               </Button>
 
-              {/* View Mode Toggle */}
-              <div className="hidden sm:flex items-center gap-2 bg-accent/5 rounded-lg p-1 w-fit flex-shrink-0 flex-grow-0">
+            </div>
+          </div>
+
+          {/* Bottom Row: Search Bar + View Mode Toggle - Always Visible */}
+          <div className="border-t border-border/50 glass-surface px-4 sm:px-6 lg:px-8 py-3">
+            <div className="w-full max-w-6xl mx-auto flex items-center gap-4">
+              {/* Search Bar */}
+              <div className="relative z-[9999] flex-1 min-w-0" ref={searchRef}>
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                <Input
+                  type="text"
+                  placeholder="Search Entire Database"
+                  value={searchQuery}
+                  onChange={(e) => handleSearchChange(e.target.value)}
+                  onFocus={() => {
+                    if (searchQuery.trim().length >= 2) {
+                      setShowSearchResults(true);
+                    }
+                  }}
+                  className="pl-10 w-full"
+                  data-testid="input-search"
+                />
+                {showSearchResults && searchQuery.trim().length >= 2 && (
+                  <SearchResults
+                    results={searchResults}
+                    query={searchQuery}
+                    onResultClick={handleSearchResultClick}
+                  />
+                )}
+              </div>
+
+              {/* Desktop View Mode Toggle */}
+              <div className="hidden sm:flex items-center gap-2 bg-accent/5 rounded-lg p-1 w-fit flex-shrink-0">
                 <Button
                   variant={viewMode === 'reference' ? 'default' : 'ghost'}
                   size="sm"
@@ -464,59 +495,30 @@ export default function Index() {
                   <span className="hidden md:inline">Questions</span>
                 </Button>
               </div>
-            </div>
 
-            {/* Mobile View Toggle - No split view on mobile */}
-            <div className="flex sm:hidden items-center gap-2 bg-accent/5 rounded-lg p-1">
-              <Button
-                onClick={handleStartTest}
-                variant="outline"
-                size="icon"
-              >
-                <Zap className="h-4 w-4" />
-              </Button>
-              <Button
-                variant={viewMode === 'reference' ? 'default' : 'ghost'}
-                size="icon"
-                onClick={() => setViewMode('reference')}
-              >
-                <BookOpen className="h-4 w-4" />
-              </Button>
-              <Button
-                variant={viewMode === 'questions' ? 'default' : 'ghost'}
-                size="icon"
-                onClick={() => setViewMode('questions')}
-              >
-                <FileQuestion className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-
-          {/* Bottom Row: Search Bar - Always Visible */}
-          <div className="border-t border-border/50 glass-surface px-4 sm:px-6 lg:px-8 py-3">
-            <div className="w-full max-w-6xl mx-auto">
-              <div className="relative z-[9999]" ref={searchRef}>
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-                <Input
-                  type="text"
-                  placeholder="Search Entire Database"
-                  value={searchQuery}
-                  onChange={(e) => handleSearchChange(e.target.value)}
-                  onFocus={() => {
-                    if (searchQuery.trim().length >= 2) {
-                      setShowSearchResults(true);
-                    }
-                  }}
-                  className="pl-10 w-full"
-                  data-testid="input-search"
-                />
-                {showSearchResults && searchQuery.trim().length >= 2 && (
-                  <SearchResults
-                    results={searchResults}
-                    query={searchQuery}
-                    onResultClick={handleSearchResultClick}
-                  />
-                )}
+              {/* Mobile View Toggle - No split view on mobile */}
+              <div className="flex sm:hidden items-center gap-2 bg-accent/5 rounded-lg p-1 flex-shrink-0">
+                <Button
+                  onClick={handleStartTest}
+                  variant="outline"
+                  size="icon"
+                >
+                  <Zap className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant={viewMode === 'reference' ? 'default' : 'ghost'}
+                  size="icon"
+                  onClick={() => setViewMode('reference')}
+                >
+                  <BookOpen className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant={viewMode === 'questions' ? 'default' : 'ghost'}
+                  size="icon"
+                  onClick={() => setViewMode('questions')}
+                >
+                  <FileQuestion className="h-4 w-4" />
+                </Button>
               </div>
             </div>
           </div>
