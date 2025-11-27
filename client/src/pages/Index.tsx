@@ -50,7 +50,6 @@ export default function Index() {
   const [isCheckingSubscription, setIsCheckingSubscription] = useState(true);
   const [showPreviewWizard, setShowPreviewWizard] = useState(false);
   const [isMobileLayout, setIsMobileLayout] = useState(window.innerWidth < 1024);
-  const [isWideEnoughForSplit, setIsWideEnoughForSplit] = useState(window.innerWidth >= 1400);
   const { bookmarks } = useBookmarks();
   const { dueCount } = useSpacedRepetition();
 
@@ -97,9 +96,7 @@ export default function Index() {
   useEffect(() => {
     const handleResize = () => {
       const isSmall = window.innerWidth < 1024;
-      const isWide = window.innerWidth >= 1400;
       setIsMobileLayout(isSmall);
-      setIsWideEnoughForSplit(isWide);
       
       // Auto-close nav and settings on small screens
       if (isSmall) {
@@ -116,10 +113,10 @@ export default function Index() {
 
   // Auto-switch out of split mode when screen becomes too small
   useEffect(() => {
-    if ((isMobileLayout || !isWideEnoughForSplit) && viewMode === 'split') {
+    if (isMobileLayout && viewMode === 'split') {
       setViewMode('questions');
     }
-  }, [isMobileLayout, isWideEnoughForSplit, viewMode]);
+  }, [isMobileLayout, viewMode]);
 
   // Close search results when clicking outside
   useEffect(() => {
@@ -436,7 +433,7 @@ export default function Index() {
                   <BookOpen className="h-4 w-4" />
                   <span className="hidden md:inline">Reference</span>
                 </Button>
-                {isWideEnoughForSplit && (
+                {!isMobileLayout && (
                   <Button
                     variant={viewMode === 'split' ? 'default' : 'ghost'}
                     size="sm"
