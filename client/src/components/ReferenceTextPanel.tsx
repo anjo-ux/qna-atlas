@@ -153,7 +153,7 @@ export function ReferenceTextPanel({
           <ReactMarkdown
             components={{
               h1: ({ node, ...props }) => <h1 className="text-xl font-bold mt-6 mb-3 text-primary" {...props} />,
-              h2: ({ node, ...props }) => <h2 className="text-lg font-semibold mt-5 mb-2 text-foreground" {...props} />,
+              h2: ({ node, ...props }) => <h2 className="text-lg font-semibold mt-5 mb-2 text-foreground uppercase" {...props} />,
               h3: ({ node, ...props }) => <h3 className="text-base font-semibold mt-4 mb-2 text-foreground" {...props} />,
               ul: ({ node, ...props }) => <ul className="list-disc list-inside space-y-1 my-3 text-foreground/90" {...props} />,
               li: ({ node, ...props }) => <li className="ml-2" {...props} />,
