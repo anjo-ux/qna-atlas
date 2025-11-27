@@ -50,6 +50,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get user percentile rank
+  app.get('/api/user/percentile', async (req: any, res) => {
+    try {
+      const userId = req.session?.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const percentile = await storage.getUserPercentileRank(userId);
+      res.json({ percentile });
+    } catch (error) {
+      console.error("Error calculating percentile:", error);
+      res.status(500).json({ message: "Failed to calculate percentile" });
+    }
+  });
+
   // Check subscription status
   app.get('/api/subscription', async (req: any, res) => {
     try {

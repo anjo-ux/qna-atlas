@@ -2,7 +2,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ArrowLeft, Mail, Lock, CreditCard, BookOpen, TrendingUp, Target, Save, ChevronRight, ChevronLeft, Check, ChevronsUpDown } from 'lucide-react';
+import { ArrowLeft, Mail, CreditCard, BookOpen, TrendingUp, Target, Save, ChevronRight, ChevronLeft, Check, ChevronsUpDown, Award } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { QuestionBreakdownCharts } from '@/components/QuestionBreakdownCharts';
@@ -42,6 +42,8 @@ export function Settings({ onBack, subscription }: SettingsProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [openCombobox, setOpenCombobox] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [percentile, setPercentile] = useState<number | null>(null);
+  const [percentileLoading, setPercentileLoading] = useState(false);
 
   // Determine if Emory affiliation grants free access
   const hasEmoryAccess = user?.institutionalAffiliation?.toLowerCase().includes('emory');
@@ -107,11 +109,6 @@ export function Settings({ onBack, subscription }: SettingsProps) {
     return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase() || 'U';
   };
 
-  const connectionMethods = [
-    { name: 'Gmail', connected: true, icon: '📧' },
-    { name: 'Apple', connected: false, icon: '🍎' },
-    { name: 'Microsoft', connected: false, icon: '💻' },
-  ];
 
   const getAvatarIcon = (iconId: string) => {
     const avatar = AVATAR_ICONS.find(a => a.id === iconId);
@@ -148,31 +145,24 @@ export function Settings({ onBack, subscription }: SettingsProps) {
     }
   };
 
-  const [connectedProviders, setConnectedProviders] = useState<string[]>([]);
-
   useEffect(() => {
-    const fetchConnections = async () => {
+    const fetchPercentile = async () => {
+      if (!user) return;
+      setPercentileLoading(true);
       try {
-        const res = await fetch('/api/auth/connections');
-        const providers = await res.json();
-        setConnectedProviders(providers);
+        const res = await fetch('/api/user/percentile');
+        if (res.ok) {
+          const data = await res.json();
+          setPercentile(data.percentile);
+        }
       } catch (error) {
-        console.error('Error fetching connections:', error);
+        console.error('Error fetching percentile:', error);
+      } finally {
+        setPercentileLoading(false);
       }
     };
-    fetchConnections();
-
-    // Check for connection_added in URL params
-    const params = new URLSearchParams(window.location.search);
-    const addedProvider = params.get('connection_added');
-    if (addedProvider) {
-      toast.success(`${addedProvider} connection added successfully`);
-      // Clean up the URL
-      window.history.replaceState({}, document.title, window.location.pathname);
-      // Refresh connections
-      fetchConnections();
-    }
-  }, [toast]);
+    fetchPercentile();
+  }, [user]);
 
   const hasChanges = 
     formData.username !== (user?.username || '') ||
@@ -180,25 +170,6 @@ export function Settings({ onBack, subscription }: SettingsProps) {
     formData.lastName !== (user?.lastName || '') ||
     formData.institutionalAffiliation !== (user?.institutionalAffiliation || '') ||
     formData.avatarIcon !== (user?.avatarIcon || 'smile');
-
-  const handleAddConnection = (provider: string) => {
-    window.location.href = `/api/login?provider=${provider}&action=connect`;
-  };
-
-  const handleRemoveConnection = async (provider: string) => {
-    try {
-      const res = await fetch(`/api/auth/connections/${provider}`, { method: 'DELETE' });
-      if (res.ok) {
-        setConnectedProviders(connectedProviders.filter(p => p !== provider));
-        toast.success(`${provider} connection removed`);
-      } else {
-        const error = await res.json();
-        toast.error(error.message || `Failed to remove ${provider} connection`);
-      }
-    } catch (error) {
-      toast.error(`Failed to remove ${provider} connection`);
-    }
-  };
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
@@ -439,63 +410,32 @@ export function Settings({ onBack, subscription }: SettingsProps) {
                 <QuestionBreakdownCharts />
               </div>
 
-              {/* Connections Section */}
-              <Card className="p-6">
+              {/* Percentile Rank Section */}
+              <Card className="p-6 bg-gradient-to-br from-purple-500/10 to-blue-500/10 border-purple-500/20">
                 <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
-                  <Lock className="h-5 w-5" />
-                  Login Connections
+                  <Award className="h-5 w-5 text-purple-500" />
+                  Percentile Rank
                 </h2>
-
-                <div className="space-y-3">
-                  {connectionMethods.map(method => {
-                    const providerKey = method.name.toLowerCase();
-                    const isConnected = connectedProviders.includes(providerKey);
-                    const canDisconnect = connectedProviders.length > 1;
-                    
-                    return (
-                      <div key={method.name} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg border border-border">
-                        <div className="flex items-center gap-3">
-                          <span className="text-xl">{method.icon}</span>
-                          <div>
-                            <p className="font-medium text-foreground">{method.name}</p>
-                            <p className="text-xs text-muted-foreground">
-                              {isConnected ? 'Connected' : 'Not connected'}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          {isConnected ? (
-                            <>
-                              <span className="text-xs px-2 py-1 bg-green-500/20 text-green-700 dark:text-green-400 rounded">
-                                Active
-                              </span>
-                              {canDisconnect && (
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => handleRemoveConnection(providerKey)}
-                                  className="text-destructive hover:text-destructive"
-                                  data-testid={`button-disconnect-${providerKey}`}
-                                >
-                                  Disconnect
-                                </Button>
-                              )}
-                            </>
-                          ) : (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleAddConnection(providerKey)}
-                              data-testid={`button-connect-${providerKey}`}
-                            >
-                              Connect
-                            </Button>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
+                {percentileLoading ? (
+                  <div className="text-sm text-muted-foreground">Loading rank...</div>
+                ) : percentile !== null ? (
+                  <div className="flex items-center gap-6">
+                    <div className="flex flex-col items-center">
+                      <div className="text-5xl font-bold text-purple-500">{percentile}</div>
+                      <p className="text-xs text-muted-foreground mt-1">Percentile</p>
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm text-foreground">
+                        You're in the <span className="font-semibold text-purple-500">{percentile}th percentile</span> among all users based on your accuracy percentage.
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-2">
+                        100th percentile is the highest score. Your accuracy: {stats.accuracy}%
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-sm text-muted-foreground">Not enough data yet. Answer more questions to see your rank.</div>
+                )}
               </Card>
 
               {/* Mobile Subscription Section */}

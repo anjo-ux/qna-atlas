@@ -94,6 +94,9 @@ export interface IStorage {
   // Theme preference operations
   getThemePreference(userId: string): Promise<string>;
   updateThemePreference(userId: string, theme: string): Promise<string>;
+
+  // Percentile rank operations
+  getUserPercentileRank(userId: string): Promise<number | null>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -572,6 +575,45 @@ export class DatabaseStorage implements IStorage {
       .where(eq(users.id, userId))
       .returning({ themePreference: users.themePreference });
     return updated?.themePreference || 'light';
+  }
+
+  // Percentile rank operations
+  async getUserPercentileRank(userId: string): Promise<number | null> {
+    // Get user's accuracy
+    const userResponses = await db
+      .select()
+      .from(questionResponses)
+      .where(eq(questionResponses.userId, userId));
+    
+    if (userResponses.length === 0) {
+      return null;
+    }
+
+    const userCorrect = userResponses.filter(r => r.isCorrect).length;
+    const userAccuracy = (userCorrect / userResponses.length) * 100;
+
+    // Get all users' accuracy percentages
+    const allUsers = await db.select({ id: users.id }).from(users);
+    
+    let betterCount = 0;
+    for (const user of allUsers) {
+      const responses = await db
+        .select()
+        .from(questionResponses)
+        .where(eq(questionResponses.userId, user.id));
+      
+      if (responses.length > 0) {
+        const correct = responses.filter(r => r.isCorrect).length;
+        const accuracy = (correct / responses.length) * 100;
+        
+        if (accuracy > userAccuracy) {
+          betterCount++;
+        }
+      }
+    }
+
+    const percentile = Math.round(((allUsers.length - betterCount) / allUsers.length) * 100);
+    return Math.min(100, Math.max(0, percentile));
   }
 }
 
