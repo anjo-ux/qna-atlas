@@ -18,6 +18,7 @@ interface DetailedTestResultsProps {
   responses: Record<string, QuestionResponse>;
   onBack: () => void;
   onReview: () => void;
+  onHome?: () => void;
 }
 
 export function DetailedTestResults({
@@ -26,6 +27,7 @@ export function DetailedTestResults({
   responses,
   onBack,
   onReview,
+  onHome,
 }: DetailedTestResultsProps) {
   // Calculate section-level statistics
   const sectionStats = new Map<string, { section: Section; correct: number; total: number; questions: Question[] }>();
@@ -193,6 +195,11 @@ export function DetailedTestResults({
         <Button onClick={onReview} className="flex-1" data-testid="button-review-test">
           Review Test
         </Button>
+        {onHome && (
+          <Button variant="outline" onClick={onHome} className="flex-1" data-testid="button-return-home">
+            Return Home
+          </Button>
+        )}
       </div>
     </div>
   );

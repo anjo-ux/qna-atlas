@@ -829,6 +829,10 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
           setTestState('testing');
           setCurrentQuestionIndex(0);
         }}
+        onHome={() => {
+          setScreenMode('study');
+          setTestModeState({ mode: 'new' });
+        }}
       />
     );
   }
