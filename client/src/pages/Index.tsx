@@ -416,7 +416,7 @@ export default function Index() {
               </Button>
 
               {/* View Mode Toggle */}
-              <div className="hidden sm:flex items-center gap-2 bg-accent/5 rounded-lg p-1">
+              <div className="hidden sm:flex items-center gap-2 bg-accent/5 rounded-lg p-1 flex-wrap w-fit">
                 <Button
                   variant={viewMode === 'reference' ? 'default' : 'ghost'}
                   size="sm"
@@ -426,15 +426,17 @@ export default function Index() {
                   <BookOpen className="h-4 w-4" />
                   <span className="hidden md:inline">Reference</span>
                 </Button>
-                <Button
-                  variant={viewMode === 'split' ? 'default' : 'ghost'}
-                  size="sm"
-                  onClick={() => setViewMode('split')}
-                  className="gap-2"
-                >
-                  <Columns2 className="h-4 w-4" />
-                  <span className="hidden md:inline">Split</span>
-                </Button>
+                {!isMobileLayout && (
+                  <Button
+                    variant={viewMode === 'split' ? 'default' : 'ghost'}
+                    size="sm"
+                    onClick={() => setViewMode('split')}
+                    className="gap-2"
+                  >
+                    <Columns2 className="h-4 w-4" />
+                    <span className="hidden md:inline">Split</span>
+                  </Button>
+                )}
                 <Button
                   variant={viewMode === 'questions' ? 'default' : 'ghost'}
                   size="sm"
