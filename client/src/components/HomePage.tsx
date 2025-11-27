@@ -153,17 +153,17 @@ export function HomePage({ sections, onReviewIncorrect, onStartTest, onResumeTes
       {/* Welcome Header */}
       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
         <div className="space-y-2 min-w-0">
-          <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-foreground">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground">
             Plastic Surgery In-Training Exam Review
           </h1>
           <p className="text-muted-foreground text-sm md:text-base">
             {user && (
               <span>Welcome back, {user.firstName || user.email?.split('@')[0]}. Track your progress and master your knowledge.</span>
             )}
-            {!user && "Track your progress and master your knowledge."}
+            {!user && ""}
           </p>
         </div>
-        <div className="flex items-center gap-1 sm:gap-2 md:gap-3 flex-shrink-0">
+        <div className="flex items-center gap-1 sm:gap-2 md:gap-4 flex-shrink-0">
           <ThemeToggle />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
