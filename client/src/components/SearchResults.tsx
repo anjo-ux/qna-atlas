@@ -32,7 +32,7 @@ const TYPE_CONFIG = {
 export function SearchResults({ results, query, onResultClick }: SearchResultsProps) {
   if (results.length === 0) {
     return (
-      <div className="absolute top-full left-0 right-0 mt-2 z-50">
+      <div className="fixed top-full left-0 right-0 mt-2 z-[9999]">
         <Card className="p-4 shadow-elevated">
           <p className="text-sm text-muted-foreground text-center">
             No results found for "{query}"
@@ -50,7 +50,7 @@ export function SearchResults({ results, query, onResultClick }: SearchResultsPr
   };
 
   return (
-    <div className="absolute top-full left-0 right-0 mt-2 z-50">
+    <div className="fixed left-0 right-0 mt-2 z-[9999]" style={{ top: 'calc(var(--search-top, 0) + var(--search-height, 0) + 8px)' }}>
       <Card className="shadow-elevated overflow-hidden">
         <div className="p-3 border-b border-border bg-accent/5">
           <p className="text-sm font-semibold text-foreground">
