@@ -66,6 +66,11 @@ export default function Login() {
         return;
       }
 
+      // Clear localStorage data for new user session
+      localStorage.removeItem('psite-question-responses');
+      localStorage.removeItem('psite-highlights');
+      localStorage.removeItem('psite-notes');
+
       // Redirect to home
       window.location.href = '/';
     } catch (error) {

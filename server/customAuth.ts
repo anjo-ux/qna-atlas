@@ -69,7 +69,14 @@ export async function setupAuth(app: Express) {
       (req as any).session.user = user;
       (req as any).user = user;
 
-      res.json({ success: true, user });
+      // Save session before responding
+      (req as any).session.save((err: any) => {
+        if (err) {
+          console.error('Session save error:', err);
+          return res.status(500).json({ message: 'Session creation failed' });
+        }
+        res.json({ success: true, user });
+      });
     } catch (error) {
       console.error('Login error:', error);
       res.status(500).json({ message: 'Login failed' });
@@ -126,7 +133,14 @@ export async function setupAuth(app: Express) {
       (req as any).session.user = newUser;
       (req as any).user = newUser;
 
-      res.status(201).json({ success: true, user: newUser });
+      // Save session before responding
+      (req as any).session.save((err: any) => {
+        if (err) {
+          console.error('Session save error:', err);
+          return res.status(500).json({ message: 'Session creation failed' });
+        }
+        res.status(201).json({ success: true, user: newUser });
+      });
     } catch (error) {
       console.error('Register error:', error);
       res.status(500).json({ message: 'Registration failed' });
@@ -135,30 +149,31 @@ export async function setupAuth(app: Express) {
 
   // Logout route
   app.post('/api/auth/logout', (req, res) => {
-    req.logout((err) => {
+    (req as any).session.destroy((err: any) => {
       if (err) {
         return res.status(500).json({ message: 'Logout failed' });
       }
-      req.session.destroy(() => {
-        res.json({ success: true });
-      });
+      res.clearCookie('connect.sid');
+      res.json({ success: true });
     });
   });
 }
 
 export const isAuthenticated: RequestHandler = async (req, res, next) => {
   const session = (req as any).session;
-  const user = (req as any).user;
 
-  if (!session?.userId || !user) {
+  if (!session?.userId) {
     return res.status(401).json({ message: 'Unauthorized' });
   }
 
   // Verify user still exists
-  const currentUser = await storage.getUser(user.id);
+  const currentUser = await storage.getUser(session.userId);
   if (!currentUser) {
     return res.status(401).json({ message: 'Unauthorized' });
   }
+
+  // Attach user to request for use in route handlers
+  (req as any).user = currentUser;
 
   next();
 };
