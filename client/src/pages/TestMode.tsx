@@ -535,6 +535,9 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
                         setUseBookmarkedOnly(true);
                         setUseAllQuestions(false);
                         setUseIncorrectOnly(false);
+                        if (bookmarks.length < questionCount) {
+                          setQuestionCount(bookmarks.length);
+                        }
                       }}
                     >
                       <p className="font-medium text-foreground text-sm">Bookmarked Questions</p>
@@ -562,9 +565,19 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
                             : "border-border bg-muted/30 hover:bg-muted/50"
                         )}
                         onClick={() => {
+                          const incorrectIds = new Set<string>();
+                          sections.forEach(section => {
+                            section.subsections.forEach(subsection => {
+                              const ids = getGlobalIncorrectIds(section.id, subsection.id);
+                              ids.forEach(id => incorrectIds.add(id));
+                            });
+                          });
                           setUseIncorrectOnly(true);
                           setUseAllQuestions(false);
                           setUseBookmarkedOnly(false);
+                          if (incorrectIds.size < questionCount) {
+                            setQuestionCount(incorrectIds.size);
+                          }
                         }}
                       >
                         <p className="font-medium text-foreground text-sm">Incorrect Questions</p>
