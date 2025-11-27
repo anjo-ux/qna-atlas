@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { QuestionCard } from '@/components/QuestionCard';
 import { TestHistory } from '@/components/TestHistory';
@@ -29,7 +29,7 @@ type TestState = 'setup' | 'testing' | 'results' | 'review';
 
 export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, isPreview }: TestModeProps) {
   const [testState, setTestState] = useState<TestState>('setup');
-  const [questionCount, setQuestionCount] = useState<10 | 20 | 30 | 40>(10);
+  const [questionCount, setQuestionCount] = useState<number>(10);
   const [selectedSubsections, setSelectedSubsections] = useState<Set<string>>(
     new Set(sections.flatMap(s => s.subsections.map(ss => ss.id)))
   );
@@ -496,19 +496,21 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
                 <h2 className="text-lg font-semibold text-foreground">Test Creation</h2>
                 
                 {/* Question Count */}
-              <Card className="p-4">
-                <h2 className="text-sm font-semibold mb-3">Total Questions</h2>
-                <RadioGroup value={questionCount.toString()} onValueChange={(v) => setQuestionCount(parseInt(v) as any)}>
-                  <div className="space-y-2">
-                    {[10, 20, 30, 40].map(count => (
-                      <div key={count} className="flex items-center space-x-2">
-                        <RadioGroupItem value={count.toString()} id={`count-${count}`} />
-                        <Label htmlFor={`count-${count}`} className="cursor-pointer text-sm">{count} Questions</Label>
-                      </div>
-                    ))}
-                  </div>
-                </RadioGroup>
-              </Card>
+                <Card className="p-4">
+                  <Label htmlFor="question-count" className="text-sm font-semibold block mb-3">Total Questions</Label>
+                  <Input
+                    id="question-count"
+                    type="number"
+                    min="1"
+                    max="40"
+                    value={questionCount}
+                    onChange={(e) => {
+                      const value = Math.min(40, Math.max(1, parseInt(e.target.value) || 1));
+                      setQuestionCount(value);
+                    }}
+                    placeholder="Enter number (max 40)"
+                  />
+                </Card>
 
               {/* Question Source */}
               <Card className="p-4">
