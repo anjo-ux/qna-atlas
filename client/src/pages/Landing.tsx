@@ -3,7 +3,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Check, Eye } from "lucide-react";
 import { useState } from "react";
 import { PreviewWizard } from "@/components/PreviewWizard";
-import atlasLogo from "@assets/atlas_1764093111680.png";
 
 function handleLogin() {
   window.location.href = '/login';
@@ -30,7 +29,7 @@ export default function Landing() {
       <header className="sticky top-0 z-50 glass-surface border-glass border-b">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <img src={atlasLogo} alt="Plastic Surgery Atlas" className="w-8 h-8 object-contain" />
+            <img src="/atlas-logo.png" alt="Plastic Surgery Atlas" className="w-8 h-8 object-contain" />
             <h1 className="text-xl font-bold gradient-text">Atlas Review</h1>
           </div>
           <div className="flex items-center gap-2">
@@ -48,7 +47,7 @@ export default function Landing() {
         <div className="max-w-4xl mx-auto space-y-12">
           <div className="text-center space-y-6">
             <div className="flex justify-center mb-4">
-              <img src={atlasLogo} alt="Plastic Surgery Atlas" className="w-24 h-24 object-contain drop-shadow-lg" />
+              <img src="/atlas-logo.png" alt="Plastic Surgery Atlas" className="w-24 h-24 object-contain drop-shadow-lg" />
             </div>
             <h2 className="text-5xl font-bold gradient-text leading-tight">
               Plastic Surgery Atlas
