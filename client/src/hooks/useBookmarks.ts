@@ -22,14 +22,33 @@ export function useBookmarks() {
         body: JSON.stringify(data),
       });
     },
+    onMutate: async (data) => {
+      // Optimistic update: immediately add the bookmark to the cache
+      await queryClient.cancelQueries({ queryKey: ['/api/bookmarks'] });
+      const previousBookmarks = queryClient.getQueryData<Bookmark[]>(['/api/bookmarks']) || [];
+      const newBookmark: Bookmark = {
+        id: `temp-${Date.now()}`,
+        userId: '',
+        questionId: data.questionId,
+        sectionId: data.sectionId,
+        subsectionId: data.subsectionId,
+        createdAt: new Date(),
+      };
+      queryClient.setQueryData(['/api/bookmarks'], [...previousBookmarks, newBookmark]);
+      return { previousBookmarks };
+    },
     onSuccess: async () => {
       toast.success('Question bookmarked!');
-      // Invalidate first to clear the cache, then refetch to get fresh data
+      // Refetch to ensure we have the real IDs from the server
       await queryClient.invalidateQueries({ queryKey: ['/api/bookmarks'] });
       await queryClient.refetchQueries({ queryKey: ['/api/bookmarks'] });
     },
-    onError: (error: any) => {
+    onError: (error: any, variables, context: any) => {
       console.error('[Bookmark] Error adding bookmark:', error);
+      // Rollback on error
+      if (context?.previousBookmarks) {
+        queryClient.setQueryData(['/api/bookmarks'], context.previousBookmarks);
+      }
       const message = error.message || 'Failed to bookmark question';
       toast.error(message);
     },
@@ -50,17 +69,31 @@ export function useBookmarks() {
         throw error;
       }
     },
+    onMutate: async (questionId) => {
+      // Optimistic update: immediately remove the bookmark from the cache
+      await queryClient.cancelQueries({ queryKey: ['/api/bookmarks'] });
+      const previousBookmarks = queryClient.getQueryData<Bookmark[]>(['/api/bookmarks']) || [];
+      queryClient.setQueryData(
+        ['/api/bookmarks'],
+        previousBookmarks.filter(b => b.questionId !== questionId)
+      );
+      return { previousBookmarks };
+    },
     onSuccess: async () => {
       console.log('[Bookmark] onSuccess called - bookmark removed successfully');
       toast.success('Bookmark removed!');
-      // Invalidate first to clear the cache, then refetch to get fresh data
+      // Refetch to ensure consistency
       await queryClient.invalidateQueries({ queryKey: ['/api/bookmarks'] });
       console.log('[Bookmark] Bookmarks invalidated');
       await queryClient.refetchQueries({ queryKey: ['/api/bookmarks'] });
       console.log('[Bookmark] Bookmarks refetched after removal');
     },
-    onError: (error: any) => {
+    onError: (error: any, variables, context: any) => {
       console.error('[Bookmark] onError called - Error removing bookmark:', error);
+      // Rollback on error
+      if (context?.previousBookmarks) {
+        queryClient.setQueryData(['/api/bookmarks'], context.previousBookmarks);
+      }
       const message = error.message || 'Failed to remove bookmark';
       toast.error(message);
     },
