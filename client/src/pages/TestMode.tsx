@@ -614,20 +614,20 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
                       });
                     });
                     maxQuestions = incorrectIds.size;
-                  } else if (!useAllQuestions) {
-                    // Selected sections
+                  } else if (!useAllQuestions && selectedSubsections.size > 0) {
+                    // Selected sections - only apply limit if sections are actually selected
                     maxQuestions = availableQuestions.length;
                   }
 
                   // Determine error state
-                  const hasError = questionCount > maxQuestions;
+                  const hasError = questionCount > maxQuestions && (!(!useAllQuestions && selectedSubsections.size === 0));
                   if (hasError) {
                     if (useBookmarkedOnly) {
                       errorMessage = `Max ${maxQuestions} Bookmarked`;
                     } else if (useIncorrectOnly) {
                       errorMessage = `Max ${maxQuestions} Incorrect`;
                     } else {
-                      errorMessage = 'Max 40 Questions';
+                      errorMessage = `Max ${maxQuestions} Questions`;
                     }
                   }
 
@@ -675,11 +675,11 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
                     });
                   });
                   maxQuestions = incorrectIds.size;
-                } else if (!useAllQuestions) {
+                } else if (!useAllQuestions && selectedSubsections.size > 0) {
                   maxQuestions = availableQuestions.length;
                 }
 
-                hasError = questionCount > maxQuestions;
+                hasError = questionCount > maxQuestions && (!(!useAllQuestions && selectedSubsections.size === 0));
 
                 return (
                   <>
