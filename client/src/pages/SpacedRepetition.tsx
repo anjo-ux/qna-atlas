@@ -156,18 +156,16 @@ export function SpacedRepetitionPage({ onBack }: SpacedRepetitionProps) {
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-auto p-4 md:p-6">
+      <div className="flex-1 overflow-auto p-4 md:p-6 flex items-center justify-center">
         {isLoading && sections.length === 0 && (
-          <div className="flex items-center justify-center h-full">
-            <div className="text-center space-y-4">
-              <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto" />
-              <p className="text-muted-foreground">Loading questions...</p>
-            </div>
+          <div className="text-center space-y-4">
+            <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto" />
+            <p className="text-muted-foreground">Loading questions...</p>
           </div>
         )}
 
         {!isLoading && dueQuestions.length === 0 && (
-          <Card variant="glass" className="p-8 text-center max-w-2xl mx-auto">
+          <Card variant="glass" className="p-8 text-center max-w-2xl">
             <Brain className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-50" />
             <h2 className="text-xl font-semibold text-foreground mb-2">No Questions Due</h2>
             <p className="text-muted-foreground">All your spaced repetition questions are up to date. Keep studying to add more.</p>
