@@ -124,7 +124,39 @@ function decodeHtmlEntities(text: string): string {
   // Then use textarea to catch any remaining entities
   const textarea = document.createElement('textarea');
   textarea.innerHTML = result;
-  return textarea.value;
+  result = textarea.value;
+
+  // Handle Unicode smart quotes and other problematic characters
+  result = result
+    .replace(/[\u2018\u2019]/g, "'")  // Unicode single quotes to ASCII apostrophe
+    .replace(/[\u201C\u201D]/g, '"')  // Unicode double quotes to ASCII quote
+    .replace(/[\u00C4]/g, 'A')         // Ä to A
+    .replace(/[\u00F4]/g, 'o')         // ô to o
+    .replace(/[\u00E4]/g, 'a')         // ä to a
+    .replace(/[\u00D6]/g, 'O')         // Ö to O
+    .replace(/[\u00F6]/g, 'o')         // ö to o
+    .replace(/[\u00DC]/g, 'U')         // Ü to U
+    .replace(/[\u00FC]/g, 'u')         // ü to u
+    .replace(/[\u00E9]/g, 'e')         // é to e
+    .replace(/[\u00E8]/g, 'e')         // è to e
+    .replace(/[\u00EA]/g, 'e')         // ê to e
+    .replace(/[\u00EB]/g, 'e')         // ë to e
+    .replace(/[\u00E0]/g, 'a')         // à to a
+    .replace(/[\u00E2]/g, 'a')         // â to a
+    .replace(/[\u00E7]/g, 'c')         // ç to c
+    .replace(/[\u00ED]/g, 'i')         // í to i
+    .replace(/[\u00EC]/g, 'i')         // ì to i
+    .replace(/[\u00EE]/g, 'i')         // î to i
+    .replace(/[\u00EF]/g, 'i')         // ï to i
+    .replace(/[\u00F1]/g, 'n')         // ñ to n
+    .replace(/[\u00F2]/g, 'o')         // ò to o
+    .replace(/[\u00F3]/g, 'o')         // ó to o
+    .replace(/[\u00F5]/g, 'o')         // õ to o
+    .replace(/[\u00FA]/g, 'u')         // ú to u
+    .replace(/[\u00F9]/g, 'u')         // ù to u
+    .replace(/[\u00FB]/g, 'u');        // û to u
+
+  return result;
 }
 
 function stripHtml(html: string): string {
