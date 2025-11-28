@@ -121,7 +121,7 @@ export function SpacedRepetitionPage({ onBack }: SpacedRepetitionProps) {
   const progress = filteredQuestions.length > 0 ? currentIndex + 1 : 0;
 
   return (
-    <div className="flex-1 flex flex-col overflow-hidden bg-gradient-to-br from-purple-400/20 via-lavender-300/20 to-pink-300/20">
+    <div className="h-screen w-screen overflow-hidden flex flex-col bg-gradient-to-br from-purple-400/20 via-lavender-300/20 to-pink-300/20">
       {/* Header */}
       <div className="p-4 md:p-6 border-b border-border/40 backdrop-blur-sm">
         <div className="flex items-center justify-between gap-4 mb-4">
