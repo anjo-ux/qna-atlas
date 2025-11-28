@@ -62,7 +62,9 @@ export default function App() {
         <TooltipProvider>
           <Toaster />
           <Sonner />
-          <Router />
+          <div className="h-screen w-screen overflow-hidden">
+            <Router />
+          </div>
         </TooltipProvider>
       </ThemeProvider>
     </QueryClientProvider>
