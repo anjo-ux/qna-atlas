@@ -130,9 +130,7 @@ function decodeHtmlEntities(text: string): string {
   result = result
     .replace(/[\u2018\u2019]/g, "'")  // Unicode single quotes to ASCII apostrophe
     .replace(/[\u201C\u201D]/g, '"')  // Unicode double quotes to ASCII quote
-    .replace(/[\u00C4]/g, 'A')         // Ä to A
-    .replace(/[\u00F4]/g, 'o')         // ô to o
-    .replace(/[\u00E4]/g, 'a')         // ä to a
+    .replace(/[\u00F4]/g, 'o')         // ô to o only when standalone
     .replace(/[\u00D6]/g, 'O')         // Ö to O
     .replace(/[\u00F6]/g, 'o')         // ö to o
     .replace(/[\u00DC]/g, 'U')         // Ü to U
