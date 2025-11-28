@@ -741,6 +741,61 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Test endpoint: Seed mock spaced repetition data for testing
+  app.post('/api/test/seed-sr', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session?.userId;
+      
+      // Get all questions from the data file
+      const XLSX = await import('xlsx');
+      const response = await fetch(new URL('../public/data/questions.xlsx', import.meta.url));
+      const buffer = await response.arrayBuffer();
+      const workbook = XLSX.read(buffer, { type: 'array' });
+      const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+      const data = XLSX.utils.sheet_to_json(worksheet);
+      
+      if (!Array.isArray(data) || data.length === 0) {
+        return res.status(400).json({ message: "No questions found to seed" });
+      }
+
+      // Generate 8 mock SR records with past review dates
+      const mockRecords = [];
+      const questionCount = Math.min(8, data.length);
+      
+      for (let i = 0; i < questionCount; i++) {
+        const question = data[i] as any;
+        const questionId = String(i + 1); // Use index as question ID
+        
+        // Create past review dates ranging from 1 to 7 days ago
+        const daysAgo = Math.floor(Math.random() * 7) + 1;
+        const nextReviewDate = new Date();
+        nextReviewDate.setDate(nextReviewDate.getDate() - daysAgo);
+        
+        const sr = await storage.upsertSpacedRepetition({
+          userId,
+          questionId,
+          sectionId: 'section-1',
+          subsectionId: 'subsection-1',
+          repetitionCount: Math.floor(Math.random() * 3) + 1,
+          easeFactor: 2500 + Math.random() * 500,
+          interval: Math.floor(Math.random() * 5) + 1,
+          nextReviewAt: nextReviewDate,
+          lastReviewedAt: new Date(nextReviewDate.getTime() - 86400000), // 1 day before
+        });
+        
+        mockRecords.push(sr);
+      }
+      
+      res.json({
+        message: `Created ${mockRecords.length} mock spaced repetition records`,
+        records: mockRecords,
+      });
+    } catch (error) {
+      console.error("Error seeding SR data:", error);
+      res.status(500).json({ message: "Failed to seed SR data" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
