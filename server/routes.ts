@@ -372,7 +372,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Forbidden" });
       }
       
-      const response = await storage.upsertQuestionResponse(validationResult.data);
+      // Add userId to the response data before saving
+      const responseData = {
+        ...validationResult.data,
+        userId
+      };
+      
+      const response = await storage.upsertQuestionResponse(responseData);
       res.json(response);
     } catch (error) {
       console.error("Error saving question response:", error);
