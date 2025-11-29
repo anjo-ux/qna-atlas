@@ -36,6 +36,7 @@ export interface IStorage {
   getUserByEmail(email: string): Promise<User | undefined>;
   upsertUser(user: UpsertUser): Promise<User>;
   updateUserProfile(id: string, updates: Partial<UpsertUser>): Promise<User>;
+  updateUserPassword(id: string, passwordHash: string, needsReset: boolean): Promise<User>;
 
   // Test Session operations
   createTestSession(session: InsertTestSession): Promise<TestSession>;
@@ -131,6 +132,19 @@ export class DatabaseStorage implements IStorage {
       .update(users)
       .set({
         ...updates,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, userId))
+      .returning();
+    return user;
+  }
+
+  async updateUserPassword(userId: string, passwordHash: string, needsReset: boolean): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set({
+        passwordHash,
+        passwordNeedsReset: needsReset,
         updatedAt: new Date(),
       })
       .where(eq(users.id, userId))

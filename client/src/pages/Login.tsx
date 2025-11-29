@@ -3,7 +3,7 @@ import { useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Moon, Sun, ChevronsUpDown, Check, Mail } from 'lucide-react';
+import { Moon, Sun, ChevronsUpDown, Check, Mail, Lock } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -45,6 +45,10 @@ export default function Login() {
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [forgotPasswordEmail, setForgotPasswordEmail] = useState('');
   const [isForgotPasswordLoading, setIsForgotPasswordLoading] = useState(false);
+  const [showChangePassword, setShowChangePassword] = useState(false);
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmNewPassword, setConfirmNewPassword] = useState('');
+  const [isChangePasswordLoading, setIsChangePasswordLoading] = useState(false);
 
   const universities = useMemo(() => {
     return getUniversityOptions().map(u => u.value);
@@ -77,6 +81,14 @@ export default function Login() {
 
       if (!response.ok) {
         toast.error(data.message || 'Authentication Failed');
+        return;
+      }
+
+      // Check if password needs to be reset
+      if (data.passwordNeedsReset) {
+        setShowChangePassword(true);
+        setNewPassword('');
+        setConfirmNewPassword('');
         return;
       }
 
@@ -130,6 +142,55 @@ export default function Login() {
       console.error('Forgot password error:', error);
     } finally {
       setIsForgotPasswordLoading(false);
+    }
+  };
+
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (newPassword !== confirmNewPassword) {
+      toast.error('Passwords do not match.');
+      return;
+    }
+
+    if (newPassword.length < 8) {
+      toast.error('Password must be at least 8 characters long.');
+      return;
+    }
+
+    setIsChangePasswordLoading(true);
+
+    try {
+      const response = await fetch('/api/auth/change-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ newPassword, confirmPassword: confirmNewPassword }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        toast.error(data.message || 'Failed to change password');
+        return;
+      }
+
+      toast.success('Password changed successfully!');
+      setShowChangePassword(false);
+      setNewPassword('');
+      setConfirmNewPassword('');
+
+      // Clear localStorage data for new user session
+      localStorage.removeItem('psite-question-responses');
+      localStorage.removeItem('psite-highlights');
+      localStorage.removeItem('psite-notes');
+
+      // Redirect to home
+      window.location.href = '/';
+    } catch (error) {
+      toast.error('An error occurred, please try again.');
+      console.error('Change password error:', error);
+    } finally {
+      setIsChangePasswordLoading(false);
     }
   };
 
@@ -417,6 +478,63 @@ export default function Login() {
                 data-testid="button-send-password"
               >
                 {isForgotPasswordLoading ? 'Sending...' : 'Send Password'}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Change Password Modal */}
+      <Dialog open={showChangePassword} onOpenChange={setShowChangePassword}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Lock className="h-5 w-5" />
+              Set New Password
+            </DialogTitle>
+            <DialogDescription>
+              You're using a temporary password. Please set a new permanent password to continue.
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleChangePassword} className="space-y-4">
+            <div className="space-y-2">
+              <label htmlFor="new-password" className="text-sm font-medium">
+                New Password
+              </label>
+              <Input
+                id="new-password"
+                type="password"
+                placeholder="Enter new password (min 8 characters)"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                disabled={isChangePasswordLoading}
+                required
+                data-testid="input-new-password"
+              />
+            </div>
+            <div className="space-y-2">
+              <label htmlFor="confirm-new-password" className="text-sm font-medium">
+                Confirm Password
+              </label>
+              <Input
+                id="confirm-new-password"
+                type="password"
+                placeholder="Confirm new password"
+                value={confirmNewPassword}
+                onChange={(e) => setConfirmNewPassword(e.target.value)}
+                disabled={isChangePasswordLoading}
+                required
+                data-testid="input-confirm-new-password"
+              />
+            </div>
+            <div className="flex gap-3">
+              <Button
+                type="submit"
+                disabled={isChangePasswordLoading || !newPassword || !confirmNewPassword}
+                className="flex-1 glow-primary"
+                data-testid="button-set-new-password"
+              >
+                {isChangePasswordLoading ? 'Setting Password...' : 'Set Password'}
               </Button>
             </div>
           </form>
