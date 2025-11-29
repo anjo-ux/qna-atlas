@@ -10,7 +10,7 @@ import { QuestionCard } from '@/components/QuestionCard';
 import { TestHistory } from '@/components/TestHistory';
 import { TestModeWizard } from '@/components/TestModeWizard';
 import { DetailedTestResults } from '@/components/DetailedTestResults';
-import { ArrowLeft, ChevronDown, ChevronUp, ChevronRight, ChevronLeft, ChevronRight as ChevronRightIcon, Check, X, Circle, Maximize2, Minimize2, ChevronDown as ChevronDownIcon } from 'lucide-react';
+import { ArrowLeft, ChevronDown, ChevronUp, ChevronRight, ChevronLeft, ChevronRight as ChevronRightIcon, Check, X, Circle, Maximize2, Minimize2, ChevronDown as ChevronDownIcon, Flag } from 'lucide-react';
 import { useQuestionStats, QuestionResponse } from '@/hooks/useQuestionStats';
 import { useTestSessions, TestSession } from '@/hooks/useTestSessions';
 import { useBookmarks } from '@/hooks/useBookmarks';
@@ -1006,28 +1006,35 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
               {testQuestions.map((question, index) => {
                 const status = getQuestionStatus(index);
                 const isCurrent = index === currentQuestionIndex;
+                const isFlagged = flaggedQuestions.has(question.id);
                 
                 return (
-                  <button
-                    key={question.id}
-                    data-testid={`button-question-${index + 1}`}
-                    onClick={() => {
-                      handleQuestionNavigation(index);
-                      // Auto-close on mobile after selection
-                      if (window.innerWidth < 768) {
-                        setShowQuestionPanel(false);
-                      }
-                    }}
-                    className={cn(
-                      "aspect-square rounded flex items-center justify-center text-xs font-semibold transition-all",
-                      isCurrent && "ring-2 ring-primary ring-offset-2",
-                      status === 'unanswered' && "bg-muted hover:bg-muted/80 text-muted-foreground",
-                      status === 'correct' && "bg-green-500/20 text-green-700 dark:text-green-400 hover:bg-green-500/30",
-                      status === 'incorrect' && "bg-red-500/20 text-red-700 dark:text-red-400 hover:bg-red-500/30"
+                  <div key={question.id} className="relative">
+                    <button
+                      data-testid={`button-question-${index + 1}`}
+                      onClick={() => {
+                        handleQuestionNavigation(index);
+                        // Auto-close on mobile after selection
+                        if (window.innerWidth < 768) {
+                          setShowQuestionPanel(false);
+                        }
+                      }}
+                      className={cn(
+                        "aspect-square rounded flex items-center justify-center text-xs font-semibold transition-all w-full",
+                        isCurrent && "ring-2 ring-primary ring-offset-2",
+                        status === 'unanswered' && "bg-muted hover:bg-muted/80 text-muted-foreground",
+                        status === 'correct' && "bg-green-500/20 text-green-700 dark:text-green-400 hover:bg-green-500/30",
+                        status === 'incorrect' && "bg-red-500/20 text-red-700 dark:text-red-400 hover:bg-red-500/30"
+                      )}
+                    >
+                      {index + 1}
+                    </button>
+                    {isFlagged && (
+                      <div className="absolute top-0 right-0 -translate-y-1 translate-x-1">
+                        <Flag className="h-3 w-3 fill-red-500 text-red-500" data-testid={`flag-question-${index + 1}`} />
+                      </div>
                     )}
-                  >
-                    {index + 1}
-                  </button>
+                  </div>
                 );
               })}
             </div>
@@ -1059,6 +1066,16 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
                 <p className="text-xs md:text-sm text-muted-foreground">Question {currentQuestionIndex + 1} / {testQuestions.length}</p>
               </div>
               <div className="flex items-center gap-1 md:gap-2 flex-shrink-0">
+                <Button 
+                  size="icon"
+                  variant="ghost"
+                  onClick={() => handleToggleFlag(currentQuestion.id)}
+                  data-testid="button-flag-question"
+                  title={flaggedQuestions.has(currentQuestion.id) ? "Unflag question" : "Flag question"}
+                  className={flaggedQuestions.has(currentQuestion.id) ? "text-red-500" : ""}
+                >
+                  <Flag className={cn("h-4 w-4", flaggedQuestions.has(currentQuestion.id) && "fill-red-500")} />
+                </Button>
                 <Button 
                   size="icon"
                   variant="ghost"
