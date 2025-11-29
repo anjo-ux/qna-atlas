@@ -377,6 +377,12 @@ html, body {
   /* Scrollbar only appears on scroll */
   .scrollbar-hide {
     overflow-y: overlay;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
   }
 }
 
