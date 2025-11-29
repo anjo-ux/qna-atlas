@@ -1032,8 +1032,8 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
             </div>
           </div>
 
-          <div className="flex-1 overflow-auto flex flex-col justify-center">
-            <div className="w-full flex justify-center p-3 md:p-6">
+          <div className="flex-1 overflow-auto flex flex-col">
+            <div className="w-full flex justify-center p-3 md:p-6 min-h-min">
               {(() => {
                 const { sectionId, subsectionId } = findSectionAndSubsectionForQuestion(currentQuestion.id);
                 return (
