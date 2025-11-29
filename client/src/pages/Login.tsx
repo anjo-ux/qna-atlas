@@ -115,7 +115,7 @@ export default function Login() {
       </header>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col items-center px-4 py-16 overflow-auto">
+      <div className="flex-1 flex flex-col items-center justify-center px-4 py-16 overflow-y-auto">
         <Card variant="glass" className="w-full max-w-md glow-primary">
           <CardHeader className="space-y-2">
             <div className="flex justify-center mb-4">
