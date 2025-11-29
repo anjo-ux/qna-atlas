@@ -54,21 +54,24 @@ export function ReferenceTextPanel({
       const element = document.querySelector(
         `[data-section-id="${selectedSectionId}"][data-subsection-id="${selectedSubsectionId}"]`
       );
-      if (element && scrollAreaRef.current) {
-        // Use the scrollAreaRef directly to find the viewport
-        const viewport = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]') as HTMLElement;
-        if (viewport) {
-          // Get element's bounding rect relative to viewport
-          const elementRect = element.getBoundingClientRect();
-          const viewportRect = viewport.getBoundingClientRect();
-          
-          // Calculate the element's position relative to the viewport's scroll content
-          const elementTopRelativeToContent = element.getBoundingClientRect().top - viewport.getBoundingClientRect().top + viewport.scrollTop;
-          
-          viewport.scrollTo({
-            top: elementTopRelativeToContent,
-            behavior: 'smooth'
-          });
+      
+      if (element) {
+        // Find the closest scrollable parent
+        let scrollParent = element.parentElement;
+        while (scrollParent) {
+          if (scrollParent.scrollHeight > scrollParent.clientHeight) {
+            // Found a scrollable parent
+            const elementOffsetTop = (element as HTMLElement).offsetTop;
+            const scrollParentTop = (scrollParent as HTMLElement).offsetTop;
+            const relativeTop = elementOffsetTop - scrollParentTop;
+            
+            scrollParent.scrollTo({
+              top: relativeTop,
+              behavior: 'smooth'
+            });
+            break;
+          }
+          scrollParent = scrollParent.parentElement;
         }
       }
     }, 50);
