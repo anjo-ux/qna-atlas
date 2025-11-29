@@ -612,13 +612,13 @@ export default function Index() {
             />
           ) : (
             <div className={cn(
-              "flex-1 flex flex-col lg:flex-row",
+              "flex-1 flex flex-col lg:flex-row min-h-0",
               viewMode === 'split' ? "divide-y lg:divide-y-0 lg:divide-x divide-border" : ""
             )}>
               {/* Reference Text Panel */}
               {(viewMode === 'reference' || viewMode === 'split') && (
                 <div className={cn(
-                  "overflow-y-auto scrollbar-hide",
+                  "overflow-y-auto scrollbar-hide min-h-0",
                   viewMode === 'split' ? "lg:w-2/5 2xl:w-1/3 lg:flex-shrink-0" : "flex-1"
                 )}>
                   <ReferenceTextPanel 
@@ -633,7 +633,7 @@ export default function Index() {
               {/* Questions Panel */}
               {(viewMode === 'questions' || viewMode === 'split') && (
                 <div className={cn(
-                  "overflow-y-auto scrollbar-hide",
+                  "overflow-y-auto scrollbar-hide min-h-0",
                   viewMode === 'split' ? "lg:w-3/5 2xl:w-2/3 lg:flex-1" : "flex-1"
                 )}>
                   <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
