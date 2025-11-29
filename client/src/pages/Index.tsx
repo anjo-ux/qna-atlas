@@ -266,13 +266,16 @@ export default function Index() {
     }
   };
 
-  const currentReferenceContent = referenceSections
-    .find(s => s.id === selectedSection)
-    ?.subsections.find(ss => ss.id === selectedSubsection)?.content || '';
-  
-  const currentReferenceTitle = referenceSections
-    .find(s => s.id === selectedSection)
-    ?.subsections.find(ss => ss.id === selectedSubsection)?.title || '';
+  // Build all reference sections for continuous scrollable display
+  const allReferenceSections = referenceSections.flatMap(section => 
+    section.subsections.map(subsection => ({
+      sectionId: section.id,
+      sectionTitle: section.title,
+      subsectionId: subsection.id,
+      subsectionTitle: subsection.title,
+      content: subsection.content,
+    }))
+  );
 
   const handleResumeTest = (sessionId: string) => {
     setTestModeState({ mode: 'resume', sessionId });
@@ -619,10 +622,9 @@ export default function Index() {
                   viewMode === 'split' ? "lg:w-2/5 2xl:w-1/3 lg:flex-shrink-0" : "flex-1"
                 )}>
                   <ReferenceTextPanel 
-                    content={currentReferenceContent}
-                    subsectionTitle={currentReferenceTitle}
-                    sectionId={selectedSection || ''}
-                    subsectionId={selectedSubsection || ''}
+                    sections={allReferenceSections}
+                    selectedSectionId={selectedSection || undefined}
+                    selectedSubsectionId={selectedSubsection || undefined}
                     isCompressed={viewMode === 'split'}
                   />
                 </div>

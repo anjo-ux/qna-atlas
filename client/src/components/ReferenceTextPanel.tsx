@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import ReactMarkdown from 'react-markdown';
 import { HighlightToolbar } from '@/components/HighlightToolbar';
@@ -7,19 +7,25 @@ import { useHighlights } from '@/hooks/useHighlights';
 import { useTextHighlight } from '@/hooks/useTextHighlight';
 import { cn } from '@/lib/utils';
 
-interface ReferenceTextPanelProps {
-  content: string;
-  subsectionTitle: string;
+interface ReferenceSection {
   sectionId: string;
+  sectionTitle: string;
   subsectionId: string;
+  subsectionTitle: string;
+  content: string;
+}
+
+interface ReferenceTextPanelProps {
+  sections: ReferenceSection[];
+  selectedSectionId?: string;
+  selectedSubsectionId?: string;
   isCompressed?: boolean;
 }
 
 export function ReferenceTextPanel({ 
-  content, 
-  subsectionTitle, 
-  sectionId, 
-  subsectionId,
+  sections, 
+  selectedSectionId,
+  selectedSubsectionId,
   isCompressed = false
 }: ReferenceTextPanelProps) {
   const {
@@ -37,13 +43,22 @@ export function ReferenceTextPanel({
   } = useHighlights();
 
   const [isEraserMode, setIsEraserMode] = useState(false);
-  const [highlightedContent, setHighlightedContent] = useState(content);
-  const highlights = getHighlightsForSection(sectionId, subsectionId, 'reference');
-  const notes = getNotesForSection(sectionId, subsectionId, 'reference');
   const contentRef = useRef<HTMLDivElement>(null);
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
 
-  // Apply highlights to rendered content
-  useTextHighlight(contentRef, highlights, content);
+  // Scroll to selected section when it changes
+  useEffect(() => {
+    if (!selectedSectionId || !selectedSubsectionId) return;
+    
+    setTimeout(() => {
+      const element = document.querySelector(
+        `[data-section-id="${selectedSectionId}"][data-subsection-id="${selectedSubsectionId}"]`
+      );
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 50);
+  }, [selectedSectionId, selectedSubsectionId]);
 
   // Setup global eraser click handler
   useEffect(() => {
@@ -80,6 +95,14 @@ export function ReferenceTextPanel({
     const selectedText = selection.toString().trim();
     if (!selectedText || selectedText.length < 2) return;
 
+    // Get section from the closest section div
+    const sectionDiv = (selection.anchorNode as Node)?.parentElement?.closest('[data-section-id]') as HTMLElement;
+    if (!sectionDiv) return;
+
+    const sectionId = sectionDiv.getAttribute('data-section-id');
+    const subsectionId = sectionDiv.getAttribute('data-subsection-id');
+    if (!sectionId || !subsectionId) return;
+
     // Get the full text content to calculate proper offsets
     const container = document.querySelector('[data-reference-content]');
     if (!container) return;
@@ -103,20 +126,23 @@ export function ReferenceTextPanel({
   };
 
   const handleAddNote = () => {
+    if (!selectedSectionId || !selectedSubsectionId) return;
     addNote({
       content: '',
-      sectionId,
-      subsectionId,
+      sectionId: selectedSectionId,
+      subsectionId: selectedSubsectionId,
       location: 'reference',
       position: { x: 100, y: 100 },
     });
   };
 
   const handleClearHighlights = () => {
+    if (!selectedSectionId || !selectedSubsectionId) return;
+    const highlights = getHighlightsForSection(selectedSectionId, selectedSubsectionId, 'reference');
     batchRemoveHighlights(highlights.map(h => h.id));
   };
 
-  if (!content) {
+  if (!sections || sections.length === 0) {
     return (
       <div className="h-full flex items-center justify-center p-8">
         <p className="text-muted-foreground text-center">
@@ -131,7 +157,7 @@ export function ReferenceTextPanel({
       <div className="border-b border-border p-4 bg-accent/5 space-y-3">
         <div>
           <h2 className="text-lg font-semibold text-foreground">Reference Material</h2>
-          <p className="text-sm text-muted-foreground mt-1">{subsectionTitle}</p>
+          <p className="text-sm text-muted-foreground mt-1">Entire Database (Scrollable)</p>
         </div>
         <HighlightToolbar
           activeColor={activeColor}
@@ -143,40 +169,46 @@ export function ReferenceTextPanel({
           isCompressed={isCompressed}
         />
       </div>
-      <ScrollArea className="flex-1">
+      <ScrollArea className="flex-1" ref={scrollAreaRef}>
         <div 
           ref={contentRef}
           className={cn("p-6 prose prose-sm dark:prose-invert max-w-none", isEraserMode && "eraser-mode")}
           data-reference-content
           onMouseUp={handleTextSelection}
         >
-          <ReactMarkdown
-            components={{
-              h1: ({ node, ...props }) => <h1 className="text-xl font-bold mt-6 mb-3 text-primary" {...props} />,
-              h2: ({ node, ...props }) => <h2 className="text-lg font-semibold mt-5 mb-2 text-foreground uppercase" {...props} />,
-              h3: ({ node, ...props }) => <h3 className="text-base font-semibold mt-4 mb-2 text-foreground" {...props} />,
-              ul: ({ node, ...props }) => <ul className="list-disc list-inside space-y-1 my-3 text-foreground/90" {...props} />,
-              li: ({ node, ...props }) => <li className="ml-2" {...props} />,
-              p: ({ node, ...props }) => <p className="my-2 text-foreground/90 leading-relaxed" {...props} />,
-              strong: ({ node, ...props }) => <strong className="font-semibold text-foreground" {...props} />,
-            }}
-          >
-            {content}
-          </ReactMarkdown>
+          {sections.map((section) => {
+            const sectionHighlights = getHighlightsForSection(section.sectionId, section.subsectionId, 'reference');
+            const sectionNotes = getNotesForSection(section.sectionId, section.subsectionId, 'reference');
+            
+            return (
+              <div 
+                key={`${section.sectionId}-${section.subsectionId}`}
+                data-section-id={section.sectionId}
+                data-subsection-id={section.subsectionId}
+                className="mb-8 pb-6 border-b border-border/50 last:border-b-0"
+              >
+                <h2 className="text-lg font-semibold mt-5 mb-2 text-foreground uppercase">
+                  {section.subsectionTitle}
+                </h2>
+                <p className="text-xs text-muted-foreground mb-4">{section.sectionTitle}</p>
+                <ReactMarkdown
+                  components={{
+                    h1: ({ node, ...props }) => <h1 className="text-xl font-bold mt-6 mb-3 text-primary" {...props} />,
+                    h2: ({ node, ...props }) => <h2 className="text-lg font-semibold mt-5 mb-2 text-foreground uppercase" {...props} />,
+                    h3: ({ node, ...props }) => <h3 className="text-base font-semibold mt-4 mb-2 text-foreground" {...props} />,
+                    ul: ({ node, ...props }) => <ul className="list-disc list-inside space-y-1 my-3 text-foreground/90" {...props} />,
+                    li: ({ node, ...props }) => <li className="ml-2" {...props} />,
+                    p: ({ node, ...props }) => <p className="my-2 text-foreground/90 leading-relaxed" {...props} />,
+                    strong: ({ node, ...props }) => <strong className="font-semibold text-foreground" {...props} />,
+                  }}
+                >
+                  {section.content}
+                </ReactMarkdown>
+              </div>
+            );
+          })}
         </div>
       </ScrollArea>
-      
-      {notes.map(note => (
-        <StickyNote
-          key={note.id}
-          id={note.id}
-          content={note.content}
-          position={note.position}
-          onUpdate={updateNote}
-          onDelete={removeNote}
-          onPositionChange={updateNotePosition}
-        />
-      ))}
     </div>
   );
 }
