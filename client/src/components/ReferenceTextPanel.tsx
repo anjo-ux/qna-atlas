@@ -54,28 +54,21 @@ export function ReferenceTextPanel({
       const element = document.querySelector(
         `[data-section-id="${selectedSectionId}"][data-subsection-id="${selectedSubsectionId}"]`
       );
-      if (element) {
-        // Find the scrollable viewport parent
-        let scrollParent = element.parentElement;
-        while (scrollParent) {
-          const style = window.getComputedStyle(scrollParent);
-          if (style.overflowY === 'auto' || style.overflowY === 'scroll' || style.overflowY === 'overlay') {
-            // Found the scrollable parent
-            const elementTop = (element as HTMLElement).offsetTop;
-            const elementBottom = elementTop + (element as HTMLElement).offsetHeight;
-            const viewportTop = scrollParent.scrollTop;
-            const viewportBottom = viewportTop + scrollParent.clientHeight;
-            
-            // Only scroll if element is not visible
-            if (elementTop < viewportTop || elementBottom > viewportBottom) {
-              scrollParent.scrollTo({
-                top: elementTop,
-                behavior: 'smooth'
-              });
-            }
-            break;
-          }
-          scrollParent = scrollParent.parentElement;
+      if (element && scrollAreaRef.current) {
+        // Use the scrollAreaRef directly to find the viewport
+        const viewport = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]') as HTMLElement;
+        if (viewport) {
+          // Get element's bounding rect relative to viewport
+          const elementRect = element.getBoundingClientRect();
+          const viewportRect = viewport.getBoundingClientRect();
+          
+          // Calculate the element's position relative to the viewport's scroll content
+          const elementTopRelativeToContent = element.getBoundingClientRect().top - viewport.getBoundingClientRect().top + viewport.scrollTop;
+          
+          viewport.scrollTo({
+            top: elementTopRelativeToContent,
+            behavior: 'smooth'
+          });
         }
       }
     }, 50);
@@ -190,7 +183,8 @@ export function ReferenceTextPanel({
           isCompressed={isCompressed}
         />
       </div>
-      <ScrollArea className="flex-1" ref={scrollAreaRef}>
+      <ScrollArea className="flex-1">
+        <div ref={scrollAreaRef} className="h-full">
         <div 
           ref={contentRef}
           className={cn("p-6 prose prose-sm dark:prose-invert max-w-none", isEraserMode && "eraser-mode")}
