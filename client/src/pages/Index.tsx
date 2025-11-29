@@ -317,44 +317,11 @@ export default function Index() {
 
   if (screenMode === 'settings') {
     return (
-      <div className="flex flex-col h-screen overflow-hidden">
-        {/* Header - reuse from study mode */}
-        <header className="glass-surface border-glass w-full sticky top-0 z-50">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-3 pb-2">
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-4">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setScreenMode('study')}
-                  className="hover:bg-primary/10 flex-shrink-0 outline-none focus-visible:ring-0"
-                  title="Go to Study"
-                >
-                  <ChevronLeft className="h-5 w-5" />
-                </Button>
-                
-                <div className="flex items-center gap-2 min-w-0">
-                  <img 
-                    src="/atlas-logo.png" 
-                    alt="Atlas Logo" 
-                    className="h-8 w-8 object-contain flex-shrink-0"
-                  />
-                  <h1 className="hidden sm:block text-lg sm:text-xl font-bold text-primary truncate">
-                    Settings
-                  </h1>
-                </div>
-              </div>
-            </div>
-          </div>
-        </header>
-
-        {/* Settings Content */}
-        <div className="flex-1 overflow-auto">
-          <SettingsPage 
-            onBack={() => setScreenMode('study')}
-            subscription={subscription}
-          />
-        </div>
+      <div className="flex h-screen overflow-hidden">
+        <SettingsPage 
+          onBack={() => setScreenMode('study')}
+          subscription={subscription}
+        />
       </div>
     );
   }
