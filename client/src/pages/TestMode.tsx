@@ -447,13 +447,44 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
     setTestState('results');
   };
 
-  const handleSaveAndExit = () => {
+  const handleSaveAndExit = async () => {
     if (isPreview && !isAuthenticated) {
       window.location.href = '/api/auth';
       return;
     }
-    // Progress is already saved via updateSession calls as user answers questions
-    // Just return to setup to show the test in "Resume" section
+    
+    // Explicitly save all current responses to database before exiting
+    if (isAuthenticated && currentSession && Object.keys(responses).length > 0) {
+      try {
+        // Batch save all responses that haven't been explicitly saved yet
+        const promises = Object.values(responses).map(response =>
+          fetch('/api/question-responses', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({
+              testSessionId: currentSession.id,
+              questionId: response.questionId,
+              sectionId: response.sectionId,
+              subsectionId: response.subsectionId,
+              selectedAnswer: response.selectedAnswer,
+              isCorrect: response.isCorrect,
+            }),
+          })
+        );
+        
+        await Promise.all(promises);
+      } catch (error) {
+        console.error('Error saving responses on exit:', error);
+        // Still exit even if save fails - user data is in local responses
+      }
+    }
+    
+    // Also update the session's current question index
+    if (currentSession) {
+      updateSession(currentSession.id, { currentQuestionIndex });
+    }
+    
     setTestState('setup');
   };
 
