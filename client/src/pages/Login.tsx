@@ -115,24 +115,25 @@ export default function Login() {
       </header>
 
       {/* Main Content */}
-      <div className="flex-1 overflow-y-auto flex flex-col items-center justify-center px-4 py-16">
-        <Card variant="glass" className="w-full max-w-md glow-primary">
-          <CardHeader className="space-y-2">
-            <div className="flex justify-center mb-4">
-              <img src={atlasLogo} alt="Atlas Logo" className="w-16 h-16 object-contain" />
-            </div>
-            <CardTitle className="text-center text-2xl gradient-text">
-              {isSignUp ? 'Create Account' : 'Sign In'}
-            </CardTitle>
-            <CardDescription className="text-center">
-              {isSignUp
-                ? 'Start your 30-day free trial of the Atlas Review.'
-                : 'Access your plastic surgery study materials today.'}
-            </CardDescription>
-          </CardHeader>
+      <div className="flex-1 overflow-y-auto flex flex-col">
+        <div className="flex flex-col items-center justify-center px-4 py-16 flex-1">
+          <Card variant="glass" className="w-full max-w-md glow-primary">
+            <CardHeader className="space-y-2">
+              <div className="flex justify-center mb-4">
+                <img src={atlasLogo} alt="Atlas Logo" className="w-16 h-16 object-contain" />
+              </div>
+              <CardTitle className="text-center text-2xl gradient-text">
+                {isSignUp ? 'Create Account' : 'Sign In'}
+              </CardTitle>
+              <CardDescription className="text-center">
+                {isSignUp
+                  ? 'Start your 30-day free trial of the Atlas Review.'
+                  : 'Access your plastic surgery study materials today.'}
+              </CardDescription>
+            </CardHeader>
 
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <CardContent>
+              <form onSubmit={handleSubmit} className="space-y-4">
               {isSignUp && (
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-2">
@@ -287,35 +288,36 @@ export default function Login() {
                     ? 'Create Account'
                     : 'Sign In'}
               </Button>
-            </form>
+              </form>
 
-            <div className="mt-6 text-center text-sm">
-              <button
-                onClick={() => {
-                  setIsSignUp(!isSignUp);
-                  setPassword('');
-                  setConfirmPassword('');
-                  setFirstName('');
-                  setLastName('');
-                }}
-                className="text-primary hover:underline font-medium"
-                data-testid="button-toggle-auth"
-              >
-                {isSignUp
-                  ? 'Sign In Instead'
-                  : "Sign Up Instead"}
-              </button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Footer */}
-      <footer className="border-t py-6 bg-muted/30">
-        <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          Atlas Review © {new Date().getFullYear()} • Empowering Surgical Education
+              <div className="mt-6 text-center text-sm">
+                <button
+                  onClick={() => {
+                    setIsSignUp(!isSignUp);
+                    setPassword('');
+                    setConfirmPassword('');
+                    setFirstName('');
+                    setLastName('');
+                  }}
+                  className="text-primary hover:underline font-medium"
+                  data-testid="button-toggle-auth"
+                >
+                  {isSignUp
+                    ? 'Sign In Instead'
+                    : "Sign Up Instead"}
+                </button>
+              </div>
+            </CardContent>
+          </Card>
         </div>
-      </footer>
+
+        {/* Footer */}
+        <footer className="border-t py-6 bg-muted/30 flex-shrink-0">
+          <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
+            Atlas Review © {new Date().getFullYear()} • Empowering Surgical Education
+          </div>
+        </footer>
+      </div>
       </div>
     </div>
   );

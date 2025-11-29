@@ -43,8 +43,9 @@ export default function Landing() {
         </div>
       </header>
 
-      <main className="flex-1 overflow-y-auto container mx-auto px-4 py-16">
-        <div className="max-w-4xl mx-auto space-y-12">
+      <main className="flex-1 overflow-y-auto flex flex-col">
+        <div className="container mx-auto px-4 py-16">
+          <div className="max-w-4xl mx-auto space-y-12">
           <div className="text-center space-y-6">
             <div className="flex justify-center mb-4">
               <img src="/atlas-logo.png" alt="Plastic Surgery Atlas" className="w-24 h-24 object-contain drop-shadow-lg" />
@@ -137,16 +138,18 @@ export default function Landing() {
               <Button onClick={handleSignUp} data-testid="button-sign-up" className="bg-primary hover:bg-primary/90">
                 Create Free Account
               </Button>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </div>
         </div>
-      </main>
 
-      <footer className="border-t py-6 bg-muted/30">
-        <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          Atlas Review © {new Date().getFullYear()} • Empowering Surgical Education
-        </div>
-      </footer>
+        {/* Footer */}
+        <footer className="border-t py-6 bg-muted/30 flex-shrink-0">
+          <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
+            Atlas Review © {new Date().getFullYear()} • Empowering Surgical Education
+          </div>
+        </footer>
+      </main>
     </div>
   );
 }
