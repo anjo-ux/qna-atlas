@@ -596,7 +596,7 @@ export default function Index() {
         )}
 
         {/* Main Content Area */}
-        <main className="flex-1 flex overflow-hidden flex-col">
+        <main className="flex-1 flex overflow-y-auto flex-col">
           {isLoading ? (
             <div className="flex-1 flex items-center justify-center min-h-[400px]">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
@@ -633,7 +633,7 @@ export default function Index() {
               {/* Questions Panel */}
               {(viewMode === 'questions' || viewMode === 'split') && (
                 <div className={cn(
-                  "overflow-auto",
+                  "overflow-hidden",
                   viewMode === 'split' ? "lg:w-3/5 2xl:w-2/3 lg:flex-1" : "flex-1"
                 )}>
                   <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
