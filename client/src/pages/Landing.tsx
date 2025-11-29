@@ -43,7 +43,7 @@ export default function Landing() {
         </div>
       </header>
 
-      <main className="flex-1 container mx-auto px-4 py-16">
+      <main className="flex-1 container mx-auto px-4 py-16 overflow-auto">
         <div className="max-w-4xl mx-auto space-y-12">
           <div className="text-center space-y-6">
             <div className="flex justify-center mb-4">
