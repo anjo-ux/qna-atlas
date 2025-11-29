@@ -54,19 +54,28 @@ export function ReferenceTextPanel({
       const element = document.querySelector(
         `[data-section-id="${selectedSectionId}"][data-subsection-id="${selectedSubsectionId}"]`
       );
-      if (element && contentRef.current) {
-        // Find the ScrollArea's viewport (the scrollable container)
-        const scrollContainer = contentRef.current.closest('[data-radix-scroll-area-viewport]');
-        if (scrollContainer) {
-          // Calculate the position relative to the scroll container
-          const elementTop = (element as HTMLElement).offsetTop;
-          const containerScrollTop = scrollContainer.scrollTop;
-          
-          // Smooth scroll within the container only
-          scrollContainer.scrollTo({
-            top: elementTop,
-            behavior: 'smooth'
-          });
+      if (element) {
+        // Find the scrollable viewport parent
+        let scrollParent = element.parentElement;
+        while (scrollParent) {
+          const style = window.getComputedStyle(scrollParent);
+          if (style.overflowY === 'auto' || style.overflowY === 'scroll' || style.overflowY === 'overlay') {
+            // Found the scrollable parent
+            const elementTop = (element as HTMLElement).offsetTop;
+            const elementBottom = elementTop + (element as HTMLElement).offsetHeight;
+            const viewportTop = scrollParent.scrollTop;
+            const viewportBottom = viewportTop + scrollParent.clientHeight;
+            
+            // Only scroll if element is not visible
+            if (elementTop < viewportTop || elementBottom > viewportBottom) {
+              scrollParent.scrollTo({
+                top: elementTop,
+                behavior: 'smooth'
+              });
+            }
+            break;
+          }
+          scrollParent = scrollParent.parentElement;
         }
       }
     }, 50);
