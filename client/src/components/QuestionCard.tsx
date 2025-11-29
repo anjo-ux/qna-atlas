@@ -11,7 +11,7 @@ import { HighlightToolbar } from '@/components/HighlightToolbar';
 import { StickyNote } from '@/components/StickyNote';
 import { useTextHighlight } from '@/hooks/useTextHighlight';
 import { QuestionResponse } from '@/hooks/useQuestionStats';
-import { Bookmark } from 'lucide-react';
+import { Bookmark, Flag } from 'lucide-react';
 import { queryClient } from '@/lib/queryClient';
 
 interface QuestionCardProps {
@@ -23,6 +23,8 @@ interface QuestionCardProps {
   onAnswerSubmit: (questionId: string, selectedAnswer: string, correctAnswer: string, isCorrect: boolean) => void;
   isTestMode?: boolean;
   isReadOnly?: boolean;
+  isFlagged?: boolean;
+  onToggleFlag?: (questionId: string) => void;
 }
 
 interface ParsedQuestion {
@@ -38,7 +40,9 @@ export function QuestionCard({
   savedResponse,
   onAnswerSubmit,
   isTestMode = false,
-  isReadOnly = false
+  isReadOnly = false,
+  isFlagged = false,
+  onToggleFlag
 }: QuestionCardProps) {
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(savedResponse?.selectedAnswer || null);
   const [showExplanation, setShowExplanation] = useState(!!savedResponse);
