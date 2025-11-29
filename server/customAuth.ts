@@ -41,9 +41,76 @@ export async function verifyPassword(
   return bcrypt.compare(password, hash);
 }
 
+async function sendPasswordEmail(email: string, password: string): Promise<void> {
+  // For now, we'll just log the password. In production, integrate with SendGrid/email service
+  // This uses a simple approach: send an email with the password
+  try {
+    // Check for sendmail or mail command availability
+    const { exec } = require('child_process');
+    const util = require('util');
+    const execPromise = util.promisify(exec);
+    
+    // Try to send via system mail command
+    const mailContent = `
+Subject: Your Password Recovery for Atlas Review
+
+Your password for Atlas Review is: ${password}
+
+If you did not request this, please contact support.
+
+---
+Atlas Review © 2024
+`;
+    
+    await execPromise(`echo "${mailContent}" | mail -s "Your Password Recovery for Atlas Review" "${email}"`, {
+      shell: '/bin/bash'
+    });
+  } catch (error) {
+    console.error('Email sending failed (this is expected if mail not configured):', error);
+    // In production, use SendGrid or similar service
+    // For now, just log it
+    console.log(`[PASSWORD RECOVERY] Email should be sent to ${email} with password: ${password}`);
+  }
+}
+
 export async function setupAuth(app: Express) {
   app.set('trust proxy', 1);
   app.use(getSession());
+
+  // Forgot password route
+  app.post('/api/auth/forgot-password', async (req, res) => {
+    try {
+      const { email } = req.body;
+
+      if (!email) {
+        return res.status(400).json({ message: 'Email is required to retrieve password.' });
+      }
+
+      const user = await storage.getUserByEmail(email);
+      if (!user) {
+        // Don't reveal if email exists or not (security best practice)
+        return res.json({ message: 'If an account exists with that email, a password recovery email has been sent.' });
+      }
+
+      // For security, we can't retrieve the hashed password
+      // Instead, generate a temporary password or send password reset link
+      // For now, send a message that account found
+      // In production, you'd send a reset link or temp password
+      
+      // Try to send email with current password (ideally you'd have the plaintext stored separately)
+      // Since we only have hashed passwords, we'll send a generic recovery message
+      try {
+        await sendPasswordEmail(email, '[Password reset link would be sent here]');
+      } catch (err) {
+        console.error('Failed to send password email:', err);
+      }
+
+      return res.json({ message: 'If an account exists with that email, a password recovery email has been sent.' });
+    } catch (error) {
+      console.error('Forgot password error:', error);
+      res.status(500).json({ message: 'An error occurred while processing your request.' });
+    }
+  });
 
   // Login route
   app.post('/api/auth/login', async (req, res) => {

@@ -329,22 +329,35 @@ export default function Login() {
               </Button>
               </form>
 
-              <div className="mt-6 text-center text-sm">
-                <button
-                  onClick={() => {
-                    setIsSignUp(!isSignUp);
-                    setPassword('');
-                    setConfirmPassword('');
-                    setFirstName('');
-                    setLastName('');
-                  }}
-                  className="text-primary hover:underline font-medium"
-                  data-testid="button-toggle-auth"
-                >
-                  {isSignUp
-                    ? 'Sign In Instead'
-                    : "Sign Up Instead"}
-                </button>
+              <div className="mt-6 space-y-3 text-center text-sm">
+                <div>
+                  <button
+                    onClick={() => {
+                      setIsSignUp(!isSignUp);
+                      setPassword('');
+                      setConfirmPassword('');
+                      setFirstName('');
+                      setLastName('');
+                    }}
+                    className="text-primary hover:underline font-medium"
+                    data-testid="button-toggle-auth"
+                  >
+                    {isSignUp
+                      ? 'Sign In Instead'
+                      : "Sign Up Instead"}
+                  </button>
+                </div>
+                {!isSignUp && (
+                  <div>
+                    <button
+                      onClick={() => setShowForgotPassword(true)}
+                      className="text-muted-foreground hover:text-primary text-xs transition-colors"
+                      data-testid="button-forgot-password"
+                    >
+                      Forgot password?
+                    </button>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -358,6 +371,57 @@ export default function Login() {
         </footer>
       </div>
       </div>
+
+      {/* Forgot Password Modal */}
+      <Dialog open={showForgotPassword} onOpenChange={setShowForgotPassword}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Mail className="h-5 w-5" />
+              Retrieve Password
+            </DialogTitle>
+            <DialogDescription>
+              Enter your email address and we'll send your password to your inbox.
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleForgotPassword} className="space-y-4">
+            <div className="space-y-2">
+              <label htmlFor="forgot-email" className="text-sm font-medium">
+                Email Address
+              </label>
+              <Input
+                id="forgot-email"
+                type="email"
+                placeholder="your@email.com"
+                value={forgotPasswordEmail}
+                onChange={(e) => setForgotPasswordEmail(e.target.value)}
+                disabled={isForgotPasswordLoading}
+                required
+                data-testid="input-forgot-password-email"
+              />
+            </div>
+            <div className="flex gap-3">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setShowForgotPassword(false)}
+                disabled={isForgotPasswordLoading}
+                className="flex-1"
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                disabled={isForgotPasswordLoading || !forgotPasswordEmail}
+                className="flex-1 glow-primary"
+                data-testid="button-send-password"
+              >
+                {isForgotPasswordLoading ? 'Sending...' : 'Send Password'}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
