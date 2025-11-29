@@ -95,10 +95,10 @@ export default function Login() {
   };
 
   return (
-    <div className={`min-h-screen flex flex-col ${isDark ? 'dark' : ''}`}>
-      <div className="min-h-screen flex flex-col bg-gradient-to-br from-blue-50 via-cyan-50 to-purple-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
+    <div className={`flex flex-col h-full ${isDark ? 'dark' : ''}`}>
+      <div className="flex flex-col h-full bg-gradient-to-br from-blue-50 via-cyan-50 to-purple-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
       {/* Header */}
-      <header className="sticky top-0 z-50 glass-surface border-glass border-b">
+      <header className="sticky top-0 z-50 glass-surface border-glass border-b flex-shrink-0">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <button 
             onClick={() => window.location.href = '/'} 
@@ -115,7 +115,7 @@ export default function Login() {
       </header>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col items-center justify-center px-4 py-16 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto flex flex-col items-center justify-center px-4 py-16">
         <Card variant="glass" className="w-full max-w-md glow-primary">
           <CardHeader className="space-y-2">
             <div className="flex justify-center mb-4">

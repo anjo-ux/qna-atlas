@@ -16,7 +16,7 @@ export default function Landing() {
   const [showPreviewWizard, setShowPreviewWizard] = useState(false);
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="flex flex-col h-full">
       <PreviewWizard
         open={showPreviewWizard}
         onClose={() => setShowPreviewWizard(false)}
@@ -26,7 +26,7 @@ export default function Landing() {
         }}
       />
 
-      <header className="sticky top-0 z-50 glass-surface border-glass border-b">
+      <header className="sticky top-0 z-50 glass-surface border-glass border-b flex-shrink-0">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <img src="/atlas-logo.png" alt="Plastic Surgery Atlas" className="w-8 h-8 object-contain" />
@@ -43,7 +43,7 @@ export default function Landing() {
         </div>
       </header>
 
-      <main className="flex-1 container mx-auto px-4 py-16 overflow-y-auto">
+      <main className="flex-1 overflow-y-auto container mx-auto px-4 py-16">
         <div className="max-w-4xl mx-auto space-y-12">
           <div className="text-center space-y-6">
             <div className="flex justify-center mb-4">
