@@ -149,7 +149,7 @@ export function HomePage({ sections, onReviewIncorrect, onStartTest, onResumeTes
     : 0;
 
   return (
-    <div className="p-2 md:p-3 lg:p-4 max-w-7xl mx-auto space-y-3 md:space-y-4 animate-fade-in scrollbar-hide flex-1">
+    <div className="p-4 md:p-6 lg:p-8 max-w-7xl mx-auto space-y-3 md:space-y-4 animate-fade-in scrollbar-hide flex-1">
       {/* Welcome Header */}
       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
         <div className="space-y-1 min-w-0">
