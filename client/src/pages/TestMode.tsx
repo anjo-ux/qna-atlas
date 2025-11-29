@@ -1030,7 +1030,7 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
             <div className="flex items-center justify-between gap-3">
               <div className="flex-1 min-w-0">
                 <h1 className="text-xl md:text-2xl font-bold truncate">Test Mode</h1>
-                <p className="text-xs md:text-sm text-muted-foreground">Question {currentQuestionIndex + 1} of {testQuestions.length}</p>
+                <p className="text-xs md:text-sm text-muted-foreground">Question {currentQuestionIndex + 1} / {testQuestions.length}</p>
               </div>
               <div className="flex items-center gap-1 md:gap-2 flex-shrink-0">
                 <Button 
@@ -1099,7 +1099,7 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
               </Button>
               
               <div className="text-xs sm:text-sm text-muted-foreground text-center">
-                Question {currentQuestionIndex + 1} of {testQuestions.length}
+                Question {currentQuestionIndex + 1} / {testQuestions.length}
               </div>
 
               <Button
