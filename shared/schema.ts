@@ -38,6 +38,7 @@ export const users = pgTable("users", {
   subscriptionEndsAt: timestamp("subscription_ends_at"),
   stripeCustomerId: varchar("stripe_customer_id"),
   stripeSubscriptionId: varchar("stripe_subscription_id"),
+  passwordNeedsReset: boolean("password_needs_reset").default(false), // True if using temporary password
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

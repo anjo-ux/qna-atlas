@@ -41,6 +41,16 @@ export async function verifyPassword(
   return bcrypt.compare(password, hash);
 }
 
+function generateTemporaryPassword(): string {
+  // Generate a 12-character temporary password
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$';
+  let password = '';
+  for (let i = 0; i < 12; i++) {
+    password += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return password;
+}
+
 async function sendPasswordEmail(email: string, password: string): Promise<void> {
   // For now, we'll just log the password. In production, integrate with SendGrid/email service
   // This uses a simple approach: send an email with the password
@@ -54,7 +64,9 @@ async function sendPasswordEmail(email: string, password: string): Promise<void>
     const mailContent = `
 Subject: Your Password Recovery for Atlas Review
 
-Your password for Atlas Review is: ${password}
+Your temporary password for Atlas Review is: ${password}
+
+You will be required to change this password when you log in.
 
 If you did not request this, please contact support.
 
@@ -69,7 +81,7 @@ Atlas Review © 2024
     console.error('Email sending failed (this is expected if mail not configured):', error);
     // In production, use SendGrid or similar service
     // For now, just log it
-    console.log(`[PASSWORD RECOVERY] Email should be sent to ${email} with password: ${password}`);
+    console.log(`[PASSWORD RECOVERY] Email should be sent to ${email} with temporary password: ${password}`);
   }
 }
 
@@ -92,15 +104,16 @@ export async function setupAuth(app: Express) {
         return res.json({ message: 'If an account exists with that email, a password recovery email has been sent.' });
       }
 
-      // For security, we can't retrieve the hashed password
-      // Instead, generate a temporary password or send password reset link
-      // For now, send a message that account found
-      // In production, you'd send a reset link or temp password
-      
-      // Try to send email with current password (ideally you'd have the plaintext stored separately)
-      // Since we only have hashed passwords, we'll send a generic recovery message
+      // Generate temporary password
+      const temporaryPassword = generateTemporaryPassword();
+      const tempPasswordHash = await hashPassword(temporaryPassword);
+
+      // Update user with temporary password and set flag
+      await storage.updateUserPassword(user.id, tempPasswordHash, true);
+
+      // Send email with temporary password
       try {
-        await sendPasswordEmail(email, '[Password reset link would be sent here]');
+        await sendPasswordEmail(email, temporaryPassword);
       } catch (err) {
         console.error('Failed to send password email:', err);
       }
@@ -142,11 +155,44 @@ export async function setupAuth(app: Express) {
           console.error('Session Save Error:', err);
           return res.status(500).json({ message: 'Session Creation Failed' });
         }
-        res.json({ success: true, user });
+        res.json({ success: true, user, passwordNeedsReset: user.passwordNeedsReset || false });
       });
     } catch (error) {
       console.error('Login Error:', error);
       res.status(500).json({ message: 'Login Failed' });
+    }
+  });
+
+  // Change password route (used after login with temporary password)
+  app.post('/api/auth/change-password', async (req, res) => {
+    try {
+      const userId = (req as any).session?.userId;
+      if (!userId) {
+        return res.status(401).json({ message: 'Unauthorized' });
+      }
+
+      const { newPassword, confirmPassword } = req.body;
+
+      if (!newPassword || !confirmPassword) {
+        return res.status(400).json({ message: 'New password and confirmation required.' });
+      }
+
+      if (newPassword !== confirmPassword) {
+        return res.status(400).json({ message: 'Passwords do not match.' });
+      }
+
+      if (newPassword.length < 8) {
+        return res.status(400).json({ message: 'Password must be at least eight characters in length.' });
+      }
+
+      // Hash new password and update user
+      const passwordHash = await hashPassword(newPassword);
+      await storage.updateUserPassword(userId, passwordHash, false);
+
+      res.json({ success: true, message: 'Password changed successfully.' });
+    } catch (error) {
+      console.error('Change password error:', error);
+      res.status(500).json({ message: 'Failed to change password' });
     }
   });
 
