@@ -143,7 +143,7 @@ export function SpacedRepetitionPage({ onBack }: SpacedRepetitionProps) {
         {/* Search */}
         <Input
           type="text"
-          placeholder="Search questions"
+          placeholder="Search Review Questions"
           value={searchQuery}
           onChange={(e) => {
             setSearchQuery(e.target.value);
