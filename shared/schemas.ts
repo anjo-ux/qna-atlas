@@ -25,6 +25,7 @@ export type UpdateTestSessionInput = z.infer<typeof updateTestSessionSchema>;
 // Question Response schemas
 export const insertQuestionResponseSchema = createInsertSchema(questionResponses).omit({
   id: true,
+  userId: true,  // Will be added by backend from authenticated session
   answeredAt: true,
 });
 
