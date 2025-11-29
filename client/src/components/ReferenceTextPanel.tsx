@@ -174,7 +174,7 @@ export function ReferenceTextPanel({
       <div className="border-b border-border p-4 bg-accent/5 space-y-3">
         <div>
           <h2 className="text-lg font-semibold text-foreground">Reference Material</h2>
-          <p className="text-sm text-muted-foreground mt-1">Entire Database (Scrollable)</p>
+          <p className="text-sm text-muted-foreground mt-1">Default Text</p>
         </div>
         <HighlightToolbar
           activeColor={activeColor}
