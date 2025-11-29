@@ -415,7 +415,7 @@ export default function Login() {
                       className="text-muted-foreground hover:text-primary text-xs transition-colors"
                       data-testid="button-forgot-password"
                     >
-                      Forgot password?
+                      Forgot Password?
                     </button>
                   </div>
                 )}
