@@ -223,6 +223,7 @@ export function ReferenceTextPanel({
             );
           })}
         </div>
+        </div>
       </ScrollArea>
     </div>
   );
