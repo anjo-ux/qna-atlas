@@ -42,6 +42,7 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
   const [testQuestions, setTestQuestions] = useState<Question[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [responses, setResponses] = useState<Record<string, QuestionResponse>>({});
+  const [flaggedQuestions, setFlaggedQuestions] = useState<Set<string>>(new Set());
   const [currentSession, setCurrentSession] = useState<TestSession | null>(null);
   const [showTestWizard, setShowTestWizard] = useState(false);
   const [showQuestionPanel, setShowQuestionPanel] = useState(false);
@@ -87,7 +88,7 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
     }
   }, [isPreview, previewQuestions, testState]);
 
-  // Load saved responses when test starts
+  // Load saved responses and flags when test starts
   useEffect(() => {
     const loadSavedResponses = async () => {
       if (isAuthenticated && currentSession && testState === 'testing' && Object.keys(responses).length === 0) {
@@ -110,6 +111,11 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
               };
             });
             setResponses(responsesMap);
+          }
+          
+          // Load flagged questions from session
+          if (currentSession.flaggedQuestionIds && currentSession.flaggedQuestionIds.length > 0) {
+            setFlaggedQuestions(new Set(currentSession.flaggedQuestionIds));
           }
         } catch (error) {
           console.error('Error loading saved responses:', error);
@@ -423,6 +429,21 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
     }
   };
 
+  const handleToggleFlag = (questionId: string) => {
+    const newFlagged = new Set(flaggedQuestions);
+    if (newFlagged.has(questionId)) {
+      newFlagged.delete(questionId);
+    } else {
+      newFlagged.add(questionId);
+    }
+    setFlaggedQuestions(newFlagged);
+    
+    // Auto-save flags to session
+    if (currentSession) {
+      updateSession(currentSession.id, { flaggedQuestionIds: Array.from(newFlagged) });
+    }
+  };
+
   const handleFinishTest = () => {
     if (isPreview && !isAuthenticated) {
       window.location.href = '/api/auth';
@@ -442,6 +463,8 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
     });
     
     if (currentSession) {
+      // Save flagged questions before completing
+      updateSession(currentSession.id, { flaggedQuestionIds: Array.from(flaggedQuestions) });
       completeSession(currentSession.id);
     }
     setTestState('results');
@@ -480,9 +503,12 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
       }
     }
     
-    // Also update the session's current question index
+    // Also update the session's current question index and flagged questions
     if (currentSession) {
-      updateSession(currentSession.id, { currentQuestionIndex });
+      updateSession(currentSession.id, { 
+        currentQuestionIndex,
+        flaggedQuestionIds: Array.from(flaggedQuestions)
+      });
     }
     
     setTestState('setup');

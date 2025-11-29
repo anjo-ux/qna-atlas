@@ -67,6 +67,7 @@ export const testSessions = pgTable("test_sessions", {
   selectedSectionIds: jsonb("selected_section_ids").$type<string[]>().notNull(),
   questions: jsonb("questions").notNull(), // Store the full Question objects for resume
   currentQuestionIndex: integer("current_question_index").notNull().default(0),
+  flaggedQuestionIds: jsonb("flagged_question_ids").$type<string[]>().default([]).notNull(), // Store IDs of flagged questions
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
   completedAt: timestamp("completed_at"),
