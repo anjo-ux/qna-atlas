@@ -596,7 +596,7 @@ export default function Index() {
         )}
 
         {/* Main Content Area */}
-        <main className="flex-1 flex overflow-y-auto scrollbar-hide flex-col">
+        <main className="flex-1 flex overflow-hidden flex-col">
           {isLoading ? (
             <div className="flex-1 flex items-center justify-center min-h-[400px]">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
@@ -618,7 +618,7 @@ export default function Index() {
               {/* Reference Text Panel */}
               {(viewMode === 'reference' || viewMode === 'split') && (
                 <div className={cn(
-                  "overflow-hidden",
+                  "overflow-y-auto scrollbar-hide",
                   viewMode === 'split' ? "lg:w-2/5 2xl:w-1/3 lg:flex-shrink-0" : "flex-1"
                 )}>
                   <ReferenceTextPanel 
@@ -633,7 +633,7 @@ export default function Index() {
               {/* Questions Panel */}
               {(viewMode === 'questions' || viewMode === 'split') && (
                 <div className={cn(
-                  "overflow-hidden",
+                  "overflow-y-auto scrollbar-hide",
                   viewMode === 'split' ? "lg:w-3/5 2xl:w-2/3 lg:flex-1" : "flex-1"
                 )}>
                   <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
