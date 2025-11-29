@@ -54,8 +54,20 @@ export function ReferenceTextPanel({
       const element = document.querySelector(
         `[data-section-id="${selectedSectionId}"][data-subsection-id="${selectedSubsectionId}"]`
       );
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      if (element && contentRef.current) {
+        // Find the ScrollArea's viewport (the scrollable container)
+        const scrollContainer = contentRef.current.closest('[data-radix-scroll-area-viewport]');
+        if (scrollContainer) {
+          // Calculate the position relative to the scroll container
+          const elementTop = (element as HTMLElement).offsetTop;
+          const containerScrollTop = scrollContainer.scrollTop;
+          
+          // Smooth scroll within the container only
+          scrollContainer.scrollTo({
+            top: elementTop,
+            behavior: 'smooth'
+          });
+        }
       }
     }, 50);
   }, [selectedSectionId, selectedSubsectionId]);
