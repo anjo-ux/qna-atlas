@@ -52,37 +52,34 @@ function generateTemporaryPassword(): string {
 }
 
 async function sendPasswordEmail(email: string, password: string): Promise<void> {
-  // For now, we'll just log the password. In production, integrate with SendGrid/email service
-  // This uses a simple approach: send an email with the password
-  try {
-    // Check for sendmail or mail command availability
-    const { exec } = require('child_process');
-    const util = require('util');
-    const execPromise = util.promisify(exec);
-    
-    // Try to send via system mail command
-    const mailContent = `
-Subject: Your Password Recovery for Atlas Review
-
-Your temporary password for Atlas Review is: ${password}
-
-You will be required to change this password when you log in.
-
-If you did not request this, please contact support.
-
----
-Atlas Review © 2024
-`;
-    
-    await execPromise(`echo "${mailContent}" | mail -s "Your Password Recovery for Atlas Review" "${email}"`, {
-      shell: '/bin/bash'
-    });
-  } catch (error) {
-    console.error('Email sending failed (this is expected if mail not configured):', error);
-    // In production, use SendGrid or similar service
-    // For now, just log it
-    console.log(`[PASSWORD RECOVERY] Email should be sent to ${email} with temporary password: ${password}`);
-  }
+  // Note: For production, integrate with SendGrid via SENDGRID_API_KEY environment variable
+  // Currently logs temporary passwords to server console for development
+  
+  console.log('\n' + '='.repeat(70));
+  console.log('PASSWORD RECOVERY REQUEST');
+  console.log('='.repeat(70));
+  console.log(`To: ${email}`);
+  console.log(`Temporary Password: ${password}`);
+  console.log('Action: User must change password on next login');
+  console.log('='.repeat(70) + '\n');
+  
+  // In production, uncomment and implement SendGrid:
+  // try {
+  //   const sgMail = require('@sendgrid/mail');
+  //   sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+  //   
+  //   await sgMail.send({
+  //     to: email,
+  //     from: process.env.SENDGRID_FROM_EMAIL || 'noreply@atlasreview.com',
+  //     subject: 'Your Password Recovery for Atlas Review',
+  //     html: `
+  //       <p>Your temporary password for Atlas Review is: <strong>${password}</strong></p>
+  //       <p>You will be required to change this password when you log in.</p>
+  //     `
+  //   });
+  // } catch (error) {
+  //   console.error('Failed to send email via SendGrid:', error);
+  // }
 }
 
 export async function setupAuth(app: Express) {

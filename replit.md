@@ -46,6 +46,17 @@ shared/           # Shared types between client and server
 
 ## Recent Changes
 
+### November 29, 2025
+- **Temporary Password Recovery System**:
+  - Implemented forgot password flow with 12-character temporary passwords
+  - Added `passwordNeedsReset` flag to users table for tracking password recovery state
+  - Users logging in with temporary passwords are prompted to set permanent password
+  - Backend endpoints: `/api/auth/forgot-password` and `/api/auth/change-password`
+  - Frontend modals for both password recovery request and password change
+  - **Email Configuration**: Currently logs temporary passwords to server console for development
+    - To enable production email: Set up SendGrid integration with `SENDGRID_API_KEY` and `SENDGRID_FROM_EMAIL` environment variables
+    - See customAuth.ts for SendGrid implementation notes
+
 ### November 26, 2025
 - **Glassmorphism UI Implementation**:
   - Implemented comprehensive glassmorphism design system with Card variant="glass"
