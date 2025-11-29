@@ -412,13 +412,13 @@ html, body {
     background: rgba(100, 80, 140, 0.6);
   }
 
-  /* Firefox scrollbar - only for scrollable elements */
-  main {
+  /* Firefox scrollbar */
+  * {
     scrollbar-color: rgba(200, 180, 220, 0.4) transparent;
-    scrollbar-width: auto;
+    scrollbar-width: thin;
   }
 
-  .dark main {
+  .dark {
     scrollbar-color: rgba(100, 80, 140, 0.4) transparent;
   }
 }
