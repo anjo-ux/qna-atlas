@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { ChevronRight, Play, Zap, BookOpen, BarChart3, RotateCcw } from 'lucide-react';
+import { ChevronRight, Play, FileText, BookOpen, BarChart3, RotateCcw } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 
 interface TestModeWizardProps {
@@ -49,7 +49,7 @@ export function TestModeWizard({ open, onClose, onContinue }: TestModeWizardProp
     {
       title: 'Answering Questions',
       description: 'Mark your response, highlight, and cross-out.',
-      icon: Zap,
+      icon: FileText,
       content: (
         <div className="space-y-3">
           <Card className="p-3 border-l-4 border-l-primary">

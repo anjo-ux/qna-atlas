@@ -15,7 +15,7 @@ import { PreviewWizard } from '@/components/PreviewWizard';
 import { TestMode } from './TestMode';
 import { Settings as SettingsPage } from './Settings';
 import { Input } from '@/components/ui/input';
-import { Search, Menu, X, BookOpen, FileQuestion, Columns2, Home, Zap, Settings, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, Bookmark, Lightbulb } from 'lucide-react';
+import { Search, Menu, X, BookOpen, FileQuestion, Columns2, Home, FileText, Settings, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, Bookmark, Lightbulb } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useQuestionStats } from '@/hooks/useQuestionStats';
@@ -440,7 +440,7 @@ export default function Index() {
                   variant="outline"
                   className="gap-2"
                 >
-                  <Zap className="h-4 w-4" />
+                  <FileText className="h-4 w-4" />
                   <span className="hidden md:inline">Test</span>
                 </Button>
               </div>
@@ -515,7 +515,7 @@ export default function Index() {
                   variant="outline"
                   size="icon"
                 >
-                  <Zap className="h-4 w-4" />
+                  <FileText className="h-4 w-4" />
                 </Button>
                 <Button
                   variant={viewMode === 'reference' ? 'default' : 'ghost'}
