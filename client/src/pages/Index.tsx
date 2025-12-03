@@ -530,6 +530,13 @@ export default function Index() {
                   <FileText className="h-4 w-4" />
                 </Button>
                 <Button
+                  onClick={() => setLocation('/oral-board')}
+                  variant="outline"
+                  size="icon"
+                >
+                  <Mic className="h-4 w-4" />
+                </Button>
+                <Button
                   variant={viewMode === 'reference' ? 'default' : 'ghost'}
                   size="icon"
                   onClick={() => setViewMode('reference')}
