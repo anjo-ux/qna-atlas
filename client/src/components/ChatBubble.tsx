@@ -93,9 +93,45 @@ export function ChatBubble() {
 
   return (
     <div className="fixed bottom-6 right-6 z-40">
+      <style>{`
+        @keyframes chatBubbleGrow {
+          from {
+            opacity: 0;
+            transform: scale(0.1);
+            transform-origin: bottom right;
+          }
+          to {
+            opacity: 1;
+            transform: scale(1);
+            transform-origin: bottom right;
+          }
+        }
+        
+        @keyframes chatBubbleShrink {
+          from {
+            opacity: 1;
+            transform: scale(1);
+            transform-origin: bottom right;
+          }
+          to {
+            opacity: 0;
+            transform: scale(0.1);
+            transform-origin: bottom right;
+          }
+        }
+        
+        .chat-window-open {
+          animation: chatBubbleGrow 0.4s ease-out forwards;
+        }
+        
+        .chat-window-close {
+          animation: chatBubbleShrink 0.3s ease-in forwards;
+        }
+      `}</style>
+
       {isOpen ? (
         // Chat Window (Expanded)
-        <Card className="w-96 h-96 flex flex-col bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm border-white/20 dark:border-slate-700/20 shadow-xl">
+        <Card className="w-96 h-96 flex flex-col bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm border-white/20 dark:border-slate-700/20 shadow-xl chat-window-open">
           {/* Header with Close Button */}
           <div className="flex items-center justify-between p-4 border-b border-border/50 bg-primary/10">
             <h3 className="font-semibold text-sm">Assistant</h3>
