@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Send, MessageCircle, X, Loader2 } from 'lucide-react';
+import { Send, MessageCircle, X, Loader2, Maximize2, Minimize2 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 
 interface Message {
@@ -13,6 +13,7 @@ interface Message {
 
 export function ChatBubble() {
   const [isOpen, setIsOpen] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -92,7 +93,7 @@ export function ChatBubble() {
   };
 
   return (
-    <div className="fixed bottom-6 right-6 z-40">
+    <div className={`fixed z-40 ${isExpanded ? 'inset-0' : 'bottom-6 right-6'}`}>
       <style>{`
         @keyframes chatBubbleGrow {
           from {
@@ -120,6 +121,15 @@ export function ChatBubble() {
           }
         }
         
+        @keyframes expandToFull {
+          from {
+            transform: scale(1);
+          }
+          to {
+            transform: scale(1);
+          }
+        }
+        
         .chat-window-open {
           animation: chatBubbleGrow 0.4s ease-out forwards;
         }
@@ -127,23 +137,41 @@ export function ChatBubble() {
         .chat-window-close {
           animation: chatBubbleShrink 0.3s ease-in forwards;
         }
+        
+        .chat-window-expanded {
+          animation: expandToFull 0.4s ease-out forwards;
+        }
       `}</style>
 
       {isOpen ? (
-        // Chat Window (Expanded)
-        <Card className="w-96 h-96 flex flex-col bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm border-white/20 dark:border-slate-700/20 shadow-xl chat-window-open">
-          {/* Header with Close Button */}
+        // Chat Window (Expanded or Normal)
+        <Card className={`flex flex-col bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm border-white/20 dark:border-slate-700/20 shadow-xl ${isExpanded ? 'chat-window-expanded w-full h-full' : 'chat-window-open w-96 h-96'}`}>
+          {/* Header with Close and Expand Buttons */}
           <div className="flex items-center justify-between p-4 border-b border-border/50 bg-primary/10">
             <h3 className="font-semibold text-sm">Assistant</h3>
-            <Button
-              onClick={() => setIsOpen(false)}
-              size="icon"
-              variant="ghost"
-              className="h-6 w-6"
-              data-testid="button-close-chat-bubble"
-            >
-              <X className="h-4 w-4" />
-            </Button>
+            <div className="flex gap-1">
+              <Button
+                onClick={() => setIsExpanded(!isExpanded)}
+                size="icon"
+                variant="ghost"
+                className="h-6 w-6"
+                data-testid="button-expand-chat-bubble"
+              >
+                {isExpanded ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+              </Button>
+              <Button
+                onClick={() => {
+                  setIsOpen(false);
+                  setIsExpanded(false);
+                }}
+                size="icon"
+                variant="ghost"
+                className="h-6 w-6"
+                data-testid="button-close-chat-bubble"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
 
           {/* Messages */}
