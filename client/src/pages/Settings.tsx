@@ -27,7 +27,7 @@ import { getUniversityOptions } from '@/data/universities';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { queryClient } from '@/lib/queryClient';
-import { Smile, Sparkles, Zap, Heart, Rocket, Brain, Flame, Crown, Coffee, Moon, Sun, Star } from 'lucide-react';
+import { Smile, Sparkles, Zap, Heart, Rocket, Lightbulb, Flame, Crown, Coffee, Moon, Sun, Star } from 'lucide-react';
 
 interface SettingsProps {
   onBack: () => void;
@@ -62,7 +62,7 @@ export function Settings({ onBack, subscription }: SettingsProps) {
     { id: 'zap', name: 'Zap', icon: Zap },
     { id: 'heart', name: 'Heart', icon: Heart },
     { id: 'rocket', name: 'Rocket', icon: Rocket },
-    { id: 'brain', name: 'Brain', icon: Brain },
+    { id: 'lightbulb', name: 'Lightbulb', icon: Lightbulb },
     { id: 'flame', name: 'Flame', icon: Flame },
     { id: 'crown', name: 'Crown', icon: Crown },
     { id: 'coffee', name: 'Coffee', icon: Coffee },

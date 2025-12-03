@@ -5,7 +5,7 @@ import { useSpacedRepetition } from '@/hooks/useSpacedRepetition';
 import { useQuestionStats } from '@/hooks/useQuestionStats';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { ArrowLeft, Brain, CheckCircle2, XCircle, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Lightbulb, CheckCircle2, XCircle, AlertCircle } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 
@@ -130,7 +130,7 @@ export function SpacedRepetitionPage({ onBack }: SpacedRepetitionProps) {
               <ArrowLeft className="h-5 w-5" />
             </Button>
             <div className="flex items-center gap-2">
-              <Brain className="h-6 w-6 text-primary" />
+              <Lightbulb className="h-6 w-6 text-primary" />
               <h1 className="text-2xl md:text-3xl font-bold text-foreground">Spaced Repetition Review</h1>
             </div>
           </div>
@@ -167,7 +167,7 @@ export function SpacedRepetitionPage({ onBack }: SpacedRepetitionProps) {
 
           {!isLoading && dueQuestions.length === 0 && (
             <Card variant="glass" className="p-8 text-center max-w-2xl">
-              <Brain className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-50" />
+              <Lightbulb className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-50" />
               <h2 className="text-xl font-semibold text-foreground mb-2">No Questions Due</h2>
               <p className="text-muted-foreground">All your spaced repetition questions are up to date. Keep studying to add more.</p>
             </Card>

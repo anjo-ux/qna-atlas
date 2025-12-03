@@ -15,7 +15,7 @@ import { PreviewWizard } from '@/components/PreviewWizard';
 import { TestMode } from './TestMode';
 import { Settings as SettingsPage } from './Settings';
 import { Input } from '@/components/ui/input';
-import { Search, Menu, X, BookOpen, FileQuestion, Columns2, Home, Zap, Settings, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, Bookmark, Brain } from 'lucide-react';
+import { Search, Menu, X, BookOpen, FileQuestion, Columns2, Home, Zap, Settings, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, Bookmark, Lightbulb } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useQuestionStats } from '@/hooks/useQuestionStats';
@@ -425,7 +425,7 @@ export default function Index() {
                   className="gap-2 relative"
                   data-testid="button-spaced-repetition"
                 >
-                  <Brain className="h-4 w-4" />
+                  <Lightbulb className="h-4 w-4" />
                   <span className="hidden md:inline">Review</span>
                   {dueCount > 0 && (
                     <span className="absolute -top-2 -right-2 bg-primary text-primary-foreground text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">

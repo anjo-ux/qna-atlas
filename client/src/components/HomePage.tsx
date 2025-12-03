@@ -9,7 +9,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { TestHistory } from '@/components/TestHistory';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { Section } from '@/types/question';
-import { BookOpen, BadgeCheck, AlertTriangle, BarChart3, Crosshair, ChevronRight, RotateCcw, Lightbulb, Zap, LogOut, User, Settings, Eye, Smile, Sparkles, Heart, Rocket, Brain, Flame, Crown, Coffee, Moon, Sun, Star, Target } from 'lucide-react';
+import { BookOpen, BadgeCheck, AlertTriangle, BarChart3, Crosshair, ChevronRight, RotateCcw, Lightbulb, Zap, LogOut, User, Settings, Eye, Smile, Sparkles, Heart, Rocket, Flame, Crown, Coffee, Moon, Sun, Star, Target } from 'lucide-react';
 import { useMemo } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
@@ -42,7 +42,7 @@ export function HomePage({ sections, onReviewIncorrect, onStartTest, onResumeTes
     zap: Zap,
     heart: Heart,
     rocket: Rocket,
-    brain: Brain,
+    lightbulb: Lightbulb,
     flame: Flame,
     crown: Crown,
     coffee: Coffee,
@@ -53,7 +53,7 @@ export function HomePage({ sections, onReviewIncorrect, onStartTest, onResumeTes
 
   const getAvatarIcon = () => {
     const iconId = user?.avatarIcon || 'smile';
-    const IconComponent = AVATAR_ICONS[iconId] || Smile;
+    const IconComponent = AVATAR_ICONS[iconId] || Lightbulb;
     return IconComponent;
   };
   
