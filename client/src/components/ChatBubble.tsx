@@ -145,7 +145,9 @@ export function ChatBubble() {
 
       {isOpen ? (
         // Chat Window (Expanded or Normal)
-        <Card className={`flex flex-col bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm border-white/20 dark:border-slate-700/20 shadow-xl ${isExpanded ? 'chat-window-expanded w-96 h-screen' : 'chat-window-open w-96 h-96'}`}>
+        <Card className={`flex flex-col bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm border-white/20 dark:border-slate-700/20 shadow-xl ${isExpanded ? 'chat-window-expanded w-96' : 'chat-window-open w-96 h-96'}`}
+          style={isExpanded ? { height: 'calc(100vh - 140px)' } : undefined}
+        >
           {/* Header with Close and Expand Buttons */}
           <div className="flex items-center justify-between p-4 border-b border-border/50 bg-primary/10">
             <h3 className="font-semibold text-sm">Assistant</h3>
