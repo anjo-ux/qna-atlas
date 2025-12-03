@@ -1,0 +1,79 @@
+import OpenAI from 'openai';
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_CHATBUBBLE_API_KEY,
+});
+
+interface AssistantThread {
+  id: string;
+  createdAt: Date;
+}
+
+// In-memory thread storage for chat bubble
+const threads = new Map<string, AssistantThread>();
+
+export async function initializeThread(): Promise<string> {
+  try {
+    const thread = await openai.beta.threads.create();
+    threads.set(thread.id, {
+      id: thread.id,
+      createdAt: new Date()
+    });
+    return thread.id;
+  } catch (error) {
+    console.error('Failed to create chat bubble thread:', error);
+    throw new Error('Failed to initialize chat bubble session');
+  }
+}
+
+export async function sendMessage(threadId: string, userMessage: string): Promise<string> {
+  try {
+    const thread = threads.get(threadId);
+    if (!thread) {
+      throw new Error('Thread not found');
+    }
+
+    // Add message to thread
+    await openai.beta.threads.messages.create(threadId, {
+      role: 'user',
+      content: userMessage
+    });
+
+    // Get the assistant ID from environment
+    const assistantId = process.env.OPENAI_CHATBUBBLE_ASSISTANT_ID;
+    if (!assistantId) {
+      throw new Error('OPENAI_CHATBUBBLE_ASSISTANT_ID environment variable not set');
+    }
+
+    // Run assistant
+    const run = await openai.beta.threads.runs.createAndPoll(threadId, {
+      assistant_id: assistantId
+    });
+
+    // Check run status
+    if (run.status !== 'completed') {
+      throw new Error(`Run failed with status: ${run.status}`);
+    }
+
+    // Get messages from thread
+    const messages = await openai.beta.threads.messages.list(threadId);
+
+    // Find the last assistant message
+    const lastAssistantMessage = messages.data.find(
+      (msg: any) => msg.role === 'assistant'
+    );
+
+    if (!lastAssistantMessage || lastAssistantMessage.content[0].type !== 'text') {
+      throw new Error('No response from assistant');
+    }
+
+    return (lastAssistantMessage.content[0] as any).text;
+  } catch (error) {
+    console.error('Failed to send chat bubble message:', error);
+    throw new Error('Failed to process message');
+  }
+}
+
+export function validateThreadExists(threadId: string): boolean {
+  return threads.has(threadId);
+}

@@ -780,6 +780,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Chat Bubble routes
+  const { 
+    initializeThread: initChatBubbleThread, 
+    sendMessage: sendChatBubbleMessage, 
+    validateThreadExists: validateChatBubbleThread 
+  } = await import('./chatBubbleService');
+
+  app.post('/api/chat-bubble/init', async (req: any, res) => {
+    try {
+      const threadId = await initChatBubbleThread();
+      res.json({ threadId });
+    } catch (error) {
+      console.error('Error initializing chat bubble thread:', error);
+      res.status(500).json({ message: 'Failed to initialize chat bubble session' });
+    }
+  });
+
+  app.post('/api/chat-bubble/chat', async (req: any, res) => {
+    try {
+      const { threadId, message } = req.body;
+
+      if (!threadId || !message) {
+        return res.status(400).json({ message: 'Missing threadId or message' });
+      }
+
+      if (!validateChatBubbleThread(threadId)) {
+        return res.status(401).json({ message: 'Invalid thread ID' });
+      }
+
+      const response = await sendChatBubbleMessage(threadId, message);
+      res.json({ response });
+    } catch (error) {
+      console.error('Error processing chat bubble message:', error);
+      res.status(500).json({ message: 'Failed to process message' });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

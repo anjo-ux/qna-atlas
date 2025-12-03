@@ -7,6 +7,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/useAuth";
 import { useContentProtection } from "@/hooks/useContentProtection";
 import { ThemeProvider } from "@/hooks/useTheme";
+import { ChatBubble } from "@/components/ChatBubble";
 import Index from "./pages/Index";
 import PreviewMode from "./pages/PreviewMode";
 import NotFound from "./pages/NotFound";
@@ -68,6 +69,7 @@ export default function App() {
           <Sonner />
           <div className="h-screen w-screen overflow-hidden">
             <Router />
+            <ChatBubble />
           </div>
         </TooltipProvider>
       </ThemeProvider>
