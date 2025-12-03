@@ -9,7 +9,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { TestHistory } from '@/components/TestHistory';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { Section } from '@/types/question';
-import { BookOpen, CheckCircle2, XCircle, TrendingUp, Target, ChevronRight, RotateCcw, AlertCircle, Zap, LogOut, User, Settings, Eye, Smile, Sparkles, Heart, Rocket, Brain, Flame, Crown, Coffee, Moon, Sun, Star } from 'lucide-react';
+import { BookOpen, BadgeCheck, AlertTriangle, BarChart3, Crosshair, ChevronRight, RotateCcw, Lightbulb, Zap, LogOut, User, Settings, Eye, Smile, Sparkles, Heart, Rocket, Brain, Flame, Crown, Coffee, Moon, Sun, Star } from 'lucide-react';
 import { useMemo } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
@@ -256,7 +256,7 @@ export function HomePage({ sections, onReviewIncorrect, onStartTest, onResumeTes
         <Card variant="glass" className="p-3 md:p-6 glow-primary transition-glow hover:glow-primary">
           <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-3">
             <div className="p-2 md:p-3 rounded-lg bg-success/20 flex-shrink-0">
-              <CheckCircle2 className="h-5 w-5 md:h-6 md:w-6 text-success" />
+              <BadgeCheck className="h-5 w-5 md:h-6 md:w-6 text-success" />
             </div>
             <div className="min-w-0">
               <p className="text-xs md:text-sm text-muted-foreground">Correct</p>
@@ -268,7 +268,7 @@ export function HomePage({ sections, onReviewIncorrect, onStartTest, onResumeTes
         <Card variant="glass" className="p-3 md:p-6 glow-primary transition-glow hover:glow-primary">
           <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-3">
             <div className="p-2 md:p-3 rounded-lg bg-destructive/20 flex-shrink-0">
-              <XCircle className="h-5 w-5 md:h-6 md:w-6 text-destructive" />
+              <AlertTriangle className="h-5 w-5 md:h-6 md:w-6 text-destructive" />
             </div>
             <div className="min-w-0">
               <p className="text-xs md:text-sm text-muted-foreground">Incorrect</p>
@@ -294,7 +294,7 @@ export function HomePage({ sections, onReviewIncorrect, onStartTest, onResumeTes
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
         <Card variant="glass" className="p-4 md:p-6 glow-primary transition-glow hover:glow-primary">
           <h2 className="text-lg md:text-xl font-semibold mb-4 flex items-center gap-2 gradient-text">
-            <TrendingUp className="h-5 w-5 text-primary" />
+            <BarChart3 className="h-5 w-5 text-primary" />
             Overall Progress
           </h2>
           <div className="space-y-4">
