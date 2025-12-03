@@ -9,7 +9,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { TestHistory } from '@/components/TestHistory';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { Section } from '@/types/question';
-import { BookOpen, Trophy, X, BarChart3, Crosshair, ChevronRight, RotateCcw, Lightbulb, Zap, LogOut, User, Settings, Eye, Smile, Sparkles, Heart, Rocket, Flame, Crown, Coffee, Moon, Sun, Star, Target } from 'lucide-react';
+import { BookOpen, Trophy, X, BarChart3, Crosshair, ChevronRight, RotateCcw, Lightbulb, Zap, LogOut, User, Settings, Eye, Smile, Sparkles, Heart, Rocket, Flame, Crown, Coffee, Moon, Sun, Star, Target, CheckCircle2 } from 'lucide-react';
 import { useMemo } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {

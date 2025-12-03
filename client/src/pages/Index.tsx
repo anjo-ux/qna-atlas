@@ -15,7 +15,7 @@ import { PreviewWizard } from '@/components/PreviewWizard';
 import { TestMode } from './TestMode';
 import { Settings as SettingsPage } from './Settings';
 import { Input } from '@/components/ui/input';
-import { Search, Menu, X, BookOpen, FileQuestion, Columns2, Home, FileText, Settings, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, Bookmark, Lightbulb } from 'lucide-react';
+import { Search, Menu, X, BookOpen, FileQuestion, Columns2, Home, FileText, Settings, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, Bookmark, Lightbulb, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useQuestionStats } from '@/hooks/useQuestionStats';
