@@ -93,10 +93,12 @@ export default function OralBoardSimulator({ onBack }: { onBack: () => void }) {
 
       const data = await res.json();
       if (data.response) {
+        // Extract text from response object (OpenAI Assistants API returns {value, annotations})
+        const responseText = typeof data.response === 'string' ? data.response : data.response.value || '';
         const assistantMessage: Message = {
           id: (Date.now() + 1).toString(),
           role: 'assistant',
-          content: data.response,
+          content: responseText,
           timestamp: new Date()
         };
         setMessages(prev => [...prev, assistantMessage]);
