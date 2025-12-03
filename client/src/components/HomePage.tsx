@@ -244,7 +244,7 @@ export function HomePage({ sections, onReviewIncorrect, onStartTest, onResumeTes
         <Card variant="glass" className="p-3 md:p-6 glow-primary transition-glow hover:glow-primary">
           <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-3">
             <div className="p-2 md:p-3 rounded-lg bg-chart-1/20 flex-shrink-0">
-              <BookOpen className="h-5 w-5 md:h-6 md:w-6 text-chart-1" />
+              <CheckCircle2 className="h-5 w-5 md:h-6 md:w-6 text-chart-1" />
             </div>
             <div className="min-w-0">
               <p className="text-xs md:text-sm text-muted-foreground">Answered</p>
