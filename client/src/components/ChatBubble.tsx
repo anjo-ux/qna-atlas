@@ -92,14 +92,10 @@ export function ChatBubble() {
   };
 
   return (
-    <div className="fixed bottom-6 right-6 z-40 flex flex-col items-end gap-0">
-      {/* Chat Window - Expands upward from bubble */}
+    <div className="fixed bottom-6 right-6 z-40 flex flex-col items-end gap-3">
+      {/* Chat Window - Above the bubble */}
       {isOpen && (
-        <Card className="w-96 h-96 flex flex-col bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm border-white/20 dark:border-slate-700/20 shadow-xl mb-3 animate-in fade-in zoom-in-50 origin-bottom-right"
-          style={{
-            animation: 'scaleIn 0.3s ease-out'
-          }}
-        >
+        <Card className="w-96 h-96 flex flex-col bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm border-white/20 dark:border-slate-700/20 shadow-xl">
           {/* Header */}
           <div className="p-4 border-b border-border/50 bg-primary/10">
             <h3 className="font-semibold text-sm">Assistant</h3>
@@ -174,26 +170,11 @@ export function ChatBubble() {
       <Button
         onClick={() => setIsOpen(!isOpen)}
         size="icon"
-        className="h-14 w-14 rounded-full shadow-lg flex-shrink-0"
+        className="h-14 w-14 rounded-full shadow-lg"
         data-testid="button-chat-bubble"
       >
         {isOpen ? <X className="h-6 w-6" /> : <MessageCircle className="h-6 w-6" />}
       </Button>
-
-      <style>{`
-        @keyframes scaleIn {
-          from {
-            opacity: 0;
-            transform: scale(0.8);
-            transform-origin: bottom right;
-          }
-          to {
-            opacity: 1;
-            transform: scale(1);
-            transform-origin: bottom right;
-          }
-        }
-      `}</style>
     </div>
   );
 }
