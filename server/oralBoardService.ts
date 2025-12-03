@@ -23,6 +23,7 @@ Format your responses in clear, conversational language. Ask one main question o
 interface AssistantThread {
   id: string;
   createdAt: Date;
+  conversationHistory: Array<{ role: 'user' | 'assistant'; content: string }>;
 }
 
 // In-memory thread storage (in production, store in database)
@@ -30,12 +31,13 @@ const threads = new Map<string, AssistantThread>();
 
 export async function initializeThread(): Promise<string> {
   try {
-    const thread = await openai.beta.threads.create();
-    threads.set(thread.id, {
-      id: thread.id,
-      createdAt: new Date()
+    const threadId = Math.random().toString(36).substring(2);
+    threads.set(threadId, {
+      id: threadId,
+      createdAt: new Date(),
+      conversationHistory: []
     });
-    return thread.id;
+    return threadId;
   } catch (error) {
     console.error('Failed to create thread:', error);
     throw new Error('Failed to initialize oral board session');
@@ -44,36 +46,50 @@ export async function initializeThread(): Promise<string> {
 
 export async function sendMessage(threadId: string, userMessage: string): Promise<string> {
   try {
-    // Add message to thread
-    await openai.beta.threads.messages.create(threadId, {
+    const thread = threads.get(threadId);
+    if (!thread) {
+      throw new Error('Thread not found');
+    }
+
+    // Add user message to history
+    thread.conversationHistory.push({
       role: 'user',
       content: userMessage
     });
 
-    // Run assistant with system prompt in messages instead of using non-existent assistant ID
-    const run = await openai.beta.threads.runs.createAndPoll(threadId, {
+    // Prepare messages for API call
+    const messages = [
+      {
+        role: 'system' as const,
+        content: ORAL_BOARD_SYSTEM_PROMPT
+      },
+      ...thread.conversationHistory.map(msg => ({
+        role: msg.role as 'user' | 'assistant',
+        content: msg.content
+      }))
+    ];
+
+    // Call OpenAI chat completions
+    const response = await openai.chat.completions.create({
       model: 'gpt-4o',
-      instructions: ORAL_BOARD_SYSTEM_PROMPT
+      messages,
+      max_tokens: 1024,
+      temperature: 0.7
     });
 
-    // Check run status
-    if (run.status !== 'completed') {
-      throw new Error(`Run failed with status: ${run.status}`);
-    }
-
-    // Get messages from thread
-    const messages = await openai.beta.threads.messages.list(threadId);
-
-    // Find the last assistant message
-    const lastAssistantMessage = messages.data.find(
-      (msg: any) => msg.role === 'assistant'
-    );
-
-    if (!lastAssistantMessage || lastAssistantMessage.content[0].type !== 'text') {
+    // Extract response text
+    const assistantMessage = response.choices[0].message.content;
+    if (!assistantMessage) {
       throw new Error('No response from assistant');
     }
 
-    return lastAssistantMessage.content[0].text;
+    // Add assistant response to history
+    thread.conversationHistory.push({
+      role: 'assistant',
+      content: assistantMessage
+    });
+
+    return assistantMessage;
   } catch (error) {
     console.error('Failed to send message:', error);
     throw new Error('Failed to process message');
