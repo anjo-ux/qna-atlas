@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { ChevronLeft, Send, Loader2, Plus, Trash2 } from 'lucide-react';
+import { ChevronLeft, Send, Loader2, Plus, Trash2, Menu, X } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 
 interface Message {
@@ -25,6 +25,7 @@ export default function OralBoardSimulator({ onBack }: { onBack: () => void }) {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [threadId, setThreadId] = useState<string>('');
+  const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Initialize first thread on mount
@@ -66,6 +67,17 @@ export default function OralBoardSimulator({ onBack }: { onBack: () => void }) {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  // Set sidebar default open state based on screen size
+  useEffect(() => {
+    const handleResize = () => {
+      setIsSidebarOpen(window.innerWidth >= 1024);
+    };
+
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const handleSendMessage = async () => {
     if (!input.trim() || !threadId || isLoading) return;
@@ -167,7 +179,9 @@ export default function OralBoardSimulator({ onBack }: { onBack: () => void }) {
   return (
     <div className="h-screen w-full flex bg-gradient-to-br from-purple-50 via-lavender-50 to-pink-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-900">
       {/* Left Sidebar - Chat History */}
-      <div className="w-64 flex flex-col border-r border-border bg-white/30 dark:bg-slate-900/30 backdrop-blur-sm">
+      <div className={`flex flex-col border-r border-border bg-white/30 dark:bg-slate-900/30 backdrop-blur-sm transition-all duration-300 ${
+        isSidebarOpen ? 'w-64' : 'w-0'
+      } overflow-hidden lg:w-64 lg:overflow-visible`}>
         {/* Header */}
         <div className="p-4 border-b border-border/50">
           <Button
@@ -224,19 +238,29 @@ export default function OralBoardSimulator({ onBack }: { onBack: () => void }) {
       {/* Main Chat Area */}
       <div className="flex-1 flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-border/50 bg-white/40 dark:bg-slate-900/40 backdrop-blur-md">
-          <div className="flex items-center gap-3">
+        <div className="flex items-center justify-between p-4 border-b border-border/50 bg-white/40 dark:bg-slate-900/40 backdrop-blur-md gap-3">
+          <div className="flex items-center gap-3 min-w-0">
+            <Button
+              size="icon"
+              variant="ghost"
+              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+              className="lg:hidden flex-shrink-0"
+              data-testid="button-toggle-sidebar"
+            >
+              {isSidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </Button>
             <Button
               size="icon"
               variant="ghost"
               onClick={onBack}
               data-testid="button-back"
+              className="flex-shrink-0"
             >
               <ChevronLeft className="h-5 w-5" />
             </Button>
-            <div>
-              <h1 className="text-xl font-semibold">Oral Board Simulator</h1>
-              <p className="text-xs text-muted-foreground">
+            <div className="min-w-0">
+              <h1 className="text-lg sm:text-xl font-semibold truncate">Oral Boards Coach</h1>
+              <p className="text-xs text-muted-foreground truncate">
                 {conversations.find(c => c.id === currentConversationId)?.title || 'Loading...'}
               </p>
             </div>
