@@ -445,7 +445,7 @@ export default function Index() {
                   <span className="hidden md:inline">Test</span>
                 </Button>
 
-                {/* Oral Board Button */}
+                {/* Oral Boards Coach Button */}
                 <Button
                   onClick={() => setLocation('/oral-board')}
                   variant="outline"
@@ -453,7 +453,7 @@ export default function Index() {
                   data-testid="button-oral-board"
                 >
                   <Mic className="h-4 w-4" />
-                  <span className="hidden md:inline">Oral Board</span>
+                  <span className="hidden md:inline">Oral Boards Coach</span>
                 </Button>
               </div>
             </div>

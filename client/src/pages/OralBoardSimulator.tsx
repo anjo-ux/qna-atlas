@@ -51,7 +51,7 @@ export default function OralBoardSimulator({ onBack }: { onBack: () => void }) {
           setMessages([{
             id: '0',
             role: 'assistant',
-            content: 'Welcome to the Oral Board Simulator. I\'m your virtual oral exam interviewer. Let\'s discuss plastic surgery concepts. What topic would you like to review today?',
+            content: 'Welcome to Oral Boards Coach. I\'m your virtual oral exam interviewer. Let\'s discuss plastic surgery concepts. What topic would you like to review today?',
             timestamp: new Date()
           }]);
         }
