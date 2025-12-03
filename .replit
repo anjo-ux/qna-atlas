@@ -78,3 +78,8 @@ externalPort = 6000
 [[ports]]
 localPort = 46463
 externalPort = 6800
+
+[userenv]
+
+[userenv.shared]
+OPENAI_ASSISTANT_ID = "asst_tt8Ci5ShxyJNCMUA2ob7EB8m"

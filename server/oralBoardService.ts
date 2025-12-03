@@ -67,7 +67,7 @@ export async function sendMessage(threadId: string, userMessage: string): Promis
       throw new Error('No response from assistant');
     }
 
-    return lastAssistantMessage.content[0].text;
+    return (lastAssistantMessage.content[0] as any).text;
   } catch (error) {
     console.error('Failed to send message:', error);
     throw new Error('Failed to process message');
