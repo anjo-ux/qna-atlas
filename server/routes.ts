@@ -747,6 +747,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Oral Board Simulator routes
+  const { initializeThread, sendMessage, validateThreadExists } = await import('./oralBoardService');
+
+  app.post('/api/oral-board/init', isAuthenticated, async (req: any, res) => {
+    try {
+      const threadId = await initializeThread();
+      res.json({ threadId });
+    } catch (error) {
+      console.error('Error initializing oral board thread:', error);
+      res.status(500).json({ message: 'Failed to initialize oral board session' });
+    }
+  });
+
+  app.post('/api/oral-board/chat', isAuthenticated, async (req: any, res) => {
+    try {
+      const { threadId, message } = req.body;
+
+      if (!threadId || !message) {
+        return res.status(400).json({ message: 'Missing threadId or message' });
+      }
+
+      if (!validateThreadExists(threadId)) {
+        return res.status(401).json({ message: 'Invalid thread ID' });
+      }
+
+      const response = await sendMessage(threadId, message);
+      res.json({ response });
+    } catch (error) {
+      console.error('Error processing chat message:', error);
+      res.status(500).json({ message: 'Failed to process message' });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

@@ -14,6 +14,7 @@ import Landing from "./pages/Landing";
 import Login from "./pages/Login";
 import { BookmarksPage } from "./pages/Bookmarks";
 import { SpacedRepetitionPage } from "./pages/SpacedRepetition";
+import OralBoardSimulator from "./pages/OralBoardSimulator";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -44,6 +45,9 @@ function Router() {
           </Route>
           <Route path="/spaced-repetition">
             {() => <SpacedRepetitionPage onBack={() => window.history.back()} />}
+          </Route>
+          <Route path="/oral-board">
+            {() => <OralBoardSimulator onBack={() => window.history.back()} />}
           </Route>
           <Route component={NotFound} />
         </>

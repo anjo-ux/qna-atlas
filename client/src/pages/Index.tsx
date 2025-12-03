@@ -15,7 +15,7 @@ import { PreviewWizard } from '@/components/PreviewWizard';
 import { TestMode } from './TestMode';
 import { Settings as SettingsPage } from './Settings';
 import { Input } from '@/components/ui/input';
-import { Search, Menu, X, BookOpen, FileQuestion, Columns2, Home, FileText, Settings, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, Bookmark, Lightbulb, Zap } from 'lucide-react';
+import { Search, Menu, X, BookOpen, FileQuestion, Columns2, Home, FileText, Settings, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, Bookmark, Lightbulb, Zap, Mic } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useQuestionStats } from '@/hooks/useQuestionStats';
@@ -439,9 +439,21 @@ export default function Index() {
                   onClick={handleStartTest}
                   variant="outline"
                   className="gap-2"
+                  data-testid="button-test"
                 >
                   <FileText className="h-4 w-4" />
                   <span className="hidden md:inline">Test</span>
+                </Button>
+
+                {/* Oral Board Button */}
+                <Button
+                  onClick={() => setLocation('/oral-board')}
+                  variant="outline"
+                  className="gap-2"
+                  data-testid="button-oral-board"
+                >
+                  <Mic className="h-4 w-4" />
+                  <span className="hidden md:inline">Oral Board</span>
                 </Button>
               </div>
             </div>
