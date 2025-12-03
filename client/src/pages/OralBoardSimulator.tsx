@@ -363,24 +363,24 @@ Hinting: ${sessionSetup.hinting}`;
         </div>
 
         {/* Messages Container or Setup Menu */}
-        <div className="flex-1 overflow-y-auto scrollbar-hide p-6 space-y-4 flex flex-col">
+        <div className="flex-1 overflow-y-auto scrollbar-hide p-4 flex flex-col justify-center">
           {conversations.find(c => c.id === currentConversationId)?.showSetupMenu ? (
-            // Setup Menu
-            <div className="space-y-4 max-w-2xl">
-              <Card className="p-6 bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border-white/20 dark:border-slate-700/20">
-                <h2 className="text-xl font-semibold mb-6">Configure Your Session</h2>
+            // Setup Menu - Full Width
+            <div className="w-full">
+              <Card className="p-4 bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border-white/20 dark:border-slate-700/20">
+                <h2 className="text-lg font-semibold mb-4">Configure Your Session</h2>
                 
                 {/* Specialty */}
-                <div className="mb-4">
-                  <label className="text-sm font-medium mb-2 block">Specialty/Subspecialty</label>
-                  <div className="flex gap-2 flex-wrap">
+                <div className="mb-3">
+                  <label className="text-xs font-medium mb-1 block">Specialty/Subspecialty</label>
+                  <div className="flex gap-1 flex-wrap">
                     {['Plastic Surgery', 'Hand Surgery', 'Burn Surgery'].map(opt => (
                       <Button
                         key={opt}
                         variant={sessionSetup.specialty === opt ? 'default' : 'outline'}
                         size="sm"
                         onClick={() => setSessionSetup({...sessionSetup, specialty: opt})}
-                        className="gap-1"
+                        className="gap-1 text-xs"
                       >
                         {sessionSetup.specialty === opt && <Check className="h-3 w-3" />}
                         {opt}
@@ -390,16 +390,16 @@ Hinting: ${sessionSetup.hinting}`;
                 </div>
 
                 {/* Level */}
-                <div className="mb-4">
-                  <label className="text-sm font-medium mb-2 block">Level</label>
-                  <div className="flex gap-2 flex-wrap">
+                <div className="mb-3">
+                  <label className="text-xs font-medium mb-1 block">Level</label>
+                  <div className="flex gap-1 flex-wrap">
                     {['MS4', 'PGY-1', 'PGY-2', 'Fellow'].map(opt => (
                       <Button
                         key={opt}
                         variant={sessionSetup.level === opt ? 'default' : 'outline'}
                         size="sm"
                         onClick={() => setSessionSetup({...sessionSetup, level: opt})}
-                        className="gap-1"
+                        className="gap-1 text-xs"
                       >
                         {sessionSetup.level === opt && <Check className="h-3 w-3" />}
                         {opt}
@@ -409,16 +409,16 @@ Hinting: ${sessionSetup.hinting}`;
                 </div>
 
                 {/* Mode */}
-                <div className="mb-4">
-                  <label className="text-sm font-medium mb-2 block">Mode</label>
-                  <div className="flex gap-2 flex-wrap">
+                <div className="mb-3">
+                  <label className="text-xs font-medium mb-1 block">Mode</label>
+                  <div className="flex gap-1 flex-wrap">
                     {['Oral Boards', 'Written Boards', 'Case Walkthrough'].map(opt => (
                       <Button
                         key={opt}
                         variant={sessionSetup.mode === opt ? 'default' : 'outline'}
                         size="sm"
                         onClick={() => setSessionSetup({...sessionSetup, mode: opt})}
-                        className="gap-1"
+                        className="gap-1 text-xs"
                       >
                         {sessionSetup.mode === opt && <Check className="h-3 w-3" />}
                         {opt}
@@ -428,16 +428,16 @@ Hinting: ${sessionSetup.hinting}`;
                 </div>
 
                 {/* Focus Areas */}
-                <div className="mb-4">
-                  <label className="text-sm font-medium mb-2 block">Focus Areas</label>
-                  <div className="flex gap-2 flex-wrap">
+                <div className="mb-3">
+                  <label className="text-xs font-medium mb-1 block">Focus Areas</label>
+                  <div className="flex gap-1 flex-wrap">
                     {['All', 'Procedures', 'Complications', 'Ethics', 'Stats'].map(opt => (
                       <Button
                         key={opt}
                         variant={sessionSetup.focusAreas === opt ? 'default' : 'outline'}
                         size="sm"
                         onClick={() => setSessionSetup({...sessionSetup, focusAreas: opt})}
-                        className="gap-1"
+                        className="gap-1 text-xs"
                       >
                         {sessionSetup.focusAreas === opt && <Check className="h-3 w-3" />}
                         {opt}
@@ -447,16 +447,16 @@ Hinting: ${sessionSetup.hinting}`;
                 </div>
 
                 {/* Difficulty Curve */}
-                <div className="mb-4">
-                  <label className="text-sm font-medium mb-2 block">Difficulty Curve</label>
-                  <div className="flex gap-2 flex-wrap">
+                <div className="mb-3">
+                  <label className="text-xs font-medium mb-1 block">Difficulty Curve</label>
+                  <div className="flex gap-1 flex-wrap">
                     {['Steady', 'Ramping', 'Adaptive'].map(opt => (
                       <Button
                         key={opt}
                         variant={sessionSetup.difficultyCurve === opt ? 'default' : 'outline'}
                         size="sm"
                         onClick={() => setSessionSetup({...sessionSetup, difficultyCurve: opt})}
-                        className="gap-1"
+                        className="gap-1 text-xs"
                       >
                         {sessionSetup.difficultyCurve === opt && <Check className="h-3 w-3" />}
                         {opt}
@@ -466,16 +466,16 @@ Hinting: ${sessionSetup.hinting}`;
                 </div>
 
                 {/* Number of Cases */}
-                <div className="mb-4">
-                  <label className="text-sm font-medium mb-2 block">Number of Cases</label>
-                  <div className="flex gap-2 flex-wrap">
+                <div className="mb-3">
+                  <label className="text-xs font-medium mb-1 block">Number of Cases</label>
+                  <div className="flex gap-1 flex-wrap">
                     {[3, 6, 10, 15].map(num => (
                       <Button
                         key={num}
                         variant={sessionSetup.numCases === num ? 'default' : 'outline'}
                         size="sm"
                         onClick={() => setSessionSetup({...sessionSetup, numCases: num})}
-                        className="gap-1"
+                        className="gap-1 text-xs"
                       >
                         {sessionSetup.numCases === num && <Check className="h-3 w-3" />}
                         {num}
@@ -485,14 +485,14 @@ Hinting: ${sessionSetup.hinting}`;
                 </div>
 
                 {/* Scoring */}
-                <div className="mb-4">
-                  <label className="text-sm font-medium mb-2 block">Scoring</label>
-                  <div className="flex gap-2">
+                <div className="mb-3">
+                  <label className="text-xs font-medium mb-1 block">Scoring</label>
+                  <div className="flex gap-1">
                     <Button
                       variant={sessionSetup.scoring ? 'default' : 'outline'}
                       size="sm"
                       onClick={() => setSessionSetup({...sessionSetup, scoring: true})}
-                      className="gap-1"
+                      className="gap-1 text-xs"
                     >
                       {sessionSetup.scoring && <Check className="h-3 w-3" />}
                       On
@@ -501,7 +501,7 @@ Hinting: ${sessionSetup.hinting}`;
                       variant={!sessionSetup.scoring ? 'default' : 'outline'}
                       size="sm"
                       onClick={() => setSessionSetup({...sessionSetup, scoring: false})}
-                      className="gap-1"
+                      className="gap-1 text-xs"
                     >
                       {!sessionSetup.scoring && <Check className="h-3 w-3" />}
                       Off
@@ -510,16 +510,16 @@ Hinting: ${sessionSetup.hinting}`;
                 </div>
 
                 {/* Hinting */}
-                <div className="mb-6">
-                  <label className="text-sm font-medium mb-2 block">Hinting</label>
-                  <div className="flex gap-2 flex-wrap">
+                <div className="mb-4">
+                  <label className="text-xs font-medium mb-1 block">Hinting</label>
+                  <div className="flex gap-1 flex-wrap">
                     {['Off', 'Minimal', 'Tiered'].map(opt => (
                       <Button
                         key={opt}
                         variant={sessionSetup.hinting === opt ? 'default' : 'outline'}
                         size="sm"
                         onClick={() => setSessionSetup({...sessionSetup, hinting: opt})}
-                        className="gap-1"
+                        className="gap-1 text-xs"
                       >
                         {sessionSetup.hinting === opt && <Check className="h-3 w-3" />}
                         {opt}
@@ -533,7 +533,7 @@ Hinting: ${sessionSetup.hinting}`;
                   onClick={handleStartSession}
                   disabled={isLoading}
                   className="w-full gap-2"
-                  size="lg"
+                  size="sm"
                 >
                   {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
                   Start Session
@@ -546,7 +546,7 @@ Hinting: ${sessionSetup.hinting}`;
               {messages.map((message) => (
                 <div
                   key={message.id}
-                  className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                  className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'} space-y-4`}
                   data-testid={`message-${message.role}-${message.id}`}
                 >
                   <div
@@ -581,37 +581,39 @@ Hinting: ${sessionSetup.hinting}`;
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Input Area */}
-        <div className="p-6 border-t border-border/50 bg-white/40 dark:bg-slate-900/40 backdrop-blur-md">
-          <div className="flex gap-2 max-w-4xl mx-auto">
-            <Input
-              placeholder="Ask about plastic surgery concepts, techniques, or clinical scenarios..."
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyPress={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                  e.preventDefault();
-                  handleSendMessage();
-                }
-              }}
-              disabled={isLoading}
-              data-testid="input-message"
-              className="flex-1"
-            />
-            <Button
-              onClick={handleSendMessage}
-              disabled={!input.trim() || isLoading}
-              data-testid="button-send"
-              size="icon"
-            >
-              {isLoading ? (
-                <Loader2 className="h-5 w-5 animate-spin" />
-              ) : (
-                <Send className="h-5 w-5" />
-              )}
-            </Button>
+        {/* Input Area - Only show when not in setup menu */}
+        {!conversations.find(c => c.id === currentConversationId)?.showSetupMenu && (
+          <div className="p-6 border-t border-border/50 bg-white/40 dark:bg-slate-900/40 backdrop-blur-md">
+            <div className="flex gap-2 max-w-4xl mx-auto">
+              <Input
+                placeholder="Ask about plastic surgery concepts, techniques, or clinical scenarios..."
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSendMessage();
+                  }
+                }}
+                disabled={isLoading}
+                data-testid="input-message"
+                className="flex-1"
+              />
+              <Button
+                onClick={handleSendMessage}
+                disabled={!input.trim() || isLoading}
+                data-testid="button-send"
+                size="icon"
+              >
+                {isLoading ? (
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                ) : (
+                  <Send className="h-5 w-5" />
+                )}
+              </Button>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
