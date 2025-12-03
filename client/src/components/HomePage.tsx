@@ -9,7 +9,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { TestHistory } from '@/components/TestHistory';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { Section } from '@/types/question';
-import { BookOpen, BadgeCheck, AlertTriangle, BarChart3, Crosshair, ChevronRight, RotateCcw, Lightbulb, Zap, LogOut, User, Settings, Eye, Smile, Sparkles, Heart, Rocket, Brain, Flame, Crown, Coffee, Moon, Sun, Star } from 'lucide-react';
+import { BookOpen, BadgeCheck, AlertTriangle, BarChart3, Crosshair, ChevronRight, RotateCcw, Lightbulb, Zap, LogOut, User, Settings, Eye, Smile, Sparkles, Heart, Rocket, Brain, Flame, Crown, Coffee, Moon, Sun, Star, Target } from 'lucide-react';
 import { useMemo } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
@@ -280,7 +280,7 @@ export function HomePage({ sections, onReviewIncorrect, onStartTest, onResumeTes
         <Card variant="glass" className="p-3 md:p-6 glow-accent transition-glow hover:glow-accent">
           <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-3">
             <div className="p-2 md:p-3 rounded-lg bg-accent/20 flex-shrink-0">
-              <Target className="h-5 w-5 md:h-6 md:w-6 text-accent" />
+              <Crosshair className="h-5 w-5 md:h-6 md:w-6 text-accent" />
             </div>
             <div className="min-w-0">
               <p className="text-xs md:text-sm text-muted-foreground">Accuracy</p>
