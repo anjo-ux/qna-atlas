@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { ChevronLeft, Send, Loader2, Plus, Trash2, Menu, X } from 'lucide-react';
+import { ChevronLeft, Send, Loader2, Plus, Trash2, Menu, X, Check } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { Card } from '@/components/ui/card';
 
 interface Message {
   id: string;
@@ -15,6 +16,18 @@ interface Conversation {
   id: string;
   title: string;
   createdAt: Date;
+  showSetupMenu?: boolean;
+}
+
+interface SessionSetup {
+  specialty: string;
+  level: string;
+  mode: string;
+  focusAreas: string;
+  difficultyCurve: string;
+  numCases: number;
+  scoring: boolean;
+  hinting: string;
 }
 
 export default function OralBoardSimulator({ onBack }: { onBack: () => void }) {
@@ -27,6 +40,17 @@ export default function OralBoardSimulator({ onBack }: { onBack: () => void }) {
   const [threadId, setThreadId] = useState<string>('');
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  
+  const [sessionSetup, setSessionSetup] = useState<SessionSetup>({
+    specialty: 'Plastic Surgery',
+    level: 'Fellow',
+    mode: 'Oral Boards',
+    focusAreas: 'All',
+    difficultyCurve: 'Adaptive',
+    numCases: 6,
+    scoring: true,
+    hinting: 'Off'
+  });
 
   // Initialize first thread on mount
   useEffect(() => {
@@ -42,19 +66,15 @@ export default function OralBoardSimulator({ onBack }: { onBack: () => void }) {
           const newConversation: Conversation = {
             id: conversationId,
             title: 'New Conversation',
-            createdAt: new Date()
+            createdAt: new Date(),
+            showSetupMenu: true
           };
           
           setConversations([newConversation]);
           setCurrentConversationId(conversationId);
           
-          // Add initial system message
-          setMessages([{
-            id: '0',
-            role: 'assistant',
-            content: 'Welcome to Oral Boards Coach. I\'m your virtual oral exam interviewer. Let\'s discuss plastic surgery concepts. What topic would you like to review today?',
-            timestamp: new Date()
-          }]);
+          // Show setup menu - no messages yet
+          setMessages([]);
         }
       } catch (error) {
         console.error('Failed to initialize thread:', error);
@@ -78,6 +98,73 @@ export default function OralBoardSimulator({ onBack }: { onBack: () => void }) {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  const handleStartSession = async () => {
+    // Format the setup as a message
+    const setupMessage = `Specialty/subspecialty: ${sessionSetup.specialty}
+Level: ${sessionSetup.level}
+Mode: ${sessionSetup.mode}
+Focus areas: ${sessionSetup.focusAreas}
+Difficulty curve: ${sessionSetup.difficultyCurve}
+Number of cases: ${sessionSetup.numCases}
+Scoring: ${sessionSetup.scoring ? 'on' : 'off'}
+Hinting: ${sessionSetup.hinting}`;
+
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      role: 'user',
+      content: setupMessage,
+      timestamp: new Date()
+    };
+
+    setMessages([userMessage]);
+    setIsLoading(true);
+
+    // Hide setup menu
+    setConversations(prev =>
+      prev.map(conv =>
+        conv.id === currentConversationId ? { ...conv, showSetupMenu: false } : conv
+      )
+    );
+
+    try {
+      const res = await fetch('/api/oral-board/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          threadId,
+          message: userMessage.content
+        })
+      });
+
+      const data = await res.json();
+      if (data.response) {
+        const responseText = typeof data.response === 'string' ? data.response : data.response.value || '';
+        const assistantMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content: responseText,
+          timestamp: new Date()
+        };
+        setMessages(prev => [...prev, assistantMessage]);
+
+        // Update conversation title
+        if (currentConversationId) {
+          setConversations(prev =>
+            prev.map(conv =>
+              conv.id === currentConversationId && conv.title === 'New Conversation'
+                ? { ...conv, title: sessionSetup.specialty + ' - ' + sessionSetup.mode }
+                : conv
+            )
+          );
+        }
+      }
+    } catch (error) {
+      console.error('Failed to start session:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleSendMessage = async () => {
     if (!input.trim() || !threadId || isLoading) return;
@@ -144,18 +231,26 @@ export default function OralBoardSimulator({ onBack }: { onBack: () => void }) {
         const newConversation: Conversation = {
           id: conversationId,
           title: 'New Conversation',
-          createdAt: new Date()
+          createdAt: new Date(),
+          showSetupMenu: true
         };
         
         setConversations(prev => [newConversation, ...prev]);
         setCurrentConversationId(conversationId);
         
-        setMessages([{
-          id: '0',
-          role: 'assistant',
-          content: 'Welcome to the Oral Board Simulator. I\'m your virtual oral exam interviewer. Let\'s discuss plastic surgery concepts. What topic would you like to review today?',
-          timestamp: new Date()
-        }]);
+        // Reset setup to defaults
+        setSessionSetup({
+          specialty: 'Plastic Surgery',
+          level: 'Fellow',
+          mode: 'Oral Boards',
+          focusAreas: 'All',
+          difficultyCurve: 'Adaptive',
+          numCases: 6,
+          scoring: true,
+          hinting: 'Off'
+        });
+        
+        setMessages([]);
       }
     } catch (error) {
       console.error('Failed to create new conversation:', error);
@@ -267,40 +362,221 @@ export default function OralBoardSimulator({ onBack }: { onBack: () => void }) {
           </div>
         </div>
 
-        {/* Messages Container */}
+        {/* Messages Container or Setup Menu */}
         <div className="flex-1 overflow-y-auto scrollbar-hide p-6 space-y-4 flex flex-col">
-          {messages.map((message) => (
-            <div
-              key={message.id}
-              className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
-              data-testid={`message-${message.role}-${message.id}`}
-            >
-              <div
-                className={`max-w-xl px-4 py-3 rounded-lg ${
-                  message.role === 'user'
-                    ? 'bg-primary text-primary-foreground rounded-br-none'
-                    : 'bg-white/60 dark:bg-slate-800/60 text-foreground rounded-bl-none backdrop-blur-sm border border-white/20 dark:border-slate-700/20'
-                }`}
-              >
-                <p className="text-sm leading-relaxed whitespace-pre-wrap">
-                  {message.content}
-                </p>
-                <span className="text-xs opacity-70 mt-1 block">
-                  {message.timestamp.toLocaleTimeString([], {
-                    hour: '2-digit',
-                    minute: '2-digit'
-                  })}
-                </span>
-              </div>
+          {conversations.find(c => c.id === currentConversationId)?.showSetupMenu ? (
+            // Setup Menu
+            <div className="space-y-4 max-w-2xl">
+              <Card className="p-6 bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border-white/20 dark:border-slate-700/20">
+                <h2 className="text-xl font-semibold mb-6">Configure Your Session</h2>
+                
+                {/* Specialty */}
+                <div className="mb-4">
+                  <label className="text-sm font-medium mb-2 block">Specialty/Subspecialty</label>
+                  <div className="flex gap-2 flex-wrap">
+                    {['Plastic Surgery', 'Hand Surgery', 'Burn Surgery'].map(opt => (
+                      <Button
+                        key={opt}
+                        variant={sessionSetup.specialty === opt ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => setSessionSetup({...sessionSetup, specialty: opt})}
+                        className="gap-1"
+                      >
+                        {sessionSetup.specialty === opt && <Check className="h-3 w-3" />}
+                        {opt}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Level */}
+                <div className="mb-4">
+                  <label className="text-sm font-medium mb-2 block">Level</label>
+                  <div className="flex gap-2 flex-wrap">
+                    {['MS4', 'PGY-1', 'PGY-2', 'Fellow'].map(opt => (
+                      <Button
+                        key={opt}
+                        variant={sessionSetup.level === opt ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => setSessionSetup({...sessionSetup, level: opt})}
+                        className="gap-1"
+                      >
+                        {sessionSetup.level === opt && <Check className="h-3 w-3" />}
+                        {opt}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Mode */}
+                <div className="mb-4">
+                  <label className="text-sm font-medium mb-2 block">Mode</label>
+                  <div className="flex gap-2 flex-wrap">
+                    {['Oral Boards', 'Written Boards', 'Case Walkthrough'].map(opt => (
+                      <Button
+                        key={opt}
+                        variant={sessionSetup.mode === opt ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => setSessionSetup({...sessionSetup, mode: opt})}
+                        className="gap-1"
+                      >
+                        {sessionSetup.mode === opt && <Check className="h-3 w-3" />}
+                        {opt}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Focus Areas */}
+                <div className="mb-4">
+                  <label className="text-sm font-medium mb-2 block">Focus Areas</label>
+                  <div className="flex gap-2 flex-wrap">
+                    {['All', 'Procedures', 'Complications', 'Ethics', 'Stats'].map(opt => (
+                      <Button
+                        key={opt}
+                        variant={sessionSetup.focusAreas === opt ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => setSessionSetup({...sessionSetup, focusAreas: opt})}
+                        className="gap-1"
+                      >
+                        {sessionSetup.focusAreas === opt && <Check className="h-3 w-3" />}
+                        {opt}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Difficulty Curve */}
+                <div className="mb-4">
+                  <label className="text-sm font-medium mb-2 block">Difficulty Curve</label>
+                  <div className="flex gap-2 flex-wrap">
+                    {['Steady', 'Ramping', 'Adaptive'].map(opt => (
+                      <Button
+                        key={opt}
+                        variant={sessionSetup.difficultyCurve === opt ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => setSessionSetup({...sessionSetup, difficultyCurve: opt})}
+                        className="gap-1"
+                      >
+                        {sessionSetup.difficultyCurve === opt && <Check className="h-3 w-3" />}
+                        {opt}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Number of Cases */}
+                <div className="mb-4">
+                  <label className="text-sm font-medium mb-2 block">Number of Cases</label>
+                  <div className="flex gap-2 flex-wrap">
+                    {[3, 6, 10, 15].map(num => (
+                      <Button
+                        key={num}
+                        variant={sessionSetup.numCases === num ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => setSessionSetup({...sessionSetup, numCases: num})}
+                        className="gap-1"
+                      >
+                        {sessionSetup.numCases === num && <Check className="h-3 w-3" />}
+                        {num}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Scoring */}
+                <div className="mb-4">
+                  <label className="text-sm font-medium mb-2 block">Scoring</label>
+                  <div className="flex gap-2">
+                    <Button
+                      variant={sessionSetup.scoring ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setSessionSetup({...sessionSetup, scoring: true})}
+                      className="gap-1"
+                    >
+                      {sessionSetup.scoring && <Check className="h-3 w-3" />}
+                      On
+                    </Button>
+                    <Button
+                      variant={!sessionSetup.scoring ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setSessionSetup({...sessionSetup, scoring: false})}
+                      className="gap-1"
+                    >
+                      {!sessionSetup.scoring && <Check className="h-3 w-3" />}
+                      Off
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Hinting */}
+                <div className="mb-6">
+                  <label className="text-sm font-medium mb-2 block">Hinting</label>
+                  <div className="flex gap-2 flex-wrap">
+                    {['Off', 'Minimal', 'Tiered'].map(opt => (
+                      <Button
+                        key={opt}
+                        variant={sessionSetup.hinting === opt ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => setSessionSetup({...sessionSetup, hinting: opt})}
+                        className="gap-1"
+                      >
+                        {sessionSetup.hinting === opt && <Check className="h-3 w-3" />}
+                        {opt}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Start Button */}
+                <Button
+                  onClick={handleStartSession}
+                  disabled={isLoading}
+                  className="w-full gap-2"
+                  size="lg"
+                >
+                  {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+                  Start Session
+                </Button>
+              </Card>
             </div>
-          ))}
-          {isLoading && (
-            <div className="flex justify-start">
-              <div className="bg-white/60 dark:bg-slate-800/60 text-foreground px-4 py-3 rounded-lg rounded-bl-none backdrop-blur-sm border border-white/20 dark:border-slate-700/20 flex items-center gap-2">
-                <Loader2 className="h-4 w-4 animate-spin" />
-                <span className="text-sm">Thinking...</span>
-              </div>
-            </div>
+          ) : (
+            // Chat Messages
+            <>
+              {messages.map((message) => (
+                <div
+                  key={message.id}
+                  className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                  data-testid={`message-${message.role}-${message.id}`}
+                >
+                  <div
+                    className={`max-w-xl px-4 py-3 rounded-lg ${
+                      message.role === 'user'
+                        ? 'bg-primary text-primary-foreground rounded-br-none'
+                        : 'bg-white/60 dark:bg-slate-800/60 text-foreground rounded-bl-none backdrop-blur-sm border border-white/20 dark:border-slate-700/20'
+                    }`}
+                  >
+                    <p className="text-sm leading-relaxed whitespace-pre-wrap">
+                      {message.content}
+                    </p>
+                    <span className="text-xs opacity-70 mt-1 block">
+                      {message.timestamp.toLocaleTimeString([], {
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })}
+                    </span>
+                  </div>
+                </div>
+              ))}
+              {isLoading && (
+                <div className="flex justify-start">
+                  <div className="bg-white/60 dark:bg-slate-800/60 text-foreground px-4 py-3 rounded-lg rounded-bl-none backdrop-blur-sm border border-white/20 dark:border-slate-700/20 flex items-center gap-2">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <span className="text-sm">Thinking...</span>
+                  </div>
+                </div>
+              )}
+            </>
           )}
           <div ref={messagesEndRef} />
         </div>
