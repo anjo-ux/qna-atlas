@@ -12,6 +12,7 @@ import { SearchResults } from '@/components/SearchResults';
 import { HomePage } from '@/components/HomePage';
 import { Paywall } from '@/components/Paywall';
 import { PreviewWizard } from '@/components/PreviewWizard';
+import { ChatBubble } from '@/components/ChatBubble';
 import { TestMode } from './TestMode';
 import { Settings as SettingsPage } from './Settings';
 import { Input } from '@/components/ui/input';
@@ -725,6 +726,7 @@ export default function Index() {
           )}
         </main>
       </div>
+      {screenMode !== 'test' && <ChatBubble />}
     </div>
   );
 }

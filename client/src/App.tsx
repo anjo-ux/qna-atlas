@@ -1,4 +1,4 @@
-import { Switch, Route } from "wouter";
+import { Switch, Route, useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -57,6 +57,19 @@ function Router() {
   );
 }
 
+function AppContent() {
+  const [location] = useLocation();
+  // Hide chat bubble on preview mode and oral boards coach
+  const shouldHideChatBubble = location === '/preview' || location === '/oral-board';
+
+  return (
+    <div className="h-screen w-screen overflow-hidden">
+      <Router />
+      {!shouldHideChatBubble && <ChatBubble />}
+    </div>
+  );
+}
+
 export default function App() {
   // Enable content protection (prevents copy-paste and screenshots)
   useContentProtection();
@@ -67,10 +80,7 @@ export default function App() {
         <TooltipProvider>
           <Toaster />
           <Sonner />
-          <div className="h-screen w-screen overflow-hidden">
-            <Router />
-            <ChatBubble />
-          </div>
+          <AppContent />
         </TooltipProvider>
       </ThemeProvider>
     </QueryClientProvider>
