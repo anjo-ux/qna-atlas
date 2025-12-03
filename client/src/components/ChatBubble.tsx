@@ -93,7 +93,7 @@ export function ChatBubble() {
   };
 
   return (
-    <div className="fixed bottom-6 right-6 z-40">
+    <div className="fixed z-40 bottom-6 right-6 md:bottom-6 md:right-6">
       <style>{`
         @keyframes chatBubbleGrow {
           from {
@@ -141,12 +141,22 @@ export function ChatBubble() {
         .chat-window-expanded {
           animation: expandToFull 0.4s ease-out forwards;
         }
+
+        @media (max-width: 768px) {
+          .chat-window-expanded-mobile {
+            position: fixed;
+            inset: 60px 0 0 0;
+            border-radius: 0;
+            height: auto;
+            max-height: calc(100vh - 60px);
+          }
+        }
       `}</style>
 
       {isOpen ? (
         // Chat Window (Expanded or Normal)
-        <Card className={`flex flex-col bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm border-white/20 dark:border-slate-700/20 shadow-xl ${isExpanded ? 'chat-window-expanded w-96' : 'chat-window-open w-96 h-96'}`}
-          style={isExpanded ? { height: 'calc(100vh - 140px)' } : undefined}
+        <Card className={`flex flex-col bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm border-white/20 dark:border-slate-700/20 shadow-xl ${isExpanded ? 'chat-window-expanded md:w-96' : 'chat-window-open w-96 h-96'} ${isExpanded ? 'chat-window-expanded-mobile' : ''}`}
+          style={!isExpanded ? undefined : (window.innerWidth < 768 ? undefined : { height: 'calc(100vh - 140px)' })}
         >
           {/* Header with Close and Expand Buttons */}
           <div className="flex items-center justify-between p-4 border-b border-border/50 bg-primary/10">
