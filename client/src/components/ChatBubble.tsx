@@ -92,13 +92,22 @@ export function ChatBubble() {
   };
 
   return (
-    <div className="fixed bottom-6 right-6 z-40 flex flex-col items-end gap-3">
-      {/* Chat Window - Above the bubble */}
-      {isOpen && (
+    <div className="fixed bottom-6 right-6 z-40">
+      {isOpen ? (
+        // Chat Window (Expanded)
         <Card className="w-96 h-96 flex flex-col bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm border-white/20 dark:border-slate-700/20 shadow-xl">
-          {/* Header */}
-          <div className="p-4 border-b border-border/50 bg-primary/10">
+          {/* Header with Close Button */}
+          <div className="flex items-center justify-between p-4 border-b border-border/50 bg-primary/10">
             <h3 className="font-semibold text-sm">Assistant</h3>
+            <Button
+              onClick={() => setIsOpen(false)}
+              size="icon"
+              variant="ghost"
+              className="h-6 w-6"
+              data-testid="button-close-chat-bubble"
+            >
+              <X className="h-4 w-4" />
+            </Button>
           </div>
 
           {/* Messages */}
@@ -164,17 +173,17 @@ export function ChatBubble() {
             </div>
           </div>
         </Card>
+      ) : (
+        // Chat Bubble Button (Closed)
+        <Button
+          onClick={() => setIsOpen(true)}
+          size="icon"
+          className="h-14 w-14 rounded-full shadow-lg"
+          data-testid="button-chat-bubble"
+        >
+          <MessageCircle className="h-6 w-6" />
+        </Button>
       )}
-
-      {/* Chat Bubble Button */}
-      <Button
-        onClick={() => setIsOpen(!isOpen)}
-        size="icon"
-        className="h-14 w-14 rounded-full shadow-lg"
-        data-testid="button-chat-bubble"
-      >
-        {isOpen ? <X className="h-6 w-6" /> : <MessageCircle className="h-6 w-6" />}
-      </Button>
     </div>
   );
 }
