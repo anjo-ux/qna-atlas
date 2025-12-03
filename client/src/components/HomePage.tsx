@@ -9,7 +9,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { TestHistory } from '@/components/TestHistory';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { Section } from '@/types/question';
-import { BookOpen, CheckCircle2, X, BarChart3, Crosshair, ChevronRight, RotateCcw, Lightbulb, Zap, LogOut, User, Settings, Eye, Smile, Sparkles, Heart, Rocket, Flame, Crown, Coffee, Moon, Sun, Star, Target } from 'lucide-react';
+import { BookOpen, Trophy, X, BarChart3, Crosshair, ChevronRight, RotateCcw, Lightbulb, Zap, LogOut, User, Settings, Eye, Smile, Sparkles, Heart, Rocket, Flame, Crown, Coffee, Moon, Sun, Star, Target } from 'lucide-react';
 import { useMemo } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
@@ -256,7 +256,7 @@ export function HomePage({ sections, onReviewIncorrect, onStartTest, onResumeTes
         <Card variant="glass" className="p-3 md:p-6 glow-primary transition-glow hover:glow-primary">
           <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-3">
             <div className="p-2 md:p-3 rounded-lg bg-success/20 flex-shrink-0">
-              <CheckCircle2 className="h-5 w-5 md:h-6 md:w-6 text-success" />
+              <Trophy className="h-5 w-5 md:h-6 md:w-6 text-success" />
             </div>
             <div className="min-w-0">
               <p className="text-xs md:text-sm text-muted-foreground">Correct</p>
