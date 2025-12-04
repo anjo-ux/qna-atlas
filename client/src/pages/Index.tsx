@@ -151,17 +151,23 @@ export default function Index() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // Clear refs when subsection changes to ensure fresh DOM references
+  useEffect(() => {
+    questionRefsMap.current.clear();
+  }, [selectedSection, selectedSubsection]);
+
   // Auto-scroll to last answered question when subsection changes
   useEffect(() => {
-    if (!selectedSection || !selectedSubsection) return;
+    if (!selectedSection || !selectedSubsection || filteredQuestions.length === 0) return;
 
     const subsectionKey = `${selectedSection}-${selectedSubsection}`;
     const lastAnsweredId = lastAnsweredQuestionMap.current.get(subsectionKey);
 
     if (lastAnsweredId) {
       // Try multiple times to scroll, as refs might not be immediately available
+      // Increase attempts and delays to account for lazy rendering
       let attempts = 0;
-      const maxAttempts = 10;
+      const maxAttempts = 20;
       
       const tryScroll = () => {
         attempts++;
@@ -171,14 +177,14 @@ export default function Index() {
           // Element is visible in the DOM - scroll to it
           questionElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
         } else if (attempts < maxAttempts) {
-          // Try again in 100ms if not found yet
-          setTimeout(tryScroll, 100);
+          // Try again in 150ms if not found yet
+          setTimeout(tryScroll, 150);
         }
       };
       
       tryScroll();
     }
-  }, [selectedSection, selectedSubsection]);
+  }, [selectedSection, selectedSubsection, filteredQuestions]);
 
   const currentSection = sections.find(s => s.id === selectedSection);
   const currentSubsection = currentSection?.subsections.find(ss => ss.id === selectedSubsection);
