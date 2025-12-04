@@ -136,11 +136,6 @@ export default function Index() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Clear refs when subsection changes
-  useEffect(() => {
-    questionRefsMap.current.clear();
-  }, [selectedSection, selectedSubsection]);
-
   // Auto-scroll to last answered question when subsection changes
   useEffect(() => {
     if (!selectedSection || !selectedSubsection) return;
@@ -149,13 +144,15 @@ export default function Index() {
     const lastAnsweredId = lastAnsweredQuestionMap.current.get(subsectionKey);
 
     if (lastAnsweredId) {
-      // Use a small delay to ensure refs are set and DOM is rendered
+      // Use a longer delay to ensure refs are set and DOM is rendered
+      // Also gives time for animations and layout to complete
       const timeoutId = setTimeout(() => {
         const questionElement = questionRefsMap.current.get(lastAnsweredId);
-        if (questionElement) {
+        if (questionElement && questionElement.offsetParent !== null) {
+          // Element is visible in the DOM
           questionElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
-      }, 50);
+      }, 300);
       
       return () => clearTimeout(timeoutId);
     }
