@@ -56,8 +56,23 @@ export default function Index() {
   
   // Track question element refs (scoped to current subsection)
   const questionRefsMap = useRef<Map<string, HTMLDivElement>>(new Map());
-  // Track last answered question per subsection (key: "section-subsection")
+  // Track last answered question per subsection (key: "section-subsection"), persisted to localStorage
   const lastAnsweredQuestionMap = useRef<Map<string, string>>(new Map());
+
+  // Load persisted last answered questions on mount
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem('lastAnsweredQuestions');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        Object.entries(parsed).forEach(([key, value]) => {
+          lastAnsweredQuestionMap.current.set(key, value as string);
+        });
+      }
+    } catch (error) {
+      console.error('Failed to load persisted last answered questions:', error);
+    }
+  }, []);
 
   const {
     recordResponse,
@@ -144,17 +159,24 @@ export default function Index() {
     const lastAnsweredId = lastAnsweredQuestionMap.current.get(subsectionKey);
 
     if (lastAnsweredId) {
-      // Use a longer delay to ensure refs are set and DOM is rendered
-      // Also gives time for animations and layout to complete
-      const timeoutId = setTimeout(() => {
-        const questionElement = questionRefsMap.current.get(lastAnsweredId);
-        if (questionElement && questionElement.offsetParent !== null) {
-          // Element is visible in the DOM
-          questionElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-      }, 300);
+      // Try multiple times to scroll, as refs might not be immediately available
+      let attempts = 0;
+      const maxAttempts = 10;
       
-      return () => clearTimeout(timeoutId);
+      const tryScroll = () => {
+        attempts++;
+        const questionElement = questionRefsMap.current.get(lastAnsweredId);
+        
+        if (questionElement && questionElement.offsetParent !== null) {
+          // Element is visible in the DOM - scroll to it
+          questionElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        } else if (attempts < maxAttempts) {
+          // Try again in 100ms if not found yet
+          setTimeout(tryScroll, 100);
+        }
+      };
+      
+      tryScroll();
     }
   }, [selectedSection, selectedSubsection]);
 
@@ -198,10 +220,19 @@ export default function Index() {
         isCorrect,
       });
       // Track last answered question for this subsection
-      lastAnsweredQuestionMap.current.set(
-        `${selectedSection}-${selectedSubsection}`,
-        questionId
-      );
+      const subsectionKey = `${selectedSection}-${selectedSubsection}`;
+      lastAnsweredQuestionMap.current.set(subsectionKey, questionId);
+      
+      // Persist to localStorage
+      try {
+        const stored: Record<string, string> = {};
+        lastAnsweredQuestionMap.current.forEach((value, key) => {
+          stored[key] = value;
+        });
+        localStorage.setItem('lastAnsweredQuestions', JSON.stringify(stored));
+      } catch (error) {
+        console.error('Failed to persist last answered question:', error);
+      }
     }
   };
 
