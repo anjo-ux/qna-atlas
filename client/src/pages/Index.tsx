@@ -54,8 +54,9 @@ export default function Index() {
   const { bookmarks } = useBookmarks();
   const { dueCount } = useSpacedRepetition();
   
-  // Track question element refs and last answered question per subsection
+  // Track question element refs (scoped to current subsection)
   const questionRefsMap = useRef<Map<string, HTMLDivElement>>(new Map());
+  // Track last answered question per subsection (key: "section-subsection")
   const lastAnsweredQuestionMap = useRef<Map<string, string>>(new Map());
 
   const {
@@ -135,6 +136,11 @@ export default function Index() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // Clear refs when subsection changes
+  useEffect(() => {
+    questionRefsMap.current.clear();
+  }, [selectedSection, selectedSubsection]);
+
   // Auto-scroll to last answered question when subsection changes
   useEffect(() => {
     if (!selectedSection || !selectedSubsection) return;
@@ -143,13 +149,15 @@ export default function Index() {
     const lastAnsweredId = lastAnsweredQuestionMap.current.get(subsectionKey);
 
     if (lastAnsweredId) {
-      const questionElement = questionRefsMap.current.get(lastAnsweredId);
-      if (questionElement) {
-        // Small delay to ensure rendering is complete
-        setTimeout(() => {
+      // Use a small delay to ensure refs are set and DOM is rendered
+      const timeoutId = setTimeout(() => {
+        const questionElement = questionRefsMap.current.get(lastAnsweredId);
+        if (questionElement) {
           questionElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }, 100);
-      }
+        }
+      }, 50);
+      
+      return () => clearTimeout(timeoutId);
     }
   }, [selectedSection, selectedSubsection]);
 
@@ -735,11 +743,11 @@ export default function Index() {
                           return (
                             <div
                               key={question.id}
+                              data-question-id={question.id}
                               ref={(el) => {
                                 if (el) {
+                                  // Store ref with just question ID (scoped to current subsection since refs clear when subsection changes)
                                   questionRefsMap.current.set(question.id, el);
-                                } else {
-                                  questionRefsMap.current.delete(question.id);
                                 }
                               }}
                             >
