@@ -158,7 +158,7 @@ export default function Index() {
 
   // Auto-scroll to last answered question when subsection changes
   useEffect(() => {
-    if (!selectedSection || !selectedSubsection || filteredQuestions.length === 0) return;
+    if (!selectedSection || !selectedSubsection) return;
 
     const subsectionKey = `${selectedSection}-${selectedSubsection}`;
     const lastAnsweredId = lastAnsweredQuestionMap.current.get(subsectionKey);
@@ -184,7 +184,7 @@ export default function Index() {
       
       tryScroll();
     }
-  }, [selectedSection, selectedSubsection, filteredQuestions]);
+  }, [selectedSection, selectedSubsection]);
 
   const currentSection = sections.find(s => s.id === selectedSection);
   const currentSubsection = currentSection?.subsections.find(ss => ss.id === selectedSubsection);
