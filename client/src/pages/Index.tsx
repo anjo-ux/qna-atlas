@@ -53,6 +53,10 @@ export default function Index() {
   const [isMobileLayout, setIsMobileLayout] = useState(window.innerWidth < 1024);
   const { bookmarks } = useBookmarks();
   const { dueCount } = useSpacedRepetition();
+  
+  // Track question element refs and last answered question per subsection
+  const questionRefsMap = useRef<Map<string, HTMLDivElement>>(new Map());
+  const lastAnsweredQuestionMap = useRef<Map<string, string>>(new Map());
 
   const {
     recordResponse,
@@ -131,6 +135,24 @@ export default function Index() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // Auto-scroll to last answered question when subsection changes
+  useEffect(() => {
+    if (!selectedSection || !selectedSubsection) return;
+
+    const subsectionKey = `${selectedSection}-${selectedSubsection}`;
+    const lastAnsweredId = lastAnsweredQuestionMap.current.get(subsectionKey);
+
+    if (lastAnsweredId) {
+      const questionElement = questionRefsMap.current.get(lastAnsweredId);
+      if (questionElement) {
+        // Small delay to ensure rendering is complete
+        setTimeout(() => {
+          questionElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 100);
+      }
+    }
+  }, [selectedSection, selectedSubsection]);
+
   const currentSection = sections.find(s => s.id === selectedSection);
   const currentSubsection = currentSection?.subsections.find(ss => ss.id === selectedSubsection);
 
@@ -170,6 +192,11 @@ export default function Index() {
         correctAnswer,
         isCorrect,
       });
+      // Track last answered question for this subsection
+      lastAnsweredQuestionMap.current.set(
+        `${selectedSection}-${selectedSubsection}`,
+        questionId
+      );
     }
   };
 
@@ -706,15 +733,25 @@ export default function Index() {
                         filteredQuestions.map((question, index) => {
                           const savedResponse = getQuestionResponse(question.id);
                           return (
-                            <QuestionCard
+                            <div
                               key={question.id}
-                              question={question}
-                              index={index}
-                              sectionId={selectedSection || ''}
-                              subsectionId={selectedSubsection || ''}
-                              savedResponse={savedResponse}
-                              onAnswerSubmit={handleAnswerSubmit}
-                            />
+                              ref={(el) => {
+                                if (el) {
+                                  questionRefsMap.current.set(question.id, el);
+                                } else {
+                                  questionRefsMap.current.delete(question.id);
+                                }
+                              }}
+                            >
+                              <QuestionCard
+                                question={question}
+                                index={index}
+                                sectionId={selectedSection || ''}
+                                subsectionId={selectedSubsection || ''}
+                                savedResponse={savedResponse}
+                                onAnswerSubmit={handleAnswerSubmit}
+                              />
+                            </div>
                           );
                         })
                       )}
