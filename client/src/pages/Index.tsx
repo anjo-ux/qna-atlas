@@ -164,25 +164,27 @@ export default function Index() {
     const lastAnsweredId = lastAnsweredQuestionMap.current.get(subsectionKey);
 
     if (lastAnsweredId) {
-      // Try multiple times to scroll, as refs might not be immediately available
-      // Increase attempts and delays to account for lazy rendering
-      let attempts = 0;
-      const maxAttempts = 20;
-      
-      const tryScroll = () => {
-        attempts++;
-        const questionElement = questionRefsMap.current.get(lastAnsweredId);
+      // Start with a delay to ensure React has rendered and laid out the DOM
+      setTimeout(() => {
+        let attempts = 0;
+        const maxAttempts = 30;
         
-        if (questionElement && questionElement.offsetParent !== null) {
-          // Element is visible in the DOM - scroll to it
-          questionElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        } else if (attempts < maxAttempts) {
-          // Try again in 150ms if not found yet
-          setTimeout(tryScroll, 150);
-        }
-      };
-      
-      tryScroll();
+        const tryScroll = () => {
+          attempts++;
+          // Use querySelector to find element by data-question-id attribute (more reliable than refs)
+          const questionElement = document.querySelector(`[data-question-id="${lastAnsweredId}"]`) as HTMLElement;
+          
+          if (questionElement && questionElement.offsetParent !== null) {
+            // Element is visible in the DOM - scroll to it
+            questionElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          } else if (attempts < maxAttempts) {
+            // Try again if not found yet
+            setTimeout(tryScroll, 150);
+          }
+        };
+        
+        tryScroll();
+      }, 300); // Initial delay to ensure DOM is ready
     }
   }, [selectedSection, selectedSubsection]);
 
