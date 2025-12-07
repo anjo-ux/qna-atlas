@@ -4,6 +4,7 @@ import {
   questionResponses,
   loginConnections,
   notes,
+  highlights,
   bookmarks,
   spacedRepetitions,
   subscriptionPlans,
@@ -17,6 +18,8 @@ import {
   type LoginConnection,
   type Note,
   type InsertNote,
+  type Highlight,
+  type InsertHighlight,
   type Bookmark,
   type InsertBookmark,
   type SpacedRepetition,
@@ -62,6 +65,24 @@ export interface IStorage {
   getUserNotes(userId: string, sectionId?: string, subsectionId?: string): Promise<Note[]>;
   updateNote(id: string, updates: Partial<InsertNote>): Promise<Note>;
   deleteNote(id: string): Promise<void>;
+
+  // Highlights operations
+  createHighlight(highlight: InsertHighlight): Promise<Highlight>;
+  getUserHighlights(userId: string): Promise<Highlight[]>;
+  updateHighlight(id: string, updates: Partial<InsertHighlight>): Promise<Highlight>;
+  deleteHighlight(id: string): Promise<void>;
+  deleteHighlightsByLocation(userId: string, sectionId: string, subsectionId: string, location: string, questionId?: string): Promise<void>;
+
+  // Study-mode question responses (without testSessionId)
+  getUserQuestionResponses(userId: string): Promise<QuestionResponse[]>;
+  upsertStudyModeResponse(userId: string, response: {
+    questionId: string;
+    sectionId: string;
+    subsectionId: string;
+    selectedAnswer: string;
+    correctAnswer: string;
+    isCorrect: boolean;
+  }): Promise<QuestionResponse>;
 
   // Bookmarks operations
   addBookmark(bookmark: InsertBookmark): Promise<Bookmark>;
@@ -331,6 +352,121 @@ export class DatabaseStorage implements IStorage {
 
   async deleteNote(id: string): Promise<void> {
     await db.delete(notes).where(eq(notes.id, id));
+  }
+
+  // Highlights operations
+  async createHighlight(highlightData: InsertHighlight): Promise<Highlight> {
+    const [highlight] = await db
+      .insert(highlights)
+      .values(highlightData)
+      .returning();
+    return highlight;
+  }
+
+  async getUserHighlights(userId: string): Promise<Highlight[]> {
+    return await db
+      .select()
+      .from(highlights)
+      .where(eq(highlights.userId, userId))
+      .orderBy(desc(highlights.createdAt));
+  }
+
+  async updateHighlight(id: string, updates: Partial<InsertHighlight>): Promise<Highlight> {
+    const [highlight] = await db
+      .update(highlights)
+      .set({
+        ...updates,
+        updatedAt: new Date(),
+      })
+      .where(eq(highlights.id, id))
+      .returning();
+    return highlight;
+  }
+
+  async deleteHighlight(id: string): Promise<void> {
+    await db.delete(highlights).where(eq(highlights.id, id));
+  }
+
+  async deleteHighlightsByLocation(
+    userId: string,
+    sectionId: string,
+    subsectionId: string,
+    location: string,
+    questionId?: string
+  ): Promise<void> {
+    const conditions = [
+      eq(highlights.userId, userId),
+      eq(highlights.sectionId, sectionId),
+      eq(highlights.subsectionId, subsectionId),
+      eq(highlights.location, location),
+    ];
+    
+    if (questionId) {
+      conditions.push(eq(highlights.questionId, questionId));
+    }
+    
+    await db.delete(highlights).where(and(...conditions));
+  }
+
+  // Study-mode question responses (without testSessionId)
+  async getUserQuestionResponses(userId: string): Promise<QuestionResponse[]> {
+    return await db
+      .select()
+      .from(questionResponses)
+      .where(eq(questionResponses.userId, userId))
+      .orderBy(desc(questionResponses.answeredAt));
+  }
+
+  async upsertStudyModeResponse(userId: string, response: {
+    questionId: string;
+    sectionId: string;
+    subsectionId: string;
+    selectedAnswer: string;
+    correctAnswer: string;
+    isCorrect: boolean;
+  }): Promise<QuestionResponse> {
+    // Check if a response already exists for this user+question (study mode - no testSessionId)
+    const [existing] = await db
+      .select()
+      .from(questionResponses)
+      .where(
+        and(
+          eq(questionResponses.userId, userId),
+          eq(questionResponses.questionId, response.questionId),
+          // Study mode responses have no testSessionId
+        )
+      );
+
+    if (existing) {
+      // Update existing response
+      const [updated] = await db
+        .update(questionResponses)
+        .set({
+          selectedAnswer: response.selectedAnswer,
+          correctAnswer: response.correctAnswer,
+          isCorrect: response.isCorrect,
+          answeredAt: new Date(),
+        })
+        .where(eq(questionResponses.id, existing.id))
+        .returning();
+      return updated;
+    } else {
+      // Create new response
+      const [created] = await db
+        .insert(questionResponses)
+        .values({
+          userId,
+          testSessionId: null, // Study mode - no test session
+          questionId: response.questionId,
+          sectionId: response.sectionId,
+          subsectionId: response.subsectionId,
+          selectedAnswer: response.selectedAnswer,
+          correctAnswer: response.correctAnswer,
+          isCorrect: response.isCorrect,
+        })
+        .returning();
+      return created;
+    }
   }
 
   // Bookmarks operations
