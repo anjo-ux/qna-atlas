@@ -79,15 +79,16 @@ export const testSessions = pgTable("test_sessions", {
 export type InsertTestSession = typeof testSessions.$inferInsert;
 export type TestSession = typeof testSessions.$inferSelect;
 
-// Question Responses table - tracks answers to individual questions
+// Question Responses table - tracks answers to individual questions (study mode and test mode)
 export const questionResponses = pgTable("question_responses", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   userId: varchar("user_id").notNull().references(() => users.id, { onDelete: 'cascade' }),
-  testSessionId: varchar("test_session_id").notNull().references(() => testSessions.id, { onDelete: 'cascade' }),
+  testSessionId: varchar("test_session_id").references(() => testSessions.id, { onDelete: 'cascade' }), // Nullable for study mode
   questionId: varchar("question_id").notNull(),
   sectionId: varchar("section_id").notNull(),
   subsectionId: varchar("subsection_id").notNull(),
   selectedAnswer: varchar("selected_answer").notNull(),
+  correctAnswer: varchar("correct_answer").notNull().default(''), // The correct answer for reference
   isCorrect: boolean("is_correct").notNull(),
   answeredAt: timestamp("answered_at").defaultNow().notNull(),
 }, (table) => [
@@ -121,6 +122,28 @@ export const notes = pgTable("notes", {
 
 export type InsertNote = typeof notes.$inferInsert;
 export type Note = typeof notes.$inferSelect;
+
+// Highlights table - tracks user's text highlights
+export const highlights = pgTable("highlights", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: 'cascade' }),
+  text: varchar("text").notNull(),
+  color: varchar("color", { length: 20 }).notNull().default('yellow'), // 'yellow', 'green', 'blue', 'pink'
+  sectionId: varchar("section_id").notNull(),
+  subsectionId: varchar("subsection_id").notNull(),
+  location: varchar("location", { length: 20 }).notNull(), // 'reference' or 'question'
+  questionId: varchar("question_id"),
+  startOffset: integer("start_offset").notNull(),
+  endOffset: integer("end_offset").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (table) => [
+  index("idx_highlights_user_id").on(table.userId),
+  index("idx_highlights_section").on(table.sectionId, table.subsectionId),
+]);
+
+export type InsertHighlight = typeof highlights.$inferInsert;
+export type Highlight = typeof highlights.$inferSelect;
 
 // Bookmarks table - tracks user's bookmarked questions
 export const bookmarks = pgTable("bookmarks", {
