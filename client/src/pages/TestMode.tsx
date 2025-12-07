@@ -56,7 +56,7 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
   const hasResumedRef = useRef(false);
 
   const { recordResponse, getIncorrectQuestionIds: getGlobalIncorrectIds, responses: globalResponses } = useQuestionStats();
-  const { createSession, updateSession, completeSession, getInProgressSessions, getCompletedSessions, deleteSession, sessions } = useTestSessions();
+  const { createSession, updateSession, completeSession, getInProgressSessions, getCompletedSessions, deleteSession, sessions, saveResponse, isSavingResponse } = useTestSessions();
   const { bookmarks } = useBookmarks();
   const { isAuthenticated } = useAuth();
 
@@ -375,27 +375,17 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
             isCorrect,
           });
 
-          // Autosave to database if authenticated
+          // Auto-save to database immediately using the mutation
           if (isAuthenticated && currentSession) {
-            (async () => {
-              try {
-                await fetch('/api/question-responses', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  credentials: 'include',
-                  body: JSON.stringify({
-                    testSessionId: currentSession.id,
-                    questionId,
-                    sectionId: section.id,
-                    subsectionId: subsection.id,
-                    selectedAnswer,
-                    isCorrect,
-                  }),
-                });
-              } catch (error) {
-                console.error('Error saving response:', error);
-              }
-            })();
+            saveResponse({
+              testSessionId: currentSession.id,
+              questionId,
+              sectionId: section.id,
+              subsectionId: subsection.id,
+              selectedAnswer,
+              correctAnswer,
+              isCorrect,
+            });
           }
           break;
         }
