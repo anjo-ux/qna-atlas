@@ -224,9 +224,28 @@ export function useQuestionStats() {
     saveToLocalStorage(updatedResponses);
   }, [responses, saveToLocalStorage]);
 
+  const deleteAllMutation = useMutation({
+    mutationFn: async () => {
+      if (isAuthenticated) {
+        return await apiRequest('/api/question-responses', {
+          method: 'DELETE',
+        });
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/question-responses'] });
+    },
+    onError: (error) => {
+      console.error('[QuestionStats] Error deleting all responses:', error);
+    },
+  });
+
   const resetAll = useCallback(() => {
     saveToLocalStorage([]);
-  }, [saveToLocalStorage]);
+    if (isAuthenticated) {
+      deleteAllMutation.mutate();
+    }
+  }, [saveToLocalStorage, isAuthenticated, deleteAllMutation]);
 
   const getAllStats = useCallback(() => {
     const total = responses.length;

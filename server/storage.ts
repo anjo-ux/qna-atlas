@@ -83,6 +83,7 @@ export interface IStorage {
     correctAnswer: string;
     isCorrect: boolean;
   }): Promise<QuestionResponse>;
+  deleteAllStudyModeResponses(userId: string): Promise<void>;
 
   // Bookmarks operations
   addBookmark(bookmark: InsertBookmark): Promise<Bookmark>;
@@ -467,6 +468,12 @@ export class DatabaseStorage implements IStorage {
         .returning();
       return created;
     }
+  }
+
+  async deleteAllStudyModeResponses(userId: string): Promise<void> {
+    await db
+      .delete(questionResponses)
+      .where(eq(questionResponses.userId, userId));
   }
 
   // Bookmarks operations

@@ -729,6 +729,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Delete all question responses for user
+  app.delete('/api/question-responses', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session?.userId;
+      await storage.deleteAllStudyModeResponses(userId);
+      res.json({ message: "All responses deleted" });
+    } catch (error) {
+      console.error("Error deleting all question responses:", error);
+      res.status(500).json({ message: "Failed to delete question responses" });
+    }
+  });
+
   // Bulk sync question responses (for reconciling local and server data)
   app.post('/api/question-responses/sync', isAuthenticated, async (req: any, res) => {
     try {
