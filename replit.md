@@ -46,6 +46,15 @@ shared/           # Shared types between client and server
 
 ## Recent Changes
 
+### December 07, 2025
+- **Test Response Database Persistence**:
+  - Fixed test completion to properly save all responses to PostgreSQL database
+  - Added `testSessionId` to response payloads for linking responses to test sessions
+  - Added query cache invalidation after saving to ensure dashboard updates immediately
+  - Fixed LSP errors: Added `Subsection` import and `flaggedQuestionIds` to TestSession interface
+  - Added `flaggedQuestionIds` to `updateTestSessionSchema` for proper validation
+  - Test responses now persist permanently in the database, not just localStorage
+
 ### November 29, 2025
 - **Temporary Password Recovery System**:
   - Implemented forgot password flow with 12-character temporary passwords
@@ -108,7 +117,7 @@ None documented yet.
 - Protected API routes using isAuthenticated middleware
 
 ## Known Limitations
-- **Question Responses**: While the database schema and API endpoints support saving individual question responses, the frontend integration is not yet complete. Currently, test sessions store questions in the database but individual answers are not persisted/restored. This means users can create and resume test sessions, but their answer progress within a session is not saved to the database yet.
+- Test responses are batch-saved when the user finishes a test or saves and exits, not on each individual answer submission
 
 ## Security
 - Authentication tokens managed by Replit Auth with OpenID Connect

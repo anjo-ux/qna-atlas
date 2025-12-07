@@ -16,6 +16,7 @@ import { useTestSessions, TestSession } from '@/hooks/useTestSessions';
 import { useBookmarks } from '@/hooks/useBookmarks';
 import { useAuth } from '@/hooks/useAuth';
 import { cn } from '@/lib/utils';
+import { queryClient } from '@/lib/queryClient';
 
 interface TestModeProps {
   sections: Section[];
@@ -463,11 +464,7 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
     });
     
     if (currentSession) {
-      // Save flagged questions before completing
-      updateSession(currentSession.id, { flaggedQuestionIds: Array.from(flaggedQuestions) });
-      completeSession(currentSession.id);
-      
-      // Batch save all responses to database for authenticated users
+      // Batch save all responses to database for authenticated users BEFORE completing
       if (isAuthenticated && Object.keys(responses).length > 0) {
         try {
           const promises = Object.values(responses).map(response =>
@@ -476,6 +473,7 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
               headers: { 'Content-Type': 'application/json' },
               credentials: 'include',
               body: JSON.stringify({
+                testSessionId: currentSession.id,
                 questionId: response.questionId,
                 sectionId: response.sectionId,
                 subsectionId: response.subsectionId,
@@ -487,10 +485,17 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
           );
           
           await Promise.all(promises);
+          
+          // Invalidate the responses cache so dashboard updates
+          queryClient.invalidateQueries({ queryKey: ['/api/question-responses'] });
         } catch (error) {
           console.error('Error saving test responses to database:', error);
         }
       }
+      
+      // Save flagged questions and mark session complete
+      updateSession(currentSession.id, { flaggedQuestionIds: Array.from(flaggedQuestions) });
+      completeSession(currentSession.id);
     }
     setTestState('results');
   };
@@ -516,12 +521,16 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
               sectionId: response.sectionId,
               subsectionId: response.subsectionId,
               selectedAnswer: response.selectedAnswer,
+              correctAnswer: response.correctAnswer,
               isCorrect: response.isCorrect,
             }),
           })
         );
         
         await Promise.all(promises);
+        
+        // Invalidate the responses cache so dashboard updates
+        queryClient.invalidateQueries({ queryKey: ['/api/question-responses'] });
       } catch (error) {
         console.error('Error saving responses on exit:', error);
         // Still exit even if save fails - user data is in local responses
