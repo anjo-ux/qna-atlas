@@ -365,16 +365,6 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
             return updatedResponses;
           });
           
-          // Record in global stats
-          recordResponse({
-            questionId,
-            sectionId: section.id,
-            subsectionId: subsection.id,
-            selectedAnswer,
-            correctAnswer,
-            isCorrect,
-          });
-
           // Auto-save to database immediately using the mutation
           if (isAuthenticated && currentSession) {
             saveResponse({
