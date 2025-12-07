@@ -758,18 +758,16 @@ export default function Index() {
                         </div>
 
                         {/* Stats and Filters */}
-                        <div className="flex flex-col lg:flex-row gap-4">
-                          <QuestionStats stats={subsectionStats} className="lg:flex-shrink-0 lg:w-64" />
-                          <div className="flex-1">
-                            <QuestionFilters
-                              filterMode={filterMode}
-                              onFilterChange={setFilterMode}
-                              onResetSubsection={handleResetSubsection}
-                              onResetAll={handleResetAll}
-                              incorrectCount={subsectionStats.incorrect}
-                              unansweredCount={subsectionStats.total - subsectionStats.answered}
-                            />
-                          </div>
+                        <div className="space-y-4">
+                          <QuestionStats stats={subsectionStats} className="w-full sm:w-64" />
+                          <QuestionFilters
+                            filterMode={filterMode}
+                            onFilterChange={setFilterMode}
+                            onResetSubsection={handleResetSubsection}
+                            onResetAll={handleResetAll}
+                            incorrectCount={subsectionStats.incorrect}
+                            unansweredCount={subsectionStats.total - subsectionStats.answered}
+                          />
                         </div>
                       </div>
 
