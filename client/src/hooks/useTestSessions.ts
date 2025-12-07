@@ -17,6 +17,7 @@ export interface TestSession {
   questions: Question[];
   responses: Record<string, QuestionResponse>;
   currentQuestionIndex: number;
+  flaggedQuestionIds?: string[];
 }
 
 // Local storage key for questions (since they come from Excel file)
@@ -42,6 +43,7 @@ export function useTestSessions() {
       questions: (dbSession.questions as any) || [],
       responses: {},
       currentQuestionIndex: dbSession.currentQuestionIndex,
+      flaggedQuestionIds: dbSession.flaggedQuestionIds || [],
     };
   });
 
@@ -88,6 +90,9 @@ export function useTestSessions() {
       }
       if (updates.questions !== undefined) {
         dbUpdates.questions = updates.questions;
+      }
+      if (updates.flaggedQuestionIds !== undefined) {
+        dbUpdates.flaggedQuestionIds = updates.flaggedQuestionIds;
       }
 
       const response = await apiRequest(`/api/test-sessions/${sessionId}`, {

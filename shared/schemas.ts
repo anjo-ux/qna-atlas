@@ -17,6 +17,7 @@ export const updateTestSessionSchema = z.object({
   currentQuestionIndex: z.number().int().min(0).optional(),
   status: z.enum(['in-progress', 'completed']).optional(),
   questions: z.array(z.any()).optional(), // Validate as array at minimum
+  flaggedQuestionIds: z.array(z.string()).optional(),
 });
 
 export type InsertTestSessionInput = z.infer<typeof insertTestSessionSchema>;
