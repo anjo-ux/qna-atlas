@@ -366,10 +366,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const { testSessionId } = validationResult.data;
       
-      // Verify the test session belongs to the user
-      const session = await storage.getTestSession(testSessionId);
-      if (!session || session.userId !== userId) {
-        return res.status(403).json({ message: "Forbidden" });
+      // Verify the test session belongs to the user (if testSessionId provided)
+      if (testSessionId) {
+        const session = await storage.getTestSession(testSessionId);
+        if (!session || session.userId !== userId) {
+          return res.status(403).json({ message: "Forbidden" });
+        }
       }
       
       // Add userId to the response data before saving

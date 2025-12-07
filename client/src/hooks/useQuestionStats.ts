@@ -1,4 +1,7 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { queryClient, apiRequest } from '@/lib/queryClient';
+import type { QuestionResponse as DBQuestionResponse, User } from '@shared/schema';
 
 export interface QuestionResponse {
   questionId: string;
@@ -20,17 +23,115 @@ export interface SubsectionStats {
 const RESPONSES_KEY = 'psite-question-responses';
 
 export function useQuestionStats() {
-  const [responses, setResponses] = useState<QuestionResponse[]>([]);
+  const [localResponses, setLocalResponses] = useState<QuestionResponse[]>([]);
+  const hasSyncedRef = useRef(false);
+
+  const { data: user } = useQuery<User | null>({
+    queryKey: ['/api/auth/user'],
+  });
+
+  const isAuthenticated = !!user;
+
+  const { data: serverResponses = [], isLoading: isServerLoading, isError } = useQuery<DBQuestionResponse[]>({
+    queryKey: ['/api/question-responses'],
+    staleTime: 30000,
+    enabled: isAuthenticated,
+  });
+
+  const saveResponseMutation = useMutation({
+    mutationFn: async (response: QuestionResponse) => {
+      return await apiRequest(`/api/question-responses/${encodeURIComponent(response.questionId)}`, {
+        method: 'PUT',
+        body: JSON.stringify({
+          sectionId: response.sectionId,
+          subsectionId: response.subsectionId,
+          selectedAnswer: response.selectedAnswer,
+          correctAnswer: response.correctAnswer,
+          isCorrect: response.isCorrect,
+        }),
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/question-responses'] });
+    },
+    onError: (error) => {
+      console.error('[QuestionStats] Error saving response:', error);
+    },
+  });
+
+  const syncMutation = useMutation({
+    mutationFn: async (responses: QuestionResponse[]) => {
+      return await apiRequest('/api/question-responses/sync', {
+        method: 'POST',
+        body: JSON.stringify({
+          responses: responses.map(r => ({
+            questionId: r.questionId,
+            sectionId: r.sectionId,
+            subsectionId: r.subsectionId,
+            selectedAnswer: r.selectedAnswer,
+            correctAnswer: r.correctAnswer,
+            isCorrect: r.isCorrect,
+          })),
+        }),
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/question-responses'] });
+    },
+    onError: (error) => {
+      console.error('[QuestionStats] Error syncing responses:', error);
+    },
+  });
 
   useEffect(() => {
     const savedResponses = localStorage.getItem(RESPONSES_KEY);
     if (savedResponses) {
-      setResponses(JSON.parse(savedResponses));
+      try {
+        setLocalResponses(JSON.parse(savedResponses));
+      } catch (e) {
+        console.error('[QuestionStats] Error parsing localStorage:', e);
+      }
     }
   }, []);
 
-  const saveResponses = useCallback((newResponses: QuestionResponse[]) => {
-    setResponses(newResponses);
+  useEffect(() => {
+    if (!isAuthenticated || isServerLoading || isError || hasSyncedRef.current) {
+      return;
+    }
+    
+    hasSyncedRef.current = true;
+    
+    const savedResponses = localStorage.getItem(RESPONSES_KEY);
+    if (savedResponses) {
+      try {
+        const localData = JSON.parse(savedResponses) as QuestionResponse[];
+        const serverQuestionIds = new Set(serverResponses.map(r => r.questionId));
+        const localOnlyResponses = localData.filter(r => !serverQuestionIds.has(r.questionId));
+        
+        if (localOnlyResponses.length > 0) {
+          console.log(`[QuestionStats] Syncing ${localOnlyResponses.length} local responses to server`);
+          syncMutation.mutate(localOnlyResponses);
+        }
+      } catch (e) {
+        console.error('[QuestionStats] Error during sync:', e);
+      }
+    }
+  }, [isAuthenticated, isServerLoading, isError, serverResponses, syncMutation]);
+
+  const responses: QuestionResponse[] = (isAuthenticated && serverResponses.length > 0)
+    ? serverResponses.map(r => ({
+        questionId: r.questionId,
+        sectionId: r.sectionId,
+        subsectionId: r.subsectionId,
+        selectedAnswer: r.selectedAnswer,
+        correctAnswer: r.correctAnswer || '',
+        isCorrect: r.isCorrect,
+        timestamp: r.answeredAt ? new Date(r.answeredAt).getTime() : Date.now(),
+      }))
+    : localResponses;
+
+  const saveToLocalStorage = useCallback((newResponses: QuestionResponse[]) => {
+    setLocalResponses(newResponses);
     localStorage.setItem(RESPONSES_KEY, JSON.stringify(newResponses));
   }, []);
 
@@ -40,13 +141,28 @@ export function useQuestionStats() {
       timestamp: Date.now(),
     };
 
-    // Remove any existing response for this question and add new one
+    const currentResponses = (isAuthenticated && serverResponses.length > 0)
+      ? serverResponses.map(r => ({
+          questionId: r.questionId,
+          sectionId: r.sectionId,
+          subsectionId: r.subsectionId,
+          selectedAnswer: r.selectedAnswer,
+          correctAnswer: r.correctAnswer || '',
+          isCorrect: r.isCorrect,
+          timestamp: r.answeredAt ? new Date(r.answeredAt).getTime() : Date.now(),
+        }))
+      : localResponses;
+
     const updatedResponses = [
-      ...responses.filter(r => r.questionId !== response.questionId),
+      ...currentResponses.filter(r => r.questionId !== response.questionId),
       newResponse,
     ];
-    saveResponses(updatedResponses);
-  }, [responses, saveResponses]);
+    
+    saveToLocalStorage(updatedResponses);
+    if (isAuthenticated) {
+      saveResponseMutation.mutate(newResponse);
+    }
+  }, [isAuthenticated, serverResponses, localResponses, saveToLocalStorage, saveResponseMutation]);
 
   const getQuestionResponse = useCallback((questionId: string): QuestionResponse | undefined => {
     return responses.find(r => r.questionId === questionId);
@@ -89,12 +205,12 @@ export function useQuestionStats() {
     const updatedResponses = responses.filter(
       r => !(r.sectionId === sectionId && r.subsectionId === subsectionId)
     );
-    saveResponses(updatedResponses);
-  }, [responses, saveResponses]);
+    saveToLocalStorage(updatedResponses);
+  }, [responses, saveToLocalStorage]);
 
   const resetAll = useCallback(() => {
-    saveResponses([]);
-  }, [saveResponses]);
+    saveToLocalStorage([]);
+  }, [saveToLocalStorage]);
 
   const getAllStats = useCallback(() => {
     const total = responses.length;
@@ -113,5 +229,7 @@ export function useQuestionStats() {
     resetSubsection,
     resetAll,
     getAllStats,
+    isLoading: isServerLoading,
+    isPending: saveResponseMutation.isPending,
   };
 }
