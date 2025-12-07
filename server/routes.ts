@@ -554,6 +554,212 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Highlights routes
+  app.get('/api/highlights', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session?.userId;
+      const highlights = await storage.getUserHighlights(userId);
+      res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.json(highlights);
+    } catch (error) {
+      console.error("Error fetching highlights:", error);
+      res.status(500).json({ message: "Failed to fetch highlights" });
+    }
+  });
+
+  app.post('/api/highlights', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session?.userId;
+      const { text, color, sectionId, subsectionId, location, questionId, startOffset, endOffset } = req.body;
+      
+      if (!text || !sectionId || !subsectionId || !location || startOffset === undefined || endOffset === undefined) {
+        return res.status(400).json({ message: "Missing required fields" });
+      }
+      
+      const highlight = await storage.createHighlight({
+        userId,
+        text,
+        color: color || 'yellow',
+        sectionId,
+        subsectionId,
+        location,
+        questionId: questionId || null,
+        startOffset,
+        endOffset,
+      });
+      
+      res.json(highlight);
+    } catch (error) {
+      console.error("Error creating highlight:", error);
+      res.status(500).json({ message: "Failed to create highlight" });
+    }
+  });
+
+  app.patch('/api/highlights/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session?.userId;
+      const highlightId = req.params.id;
+      const updates = req.body;
+      
+      // Verify highlight belongs to user
+      const userHighlights = await storage.getUserHighlights(userId);
+      const highlight = userHighlights.find(h => h.id === highlightId);
+      
+      if (!highlight) {
+        return res.status(404).json({ message: "Highlight not found" });
+      }
+      
+      const updatedHighlight = await storage.updateHighlight(highlightId, updates);
+      res.json(updatedHighlight);
+    } catch (error) {
+      console.error("Error updating highlight:", error);
+      res.status(500).json({ message: "Failed to update highlight" });
+    }
+  });
+
+  app.delete('/api/highlights/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session?.userId;
+      const highlightId = req.params.id;
+      
+      // Verify highlight belongs to user
+      const userHighlights = await storage.getUserHighlights(userId);
+      const highlight = userHighlights.find(h => h.id === highlightId);
+      
+      if (!highlight) {
+        return res.status(404).json({ message: "Highlight not found" });
+      }
+      
+      await storage.deleteHighlight(highlightId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting highlight:", error);
+      res.status(500).json({ message: "Failed to delete highlight" });
+    }
+  });
+
+  // Bulk sync highlights (for reconciling local and server data)
+  app.post('/api/highlights/sync', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session?.userId;
+      const { highlights: localHighlights } = req.body;
+      
+      if (!Array.isArray(localHighlights)) {
+        return res.status(400).json({ message: "Invalid highlights data" });
+      }
+      
+      // Get server highlights
+      const serverHighlights = await storage.getUserHighlights(userId);
+      
+      // Create new highlights that exist locally but not on server
+      const createdHighlights = [];
+      for (const local of localHighlights) {
+        // Check if highlight already exists (by matching offsets and location)
+        const exists = serverHighlights.some(s => 
+          s.sectionId === local.sectionId &&
+          s.subsectionId === local.subsectionId &&
+          s.location === local.location &&
+          s.startOffset === local.startOffset &&
+          s.endOffset === local.endOffset
+        );
+        
+        if (!exists) {
+          const created = await storage.createHighlight({
+            userId,
+            text: local.text,
+            color: local.color || 'yellow',
+            sectionId: local.sectionId,
+            subsectionId: local.subsectionId,
+            location: local.location,
+            questionId: local.questionId || null,
+            startOffset: local.startOffset,
+            endOffset: local.endOffset,
+          });
+          createdHighlights.push(created);
+        }
+      }
+      
+      // Return all highlights (merged)
+      const allHighlights = await storage.getUserHighlights(userId);
+      res.json(allHighlights);
+    } catch (error) {
+      console.error("Error syncing highlights:", error);
+      res.status(500).json({ message: "Failed to sync highlights" });
+    }
+  });
+
+  // Question Responses routes (study mode - without test session)
+  app.get('/api/question-responses', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session?.userId;
+      const responses = await storage.getUserQuestionResponses(userId);
+      res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.json(responses);
+    } catch (error) {
+      console.error("Error fetching question responses:", error);
+      res.status(500).json({ message: "Failed to fetch question responses" });
+    }
+  });
+
+  app.put('/api/question-responses/:questionId', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session?.userId;
+      const questionId = req.params.questionId;
+      const { sectionId, subsectionId, selectedAnswer, correctAnswer, isCorrect } = req.body;
+      
+      if (!sectionId || !subsectionId || !selectedAnswer || isCorrect === undefined) {
+        return res.status(400).json({ message: "Missing required fields" });
+      }
+      
+      const response = await storage.upsertStudyModeResponse(userId, {
+        questionId,
+        sectionId,
+        subsectionId,
+        selectedAnswer,
+        correctAnswer: correctAnswer || '',
+        isCorrect,
+      });
+      
+      res.json(response);
+    } catch (error) {
+      console.error("Error saving question response:", error);
+      res.status(500).json({ message: "Failed to save question response" });
+    }
+  });
+
+  // Bulk sync question responses (for reconciling local and server data)
+  app.post('/api/question-responses/sync', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session?.userId;
+      const { responses: localResponses } = req.body;
+      
+      if (!Array.isArray(localResponses)) {
+        return res.status(400).json({ message: "Invalid responses data" });
+      }
+      
+      // Process each local response
+      for (const local of localResponses) {
+        if (local.questionId && local.sectionId && local.subsectionId && local.selectedAnswer !== undefined) {
+          await storage.upsertStudyModeResponse(userId, {
+            questionId: local.questionId,
+            sectionId: local.sectionId,
+            subsectionId: local.subsectionId,
+            selectedAnswer: local.selectedAnswer,
+            correctAnswer: local.correctAnswer || '',
+            isCorrect: local.isCorrect || false,
+          });
+        }
+      }
+      
+      // Return all responses (merged)
+      const allResponses = await storage.getUserQuestionResponses(userId);
+      res.json(allResponses);
+    } catch (error) {
+      console.error("Error syncing question responses:", error);
+      res.status(500).json({ message: "Failed to sync question responses" });
+    }
+  });
+
   // Spaced Repetition routes
   app.get('/api/spaced-repetition/due', isAuthenticated, async (req: any, res) => {
     try {
