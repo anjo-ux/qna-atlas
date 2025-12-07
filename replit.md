@@ -47,6 +47,11 @@ shared/           # Shared types between client and server
 ## Recent Changes
 
 ### December 07, 2025
+- **Auto-Save Test Responses**:
+  - Each answer selection now auto-saves immediately to the database
+  - Added `saveResponse` mutation with retry logic to useTestSessions hook
+  - Responses are saved in real-time as users answer questions, not just at test end
+  - Batch-save fallback remains in handleFinishTest as a safety reconciliation
 - **Test Response Database Persistence**:
   - Fixed test completion to properly save all responses to PostgreSQL database
   - Added `testSessionId` to response payloads for linking responses to test sessions
@@ -117,7 +122,7 @@ None documented yet.
 - Protected API routes using isAuthenticated middleware
 
 ## Known Limitations
-- Test responses are batch-saved when the user finishes a test or saves and exits, not on each individual answer submission
+- None currently documented
 
 ## Security
 - Authentication tokens managed by Replit Auth with OpenID Connect
