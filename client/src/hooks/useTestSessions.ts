@@ -134,9 +134,35 @@ export function useTestSessions() {
     },
   });
 
+  // Save individual test response mutation (auto-save on answer)
+  const saveResponseMutation = useMutation({
+    mutationFn: async (data: {
+      testSessionId: string;
+      questionId: string;
+      sectionId: string;
+      subsectionId: string;
+      selectedAnswer: string;
+      correctAnswer: string;
+      isCorrect: boolean;
+    }) => {
+      return await apiRequest('/api/question-responses', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/question-responses'] });
+    },
+    onError: (error) => {
+      console.error('[TestSessions] Error auto-saving response:', error);
+    },
+    retry: 2,
+  });
+
   return {
     sessions,
     isLoading,
+    isSavingResponse: saveResponseMutation.isPending,
     createSession: async (
       questionCount: number,
       selectedSectionIds: string[],
@@ -171,6 +197,17 @@ export function useTestSessions() {
     },
     deleteSession: async (sessionId: string) => {
       await deleteSessionMutation.mutateAsync(sessionId);
+    },
+    saveResponse: (data: {
+      testSessionId: string;
+      questionId: string;
+      sectionId: string;
+      subsectionId: string;
+      selectedAnswer: string;
+      correctAnswer: string;
+      isCorrect: boolean;
+    }) => {
+      saveResponseMutation.mutate(data);
     },
     getSession: (sessionId: string): TestSession | undefined => {
       return sessions.find(s => s.id === sessionId);
