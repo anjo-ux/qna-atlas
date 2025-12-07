@@ -444,7 +444,7 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
     }
   };
 
-  const handleFinishTest = () => {
+  const handleFinishTest = async () => {
     if (isPreview && !isAuthenticated) {
       window.location.href = '/api/auth';
       return;
@@ -466,6 +466,31 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
       // Save flagged questions before completing
       updateSession(currentSession.id, { flaggedQuestionIds: Array.from(flaggedQuestions) });
       completeSession(currentSession.id);
+      
+      // Batch save all responses to database for authenticated users
+      if (isAuthenticated && Object.keys(responses).length > 0) {
+        try {
+          const promises = Object.values(responses).map(response =>
+            fetch('/api/question-responses', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              credentials: 'include',
+              body: JSON.stringify({
+                questionId: response.questionId,
+                sectionId: response.sectionId,
+                subsectionId: response.subsectionId,
+                selectedAnswer: response.selectedAnswer,
+                correctAnswer: response.correctAnswer,
+                isCorrect: response.isCorrect,
+              }),
+            })
+          );
+          
+          await Promise.all(promises);
+        } catch (error) {
+          console.error('Error saving test responses to database:', error);
+        }
+      }
     }
     setTestState('results');
   };
