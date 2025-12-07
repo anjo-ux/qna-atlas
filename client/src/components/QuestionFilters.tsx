@@ -14,11 +14,12 @@ import {
 } from '@/components/ui/alert-dialog';
 
 interface QuestionFiltersProps {
-  filterMode: 'all' | 'incorrect';
-  onFilterChange: (mode: 'all' | 'incorrect') => void;
+  filterMode: 'all' | 'incorrect' | 'unanswered';
+  onFilterChange: (mode: 'all' | 'incorrect' | 'unanswered') => void;
   onResetSubsection: () => void;
   onResetAll: () => void;
   incorrectCount: number;
+  unansweredCount: number;
 }
 
 export function QuestionFilters({
@@ -27,6 +28,7 @@ export function QuestionFilters({
   onResetSubsection,
   onResetAll,
   incorrectCount,
+  unansweredCount,
 }: QuestionFiltersProps) {
   return (
     <div className="flex flex-wrap items-center gap-2">
@@ -49,6 +51,15 @@ export function QuestionFilters({
         >
           <Filter className="h-3 w-3" />
           Incorrect ({incorrectCount})
+        </Button>
+        <Button
+          variant={filterMode === 'unanswered' ? 'default' : 'ghost'}
+          size="sm"
+          onClick={() => onFilterChange('unanswered')}
+          className={cn('h-8', unansweredCount === 0 && 'opacity-50')}
+          disabled={unansweredCount === 0}
+        >
+          Unanswered ({unansweredCount})
         </Button>
       </div>
 

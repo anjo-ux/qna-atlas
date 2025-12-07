@@ -28,7 +28,7 @@ import { useLocation } from 'wouter';
 import { toast } from 'sonner';
 
 type ViewMode = 'questions' | 'reference' | 'split';
-type FilterMode = 'all' | 'incorrect';
+type FilterMode = 'all' | 'incorrect' | 'unanswered';
 type ScreenMode = 'study' | 'test' | 'settings' | 'preview';
 type TestModeState = { mode: 'new' } | { mode: 'resume'; sessionId: string };
 
@@ -79,6 +79,7 @@ export default function Index() {
     getQuestionResponse,
     getSubsectionStats,
     getIncorrectQuestionIds,
+    getUnansweredQuestionIds,
     resetSubsection,
     resetAll,
   } = useQuestionStats();
@@ -196,17 +197,23 @@ export default function Index() {
     ? getSubsectionStats(selectedSection, selectedSubsection, currentSubsection.questions.length)
     : { total: 0, answered: 0, correct: 0, incorrect: 0 };
 
-  // Get incorrect question IDs for filtering
+  // Get incorrect and unanswered question IDs for filtering
   const incorrectQuestionIds = selectedSection && selectedSubsection
     ? getIncorrectQuestionIds(selectedSection, selectedSubsection)
+    : [];
+  
+  const unansweredQuestionIds = selectedSection && selectedSubsection && currentSubsection
+    ? getUnansweredQuestionIds(selectedSection, selectedSubsection, currentSubsection.questions.map(q => q.id))
     : [];
 
   // Apply search and filter
   let filteredQuestions = currentSubsection?.questions || [];
   
-  // Apply incorrect filter
+  // Apply filter based on mode
   if (filterMode === 'incorrect') {
     filteredQuestions = filteredQuestions.filter(q => incorrectQuestionIds.includes(q.id));
+  } else if (filterMode === 'unanswered') {
+    filteredQuestions = filteredQuestions.filter(q => unansweredQuestionIds.includes(q.id));
   }
   
   // Apply search filter only when in a subsection (local search)
@@ -742,6 +749,8 @@ export default function Index() {
                                 ? `${filteredQuestions.length} ${filteredQuestions.length === 1 ? 'result' : 'results'} found`
                                 : filterMode === 'incorrect'
                                 ? `${filteredQuestions.length} Incorrect ${filteredQuestions.length === 1 ? 'Question' : 'Questions'}`
+                                : filterMode === 'unanswered'
+                                ? `${filteredQuestions.length} Unanswered ${filteredQuestions.length === 1 ? 'Question' : 'Questions'}`
                                 : `${currentSubsection.questions.length} ${currentSubsection.questions.length === 1 ? 'Question' : 'Questions'}`
                               }
                             </p>
@@ -758,6 +767,7 @@ export default function Index() {
                               onResetSubsection={handleResetSubsection}
                               onResetAll={handleResetAll}
                               incorrectCount={subsectionStats.incorrect}
+                              unansweredCount={subsectionStats.total - subsectionStats.answered}
                             />
                           </div>
                         </div>
@@ -770,6 +780,8 @@ export default function Index() {
                               ? 'No questions match your search.' 
                               : filterMode === 'incorrect'
                               ? 'No incorrect answers yet. Start answering questions!'
+                              : filterMode === 'unanswered'
+                              ? 'All questions answered!'
                               : 'No questions available.'}
                           </p>
                         </div>

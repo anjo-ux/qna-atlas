@@ -201,6 +201,22 @@ export function useQuestionStats() {
       .map(r => r.questionId);
   }, [responses]);
 
+  const getUnansweredQuestionIds = useCallback((
+    sectionId: string,
+    subsectionId: string,
+    totalQuestionIds: string[]
+  ): string[] => {
+    const answeredIds = new Set(
+      responses
+        .filter(r => 
+          r.sectionId === sectionId && 
+          r.subsectionId === subsectionId
+        )
+        .map(r => r.questionId)
+    );
+    return totalQuestionIds.filter(id => !answeredIds.has(id));
+  }, [responses]);
+
   const resetSubsection = useCallback((sectionId: string, subsectionId: string) => {
     const updatedResponses = responses.filter(
       r => !(r.sectionId === sectionId && r.subsectionId === subsectionId)
@@ -226,6 +242,7 @@ export function useQuestionStats() {
     getQuestionResponse,
     getSubsectionStats,
     getIncorrectQuestionIds,
+    getUnansweredQuestionIds,
     resetSubsection,
     resetAll,
     getAllStats,
