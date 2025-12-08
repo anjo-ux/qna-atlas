@@ -1091,8 +1091,8 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
 
         {/* Main Content */}
         <div className={cn("flex flex-col overflow-hidden", isFullscreen ? "w-full" : "flex-1")}>
-          <div className="p-3 md:p-4 border-b border-border bg-accent/5 flex-shrink-0">
-            <div className="flex items-center justify-between gap-3">
+          <div className="w-full p-3 md:p-4 border-b border-border bg-accent/5 flex-shrink-0">
+            <div className="w-full flex items-center justify-between gap-3">
               <div className="flex-1 min-w-0">
                 <h1 className="text-xl md:text-2xl font-bold truncate">Test Mode</h1>
                 <p className="text-xs md:text-sm text-muted-foreground">Question {currentQuestionIndex + 1} / {testQuestions.length}</p>
@@ -1159,7 +1159,7 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
           </div>
 
           {/* Navigation Buttons */}
-          <div className="p-3 md:p-4 border-t border-border bg-accent/5 flex-shrink-0">
+          <div className="w-full p-3 md:p-4 border-t border-border bg-accent/5 flex-shrink-0">
             <div className="w-full flex items-center justify-between gap-2">
               <Button
                 data-testid="button-previous-question"
