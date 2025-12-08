@@ -345,14 +345,14 @@ export function QuestionCard({
             </p>
             
             {parsed.choices.length > 0 && (
-              <RadioGroup value={selectedAnswer || ''} onValueChange={handleAnswerChange}>
-                <div className="space-y-2">
+              <RadioGroup value={selectedAnswer || ''} onValueChange={handleAnswerChange} className="w-full">
+                <div className="w-full space-y-2">
                   {parsed.choices.map((choice) => {
                     const showResult = selectedAnswer && showExplanation;
                     const isThisChoice = choice.letter === selectedAnswer;
                     const isCorrectChoice = choice.letter === correctAnswer;
                     
-                    let choiceClassName = "flex items-start space-x-2 md:space-x-3 p-2 md:p-3 rounded-lg border transition-colors text-sm md:text-base";
+                    let choiceClassName = "w-full flex items-start space-x-2 md:space-x-3 p-2 md:p-3 rounded-lg border transition-colors text-sm md:text-base";
                     
                     if (showResult && isThisChoice) {
                       // Highlight selected answer
