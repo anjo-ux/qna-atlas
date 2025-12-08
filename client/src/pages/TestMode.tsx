@@ -132,6 +132,24 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
     // This is important because globalResponses loads asynchronously from localStorage
   }, [globalResponses]);
 
+  // Keyboard navigation with arrow keys
+  useEffect(() => {
+    if (testState !== 'testing') return;
+    
+    const handleKeyPress = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        handlePreviousQuestion();
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        handleNextQuestion();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, [testState, currentQuestionIndex, testQuestions.length, currentSession]);
+
   // Calculate count of all unanswered questions (used for display only)
   const allUnansweredCount = useMemo(() => {
     if (isPreview && previewQuestions && previewQuestions.length > 0) {
