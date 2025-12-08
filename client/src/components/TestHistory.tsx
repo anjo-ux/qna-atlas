@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
@@ -19,8 +20,45 @@ interface TestHistoryProps {
 }
 
 export function TestHistory({ sessions, onResume, onReview, onDelete, maxItems, startIndex = 1 }: TestHistoryProps) {
+  const [sessionsWithResponses, setSessionsWithResponses] = useState<TestSession[]>(sessions);
+
+  // Fetch responses for completed sessions
+  useEffect(() => {
+    const loadResponses = async () => {
+      const updated = await Promise.all(
+        sessions.map(async (session) => {
+          // Only fetch responses if not already loaded
+          if (session.status === 'completed' && Object.keys(session.responses).length === 0) {
+            try {
+              const res = await fetch(`/api/test-sessions/${session.id}/responses`, {
+                credentials: 'include',
+              });
+              if (res.ok) {
+                const responses = await res.json();
+                const responsesMap: Record<string, any> = {};
+                responses.forEach((r: any) => {
+                  responsesMap[r.questionId] = {
+                    questionId: r.questionId,
+                    isCorrect: r.isCorrect,
+                  };
+                });
+                return { ...session, responses: responsesMap };
+              }
+            } catch (error) {
+              console.error('Error loading responses:', error);
+            }
+          }
+          return session;
+        })
+      );
+      setSessionsWithResponses(updated);
+    };
+
+    loadResponses();
+  }, [sessions]);
+
   // Sort by most recent first
-  const sortedSessions = [...sessions].sort((a, b) => b.createdAt - a.createdAt);
+  const sortedSessions = [...sessionsWithResponses].sort((a, b) => b.createdAt - a.createdAt);
   const displaySessions = maxItems ? sortedSessions.slice(0, maxItems) : sortedSessions;
 
   if (sessions.length === 0) {
