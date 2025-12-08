@@ -116,13 +116,11 @@ export function TestHistory({ sessions, onResume, onReview, onDelete, maxItems, 
                   </div>
                   <div className="flex flex-col sm:flex-row sm:items-center gap-2 text-sm text-muted-foreground">
                     <span>{capitalizeWords(formatDistanceToNow(createdDate, { addSuffix: true }))}</span>
-                    <span className="hidden sm:inline">•</span>
-                    <span>Answered</span>
                     {isComplete && (
                       <>
                         <span className="hidden sm:inline">•</span>
                         <span className="text-success font-semibold">
-                          {correctAnswers} Correct ({accuracy}%)
+                          {accuracy}%
                         </span>
                       </>
                     )}
