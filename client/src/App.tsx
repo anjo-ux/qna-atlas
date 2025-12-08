@@ -7,7 +7,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/useAuth";
 import { useContentProtection } from "@/hooks/useContentProtection";
 import { ThemeProvider } from "@/hooks/useTheme";
-import { ChatBubble } from "@/components/ChatBubble";
 import Index from "./pages/Index";
 import PreviewMode from "./pages/PreviewMode";
 import NotFound from "./pages/NotFound";
@@ -58,14 +57,9 @@ function Router() {
 }
 
 function AppContent() {
-  const [location] = useLocation();
-  // Hide chat bubble on preview mode and oral boards coach
-  const shouldHideChatBubble = location === '/preview' || location === '/oral-board';
-
   return (
     <div className="h-screen w-screen overflow-hidden">
       <Router />
-      {!shouldHideChatBubble && <ChatBubble />}
     </div>
   );
 }
