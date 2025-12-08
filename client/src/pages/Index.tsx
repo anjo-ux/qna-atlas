@@ -381,7 +381,7 @@ export default function Index() {
 
   if (screenMode === 'test') {
     return (
-      <div className="flex h-screen overflow-hidden">
+      <div className="flex w-full h-screen overflow-hidden">
         <TestMode 
           sections={sections} 
           onBack={() => {
@@ -409,7 +409,7 @@ export default function Index() {
     const { getPreviewQuestions } = require('@/utils/previewQuestions');
     const previewQuestions = getPreviewQuestions(sections);
     return (
-      <div className="flex h-screen overflow-hidden">
+      <div className="flex w-full h-screen overflow-hidden">
         <TestMode 
           sections={sections}
           previewQuestions={previewQuestions}

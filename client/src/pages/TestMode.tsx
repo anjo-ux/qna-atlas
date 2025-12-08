@@ -1004,7 +1004,7 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
     const currentQuestion = testQuestions[currentQuestionIndex];
     
     return (
-      <div className="flex flex-col h-screen md:flex-row md:h-screen md:overflow-hidden overflow-hidden">
+      <div className="flex flex-col h-screen w-full md:flex-row md:h-screen md:overflow-hidden overflow-hidden">
         {/* Question Panel - Top on mobile, Right on desktop */}
         {!isFullscreen && (
         <div className={cn(
@@ -1090,7 +1090,7 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
         )}
 
         {/* Main Content */}
-        <div className={cn("flex flex-col overflow-hidden", isFullscreen ? "w-full" : "flex-1")}>
+        <div className={cn("flex flex-col overflow-hidden min-w-0", isFullscreen ? "w-full" : "flex-1 flex-grow")}>
           <div className="w-full p-3 md:p-4 border-b border-border bg-accent/5 flex-shrink-0">
             <div className="w-full flex items-center justify-between gap-3">
               <div className="flex-1 min-w-0">
