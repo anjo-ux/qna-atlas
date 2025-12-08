@@ -210,6 +210,7 @@ export function ReferenceTextPanel({
                 </h2>
                 <p className="text-xs text-muted-foreground mb-4">{section.sectionTitle}</p>
                 <ReactMarkdown
+                  skipHtml
                   components={{
                     h1: ({ node, ...props }) => <h1 className="text-xl font-bold mt-6 mb-3 text-primary" {...props} />,
                     h2: ({ node, ...props }) => <h2 className="text-lg font-semibold mt-5 mb-2 text-foreground uppercase" {...props} />,
