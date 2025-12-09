@@ -73,7 +73,13 @@ export function QuestionBreakdownCharts() {
                   ))}
                 </Pie>
                 <Tooltip 
-                  contentStyle={{ backgroundColor: 'rgba(0, 0, 0, 0.8)', border: 'none', borderRadius: '8px', color: '#fff' }}
+                  contentStyle={{ 
+                    backgroundColor: 'rgba(0, 0, 0, 0.9)', 
+                    border: 'none', 
+                    borderRadius: '8px', 
+                    color: '#ffffff',
+                    padding: '8px 12px'
+                  }}
                   formatter={(value: any) => value.toLocaleString()}
                 />
                 <Legend wrapperStyle={{ paddingTop: '20px' }} />
@@ -116,7 +122,13 @@ export function QuestionBreakdownCharts() {
                   ))}
                 </Pie>
                 <Tooltip 
-                  contentStyle={{ backgroundColor: 'rgba(0, 0, 0, 0.8)', border: 'none', borderRadius: '8px', color: '#fff' }}
+                  contentStyle={{ 
+                    backgroundColor: 'rgba(0, 0, 0, 0.9)', 
+                    border: 'none', 
+                    borderRadius: '8px', 
+                    color: '#ffffff',
+                    padding: '8px 12px'
+                  }}
                   formatter={(value: any) => value.toLocaleString()}
                 />
                 <Legend wrapperStyle={{ paddingTop: '20px' }} />
@@ -150,7 +162,7 @@ export function QuestionBreakdownCharts() {
                   cx="50%"
                   cy="50%"
                   labelLine={false}
-                  label={({ name, value }) => `${name}: ${value}`}
+                  label={({ value }) => value.toLocaleString()}
                   outerRadius={80}
                   dataKey="value"
                 >
@@ -158,7 +170,17 @@ export function QuestionBreakdownCharts() {
                     <Cell key={`topic-${index}`} fill={entry.fill} />
                   ))}
                 </Pie>
-                <Tooltip formatter={(value: any) => value.toLocaleString()} />
+                <Tooltip 
+                  contentStyle={{ 
+                    backgroundColor: 'rgba(0, 0, 0, 0.9)', 
+                    border: 'none', 
+                    borderRadius: '8px', 
+                    color: '#ffffff',
+                    padding: '8px 12px'
+                  }}
+                  formatter={(value: any) => value.toLocaleString()}
+                />
+                <Legend wrapperStyle={{ paddingTop: '20px', fontSize: '12px' }} />
               </PieChart>
             </ResponsiveContainer>
           </div>
@@ -177,7 +199,7 @@ export function QuestionBreakdownCharts() {
                   cx="50%"
                   cy="50%"
                   labelLine={false}
-                  label={({ name, value }) => `${name}: ${value}`}
+                  label={({ value }) => value.toLocaleString()}
                   outerRadius={80}
                   dataKey="value"
                 >
@@ -185,7 +207,17 @@ export function QuestionBreakdownCharts() {
                     <Cell key={`correct-${index}`} fill={entry.fill} />
                   ))}
                 </Pie>
-                <Tooltip formatter={(value: any) => value.toLocaleString()} />
+                <Tooltip 
+                  contentStyle={{ 
+                    backgroundColor: 'rgba(0, 0, 0, 0.9)', 
+                    border: 'none', 
+                    borderRadius: '8px', 
+                    color: '#ffffff',
+                    padding: '8px 12px'
+                  }}
+                  formatter={(value: any) => value.toLocaleString()}
+                />
+                <Legend wrapperStyle={{ paddingTop: '20px', fontSize: '12px' }} />
               </PieChart>
             </ResponsiveContainer>
           </div>
