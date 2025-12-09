@@ -402,7 +402,15 @@ export function QuestionCard({
                             isCrossedOut && "line-through text-muted-foreground"
                           )}
                         >
-                          <span className="font-semibold">{choice.letter}.</span> {choice.text}
+                          <span className="font-semibold">{choice.letter}.</span>{' '}
+                          <ReactMarkdown
+                            skipHtml
+                            components={{
+                              p: ({ node, children, ...props }) => <span {...props}>{children}</span>,
+                            }}
+                          >
+                            {choice.text}
+                          </ReactMarkdown>
                           {showResult && isThisChoice && (
                             <span className={cn(
                               "ml-2 text-xs font-semibold",
