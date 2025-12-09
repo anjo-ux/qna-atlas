@@ -86,7 +86,7 @@ export function QuestionBreakdownCharts() {
               </PieChart>
             </ResponsiveContainer>
           ) : (
-            <p className="text-muted-foreground text-center">No data yet</p>
+            <p className="text-muted-foreground text-center">No Data Yet</p>
           )}
         </div>
         <div className="grid grid-cols-2 gap-2 text-xs mt-4">
@@ -135,7 +135,7 @@ export function QuestionBreakdownCharts() {
               </PieChart>
             </ResponsiveContainer>
           ) : (
-            <p className="text-muted-foreground text-center">No data yet</p>
+            <p className="text-muted-foreground text-center">No Data Yet</p>
           )}
         </div>
         <div className="grid grid-cols-2 gap-2 text-xs mt-4">
@@ -153,7 +153,7 @@ export function QuestionBreakdownCharts() {
       {/* By Topic - Questions Answered */}
       {topicAnswered.length > 0 && (
         <Card variant="glass" className="p-6 glow-primary transition-glow flex flex-col">
-          <h3 className="text-lg font-semibold mb-4 gradient-text">Questions by Topic</h3>
+          <h3 className="text-lg font-semibold mb-4 gradient-text">Questions - Topic</h3>
           <div className="flex-1 flex items-center justify-center">
             <ResponsiveContainer width="100%" height={280}>
               <PieChart>
@@ -190,7 +190,7 @@ export function QuestionBreakdownCharts() {
       {/* By Topic - Correct Answers */}
       {topicCorrect.length > 0 && (
         <Card variant="glass" className="p-6 glow-accent transition-glow flex flex-col">
-          <h3 className="text-lg font-semibold mb-4 gradient-text">Correct by Topic</h3>
+          <h3 className="text-lg font-semibold mb-4 gradient-text">Correct - Topic</h3>
           <div className="flex-1 flex items-center justify-center">
             <ResponsiveContainer width="100%" height={280}>
               <PieChart>

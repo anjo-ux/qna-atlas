@@ -23,7 +23,7 @@ export function TopicAnalytics() {
   if (topics.length === 0) {
     return (
       <Card variant="glass" className="p-6 text-center">
-        <p className="text-muted-foreground">No data yet. Answer questions to see topic-based analytics.</p>
+        <p className="text-muted-foreground">No sufficient data yet accumulated. Answer questions to see topic-based analytics.</p>
       </Card>
     );
   }

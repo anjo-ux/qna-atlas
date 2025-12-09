@@ -392,7 +392,7 @@ export function Settings({ onBack, subscription }: SettingsProps) {
                         You're in the <span className="font-semibold text-purple-500">{percentile}th percentile</span> among all users based on your accuracy percentage.
                       </p>
                       <p className="text-xs text-muted-foreground mt-2">
-                        100th percentile is the highest score. Your accuracy: {stats.accuracy}%
+                        100th percentile is the highest score. Your Accuracy - {stats.accuracy}%
                       </p>
                     </div>
                   </div>
