@@ -163,11 +163,11 @@ export function MobileSubscriptionWidget({ hasEmoryAccess = false }: MobileSubsc
             </DialogTrigger>
             <DialogContent className="max-w-2xl">
               <DialogHeader>
-                <DialogTitle>Choose a Plan</DialogTitle>
+                <DialogTitle>Choose Plan</DialogTitle>
                 <DialogDescription>
                   {isTrialOrExpired
-                    ? 'Upgrade to premium access'
-                    : 'Switch to a different subscription plan'}
+                    ? 'Upgrade to premium access.'
+                    : 'Switch to a different subscription plan.'}
                 </DialogDescription>
               </DialogHeader>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

@@ -2,10 +2,33 @@ import { Card } from '@/components/ui/card';
 import { useTopicAnalytics } from '@/hooks/useTopicAnalytics';
 import { useQuestionStats } from '@/hooks/useQuestionStats';
 import { useMemo } from 'react';
-import { PieChart, Pie, Cell, Legend, Tooltip, ResponsiveContainer } from 'recharts';
+import { PieChart, Pie, Cell, Legend, Tooltip, ResponsiveContainer, TooltipProps } from 'recharts';
 
 const COLORS_ANSWERED = ['#10b981', '#ef4444'];
 const COLORS_CORRECT = ['#3b82f6', '#ef4444'];
+
+// Custom tooltip with white text
+const CustomTooltip = ({ active, payload }: TooltipProps<number, string>) => {
+  if (active && payload && payload.length) {
+    const value = payload[0].value;
+    return (
+      <div 
+        style={{
+          backgroundColor: 'rgba(0, 0, 0, 0.95)',
+          border: 'none',
+          borderRadius: '8px',
+          padding: '8px 12px',
+          color: '#ffffff'
+        }}
+      >
+        <p style={{ margin: 0, color: '#ffffff' }}>
+          {typeof value === 'number' ? value.toLocaleString() : value}
+        </p>
+      </div>
+    );
+  }
+  return null;
+};
 
 export function QuestionBreakdownCharts() {
   const { topics } = useTopicAnalytics();
@@ -72,16 +95,7 @@ export function QuestionBreakdownCharts() {
                     <Cell key={`cell-${index}`} fill={entry.fill} />
                   ))}
                 </Pie>
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: 'rgba(0, 0, 0, 0.9)', 
-                    border: 'none', 
-                    borderRadius: '8px', 
-                    color: '#ffffff',
-                    padding: '8px 12px'
-                  }}
-                  formatter={(value: any) => value.toLocaleString()}
-                />
+                <Tooltip content={<CustomTooltip />} />
                 <Legend wrapperStyle={{ paddingTop: '20px' }} />
               </PieChart>
             </ResponsiveContainer>
@@ -121,16 +135,7 @@ export function QuestionBreakdownCharts() {
                     <Cell key={`cell-${index}`} fill={entry.fill} />
                   ))}
                 </Pie>
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: 'rgba(0, 0, 0, 0.9)', 
-                    border: 'none', 
-                    borderRadius: '8px', 
-                    color: '#ffffff',
-                    padding: '8px 12px'
-                  }}
-                  formatter={(value: any) => value.toLocaleString()}
-                />
+                <Tooltip content={<CustomTooltip />} />
                 <Legend wrapperStyle={{ paddingTop: '20px' }} />
               </PieChart>
             </ResponsiveContainer>
@@ -170,16 +175,7 @@ export function QuestionBreakdownCharts() {
                     <Cell key={`topic-${index}`} fill={entry.fill} />
                   ))}
                 </Pie>
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: 'rgba(0, 0, 0, 0.9)', 
-                    border: 'none', 
-                    borderRadius: '8px', 
-                    color: '#ffffff',
-                    padding: '8px 12px'
-                  }}
-                  formatter={(value: any) => value.toLocaleString()}
-                />
+                <Tooltip content={<CustomTooltip />} />
                 <Legend wrapperStyle={{ paddingTop: '20px', fontSize: '12px' }} />
               </PieChart>
             </ResponsiveContainer>
@@ -207,16 +203,7 @@ export function QuestionBreakdownCharts() {
                     <Cell key={`correct-${index}`} fill={entry.fill} />
                   ))}
                 </Pie>
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: 'rgba(0, 0, 0, 0.9)', 
-                    border: 'none', 
-                    borderRadius: '8px', 
-                    color: '#ffffff',
-                    padding: '8px 12px'
-                  }}
-                  formatter={(value: any) => value.toLocaleString()}
-                />
+                <Tooltip content={<CustomTooltip />} />
                 <Legend wrapperStyle={{ paddingTop: '20px', fontSize: '12px' }} />
               </PieChart>
             </ResponsiveContainer>
