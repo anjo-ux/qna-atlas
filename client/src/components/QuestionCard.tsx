@@ -13,6 +13,7 @@ import { useTextHighlight } from '@/hooks/useTextHighlight';
 import { QuestionResponse } from '@/hooks/useQuestionStats';
 import { Bookmark, Flag } from 'lucide-react';
 import { queryClient } from '@/lib/queryClient';
+import ReactMarkdown from 'react-markdown';
 
 interface QuestionCardProps {
   question: Question;
@@ -340,9 +341,16 @@ export function QuestionCard({
             <span className="text-xs md:text-sm font-semibold text-primary">{index + 1}</span>
           </div>
           <div className={cn("flex-1 min-w-0", isEraserMode && "eraser-mode")} ref={questionRef} onMouseUp={handleTextSelection}>
-            <p className="text-sm md:text-base leading-relaxed text-foreground whitespace-pre-wrap mb-3 md:mb-4">
-              {parsed.text}
-            </p>
+            <div className="text-sm md:text-base leading-relaxed text-foreground mb-3 md:mb-4">
+              <ReactMarkdown
+                skipHtml
+                components={{
+                  p: ({ node, ...props }) => <p className="whitespace-pre-wrap" {...props} />,
+                }}
+              >
+                {parsed.text}
+              </ReactMarkdown>
+            </div>
             
             {parsed.choices.length > 0 && (
               <RadioGroup value={selectedAnswer || ''} onValueChange={handleAnswerChange} className="w-full">
@@ -441,9 +449,16 @@ export function QuestionCard({
                 )}
                 <div className="bg-accent/5 border-l-4 border-accent rounded-r-lg p-4">
                   <p className="text-sm font-semibold text-accent mb-2">Answer & Explanation</p>
-                  <p className="text-sm leading-relaxed text-foreground/90 whitespace-pre-wrap">
-                    {question.answer}
-                  </p>
+                  <div className="text-sm leading-relaxed text-foreground/90">
+                    <ReactMarkdown
+                      skipHtml
+                      components={{
+                        p: ({ node, ...props }) => <p className="whitespace-pre-wrap my-1" {...props} />,
+                      }}
+                    >
+                      {question.answer}
+                    </ReactMarkdown>
+                  </div>
                 </div>
               </div>
             )}
