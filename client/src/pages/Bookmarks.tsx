@@ -124,7 +124,7 @@ export function BookmarksPage({ onBack }: BookmarksProps) {
   };
 
   return (
-    <div className="flex-1 flex flex-col overflow-hidden">
+    <div className="h-full w-full flex flex-col overflow-hidden">
       {/* Header */}
       <div className="border-b border-border bg-accent/5 p-4 flex-shrink-0">
         <div className="flex items-center justify-between">
