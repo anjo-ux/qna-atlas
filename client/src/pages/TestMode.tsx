@@ -1033,8 +1033,8 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
             </div>
           </div>
           
-          <div className="flex-1 overflow-y-auto p-2">
-            <div className="grid grid-cols-2 gap-2">
+          <div className="flex-1 overflow-y-auto p-2 max-h-[50vh] md:max-h-none">
+            <div className="grid grid-cols-5 md:grid-cols-2 gap-1.5 md:gap-2">
               {testQuestions.map((question, index) => {
                 const status = getQuestionStatus(index);
                 const isCurrent = index === currentQuestionIndex;
@@ -1052,8 +1052,8 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
                         }
                       }}
                       className={cn(
-                        "aspect-square rounded flex items-center justify-center text-xs font-semibold transition-all w-full",
-                        isCurrent && "ring-2 ring-primary ring-offset-2",
+                        "h-8 md:h-10 rounded flex items-center justify-center text-xs font-semibold transition-all w-full",
+                        isCurrent && "ring-2 ring-primary ring-offset-1 md:ring-offset-2",
                         status === 'unanswered' && "bg-muted hover:bg-muted/80 text-muted-foreground",
                         status === 'correct' && "bg-green-500/20 text-green-700 dark:text-green-400 hover:bg-green-500/30",
                         status === 'incorrect' && "bg-red-500/20 text-red-700 dark:text-red-400 hover:bg-red-500/30"
@@ -1062,8 +1062,8 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
                       {index + 1}
                     </button>
                     {isFlagged && (
-                      <div className="absolute top-0 right-0 -translate-y-1 translate-x-1">
-                        <Flag className="h-3 w-3 fill-red-500 text-red-500" data-testid={`flag-question-${index + 1}`} />
+                      <div className="absolute top-0 right-0 -translate-y-0.5 translate-x-0.5 md:-translate-y-1 md:translate-x-1">
+                        <Flag className="h-2.5 w-2.5 md:h-3 md:w-3 fill-red-500 text-red-500" data-testid={`flag-question-${index + 1}`} />
                       </div>
                     )}
                   </div>
