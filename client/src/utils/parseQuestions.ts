@@ -172,8 +172,17 @@ function stripHtml(html: string): string {
   );
 }
 
+const FETCH_TIMEOUT_MS = 90000; // Avoid hanging the app; server timeout is 60s
+let cachedSections: Section[] | null = null;
+
 export async function loadQuestions(): Promise<Section[]> {
-  const response = await fetch('/data/questions.xlsx');
+  if (cachedSections) return cachedSections;
+
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+  const response = await fetch('/data/questions.xlsx', { signal: controller.signal });
+  clearTimeout(timeoutId);
+
   const arrayBuffer = await response.arrayBuffer();
   const workbook = XLSX.read(arrayBuffer, { type: 'array' });
   const worksheet = workbook.Sheets[workbook.SheetNames[0]];
@@ -220,7 +229,14 @@ export async function loadQuestions(): Promise<Section[]> {
     subsectionMap.get(q.subcategory)!.push(q);
   });
 
-  return createSectionStructure(sectionMap);
+  const result = createSectionStructure(sectionMap);
+  cachedSections = result;
+  return result;
+}
+
+// Allow clearing cache (e.g. for tests or refresh)
+export function clearQuestionsCache(): void {
+  cachedSections = null;
 }
 
 function createSectionStructure(sectionMap: Map<string, Map<string, Question[]>>): Section[] {

@@ -52,7 +52,7 @@ export default function Index() {
   const [showPreviewWizard, setShowPreviewWizard] = useState(false);
   const [isMobileLayout, setIsMobileLayout] = useState(window.innerWidth < 1024);
   const { bookmarks } = useBookmarks();
-  const { dueCount } = useSpacedRepetition();
+  const { incorrectCount } = useSpacedRepetition();
   
   // Track question element refs (scoped to current subsection)
   const questionRefsMap = useRef<Map<string, HTMLDivElement>>(new Map());
@@ -431,13 +431,13 @@ export default function Index() {
         }}
       />
 
-      {/* Header - Full Width */}
-      <header className="glass-surface border-glass w-full sticky top-0 z-50">
+      {/* Header - Full Width (liquid glass) */}
+      <header className="glass-nav w-full sticky top-0 z-50 rounded-b-2xl">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-3 pb-2">
             {/* Top Row: Home, Title, Actions */}
             <div className="flex items-center gap-4">
               {/* Left Section */}
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-3 sm:gap-4">
                 <Button
                   variant="ghost"
                   size="icon"
@@ -446,21 +446,28 @@ export default function Index() {
                     handleGoHome();
                     (e.currentTarget as HTMLButtonElement).blur();
                   }}
-                  className="hover:bg-primary/10 flex-shrink-0 outline-none focus-visible:ring-0"
+                  className="hover:bg-primary/10 flex-shrink-0 outline-none focus-visible:ring-0 rounded-xl"
                   title="Go to Dashboard"
                 >
                   <Home className="h-5 w-5" />
                 </Button>
                 
-                <div className="flex items-center gap-2 min-w-0">
-                  <img 
-                    src="/atlas-logo.png" 
-                    alt="Atlas Logo" 
-                    className="h-8 w-8 object-contain flex-shrink-0"
-                  />
-                  <h1 className="hidden sm:block text-lg sm:text-xl font-bold text-primary truncate">
-                    Atlas Review
-                  </h1>
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="logo-glass flex items-center justify-center p-1.5 flex-shrink-0 ring-1 ring-black/5 dark:ring-white/10">
+                    <img 
+                      src="/atlas-logo.png" 
+                      alt="Atlas Logo" 
+                      className="h-7 w-7 sm:h-8 sm:w-8 object-contain"
+                    />
+                  </div>
+                  <div className="hidden sm:flex flex-col min-w-0">
+                    <span className="text-base sm:text-lg font-bold tracking-tight gradient-text leading-tight truncate">
+                      Atlas
+                    </span>
+                    <span className="text-xs font-medium text-muted-foreground tracking-widest uppercase truncate">
+                      Review
+                    </span>
+                  </div>
                 </div>
               </div>
 
@@ -506,9 +513,9 @@ export default function Index() {
                 >
                   <Lightbulb className="h-4 w-4" />
                   <span className="hidden md:inline">Review</span>
-                  {dueCount > 0 && (
+                  {incorrectCount > 0 && (
                     <span className="absolute -top-2 -right-2 bg-primary text-primary-foreground text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
-                      {dueCount > 99 ? '99+' : dueCount}
+                      {incorrectCount > 99 ? '99+' : incorrectCount}
                     </span>
                   )}
                 </Button>
@@ -539,7 +546,7 @@ export default function Index() {
           </div>
 
           {/* Bottom Row: Search Bar + View Mode Toggle - Always Visible */}
-          <div className="border-t border-border/50 glass-surface px-4 sm:px-6 lg:px-8 py-3">
+          <div className="border-t border-white/40 dark:border-white/10 px-4 sm:px-6 lg:px-8 py-3 bg-white/20 dark:bg-white/5 backdrop-blur-sm">
             <div className="w-full max-w-6xl mx-auto flex items-center gap-4">
               {/* Search Bar */}
               <div className="relative z-[9999] flex-1 min-w-0" ref={searchRef}>

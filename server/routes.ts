@@ -5,6 +5,11 @@ import { setupAuth, isAuthenticated } from "./customAuth";
 import { insertTestSessionSchema, updateTestSessionSchema, insertQuestionResponseSchema } from "@shared/schemas";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Lightweight health check (no DB/session) so Replit proxy gets a fast response
+  app.get("/api/health", (_req, res) => {
+    res.status(200).json({ ok: true });
+  });
+
   // Set up authentication middleware
   await setupAuth(app);
 
@@ -778,8 +783,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/spaced-repetition/due', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.session?.userId;
-      const dueQuestions = await storage.getUserDueQuestions(userId);
-      res.json(dueQuestions);
+      const [dueQuestions, reviewedQuestionIds, incorrectQuestionIds] = await Promise.all([
+        storage.getUserDueQuestions(userId),
+        storage.getUserSpacedRepetitionQuestionIds(userId),
+        storage.getUserIncorrectQuestionIds(userId),
+      ]);
+      res.json({ due: dueQuestions, reviewedQuestionIds, incorrectQuestionIds });
     } catch (error) {
       console.error("Error fetching due questions:", error);
       res.status(500).json({ message: "Failed to fetch due questions" });

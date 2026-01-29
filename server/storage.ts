@@ -95,6 +95,8 @@ export interface IStorage {
   upsertSpacedRepetition(sr: InsertSpacedRepetition): Promise<SpacedRepetition>;
   getSpacedRepetition(userId: string, questionId: string): Promise<SpacedRepetition | undefined>;
   getUserDueQuestions(userId: string): Promise<SpacedRepetition[]>;
+  getUserSpacedRepetitionQuestionIds(userId: string): Promise<string[]>;
+  getUserIncorrectQuestionIds(userId: string): Promise<string[]>;
   updateSpacedRepetition(id: string, updates: Partial<InsertSpacedRepetition>): Promise<SpacedRepetition>;
 
   // Topic Analytics operations
@@ -587,6 +589,22 @@ export class DatabaseStorage implements IStorage {
         )
       )
       .orderBy(spacedRepetitions.nextReviewAt);
+  }
+
+  async getUserSpacedRepetitionQuestionIds(userId: string): Promise<string[]> {
+    const rows = await db
+      .select({ questionId: spacedRepetitions.questionId })
+      .from(spacedRepetitions)
+      .where(eq(spacedRepetitions.userId, userId));
+    return rows.map((r) => r.questionId);
+  }
+
+  async getUserIncorrectQuestionIds(userId: string): Promise<string[]> {
+    const rows = await db
+      .selectDistinct({ questionId: questionResponses.questionId })
+      .from(questionResponses)
+      .where(and(eq(questionResponses.userId, userId), eq(questionResponses.isCorrect, false)));
+    return rows.map((r) => r.questionId);
   }
 
   async updateSpacedRepetition(id: string, updates: Partial<InsertSpacedRepetition>): Promise<SpacedRepetition> {

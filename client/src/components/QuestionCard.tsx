@@ -45,7 +45,9 @@ export function QuestionCard({
   isFlagged = false,
   onToggleFlag
 }: QuestionCardProps) {
-  const [selectedAnswer, setSelectedAnswer] = useState<string | null>(savedResponse?.selectedAnswer || null);
+  const [selectedAnswer, setSelectedAnswer] = useState<string | null>(
+    savedResponse?.selectedAnswer?.trim().toUpperCase() || null
+  );
   const [showExplanation, setShowExplanation] = useState(!!savedResponse);
   const [isEraserMode, setIsEraserMode] = useState(false);
   const [crossedOutChoices, setCrossedOutChoices] = useState<Set<string>>(new Set());
@@ -74,77 +76,78 @@ export function QuestionCard({
   const parsed = useMemo((): ParsedQuestion => {
     let questionText = question.question;
     const choices: { letter: string; text: string }[] = [];
-    
-    // Check if choices are on separate lines (already well-formatted)
+
+    // Normalize parsed letter to A-E (or A-F) for consistent RadioGroup value
+    const toChoiceLetter = (captured: string): string => {
+      const upper = captured.toUpperCase();
+      if (/[A-F]/.test(upper)) return upper;
+      const n = parseInt(captured, 10);
+      if (n >= 1 && n <= 6) return String.fromCharCode(64 + n); // 1->A, 2->B, ...
+      return upper;
+    };
+
+    // Match choice at line start: A), A., (A), a), 1., etc.
+    const choiceLineRegex = /^([A-Fa-f1-6])\s*[.)]\s*(.+)$|^\s*\(([A-Fa-f1-6])\)\s*(.+)$/;
+
     const lines = questionText.split('\n');
     let choicesOnSeparateLines = false;
-    
+
     for (const line of lines) {
-      const match = line.match(/^([A-E])[.)]\s*(.+)$/);
-      if (match) {
+      const m = line.match(choiceLineRegex);
+      if (m && (m[2]?.trim() || m[4]?.trim())) {
         choicesOnSeparateLines = true;
         break;
       }
     }
-    
+
     if (choicesOnSeparateLines) {
-      // Handle case where choices are already on separate lines
       const textLines: string[] = [];
       for (const line of lines) {
-        // Match "A)" or "A )" with optional space before paren
-        const match = line.match(/^([A-E])\s*[.)]\s*(.+)$/);
-        if (match) {
-          choices.push({ letter: match[1], text: match[2].trim() });
+        const m = line.match(choiceLineRegex);
+        if (m) {
+          const letter = toChoiceLetter(m[1] || m[3] || '');
+          const text = (m[2] || m[4] || '').trim();
+          if (letter && text && /^[A-F]$/.test(letter)) {
+            choices.push({ letter, text });
+          }
         } else if (line.trim()) {
           textLines.push(line);
         }
       }
       questionText = textLines.join('\n');
     } else {
-      // Handle case where choices are concatenated: "Question?A) TextB) TextC) Text..."
       const questionMarkers = ['?', ':', '.'];
       let lastMarkerIndex = -1;
-      
       for (const marker of questionMarkers) {
         const index = questionText.lastIndexOf(marker);
-        if (index > lastMarkerIndex) {
-          lastMarkerIndex = index;
-        }
+        if (index > lastMarkerIndex) lastMarkerIndex = index;
       }
-      
+
       if (lastMarkerIndex !== -1) {
         const beforeMarker = questionText.substring(0, lastMarkerIndex + 1);
         const afterMarker = questionText.substring(lastMarkerIndex + 1);
-        
-        // Parse concatenated choices: "A) TextB) TextC) Text..." or "A ) TextB ) TextC ) Text..."
-        // Split by choice markers first to get individual choice blocks
-        const extractedChoices: { letter: string; text: string }[] = [];
-        
-        // Find all choice positions
-        const choiceMatches = Array.from(afterMarker.matchAll(/([A-E])\s*[.)]\s*/g));
-        
-        if (choiceMatches.length >= 2 && choiceMatches.length <= 5) {
-          // Extract text between each choice marker
+
+        // Allow A-F and 1-6, and both . and )
+        const choiceMatches = Array.from(afterMarker.matchAll(/([A-Fa-f1-6])\s*[.)]\s*/g));
+
+        if (choiceMatches.length >= 2 && choiceMatches.length <= 6) {
+          const extractedChoices: { letter: string; text: string }[] = [];
           for (let i = 0; i < choiceMatches.length; i++) {
-            const letter = choiceMatches[i][1];
+            const letter = toChoiceLetter(choiceMatches[i][1]);
+            if (!/^[A-F]$/.test(letter)) continue;
             const startIndex = choiceMatches[i].index! + choiceMatches[i][0].length;
             const endIndex = i < choiceMatches.length - 1 ? choiceMatches[i + 1].index! : afterMarker.length;
-            
             const text = afterMarker.substring(startIndex, endIndex).trim();
-            if (text) {
-              extractedChoices.push({ letter, text });
-            }
+            if (text) extractedChoices.push({ letter, text });
           }
-        }
-        
-        // Validate we got a reasonable number of choices (at least 2, at most 5)
-        if (extractedChoices.length >= 2 && extractedChoices.length <= 5) {
-          choices.push(...extractedChoices);
-          questionText = beforeMarker;
+          if (extractedChoices.length >= 2 && extractedChoices.length <= 6) {
+            choices.push(...extractedChoices);
+            questionText = beforeMarker;
+          }
         }
       }
     }
-    
+
     return { text: questionText.trim(), choices };
   }, [question.id, question.question]);
 
@@ -175,8 +178,8 @@ export function QuestionCard({
   }, [isEraserMode, removeHighlight]);
 
   const correctAnswer = useMemo(() => {
-    // Extract correct answer from the answer text
-    const match = question.answer.match(/(?:correct answer is|answer is|correct response is|response is)\s*(?:option\s+)?([A-E])/i);
+    // Extract correct answer from the answer text (support A-F)
+    const match = question.answer.match(/(?:correct answer is|answer is|correct response is|response is)\s*(?:option\s+)?([A-F])/i);
     return match ? match[1].toUpperCase() : null;
   }, [question.answer]);
 
@@ -188,7 +191,8 @@ export function QuestionCard({
   // Reset state when question changes or when saved response changes
   useEffect(() => {
     if (savedResponse) {
-      setSelectedAnswer(savedResponse.selectedAnswer);
+      const normalized = savedResponse.selectedAnswer?.trim().toUpperCase();
+      setSelectedAnswer(normalized || null);
       setShowExplanation(true);
     } else {
       setSelectedAnswer(null);
@@ -198,7 +202,7 @@ export function QuestionCard({
 
   const handleAnswerClick = () => {
     if (selectedAnswer && !showExplanation && correctAnswer) {
-      const correct = selectedAnswer.toUpperCase() === correctAnswer;
+      const correct = selectedAnswer === correctAnswer;
       setShowExplanation(true);
       onAnswerSubmit(question.id, selectedAnswer, correctAnswer, correct);
     }
@@ -206,17 +210,19 @@ export function QuestionCard({
 
   // Autosave answer selection to database
   const handleAnswerChange = (value: string) => {
-    setSelectedAnswer(value);
+    const normalized = value.trim().toUpperCase();
+    if (!normalized) return;
+    setSelectedAnswer(normalized);
     // Remove cross-out if this choice was crossed out
     setCrossedOutChoices(prev => {
       const newSet = new Set(prev);
-      newSet.delete(value);
+      newSet.delete(normalized);
       return newSet;
     });
     // Also immediately submit if we're in test mode and have a saved response (user is changing their answer)
     if (isTestMode && savedResponse) {
-      const correct = value.toUpperCase() === correctAnswer;
-      onAnswerSubmit(question.id, value, correctAnswer, correct);
+      const correct = normalized === correctAnswer;
+      onAnswerSubmit(question.id, normalized, correctAnswer || '', correct);
       setShowExplanation(true);
     }
   };
@@ -377,15 +383,20 @@ export function QuestionCard({
                     }
                     
                     const isCrossedOut = crossedOutChoices.has(choice.letter);
+                    const canSelect = !showExplanation;
 
                     return (
                       <div
                         key={choice.letter}
+                        role="button"
+                        tabIndex={canSelect ? 0 : undefined}
                         className={cn(
                           choiceClassName,
-                          "cursor-context-menu",
+                          canSelect ? "cursor-pointer" : "cursor-context-menu",
                           isCrossedOut && "opacity-50"
                         )}
+                        onClick={canSelect ? () => handleAnswerChange(choice.letter) : undefined}
+                        onKeyDown={canSelect ? (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleAnswerChange(choice.letter); } } : undefined}
                         onContextMenu={(e) => handleChoiceRightClick(e, choice.letter)}
                         data-testid={`choice-${question.id}-${choice.letter}`}
                       >

@@ -6,6 +6,18 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+// Request timeout so Replit doesn't show "took too long" (60s for long routes, e.g. first load)
+const REQUEST_TIMEOUT_MS = 60000;
+app.use((req, res, next) => {
+  const t = setTimeout(() => {
+    if (!res.headersSent) {
+      res.status(504).json({ message: "Request timeout" });
+    }
+  }, REQUEST_TIMEOUT_MS);
+  res.on("finish", () => clearTimeout(t));
+  next();
+});
+
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;
