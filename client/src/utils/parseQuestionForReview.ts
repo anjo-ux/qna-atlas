@@ -73,7 +73,12 @@ export function parseQuestionForReview(question: Question): ParsedQuestionForRev
   const correctMatch = question.answer.match(
     /(?:correct answer is|answer is|correct response is|response is)\s*(?:option\s+)?([A-F])/i
   );
-  const correctAnswer = correctMatch ? correctMatch[1].toUpperCase() : null;
+  let correctAnswer: string | null = correctMatch ? correctMatch[1].toUpperCase() : null;
+  // Fallback: answer may start with "A)" or "A.\n" then explanation (e.g. AI-generated or Excel)
+  if (!correctAnswer) {
+    const leading = question.answer.match(/^\s*([A-F])\)/);
+    if (leading) correctAnswer = leading[1].toUpperCase();
+  }
 
   return { text: questionText.trim(), choices, correctAnswer };
 }

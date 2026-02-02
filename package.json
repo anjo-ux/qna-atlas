@@ -12,7 +12,10 @@
     "db:generate": "drizzle-kit generate",
     "db:push": "drizzle-kit push",
     "import:questions": "tsx server/scripts/importQuestionsFromExcel.ts",
-    "generate:questions": "tsx server/jobs/questionGenerationJob.ts"
+    "generate:questions": "tsx server/jobs/questionGenerationJob.ts",
+    "verify:questions": "tsx server/scripts/verifyQuestionFormat.ts",
+    "cleanup:questions": "tsx server/scripts/cleanupQuestions.ts",
+    "approve:questions": "tsx server/scripts/approveGeneratedQuestions.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
@@ -64,6 +67,7 @@
     "express-session": "^1.18.2",
     "input-otp": "^1.4.2",
     "lucide-react": "^0.462.0",
+    "mammoth": "^1.11.0",
     "memoizee": "^0.4.17",
     "next-themes": "^0.3.0",
     "openai": "^6.9.1",

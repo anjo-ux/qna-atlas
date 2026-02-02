@@ -2,11 +2,80 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./customAuth";
-import { insertTestSessionSchema, updateTestSessionSchema, insertQuestionResponseSchema } from "@shared/schemas";
+import { insertTestSessionSchema, updateTestSessionSchema, insertQuestionResponseSchema, insertQuestionSchema } from "@shared/schemas";
+import { validateQuestionFormat, contentRulesForGenerated } from "@shared/questionFormat";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Set up authentication middleware
   await setupAuth(app);
+
+  // Questions API (sections with nested subsections and questions)
+  app.get('/api/sections', isAuthenticated, async (req: any, res) => {
+    try {
+      const sections = await storage.getSections();
+      res.json(sections);
+    } catch (error) {
+      console.error("Error fetching sections:", error);
+      res.status(500).json({ message: "Failed to fetch sections" });
+    }
+  });
+
+  // Create AI-generated question (authenticated; same path used by scheduled job)
+  app.post('/api/questions', isAuthenticated, async (req: any, res) => {
+    try {
+      const validationResult = insertQuestionSchema.safeParse(req.body);
+      if (!validationResult.success) {
+        return res.status(400).json({
+          message: "Invalid request data",
+          errors: validationResult.error.flatten().fieldErrors,
+        });
+      }
+      const data = validationResult.data;
+      if (data.source === "generated") {
+        const formatResult = validateQuestionFormat(data.question, data.answer);
+        if (!formatResult.valid) {
+          return res.status(400).json({
+            message: "Generated question failed format validation",
+            errors: formatResult.errors,
+          });
+        }
+        const contentResult = contentRulesForGenerated(data.question);
+        if (!contentResult.pass) {
+          return res.status(400).json({
+            message: contentResult.reason ?? "Generated question failed content rules",
+          });
+        }
+      }
+      const { id } = await storage.createQuestion(data);
+      res.status(201).json({ id });
+    } catch (error) {
+      console.error("Error creating question:", error);
+      res.status(500).json({ message: "Failed to create question" });
+    }
+  });
+
+  // Update question visibility (push generated question live; authenticated)
+  app.patch('/api/questions/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const { visible } = req.body;
+      if (typeof visible !== "boolean") {
+        return res.status(400).json({ message: "Body must include visible: boolean" });
+      }
+      const question = await storage.getQuestion(id);
+      if (!question) {
+        return res.status(404).json({ message: "Question not found" });
+      }
+      const updated = await storage.updateQuestionVisibility(id, visible);
+      if (!updated) {
+        return res.status(500).json({ message: "Failed to update question" });
+      }
+      res.json({ id, visible });
+    } catch (error) {
+      console.error("Error updating question visibility:", error);
+      res.status(500).json({ message: "Failed to update question" });
+    }
+  });
 
   // Auth routes
   app.get('/api/auth/user', async (req: any, res) => {

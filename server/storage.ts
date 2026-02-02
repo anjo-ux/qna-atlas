@@ -9,6 +9,9 @@ import {
   spacedRepetitions,
   subscriptionPlans,
   subscriptionTransactions,
+  sections,
+  subsections,
+  questions,
   type User,
   type UpsertUser,
   type TestSession,
@@ -128,9 +131,14 @@ export interface IStorage {
 
   // Percentile rank operations
   getUserPercentileRank(userId: string): Promise<number | null>;
+
+  // Question bank (sections API)
+  getSections(): Promise<SectionDto[]>;
 }
 
 export class DatabaseStorage implements IStorage {
+  private chatBubbleThreads = new Map<string, { id: string; messages: unknown[] }>();
+
   // User operations
   async getUser(id: string): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.id, id));
@@ -631,6 +639,8 @@ export class DatabaseStorage implements IStorage {
     const questionRows = await db.select().from(questions);
     const bySub = new Map<string, typeof questionRows>();
     for (const q of questionRows) {
+      // Only include visible questions (hide picture-based etc.)
+      if (q.visible === false) continue;
       const list = bySub.get(q.subsectionId) ?? [];
       list.push(q);
       bySub.set(q.subsectionId, list);
@@ -658,17 +668,42 @@ export class DatabaseStorage implements IStorage {
     });
   }
 
-  async createQuestion(data: { question: string; answer: string; subsectionId: string; tags?: string[]; source?: string }) {
+  async createQuestion(data: {
+    question: string;
+    answer: string;
+    subsectionId: string;
+    tags?: string[];
+    source?: string;
+    visible?: boolean;
+  }) {
     const id = crypto.randomUUID();
+    const source = (data.source as "imported" | "generated") ?? "imported";
+    const visible =
+      data.visible !== undefined ? data.visible : source === "generated" ? false : true;
     await db.insert(questions).values({
       id,
       subsectionId: data.subsectionId,
       question: data.question,
       answer: data.answer,
       tags: data.tags ?? [],
-      source: (data.source as "imported" | "generated") ?? "generated",
+      source,
+      visible,
     });
     return { id };
+  }
+
+  async updateQuestionVisibility(id: string, visible: boolean): Promise<boolean> {
+    const [updated] = await db
+      .update(questions)
+      .set({ visible, updatedAt: new Date() })
+      .where(eq(questions.id, id))
+      .returning({ id: questions.id });
+    return !!updated;
+  }
+
+  async getQuestion(id: string) {
+    const [row] = await db.select().from(questions).where(eq(questions.id, id));
+    return row;
   }
 
   // Topic Analytics operations

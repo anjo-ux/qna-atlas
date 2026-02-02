@@ -182,7 +182,7 @@ export function SpacedRepetitionPage({ onBack }: SpacedRepetitionProps) {
         </div>
         <Input
           type="text"
-          placeholder="Search review questions"
+          placeholder="Search Review Questions"
           value={searchQuery}
           onChange={(e) => {
             setSearchQuery(e.target.value);
@@ -207,11 +207,11 @@ export function SpacedRepetitionPage({ onBack }: SpacedRepetitionProps) {
             {!isLoading && toReview.length === 0 && (
               <Card variant="glass" className="p-8 text-center max-w-2xl">
                 <Lightbulb className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-50" />
-                <h2 className="text-xl font-semibold text-foreground mb-2">No Questions to Review</h2>
+                <h2 className="text-xl font-semibold text-foreground mb-2">All Caught Up</h2>
                 <p className="text-muted-foreground">
                   {sections.length === 0
                     ? 'Load questions to get started.'
-                    : "You haven't missed any questions yet. Answer incorrectly in Test or Study mode to add them here."}
+                    : "You haven't missed any questions yet. Answer incorrectly in test or study mode to add them here."}
                 </p>
               </Card>
             )}

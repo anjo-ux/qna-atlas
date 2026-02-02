@@ -208,6 +208,7 @@ export const questions = pgTable("questions", {
   answer: text("answer").notNull(),
   tags: jsonb("tags").$type<string[]>().default([]).notNull(),
   source: varchar("source", { length: 32 }).notNull().default("imported"), // 'imported' | 'generated'
+  visible: boolean("visible").notNull().default(true), // false = hidden from users (e.g. picture-based)
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 }, (table) => [index("idx_questions_subsection_id").on(table.subsectionId)]);

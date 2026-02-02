@@ -180,7 +180,10 @@ export function QuestionCard({
   const correctAnswer = useMemo(() => {
     // Extract correct answer from the answer text (support A-F)
     const match = question.answer.match(/(?:correct answer is|answer is|correct response is|response is)\s*(?:option\s+)?([A-F])/i);
-    return match ? match[1].toUpperCase() : null;
+    if (match) return match[1].toUpperCase();
+    // Fallback: answer may start with "A)" or "A.\n" then explanation (e.g. AI-generated or Excel)
+    const leading = question.answer.match(/^\s*([A-F])\)/);
+    return leading ? leading[1].toUpperCase() : null;
   }, [question.answer]);
 
   const isCorrect = useMemo(() => {
