@@ -30,7 +30,13 @@ import {
   type InsertSubscriptionTransaction,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, desc, lte } from "drizzle-orm";
+import { eq, and, asc, desc, lte } from "drizzle-orm";
+
+export type SectionDto = {
+  id: string;
+  title: string;
+  subsections: { id: string; title: string; questions: { id: string; question: string; answer: string; category: string; subcategory: string; tags: string[] }[] }[];
+};
 
 // Interface for storage operations
 export interface IStorage {
@@ -619,6 +625,52 @@ export class DatabaseStorage implements IStorage {
     return updated;
   }
 
+  async getSections(): Promise<SectionDto[]> {
+    const sectionRows = await db.select().from(sections).orderBy(asc(sections.sortOrder));
+    const subsectionRows = await db.select().from(subsections).orderBy(asc(subsections.sortOrder));
+    const questionRows = await db.select().from(questions);
+    const bySub = new Map<string, typeof questionRows>();
+    for (const q of questionRows) {
+      const list = bySub.get(q.subsectionId) ?? [];
+      list.push(q);
+      bySub.set(q.subsectionId, list);
+    }
+    const bySec = new Map<string, typeof subsectionRows>();
+    for (const s of subsectionRows) {
+      const list = bySec.get(s.sectionId) ?? [];
+      list.push(s);
+      bySec.set(s.sectionId, list);
+    }
+    return sectionRows.map((sec) => {
+      const subs = (bySec.get(sec.id) ?? []).map((sub) => ({
+        id: sub.id,
+        title: sub.title,
+        questions: (bySub.get(sub.id) ?? []).map((q) => ({
+          id: q.id,
+          question: q.question,
+          answer: q.answer,
+          category: sec.id,
+          subcategory: sub.id,
+          tags: q.tags ?? [],
+        })),
+      }));
+      return { id: sec.id, title: sec.title, subsections: subs };
+    });
+  }
+
+  async createQuestion(data: { question: string; answer: string; subsectionId: string; tags?: string[]; source?: string }) {
+    const id = crypto.randomUUID();
+    await db.insert(questions).values({
+      id,
+      subsectionId: data.subsectionId,
+      question: data.question,
+      answer: data.answer,
+      tags: data.tags ?? [],
+      source: (data.source as "imported" | "generated") ?? "generated",
+    });
+    return { id };
+  }
+
   // Topic Analytics operations
   async getTopicStats(userId: string, sectionId?: string): Promise<{
     sectionId: string;
@@ -789,6 +841,14 @@ export class DatabaseStorage implements IStorage {
 
     const percentile = Math.round(((allUsers.length - betterCount) / allUsers.length) * 100);
     return Math.min(100, Math.max(0, percentile));
+  }
+
+  async createChatBubbleThread(threadId: string) {
+    this.chatBubbleThreads.set(threadId, { id: threadId, messages: [] });
+  }
+
+  async getChatBubbleThread(threadId: string) {
+    return this.chatBubbleThreads.get(threadId);
   }
 }
 

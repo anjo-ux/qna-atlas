@@ -10,7 +10,9 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "db:generate": "drizzle-kit generate",
-    "db:push": "drizzle-kit push"
+    "db:push": "drizzle-kit push",
+    "import:questions": "tsx server/scripts/importQuestionsFromExcel.ts",
+    "generate:questions": "tsx server/jobs/questionGenerationJob.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",

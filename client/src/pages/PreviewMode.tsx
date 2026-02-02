@@ -1,29 +1,11 @@
-import { useState, useEffect } from 'react';
 import { useLocation } from 'wouter';
-import { Section } from '@/types/question';
 import { TestMode } from './TestMode';
 import { getPreviewQuestions } from '@/utils/previewQuestions';
-import { loadQuestions } from '@/utils/parseQuestions';
+import { useSections } from '@/hooks/useSections';
 
 export default function PreviewMode() {
-  const [sections, setSections] = useState<Section[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { sections, isLoading } = useSections();
   const [, navigate] = useLocation();
-
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        const questionsData = await loadQuestions();
-        setSections(questionsData);
-      } catch (error) {
-        console.error('Error loading questions:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadData();
-  }, []);
 
   if (isLoading) {
     return (

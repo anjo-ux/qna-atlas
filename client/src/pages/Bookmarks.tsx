@@ -5,7 +5,7 @@ import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { QuestionCard } from '@/components/QuestionCard';
 import { useBookmarks } from '@/hooks/useBookmarks';
-import { loadQuestions } from '@/utils/parseQuestions';
+import { useSections } from '@/hooks/useSections';
 import { Section } from '@/types/question';
 import { useQuestionStats } from '@/hooks/useQuestionStats';
 import { cn } from '@/lib/utils';
@@ -17,7 +17,7 @@ interface BookmarksProps {
 
 export function BookmarksPage({ onBack }: BookmarksProps) {
   const { bookmarks, isLoading } = useBookmarks();
-  const [sections, setSections] = useState<Section[]>([]);
+  const { sections } = useSections();
   const [searchQuery, setSearchQuery] = useState('');
   const { getQuestionResponse, recordResponse } = useQuestionStats();
   const previousBookmarkIdsRef = useRef(new Set(bookmarks.map(b => b.id)));
@@ -38,35 +38,6 @@ export function BookmarksPage({ onBack }: BookmarksProps) {
       previousBookmarkIdsRef.current = currentBookmarkIds;
     }
   }, [bookmarks]);
-
-  // Load questions to find bookmarked ones
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const questionsData = await loadQuestions();
-        setSections(questionsData);
-      } catch (error) {
-        console.error('Error loading questions:', error);
-      }
-    };
-
-    fetchData();
-  }, []);
-
-  // Reload sections when bookmarks change to ensure fresh data
-  useEffect(() => {
-    if (bookmarks.length > 0 && sections.length === 0) {
-      const fetchData = async () => {
-        try {
-          const questionsData = await loadQuestions();
-          setSections(questionsData);
-        } catch (error) {
-          console.error('Error loading questions:', error);
-        }
-      };
-      fetchData();
-    }
-  }, [bookmarks, sections.length]);
 
   // Build bookmarked questions with section/subsection info
   // This useMemo will re-run whenever bookmarks changes, including when items are deleted

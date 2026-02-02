@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { loadQuestions } from '@/utils/parseQuestions';
+import { useSections } from '@/hooks/useSections';
 import { loadReferenceText } from '@/utils/parseReferenceText';
 import { Section } from '@/types/question';
 import { ReferenceSection } from '@/utils/parseReferenceText';
@@ -34,13 +34,13 @@ type TestModeState = { mode: 'new' } | { mode: 'resume'; sessionId: string };
 
 export default function Index() {
   const [, setLocation] = useLocation();
-  const [sections, setSections] = useState<Section[]>([]);
+  const { sections, isLoading: sectionsLoading } = useSections();
   const [referenceSections, setReferenceSections] = useState<ReferenceSection[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSection, setSelectedSection] = useState<string | null>(null);
   const [selectedSubsection, setSelectedSubsection] = useState<string | null>(null);
   const [isNavOpen, setIsNavOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const isLoading = sectionsLoading;
   const [viewMode, setViewMode] = useState<ViewMode>('split');
   const [filterMode, setFilterMode] = useState<FilterMode>('all');
   const [showSearchResults, setShowSearchResults] = useState(false);
@@ -97,16 +97,11 @@ export default function Index() {
         const subData = await subRes.json();
         setSubscription(subData);
 
-        const [questionsData, referenceData] = await Promise.all([
-          loadQuestions(),
-          Promise.resolve(loadReferenceText())
-        ]);
-        setSections(questionsData);
+        const referenceData = loadReferenceText();
         setReferenceSections(referenceData);
       } catch (error) {
         console.error('Error loading data:', error);
       } finally {
-        setIsLoading(false);
         setIsCheckingSubscription(false);
       }
     };

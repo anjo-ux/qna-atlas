@@ -1,11 +1,12 @@
 import { sql } from 'drizzle-orm';
 import {
   index,
+  integer,
   jsonb,
   pgTable,
+  text,
   timestamp,
   varchar,
-  integer,
   boolean,
 } from "drizzle-orm/pg-core";
 
@@ -185,6 +186,38 @@ export const spacedRepetitions = pgTable("spaced_repetitions", {
 
 export type InsertSpacedRepetition = typeof spacedRepetitions.$inferInsert;
 export type SpacedRepetition = typeof spacedRepetitions.$inferSelect;
+
+// Question bank: sections, subsections, questions (replaces Excel as source)
+export const sections = pgTable("sections", {
+  id: varchar("id", { length: 64 }).primaryKey(),
+  title: varchar("title").notNull(),
+  sortOrder: integer("sort_order").notNull().default(0),
+});
+
+export const subsections = pgTable("subsections", {
+  id: varchar("id", { length: 64 }).primaryKey(),
+  sectionId: varchar("section_id", { length: 64 }).notNull().references(() => sections.id, { onDelete: "cascade" }),
+  title: varchar("title").notNull(),
+  sortOrder: integer("sort_order").notNull().default(0),
+}, (table) => [index("idx_subsections_section_id").on(table.sectionId)]);
+
+export const questions = pgTable("questions", {
+  id: varchar("id", { length: 128 }).primaryKey(),
+  subsectionId: varchar("subsection_id", { length: 64 }).notNull().references(() => subsections.id, { onDelete: "cascade" }),
+  question: text("question").notNull(),
+  answer: text("answer").notNull(),
+  tags: jsonb("tags").$type<string[]>().default([]).notNull(),
+  source: varchar("source", { length: 32 }).notNull().default("imported"), // 'imported' | 'generated'
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (table) => [index("idx_questions_subsection_id").on(table.subsectionId)]);
+
+export type InsertSection = typeof sections.$inferInsert;
+export type SectionRow = typeof sections.$inferSelect;
+export type InsertSubsection = typeof subsections.$inferInsert;
+export type SubsectionRow = typeof subsections.$inferSelect;
+export type InsertQuestion = typeof questions.$inferInsert;
+export type QuestionRow = typeof questions.$inferSelect;
 
 // Subscription Plans table - stores available plans
 export const subscriptionPlans = pgTable("subscription_plans", {

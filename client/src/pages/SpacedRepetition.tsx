@@ -1,5 +1,5 @@
-import { useState, useEffect, useMemo } from 'react';
-import { loadQuestions } from '@/utils/parseQuestions';
+import { useState, useMemo } from 'react';
+import { useSections } from '@/hooks/useSections';
 import { Section } from '@/types/question';
 import { useSpacedRepetition } from '@/hooks/useSpacedRepetition';
 import { useQuestionStats } from '@/hooks/useQuestionStats';
@@ -28,23 +28,11 @@ export function SpacedRepetitionPage({ onBack }: SpacedRepetitionProps) {
   const { dueQuestions, reviewedQuestionIds, incorrectQuestionIds, isLoading, updateSR, isPending } =
     useSpacedRepetition();
   const { recordResponse } = useQuestionStats();
-  const [sections, setSections] = useState<Section[]>([]);
+  const { sections } = useSections();
   const [searchQuery, setSearchQuery] = useState('');
   const [currentIndex, setCurrentIndex] = useState(0);
   const [flipped, setFlipped] = useState(false);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
-
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        const questionsData = await loadQuestions();
-        setSections(questionsData);
-      } catch (error) {
-        console.error('Error Loading Questions:', error);
-      }
-    };
-    loadData();
-  }, []);
 
   const dueIds = useMemo(() => new Set((dueQuestions ?? []).map((d) => d.questionId)), [dueQuestions]);
   const reviewedIds = useMemo(
