@@ -5,9 +5,48 @@ import { setupAuth, isAuthenticated } from "./customAuth";
 import { insertTestSessionSchema, updateTestSessionSchema, insertQuestionResponseSchema, insertQuestionSchema } from "@shared/schemas";
 import { validateQuestionFormat, contentRulesForGenerated } from "@shared/questionFormat";
 
+const ADMIN_CODE = process.env.ADMIN_CODE || "1127";
+
+function requireAdminCode(req: any): boolean {
+  const code = req.headers["x-admin-code"];
+  return code === ADMIN_CODE;
+}
+
 export async function registerRoutes(app: Express): Promise<Server> {
   // Set up authentication middleware
   await setupAuth(app);
+
+  // Admin: list generated draft questions (requires admin code; no auth)
+  app.get("/api/admin/generated-questions", async (req: any, res) => {
+    if (!requireAdminCode(req)) {
+      return res.status(403).json({ message: "Invalid admin code" });
+    }
+    try {
+      const drafts = await storage.getDraftGeneratedQuestions();
+      res.json(drafts);
+    } catch (error) {
+      console.error("Error fetching draft questions:", error);
+      res.status(500).json({ message: "Failed to fetch draft questions" });
+    }
+  });
+
+  // Admin: trigger AI question generation (requires admin code; no auth). May take 30–60s.
+  app.post("/api/admin/generate-questions", async (req: any, res) => {
+    if (!requireAdminCode(req)) {
+      return res.status(403).json({ message: "Invalid admin code" });
+    }
+    try {
+      const { runQuestionGenerationJob } = await import("./jobs/questionGenerationJob");
+      const result = await runQuestionGenerationJob();
+      res.json(result);
+    } catch (error) {
+      console.error("Error running question generation:", error);
+      res.status(500).json({
+        message: "Question generation failed",
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+  });
 
   // Questions API (sections with nested subsections and questions)
   app.get('/api/sections', isAuthenticated, async (req: any, res) => {
@@ -54,8 +93,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Update question visibility (push generated question live; authenticated)
-  app.patch('/api/questions/:id', isAuthenticated, async (req: any, res) => {
+  // Update question visibility (push generated question live; requires auth OR valid admin code)
+  app.patch('/api/questions/:id', async (req: any, res) => {
+    const hasAuth = req.session?.userId;
+    const hasCode = requireAdminCode(req);
+    if (!hasAuth && !hasCode) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
     try {
       const { id } = req.params;
       const { visible } = req.body;

@@ -706,6 +706,21 @@ export class DatabaseStorage implements IStorage {
     return row;
   }
 
+  async getDraftGeneratedQuestions(): Promise<{ id: string; question: string; answer: string; subsectionId: string; createdAt: Date }[]> {
+    const rows = await db
+      .select({
+        id: questions.id,
+        question: questions.question,
+        answer: questions.answer,
+        subsectionId: questions.subsectionId,
+        createdAt: questions.createdAt,
+      })
+      .from(questions)
+      .where(and(eq(questions.source, "generated"), eq(questions.visible, false)))
+      .orderBy(desc(questions.createdAt));
+    return rows;
+  }
+
   // Topic Analytics operations
   async getTopicStats(userId: string, sectionId?: string): Promise<{
     sectionId: string;
