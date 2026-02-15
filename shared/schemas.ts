@@ -8,7 +8,7 @@ export const insertTestSessionSchema = createInsertSchema(testSessions).omit({
   createdAt: true,
   updatedAt: true,
   completedAt: true,
-});
+}) as any as z.ZodObject<any>;
 
 export const updateTestSessionSchema = z.object({
   currentQuestionIndex: z.number().int().min(0).optional(),
@@ -17,7 +17,7 @@ export const updateTestSessionSchema = z.object({
   flaggedQuestionIds: z.array(z.string()).optional(),
 });
 
-export type InsertTestSessionInput = z.infer<typeof insertTestSessionSchema>;
+export type InsertTestSessionInput = z.infer<typeof insertTestSessionSchema> & Record<string, any>;
 export type UpdateTestSessionInput = z.infer<typeof updateTestSessionSchema>;
 
 // Question Response schemas

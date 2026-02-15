@@ -11,7 +11,6 @@ import { storage } from "../storage";
 import { loadReferenceText } from "../utils/loadReferenceText";
 import { subsectionOrder, subsectionTitles } from "@shared/questionImport";
 import { validateQuestionFormat, contentRulesForGenerated } from "@shared/questionFormat";
-import { validateQuestionFormat, contentRulesForGenerated } from "@shared/questionFormat";
 
 const VALID_SUBSECTION_IDS = new Set(subsectionOrder);
 const SAMPLE_QUESTIONS_LIMIT = 80;
@@ -82,7 +81,7 @@ function parseGeneratedJson(raw: string): GeneratedQuestion[] {
         question: String(item.question).slice(0, MAX_QUESTION_CHARS),
         answer: String(item.answer).slice(0, MAX_ANSWER_CHARS),
         subsectionId: subId,
-        tags: Array.isArray(item.tags) ? item.tags.filter((t): t is string => typeof t === "string").slice(0, 10) : undefined,
+        tags: Array.isArray(item.tags) ? item.tags.filter((t: any): t is string => typeof t === "string").slice(0, 10) : undefined,
       });
     }
   }

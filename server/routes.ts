@@ -383,7 +383,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         userId,
       };
       
-      const session = await storage.createTestSession(sessionData);
+      const session = await storage.createTestSession(sessionData as any);
       res.json(session);
     } catch (error) {
       console.error("Error creating test session:", error);

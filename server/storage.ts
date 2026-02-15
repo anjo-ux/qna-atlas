@@ -285,7 +285,7 @@ export class DatabaseStorage implements IStorage {
       .from(questionResponses)
       .where(
         and(
-          eq(questionResponses.testSessionId, responseData.testSessionId),
+          eq(questionResponses.testSessionId, responseData.testSessionId as any),
           eq(questionResponses.questionId, responseData.questionId)
         )
       );
