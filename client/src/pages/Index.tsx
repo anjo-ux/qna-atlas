@@ -819,7 +819,7 @@ export default function Index() {
           )}
         </main>
       </div>
-      {screenMode !== 'test' && <ChatBubble />}
+      {(screenMode as ScreenMode) !== 'test' && <ChatBubble />}
     </div>
   );
 }
