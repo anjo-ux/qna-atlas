@@ -77,7 +77,7 @@ app.use((req, res, next) => {
         const run = () => {
           runQuestionGenerationJob()
             .then((r) => log(`[questionGenerationJob] created=${r.created} total=${r.total} skipped=${r.skipped}`))
-            .catch((e) => log(`[questionGenerationJob] error:`, e));
+            .catch((e) => log(`[questionGenerationJob] error: ${e}`));
         };
         run(); // run once after startup
         setInterval(run, genIntervalMs);
