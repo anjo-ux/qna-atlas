@@ -15,6 +15,7 @@
     "generate:questions": "tsx server/jobs/questionGenerationJob.ts",
     "verify:questions": "tsx server/scripts/verifyQuestionFormat.ts",
     "cleanup:questions": "tsx server/scripts/cleanupQuestions.ts",
+    "clear:generated-questions": "tsx server/scripts/clearGeneratedQuestions.ts",
     "approve:questions": "tsx server/scripts/approveGeneratedQuestions.ts"
   },
   "dependencies": {
