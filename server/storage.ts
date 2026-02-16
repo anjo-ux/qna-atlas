@@ -701,6 +701,15 @@ export class DatabaseStorage implements IStorage {
     return !!updated;
   }
 
+  async updateQuestionText(id: string, question: string, answer: string): Promise<boolean> {
+    const [updated] = await db
+      .update(questions)
+      .set({ question, answer, updatedAt: new Date() })
+      .where(eq(questions.id, id))
+      .returning({ id: questions.id });
+    return !!updated;
+  }
+
   async getQuestion(id: string) {
     const [row] = await db.select().from(questions).where(eq(questions.id, id));
     return row;

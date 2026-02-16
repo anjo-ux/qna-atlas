@@ -2,6 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./customAuth";
+import { sanitizeUser } from "./authUtils";
 import { insertTestSessionSchema, updateTestSessionSchema, insertQuestionResponseSchema, insertQuestionSchema } from "@shared/schemas";
 import { validateQuestionFormat, contentRulesForGenerated } from "@shared/questionFormat";
 import { subsectionOrder, subsectionTitles } from "@shared/questionImport";
@@ -200,32 +201,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const user = await storage.getUser(userId);
-      res.json(user);
+      res.json(sanitizeUser(user) ?? null);
     } catch (error) {
       console.error("Error fetching user:", error);
       res.status(500).json({ message: "Failed to fetch user" });
     }
   });
 
-  // Update user profile
+  // Update user profile (allowlist only — never accept passwordHash or other sensitive fields from body)
+  const PROFILE_STRING_MAX = 255;
+  const NAME_MAX = 100;
+  const AVATAR_MAX = 50;
   app.patch('/api/auth/user', async (req: any, res) => {
     try {
       const userId = req.session?.userId;
       if (!userId) {
         return res.status(401).json({ message: "Unauthorized" });
       }
-      
-      const { username, firstName, lastName, institutionalAffiliation, avatarIcon } = req.body;
-      
-      const updatedUser = await storage.updateUserProfile(userId, {
-        username,
-        firstName,
-        lastName,
-        institutionalAffiliation,
-        avatarIcon,
-      });
-      
-      res.json(updatedUser);
+      const body = req.body ?? {};
+      const updates: Record<string, string | undefined> = {};
+      if (body.username !== undefined) {
+        const v = typeof body.username === 'string' ? body.username.slice(0, PROFILE_STRING_MAX) : undefined;
+        updates.username = v === '' ? undefined : v;
+      }
+      if (body.firstName !== undefined) {
+        const v = typeof body.firstName === 'string' ? body.firstName.slice(0, NAME_MAX) : undefined;
+        updates.firstName = v;
+      }
+      if (body.lastName !== undefined) {
+        const v = typeof body.lastName === 'string' ? body.lastName.slice(0, NAME_MAX) : undefined;
+        updates.lastName = v;
+      }
+      if (body.institutionalAffiliation !== undefined) {
+        const v = typeof body.institutionalAffiliation === 'string' ? body.institutionalAffiliation.slice(0, PROFILE_STRING_MAX) : undefined;
+        updates.institutionalAffiliation = v;
+      }
+      if (body.avatarIcon !== undefined) {
+        const v = typeof body.avatarIcon === 'string' ? body.avatarIcon.slice(0, AVATAR_MAX) : undefined;
+        updates.avatarIcon = v;
+      }
+      const updatedUser = await storage.updateUserProfile(userId, updates);
+      res.json(sanitizeUser(updatedUser));
     } catch (error) {
       console.error("Error updating user:", error);
       res.status(500).json({ message: "Failed to update user" });

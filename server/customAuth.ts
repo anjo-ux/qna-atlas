@@ -1,11 +1,22 @@
 import bcrypt from 'bcrypt';
 import session from 'express-session';
+import rateLimit from 'express-rate-limit';
+import sgMail from '@sendgrid/mail';
 import type { Express, RequestHandler } from 'express';
 import connectPg from 'connect-pg-simple';
 import { storage } from './storage';
+import { sanitizeUser } from './authUtils';
 
 const SALT_ROUNDS = 12; // Strong password hashing
 const SESSION_TTL = 7 * 24 * 60 * 60 * 1000; // 7 days
+
+function getSessionSecret(): string {
+  const secret = process.env.SESSION_SECRET;
+  if (process.env.NODE_ENV === 'production' && !secret) {
+    throw new Error('SESSION_SECRET must be set in production. Do not use a default secret.');
+  }
+  return secret || 'atlas-review-secret';
+}
 
 export function getSession() {
   const pgStore = connectPg(session);
@@ -17,13 +28,13 @@ export function getSession() {
   });
 
   return session({
-    secret: process.env.SESSION_SECRET || 'atlas-review-secret',
+    secret: getSessionSecret(),
     store: sessionStore,
     resave: false,
     saveUninitialized: false,
     cookie: {
       httpOnly: true, // Prevent XSS attacks
-      secure: true, // HTTPS only
+      secure: process.env.NODE_ENV === 'production', // HTTPS only in production
       sameSite: 'strict', // CSRF protection
       maxAge: SESSION_TTL,
     },
@@ -52,42 +63,54 @@ function generateTemporaryPassword(): string {
 }
 
 async function sendPasswordEmail(email: string, password: string): Promise<void> {
-  // Note: For production, integrate with SendGrid via SENDGRID_API_KEY environment variable
-  // Currently logs temporary passwords to server console for development
-  
-  console.log('\n' + '='.repeat(70));
-  console.log('PASSWORD RECOVERY REQUEST');
-  console.log('='.repeat(70));
-  console.log(`To: ${email}`);
-  console.log(`Temporary Password: ${password}`);
-  console.log('Action: User must change password on next login');
-  console.log('='.repeat(70) + '\n');
-  
-  // In production, uncomment and implement SendGrid:
-  // try {
-  //   const sgMail = require('@sendgrid/mail');
-  //   sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-  //   
-  //   await sgMail.send({
-  //     to: email,
-  //     from: process.env.SENDGRID_FROM_EMAIL || 'noreply@atlasreview.com',
-  //     subject: 'Your Password Recovery for Atlas Review',
-  //     html: `
-  //       <p>Your temporary password for Atlas Review is: <strong>${password}</strong></p>
-  //       <p>You will be required to change this password when you log in.</p>
-  //     `
-  //   });
-  // } catch (error) {
-  //   console.error('Failed to send email via SendGrid:', error);
-  // }
+  const apiKey = process.env.SENDGRID_API_KEY;
+  const fromEmail = process.env.SENDGRID_FROM_EMAIL || 'noreply@prs-atlas.com';
+
+  if (!apiKey) {
+    console.warn('[Forgot password] SENDGRID_API_KEY is not set — no email will be sent. Recipient:', email);
+    return;
+  }
+
+  try {
+    sgMail.setApiKey(apiKey);
+    console.log('[Forgot password] Sending via SendGrid to', email, 'from', fromEmail);
+    await sgMail.send({
+      to: email,
+      from: fromEmail,
+      templateId: 'd-c1a8296876d045eb8ca21c193f321224',
+      dynamicTemplateData: {
+        temporaryPassword: password,
+        loginUrl: process.env.APP_URL || 'https://prs-atlas.com',
+      },
+    });
+    console.log('[Forgot password] SendGrid accepted the request for', email);
+  } catch (error: unknown) {
+    const err = error as { response?: { body?: unknown; statusCode?: number } };
+    console.error('[Forgot password] SendGrid error:', err);
+    if (err.response?.body) {
+      console.error('[Forgot password] SendGrid response body:', JSON.stringify(err.response.body, null, 2));
+    }
+    if (err.response?.statusCode) {
+      console.error('[Forgot password] SendGrid status code:', err.response.statusCode);
+    }
+  }
 }
+
+/** Rate limiter for auth-sensitive endpoints (login, register, forgot-password) to prevent brute force. */
+const authRateLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 25, // 25 attempts per window per IP across login + register + forgot-password
+  message: { message: 'Too many attempts. Please try again later.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 
 export async function setupAuth(app: Express) {
   app.set('trust proxy', 1);
   app.use(getSession());
 
   // Forgot password route
-  app.post('/api/auth/forgot-password', async (req, res) => {
+  app.post('/api/auth/forgot-password', authRateLimiter, async (req, res) => {
     try {
       const { email } = req.body;
 
@@ -123,12 +146,15 @@ export async function setupAuth(app: Express) {
   });
 
   // Login route
-  app.post('/api/auth/login', async (req, res) => {
+  app.post('/api/auth/login', authRateLimiter, async (req, res) => {
     try {
       const { email, password } = req.body;
 
       if (!email || !password) {
         return res.status(400).json({ message: 'Email and password required to login.' });
+      }
+      if (password.length > 128) {
+        return res.status(400).json({ message: 'Invalid email or password entered.' });
       }
 
       const user = await storage.getUserByEmail(email);
@@ -141,9 +167,9 @@ export async function setupAuth(app: Express) {
         return res.status(401).json({ message: 'Invalid email or password entered.' });
       }
 
-      // Create session
+      // Create session (store only sanitized user; never persist passwordHash in session)
       (req as any).session.userId = user.id;
-      (req as any).session.user = user;
+      (req as any).session.user = sanitizeUser(user);
       (req as any).user = user;
 
       // Save session before responding
@@ -152,7 +178,7 @@ export async function setupAuth(app: Express) {
           console.error('Session Save Error:', err);
           return res.status(500).json({ message: 'Session Creation Failed' });
         }
-        res.json({ success: true, user, passwordNeedsReset: user.passwordNeedsReset || false });
+        res.json({ success: true, user: sanitizeUser(user), passwordNeedsReset: user.passwordNeedsReset || false });
       });
     } catch (error) {
       console.error('Login Error:', error);
@@ -181,6 +207,9 @@ export async function setupAuth(app: Express) {
       if (newPassword.length < 8) {
         return res.status(400).json({ message: 'Password must be at least eight characters in length.' });
       }
+      if (newPassword.length > 128) {
+        return res.status(400).json({ message: 'Password must be at most 128 characters.' });
+      }
 
       // Hash new password and update user
       const passwordHash = await hashPassword(newPassword);
@@ -194,7 +223,7 @@ export async function setupAuth(app: Express) {
   });
 
   // Register route
-  app.post('/api/auth/register', async (req, res) => {
+  app.post('/api/auth/register', authRateLimiter, async (req, res) => {
     try {
       const { email, password, confirmPassword, firstName, lastName, institutionalAffiliation } = req.body;
 
@@ -211,6 +240,22 @@ export async function setupAuth(app: Express) {
         return res
           .status(400)
           .json({ message: 'Password must be at least eight characters in length.' });
+      }
+      if (password.length > 128) {
+        return res.status(400).json({ message: 'Password must be at most 128 characters.' });
+      }
+
+      const MAX_EMAIL = 255;
+      const MAX_NAME = 100;
+      const MAX_AFFILIATION = 255;
+      if (typeof email !== 'string' || email.length > MAX_EMAIL) {
+        return res.status(400).json({ message: 'Invalid email.' });
+      }
+      if (typeof firstName !== 'string' || firstName.length > MAX_NAME || typeof lastName !== 'string' || lastName.length > MAX_NAME) {
+        return res.status(400).json({ message: 'First and last name must be at most 100 characters each.' });
+      }
+      if (institutionalAffiliation != null && (typeof institutionalAffiliation !== 'string' || institutionalAffiliation.length > MAX_AFFILIATION)) {
+        return res.status(400).json({ message: 'Institutional affiliation must be at most 255 characters.' });
       }
 
       // Check email validity
@@ -240,9 +285,9 @@ export async function setupAuth(app: Express) {
         trialEndsAt,
       });
 
-      // Create session
+      // Create session (store only sanitized user; never persist passwordHash in session)
       (req as any).session.userId = newUser.id;
-      (req as any).session.user = newUser;
+      (req as any).session.user = sanitizeUser(newUser);
       (req as any).user = newUser;
 
       // Save session before responding
@@ -251,7 +296,7 @@ export async function setupAuth(app: Express) {
           console.error('Session save error:', err);
           return res.status(500).json({ message: 'Session creation failed' });
         }
-        res.status(201).json({ success: true, user: newUser });
+        res.status(201).json({ success: true, user: sanitizeUser(newUser) });
       });
     } catch (error) {
       console.error('Register error:', error);

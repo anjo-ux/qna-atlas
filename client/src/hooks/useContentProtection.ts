@@ -14,8 +14,14 @@ export function useContentProtection() {
       return false;
     };
 
-    // Prevent paste
+    // Prevent paste except in inputs/textarea (e.g. login, signup, any form)
     const handlePaste = (e: ClipboardEvent) => {
+      const target = e.target as Node | null;
+      const active = document.activeElement;
+      const inField =
+        (target instanceof HTMLElement && target.closest('input, textarea, [contenteditable="true"]')) ||
+        (active instanceof HTMLElement && active.matches('input, textarea, [contenteditable="true"]'));
+      if (inField) return; // allow paste in form fields
       e.preventDefault();
       return false;
     };
