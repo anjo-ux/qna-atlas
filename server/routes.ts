@@ -4,12 +4,23 @@ import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./customAuth";
 import { insertTestSessionSchema, updateTestSessionSchema, insertQuestionResponseSchema, insertQuestionSchema } from "@shared/schemas";
 import { validateQuestionFormat, contentRulesForGenerated } from "@shared/questionFormat";
+import { subsectionOrder, subsectionTitles } from "@shared/questionImport";
 
 const ADMIN_CODE = process.env.ADMIN_CODE || "1127";
+const QUESTION_IMPORT_API_KEY = process.env.QUESTION_IMPORT_API_KEY;
 
 function requireAdminCode(req: any): boolean {
   const code = req.headers["x-admin-code"];
   return code === ADMIN_CODE;
+}
+
+/** Require QUESTION_IMPORT_API_KEY via Authorization: Bearer <key> or X-API-Key header. */
+function requireImportApiKey(req: any): boolean {
+  if (!QUESTION_IMPORT_API_KEY) return false;
+  const auth = req.headers.authorization;
+  const bearer = auth?.startsWith("Bearer ") ? auth.slice(7) : null;
+  const headerKey = req.headers["x-api-key"];
+  return bearer === QUESTION_IMPORT_API_KEY || headerKey === QUESTION_IMPORT_API_KEY;
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -27,6 +38,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching draft questions:", error);
       res.status(500).json({ message: "Failed to fetch draft questions" });
+    }
+  });
+
+  // External: list valid subsection IDs (for import UI). Requires QUESTION_IMPORT_API_KEY.
+  app.get("/api/admin/subsection-ids", async (req: any, res) => {
+    if (!requireImportApiKey(req)) {
+      return res.status(403).json({
+        message: "Invalid or missing API key. Set Authorization: Bearer <QUESTION_IMPORT_API_KEY> or X-API-Key header.",
+      });
+    }
+    const subsections = subsectionOrder.map((id) => ({
+      id,
+      title: subsectionTitles[id] ?? id,
+    }));
+    res.json({ subsectionIds: subsectionOrder, subsections });
+  });
+
+  // External: import an approved question from another app (e.g. external question generator). Requires QUESTION_IMPORT_API_KEY.
+  app.post("/api/admin/import-question", async (req: any, res) => {
+    if (!requireImportApiKey(req)) {
+      return res.status(403).json({
+        message: "Invalid or missing API key. Set Authorization: Bearer <QUESTION_IMPORT_API_KEY> or X-API-Key header.",
+      });
+    }
+    try {
+      const validationResult = insertQuestionSchema.safeParse(req.body);
+      if (!validationResult.success) {
+        return res.status(400).json({
+          message: "Invalid request data",
+          errors: validationResult.error.flatten().fieldErrors,
+        });
+      }
+      const data = validationResult.data;
+      const visible = typeof req.body.visible === "boolean" ? req.body.visible : undefined;
+      if (data.source === "generated") {
+        const formatResult = validateQuestionFormat(data.question, data.answer);
+        if (!formatResult.valid) {
+          return res.status(400).json({
+            message: "Generated question failed format validation",
+            errors: formatResult.errors,
+          });
+        }
+        const contentResult = contentRulesForGenerated(data.question);
+        if (!contentResult.pass) {
+          return res.status(400).json({
+            message: contentResult.reason ?? "Generated question failed content rules",
+          });
+        }
+      }
+      const { id } = await storage.createQuestion({ ...data, visible });
+      res.status(201).json({ id });
+    } catch (error) {
+      console.error("Error importing question:", error);
+      res.status(500).json({ message: "Failed to import question" });
     }
   });
 
