@@ -16,6 +16,10 @@ import Login from "./pages/Login";
 import { BookmarksPage } from "./pages/Bookmarks";
 import { SpacedRepetitionPage } from "./pages/SpacedRepetition";
 import OralBoardSimulator from "./pages/OralBoardSimulator";
+// Hidden by default: set VITE_ENABLE_ADMIN_GENERATED_QUESTIONS_UI=true to show /admin/generated-questions
+const ENABLE_ADMIN_GENERATED_QUESTIONS_UI =
+  import.meta.env.VITE_ENABLE_ADMIN_GENERATED_QUESTIONS_UI === "true";
+
 import AdminGeneratedQuestions from "./pages/AdminGeneratedQuestions";
 
 class AdminPageErrorBoundary extends Component<
@@ -69,10 +73,12 @@ function isAdminPath(path: string): boolean {
 function Router() {
   const [location] = useLocation();
   const { isAuthenticated, isLoading } = useAuth();
-  // Use actual URL as source of truth so admin page never disappears from reactive state quirks
+  // Use actual URL as source of truth so admin page never disappears from reactive state quirks (only when feature enabled)
   const pathname =
     typeof window !== "undefined" ? window.location.pathname : location;
-  const isAdminPage = isAdminPath(pathname) || isAdminPath(location);
+  const isAdminPage =
+    ENABLE_ADMIN_GENERATED_QUESTIONS_UI &&
+    (isAdminPath(pathname) || isAdminPath(location));
 
   if (!isAdminPage && isLoading) {
     return (

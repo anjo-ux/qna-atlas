@@ -697,21 +697,25 @@ export default function Index() {
           </>
         )}
 
-        {/* Main Content Area */}
-        <main className="flex-1 flex overflow-hidden flex-col">
+        {/* Main Content Area - scrollable when on home so wheel works over empty left/right space */}
+        <main className="flex-1 flex flex-col min-h-0 overflow-hidden">
           {isLoading ? (
             <div className="flex-1 flex items-center justify-center min-h-[400px]">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
             </div>
           ) : !currentSubsection ? (
-            <HomePage 
-              sections={sections} 
-              onReviewIncorrect={handleReviewIncorrect}
-              onStartTest={handleStartTest}
-              onResumeTest={handleResumeTest}
-              onSettings={() => setScreenMode('settings')}
-              onPreview={() => setShowPreviewWizard(true)}
-            />
+            <div className="flex-1 min-h-0 w-full overflow-y-auto overflow-x-hidden scrollbar-hide">
+              <div className="min-h-full w-full">
+                <HomePage 
+                  sections={sections} 
+                  onReviewIncorrect={handleReviewIncorrect}
+                  onStartTest={handleStartTest}
+                  onResumeTest={handleResumeTest}
+                  onSettings={() => setScreenMode('settings')}
+                  onPreview={() => setShowPreviewWizard(true)}
+                />
+              </div>
+            </div>
           ) : (
             <div className={cn(
               "flex-1 flex flex-col lg:flex-row min-h-0",

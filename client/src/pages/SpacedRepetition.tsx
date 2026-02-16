@@ -174,7 +174,7 @@ export function SpacedRepetitionPage({ onBack }: SpacedRepetitionProps) {
             </div>
           </div>
           <div className="text-right">
-            <p className="text-sm text-muted-foreground">To review</p>
+            <p className="text-sm text-muted-foreground">Remaining Questions To Review</p>
             <p className="text-2xl font-bold text-primary">
               {sections.length > 0 ? filtered.length : incorrectIds.size}
             </p>

@@ -28,19 +28,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Set up authentication middleware
   await setupAuth(app);
 
-  // Admin: list generated draft questions (requires admin code; no auth)
-  app.get("/api/admin/generated-questions", async (req: any, res) => {
-    if (!requireAdminCode(req)) {
-      return res.status(403).json({ message: "Invalid admin code" });
-    }
-    try {
-      const drafts = await storage.getDraftGeneratedQuestions();
-      res.json(drafts);
-    } catch (error) {
-      console.error("Error fetching draft questions:", error);
-      res.status(500).json({ message: "Failed to fetch draft questions" });
-    }
-  });
+  // Hidden by default: set ENABLE_ADMIN_GENERATED_QUESTIONS_UI=true to expose. Admin: list generated draft questions (requires admin code; no auth)
+  if (process.env.ENABLE_ADMIN_GENERATED_QUESTIONS_UI === "true") {
+    app.get("/api/admin/generated-questions", async (req: any, res) => {
+      if (!requireAdminCode(req)) {
+        return res.status(403).json({ message: "Invalid admin code" });
+      }
+      try {
+        const drafts = await storage.getDraftGeneratedQuestions();
+        res.json(drafts);
+      } catch (error) {
+        console.error("Error fetching draft questions:", error);
+        res.status(500).json({ message: "Failed to fetch draft questions" });
+      }
+    });
+    app.post("/api/admin/generate-questions", async (req: any, res) => {
+      if (!requireAdminCode(req)) {
+        return res.status(403).json({ message: "Invalid admin code" });
+      }
+      try {
+        const { runQuestionGenerationJob } = await import("./jobs/questionGenerationJob");
+        const result = await runQuestionGenerationJob();
+        res.json(result);
+      } catch (error) {
+        console.error("Error running question generation:", error);
+        res.status(500).json({
+          message: "Question generation failed",
+          error: error instanceof Error ? error.message : String(error),
+        });
+      }
+    });
+  }
 
   // External: list valid subsection IDs (for import UI). Requires QUESTION_IMPORT_API_KEY.
   app.get("/api/admin/subsection-ids", async (req: any, res) => {
@@ -97,24 +115,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error importing question:", error);
       res.status(500).json({ message: "Failed to import question" });
-    }
-  });
-
-  // Admin: trigger AI question generation (requires admin code; no auth). May take 30–60s.
-  app.post("/api/admin/generate-questions", async (req: any, res) => {
-    if (!requireAdminCode(req)) {
-      return res.status(403).json({ message: "Invalid admin code" });
-    }
-    try {
-      const { runQuestionGenerationJob } = await import("./jobs/questionGenerationJob");
-      const result = await runQuestionGenerationJob();
-      res.json(result);
-    } catch (error) {
-      console.error("Error running question generation:", error);
-      res.status(500).json({
-        message: "Question generation failed",
-        error: error instanceof Error ? error.message : String(error),
-      });
     }
   });
 
