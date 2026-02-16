@@ -52,7 +52,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       id,
       title: subsectionTitles[id] ?? id,
     }));
-    res.json({ subsectionIds: subsectionOrder, subsections });
+    res.json({
+      subsectionIds: subsectionOrder,
+      subsections,
+      data: { ids: subsectionOrder },
+    });
   });
 
   // External: import an approved question from another app (e.g. external question generator). Requires QUESTION_IMPORT_API_KEY.

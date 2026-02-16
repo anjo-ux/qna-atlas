@@ -39,3 +39,4 @@ externalPort = 80
 
 [userenv.shared]
 OPENAI_ASSISTANT_ID = "asst_tt8Ci5ShxyJNCMUA2ob7EB8m"
+QUESTION_IMPORT_API_KEY = "wf0JKM0SWLSr-zVDv8j9JrsOplqw2YwndRMiFq3RVg4"
