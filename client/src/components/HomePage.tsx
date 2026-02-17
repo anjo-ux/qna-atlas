@@ -192,7 +192,7 @@ export function HomePage({ sections, onReviewIncorrect, onStartTest, onResumeTes
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => logout()} data-testid="button-logout">
               <LogOut className="w-4 h-4 mr-2" />
-              Log out
+              Log Out
             </DropdownMenuItem>
           </DropdownMenuContent>
           </DropdownMenu>

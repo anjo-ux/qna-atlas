@@ -86,22 +86,22 @@ html, body {
 
   :root {
     --background: 210 40% 98%;
-    --foreground: 210 20% 25%;
+    --foreground: 210 20% 20%;
 
     --card: 0 0% 100%;
-    --card-foreground: 210 20% 25%;
+    --card-foreground: 210 20% 20%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 210 20% 25%;
+    --popover-foreground: 210 20% 20%;
 
-    --primary: 210 85% 60%;
+    --primary: 210 85% 48%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 200 75% 70%;
+    --secondary: 200 75% 58%;
     --secondary-foreground: 0 0% 100%;
 
-    --muted: 210 20% 94%;
-    --muted-foreground: 210 15% 55%;
+    --muted: 210 20% 91%;
+    --muted-foreground: 210 15% 45%;
 
     --accent: 180 100% 35%;
     --accent-foreground: 0 0% 100%;
@@ -109,30 +109,30 @@ html, body {
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 210 20% 90%;
-    --input: 210 20% 90%;
-    --ring: 210 85% 60%;
+    --border: 210 20% 82%;
+    --input: 210 20% 82%;
+    --ring: 210 85% 48%;
 
     --radius: 1.25rem;
     
     --sidebar-width: 280px;
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    --shadow-card: 0 2px 8px -2px hsl(0 0% 0% / 0.05);
-    --shadow-elevated: 0 4px 12px -2px hsl(0 0% 0% / 0.08);
+    --shadow-card: 0 2px 8px -2px hsl(0 0% 0% / 0.08);
+    --shadow-elevated: 0 4px 12px -2px hsl(0 0% 0% / 0.12);
 
     --sidebar-background: 0 0% 98%;
 
-    --sidebar-foreground: 210 30% 35%;
+    --sidebar-foreground: 210 30% 28%;
 
-    --sidebar-primary: 210 75% 55%;
+    --sidebar-primary: 210 75% 48%;
 
     --sidebar-primary-foreground: 0 0% 100%;
 
     --sidebar-accent: 180 100% 70%;
 
-    --sidebar-accent-foreground: 210 30% 30%;
+    --sidebar-accent-foreground: 210 30% 24%;
 
-    --sidebar-border: 210 20% 88%;
+    --sidebar-border: 210 20% 80%;
 
     --sidebar-ring: 180 100% 68%;
     
@@ -141,18 +141,18 @@ html, body {
     --highlight-blue: 199 89% 78%;
     --highlight-pink: 330 81% 85%;
     
-    --nav-gradient-start: 210 75% 55%;
-    --nav-gradient-end: 200 80% 65%;
-    --nav-hover-gradient-start: 210 75% 60%;
-    --nav-hover-gradient-end: 200 80% 70%;
+    --nav-gradient-start: 210 75% 48%;
+    --nav-gradient-end: 200 80% 55%;
+    --nav-hover-gradient-start: 210 75% 52%;
+    --nav-hover-gradient-end: 200 80% 60%;
     
     --success: 142 76% 50%;
     --success-foreground: 0 0% 100%;
-    --chart-1: 210 75% 55%;
-    --chart-2: 180 100% 68%;
+    --chart-1: 210 75% 48%;
+    --chart-2: 180 100% 55%;
     --chart-3: 142 76% 55%;
-    --chart-4: 200 80% 65%;
-    --chart-5: 180 100% 60%;
+    --chart-4: 200 80% 52%;
+    --chart-5: 180 100% 48%;
   }
 
   .dark {
