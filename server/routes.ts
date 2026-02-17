@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./customAuth";
 import { sanitizeUser } from "./authUtils";
+import { createTesterRedirectToken, verifyTesterRedirectToken, ATLAS_TRAINER_CALLBACK_URL } from "./testerToken";
 import { insertTestSessionSchema, updateTestSessionSchema, insertQuestionResponseSchema, insertQuestionSchema } from "@shared/schemas";
 import { validateQuestionFormat, contentRulesForGenerated } from "@shared/questionFormat";
 import { subsectionOrder, subsectionTitles } from "@shared/questionImport";
@@ -59,6 +60,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     });
   }
+
+  // Admin: set user tester status (beta access to Atlas Trainer). Requires X-Admin-Code.
+  app.patch("/api/admin/users/:userId/tester", async (req: any, res) => {
+    if (!requireAdminCode(req)) {
+      return res.status(403).json({ message: "Invalid admin code" });
+    }
+    const { userId } = req.params;
+    const tester = req.body?.tester;
+    if (typeof tester !== "boolean") {
+      return res.status(400).json({ message: "Body must include { tester: true | false }" });
+    }
+    try {
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      const updated = await storage.updateUserTester(userId, tester);
+      res.json(sanitizeUser(updated));
+    } catch (error) {
+      console.error("Error updating user tester status:", error);
+      res.status(500).json({ message: "Failed to update tester status" });
+    }
+  });
 
   // External: list valid subsection IDs (for import UI). Requires QUESTION_IMPORT_API_KEY.
   app.get("/api/admin/subsection-ids", async (req: any, res) => {
@@ -246,6 +270,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("Error updating user:", error);
       res.status(500).json({ message: "Failed to update user" });
     }
+  });
+
+  // Tester redirect: create short-lived token and redirect to Atlas Trainer (train.prs-atlas.com)
+  app.get("/api/auth/tester-redirect", async (req: any, res) => {
+    try {
+      const userId = req.session?.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(401).json({ message: "User not found" });
+      }
+      if (user.tester !== true) {
+        return res.status(403).json({ message: "Beta testing access required" });
+      }
+      const token = createTesterRedirectToken(userId);
+      const url = `${ATLAS_TRAINER_CALLBACK_URL}?token=${encodeURIComponent(token)}`;
+      res.redirect(302, url);
+    } catch (error) {
+      console.error("Error creating tester redirect:", error);
+      res.status(500).json({ message: "Failed to create redirect" });
+    }
+  });
+
+  // Verify tester token (called by train.prs-atlas.com server-side). Returns user if token is valid and user is a tester.
+  const TESTER_VERIFY_SECRET = process.env.TESTER_VERIFY_SECRET;
+  app.get("/api/auth/verify-tester-token", async (req: any, res) => {
+    if (TESTER_VERIFY_SECRET) {
+      const secret = req.headers["x-tester-verify-secret"] ?? req.headers.authorization?.replace(/^Bearer\s+/i, "");
+      if (secret !== TESTER_VERIFY_SECRET) {
+        return res.status(403).json({ message: "Invalid or missing verification secret" });
+      }
+    }
+    const token = req.query.token as string | undefined;
+    if (!token) {
+      return res.status(400).json({ message: "Missing token" });
+    }
+    const payload = verifyTesterRedirectToken(token);
+    if (!payload) {
+      return res.status(401).json({ message: "Invalid or expired token" });
+    }
+    const user = await storage.getUser(payload.userId);
+    if (!user || user.tester !== true) {
+      return res.status(403).json({ message: "User is not a tester" });
+    }
+    res.json({ valid: true, user: sanitizeUser(user) });
   });
 
   // Get user percentile rank

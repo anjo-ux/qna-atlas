@@ -190,6 +190,15 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
+  async updateUserTester(userId: string, tester: boolean): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set({ tester, updatedAt: new Date() })
+      .where(eq(users.id, userId))
+      .returning();
+    return user;
+  }
+
   // Test Session operations
   async createTestSession(sessionData: InsertTestSession): Promise<TestSession> {
     const [session] = await db

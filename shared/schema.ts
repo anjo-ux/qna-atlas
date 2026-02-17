@@ -40,6 +40,7 @@ export const users = pgTable("users", {
   stripeCustomerId: varchar("stripe_customer_id"),
   stripeSubscriptionId: varchar("stripe_subscription_id"),
   passwordNeedsReset: boolean("password_needs_reset").default(false), // True if using temporary password
+  tester: boolean("tester"), // True if user has beta access to Question Auth Platform (Atlas Trainer); set by admins; null/undefined treated as false
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

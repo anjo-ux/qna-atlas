@@ -2,7 +2,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ArrowLeft, Mail, CreditCard, BookOpen, TrendingUp, Target, Save, ChevronRight, ChevronLeft, Check, ChevronsUpDown, Award } from 'lucide-react';
+import { ArrowLeft, Mail, CreditCard, BookOpen, TrendingUp, Target, Save, ChevronRight, ChevronLeft, Check, ChevronsUpDown, Award, ExternalLink } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { QuestionBreakdownCharts } from '@/components/QuestionBreakdownCharts';
@@ -298,6 +298,26 @@ export function Settings({ onBack, subscription }: SettingsProps) {
                         </Command>
                       </PopoverContent>
                     </Popover>
+                  </div>
+
+                  <div>
+                    <p className="text-sm font-medium text-foreground mb-1">Beta Testing</p>
+                    <p className="text-xs text-muted-foreground mb-2">Question Authentication Platform (Atlas Trainer)</p>
+                    {user?.tester === true ? (
+                      <Button
+                        variant="outline"
+                        className="w-full gap-2"
+                        onClick={() => window.location.assign('/api/auth/tester-redirect')}
+                        data-testid="button-question-auth-platform"
+                      >
+                        <ExternalLink className="h-4 w-4" />
+                        Question Authentication Platform
+                      </Button>
+                    ) : (
+                      <p className="text-sm text-muted-foreground">
+                        Please email support team to request testing access.
+                      </p>
+                    )}
                   </div>
 
                   {hasChanges && (
