@@ -131,13 +131,13 @@ export function Settings({ onBack, subscription }: SettingsProps) {
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.message || 'Failed to save');
+        throw new Error(error.message || 'Failed to save.');
       }
 
-      toast.success('Profile updated successfully');
+      toast.success('Profile updated successfully.');
       await queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Failed to save profile');
+      toast.error(error instanceof Error ? error.message : 'Failed to save profile.');
       console.error(error);
     } finally {
       setIsSaving(false);
@@ -219,7 +219,7 @@ export function Settings({ onBack, subscription }: SettingsProps) {
                       value={formData.username}
                       onChange={(e) => setFormData({ ...formData, username: e.target.value })}
                       className="mt-1"
-                      placeholder="Enter username"
+                      placeholder="Enter Username"
                       data-testid="input-username"
                     />
                   </div>
@@ -231,7 +231,7 @@ export function Settings({ onBack, subscription }: SettingsProps) {
                         value={formData.firstName}
                         onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
                         className="mt-1"
-                        placeholder="Enter first name"
+                        placeholder="Enter First Name"
                         data-testid="input-first-name"
                       />
                     </div>
@@ -241,7 +241,7 @@ export function Settings({ onBack, subscription }: SettingsProps) {
                         value={formData.lastName}
                         onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
                         className="mt-1"
-                        placeholder="Enter last name"
+                        placeholder="Enter Last Name"
                         data-testid="input-last-name"
                       />
                     </div>
@@ -265,12 +265,12 @@ export function Settings({ onBack, subscription }: SettingsProps) {
                       <PopoverContent className="w-full p-0" align="start">
                         <Command shouldFilter={false}>
                           <CommandInput 
-                            placeholder="Search universities..." 
+                            placeholder="Search Universities..." 
                             value={searchQuery}
                             onValueChange={setSearchQuery}
                             data-testid="input-university-search"
                           />
-                          <CommandEmpty>No university found.</CommandEmpty>
+                          <CommandEmpty>No University Found.</CommandEmpty>
                           <CommandList>
                             <CommandGroup>
                               {filteredUniversities.map((uni) => (
