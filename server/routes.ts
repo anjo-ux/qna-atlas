@@ -295,28 +295,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Verify tester token (called by train.prs-atlas.com server-side). Returns user if token is valid and user is a tester.
+  // Verify tester token (called by train.prs-atlas.com). Returns user if token is valid and user is a tester.
+  // Supports GET ?token=... and POST body { token } so train can avoid query-length/encoding issues.
   const TESTER_VERIFY_SECRET = process.env.TESTER_VERIFY_SECRET;
-  app.get("/api/auth/verify-tester-token", async (req: any, res) => {
+  const ATLAS_TRAINER_ORIGIN = "https://train.prs-atlas.com";
+
+  const handleVerifyTesterToken = async (req: any, res: any) => {
+    console.warn("[verify-tester-token] request received", {
+      method: req.method,
+      hasQueryToken: !!req.query?.token,
+      hasBodyToken: !!(req.body?.token),
+    });
+    const token =
+      (req.query.token as string | undefined) ||
+      (req.body?.token as string | undefined);
+    const tokenStr = typeof token === "string" ? token.trim() : undefined;
+
     if (TESTER_VERIFY_SECRET) {
       const secret = req.headers["x-tester-verify-secret"] ?? req.headers.authorization?.replace(/^Bearer\s+/i, "");
       if (secret !== TESTER_VERIFY_SECRET) {
+        console.warn("[verify-tester-token] 403: Invalid or missing verification secret");
         return res.status(403).json({ message: "Invalid or missing verification secret" });
       }
     }
-    const token = req.query.token as string | undefined;
-    if (!token) {
+    if (!tokenStr) {
+      console.warn("[verify-tester-token] 400: Missing token");
       return res.status(400).json({ message: "Missing token" });
     }
-    const payload = verifyTesterRedirectToken(token);
+    const payload = verifyTesterRedirectToken(tokenStr);
     if (!payload) {
+      console.warn("[verify-tester-token] 401: Invalid or expired token");
       return res.status(401).json({ message: "Invalid or expired token" });
     }
     const user = await storage.getUser(payload.userId);
     if (!user || user.tester !== true) {
+      console.warn("[verify-tester-token] 403: User not found or not a tester", { userId: payload.userId });
       return res.status(403).json({ message: "User is not a tester" });
     }
     res.json({ valid: true, user: sanitizeUser(user) });
+  };
+
+  app.get("/api/auth/verify-tester-token", (req, res, next) => {
+    res.set("Access-Control-Allow-Origin", ATLAS_TRAINER_ORIGIN);
+    return handleVerifyTesterToken(req, res).catch(next);
+  });
+  app.post("/api/auth/verify-tester-token", (req, res, next) => {
+    res.set("Access-Control-Allow-Origin", ATLAS_TRAINER_ORIGIN);
+    return handleVerifyTesterToken(req, res).catch(next);
+  });
+  app.options("/api/auth/verify-tester-token", (_req, res) => {
+    res.set("Access-Control-Allow-Origin", ATLAS_TRAINER_ORIGIN);
+    res.set("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+    res.set("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Tester-Verify-Secret");
+    res.set("Access-Control-Max-Age", "86400");
+    res.sendStatus(204);
   });
 
   // Get user percentile rank
