@@ -307,11 +307,13 @@ export function Settings({ onBack, subscription }: SettingsProps) {
                       <Button
                         variant="outline"
                         className="w-full gap-2"
-                        onClick={() => window.location.assign('/api/auth/tester-redirect')}
+                        asChild
                         data-testid="button-question-auth-platform"
                       >
-                        <ExternalLink className="h-4 w-4" />
-                        Question Authentication Platform
+                        <a href="/api/auth/tester-redirect" rel="noopener noreferrer">
+                          <ExternalLink className="h-4 w-4" />
+                          Question Authentication Platform
+                        </a>
                       </Button>
                     ) : (
                       <p className="text-sm text-muted-foreground">

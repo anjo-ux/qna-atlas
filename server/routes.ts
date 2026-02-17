@@ -277,17 +277,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.session?.userId;
       if (!userId) {
+        console.warn("[tester-redirect] 401: No session userId");
         return res.status(401).json({ message: "Unauthorized" });
       }
       const user = await storage.getUser(userId);
       if (!user) {
+        console.warn("[tester-redirect] 401: User not found", { userId });
         return res.status(401).json({ message: "User not found" });
       }
       if (user.tester !== true) {
+        console.warn("[tester-redirect] 403: User is not a tester", { userId });
         return res.status(403).json({ message: "Beta testing access required" });
       }
       const token = createTesterRedirectToken(userId);
       const url = `${ATLAS_TRAINER_CALLBACK_URL}?token=${encodeURIComponent(token)}`;
+      console.warn("[tester-redirect] 302 redirect to train with token", {
+        urlPrefix: ATLAS_TRAINER_CALLBACK_URL,
+        tokenLength: token.length,
+        hasTokenInUrl: url.includes("token="),
+      });
       res.redirect(302, url);
     } catch (error) {
       console.error("Error creating tester redirect:", error);
