@@ -1,31 +1,37 @@
 import { Section, Question } from '@/types/question';
 
-// Seeded random function for consistent results
+// Fixed seed so the same 20 questions are chosen every time, everywhere.
+const PREVIEW_SEED = 12345;
+const PREVIEW_COUNT = 20;
+
 function seededRandom(seed: number) {
   const x = Math.sin(seed) * 10000;
   return x - Math.floor(x);
 }
 
+/**
+ * Returns exactly 20 questions for the preview test. Selection is deterministic:
+ * all questions are sorted by id, then 20 indices are chosen with a fixed seed.
+ * Same 20 questions for every user, every time.
+ */
 export function getPreviewQuestions(sections: Section[]): Question[] {
-  // Flatten all questions
-  const allQuestions: Question[] = [];
+  const all: Question[] = [];
   sections.forEach(section => {
     section.subsections.forEach(subsection => {
-      allQuestions.push(...subsection.questions);
+      all.push(...subsection.questions);
     });
   });
+  const sorted = [...all].sort((a, b) => a.id.localeCompare(b.id));
+  if (sorted.length === 0) return [];
 
-  if (allQuestions.length === 0) return [];
-
-  // Use seeded random to pick 20 questions consistently
   const selectedIndices = new Set<number>();
-  let seed = 12345; // Fixed seed for consistent results
-
-  while (selectedIndices.size < Math.min(20, allQuestions.length)) {
+  let seed = PREVIEW_SEED;
+  while (selectedIndices.size < Math.min(PREVIEW_COUNT, sorted.length)) {
     seed++;
-    const randomIndex = Math.floor(seededRandom(seed) * allQuestions.length);
-    selectedIndices.add(randomIndex);
+    const idx = Math.floor(seededRandom(seed) * sorted.length);
+    selectedIndices.add(idx);
   }
-
-  return Array.from(selectedIndices).map(i => allQuestions[i]);
+  return Array.from(selectedIndices)
+    .sort((a, b) => a - b)
+    .map(i => sorted[i]);
 }

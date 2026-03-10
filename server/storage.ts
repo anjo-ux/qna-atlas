@@ -1,3 +1,4 @@
+import bcrypt from "bcrypt";
 import {
   users,
   testSessions,
@@ -9,6 +10,7 @@ import {
   spacedRepetitions,
   subscriptionPlans,
   subscriptionTransactions,
+  institutionalCodes,
   sections,
   subsections,
   questions,
@@ -32,8 +34,12 @@ import {
   type SubscriptionTransaction,
   type InsertSubscriptionTransaction,
 } from "@shared/schema";
-import { db } from "./db";
-import { eq, and, asc, desc, lte } from "drizzle-orm";
+import { db, pool } from "./db";
+import { eq, and, asc, desc, lte, sql } from "drizzle-orm";
+
+const INSTITUTIONAL_CODE_SALT_ROUNDS = 10;
+let institutionalMigrationDone = false;
+let institutionalExpiresMigrationDone = false;
 
 export type SectionDto = {
   id: string;
@@ -124,6 +130,10 @@ export interface IStorage {
   getUserActiveSubscription(userId: string): Promise<SubscriptionTransaction | undefined>;
   cancelUserSubscription(userId: string): Promise<void>;
   getUserSubscriptionTransactions(userId: string): Promise<SubscriptionTransaction[]>;
+
+  // Institutional codes (hashed in DB; validate returns institution display name)
+  ensureInstitutionalCodesSeed(): Promise<void>;
+  validateInstitutionalCode(plainCode: string): Promise<string | null>;
 
   // Theme preference operations
   getThemePreference(userId: string): Promise<string>;
@@ -781,30 +791,70 @@ export class DatabaseStorage implements IStorage {
 
   // Subscription operations
   async initializeSubscriptionPlans(): Promise<SubscriptionPlan[]> {
-    // Check if plans already exist
-    const existing = await db.select().from(subscriptionPlans);
-    if (existing.length > 0) return existing;
+    await this.ensureSubscriptionPlansSync();
+    return this.getSubscriptionPlans();
+  }
 
-    // Initialize default plans
-    const plans = [
-      { name: '1-month', durationMonths: 1, priceUSD: 2500 }, // $25
-      { name: '3-month', durationMonths: 3, priceUSD: 5000 },  // $50
-      { name: '6-month', durationMonths: 6, priceUSD: 10000 }, // $100
-    ];
+  /** Payment Link URLs (with free trial) – used when set; otherwise fallback to product/price. */
+  private static readonly PAYMENT_LINK_URLS: Record<string, string> = {
+    'monthly': 'https://buy.stripe.com/test_8x25kC0LT5G3gwU2Ue6J200',
+    '6-month': 'https://buy.stripe.com/test_3cI14mbqx6K76WkcuO6J201',
+    '1-year': 'https://buy.stripe.com/test_dRm7sK9ip3xV3K8eCW6J202',
+  };
 
-    const result: SubscriptionPlan[] = [];
-    for (const plan of plans) {
-      const [inserted] = await db
-        .insert(subscriptionPlans)
-        .values(plan)
-        .returning();
-      result.push(inserted);
+  /** Ensures the three subscription plans (monthly $50, 6-month $270, 1-year $450) exist and are up to date. */
+  async ensureSubscriptionPlansSync(): Promise<void> {
+    const targetPlans = [
+      { name: 'monthly', durationMonths: 1, priceUSD: 5000, stripeProductId: 'prod_U14VnZW3eRgkDL', stripePaymentLinkUrl: DatabaseStorage.PAYMENT_LINK_URLS['monthly'] },
+      { name: '6-month', durationMonths: 6, priceUSD: 27000, stripeProductId: 'prod_U14WP9DcWZEZWi', stripePaymentLinkUrl: DatabaseStorage.PAYMENT_LINK_URLS['6-month'] },
+      { name: '1-year', durationMonths: 12, priceUSD: 45000, stripeProductId: 'prod_U14X6csDhWjhrk', stripePaymentLinkUrl: DatabaseStorage.PAYMENT_LINK_URLS['1-year'] },
+    ] as const;
+
+    // Migrate old plan names to new
+    const oneMonth = await db.select().from(subscriptionPlans).where(eq(subscriptionPlans.name, '1-month'));
+    if (oneMonth.length > 0) {
+      await db.update(subscriptionPlans).set({ name: 'monthly', durationMonths: 1, priceUSD: 5000, stripeProductId: 'prod_U14VnZW3eRgkDL' }).where(eq(subscriptionPlans.name, '1-month'));
     }
-    return result;
+    const threeMonth = await db.select().from(subscriptionPlans).where(eq(subscriptionPlans.name, '3-month'));
+    if (threeMonth.length > 0) {
+      await db.update(subscriptionPlans).set({ name: '1-year', durationMonths: 12, priceUSD: 45000, stripeProductId: 'prod_U14X6csDhWjhrk' }).where(eq(subscriptionPlans.name, '3-month'));
+    }
+    const sixMonth = await db.select().from(subscriptionPlans).where(eq(subscriptionPlans.name, '6-month'));
+    if (sixMonth.length > 0) {
+      await db.update(subscriptionPlans).set({ priceUSD: 27000, stripeProductId: 'prod_U14WP9DcWZEZWi' }).where(eq(subscriptionPlans.name, '6-month'));
+    }
+
+    // Ensure each target plan exists and has correct Stripe product id and payment link URL
+    for (const p of targetPlans) {
+      const existing = await db.select().from(subscriptionPlans).where(eq(subscriptionPlans.name, p.name));
+      const updatesFull = { durationMonths: p.durationMonths, priceUSD: p.priceUSD, stripeProductId: p.stripeProductId, stripePaymentLinkUrl: p.stripePaymentLinkUrl };
+      const updatesMinimal = { durationMonths: p.durationMonths, priceUSD: p.priceUSD, stripeProductId: p.stripeProductId };
+      if (existing.length === 0) {
+        try {
+          await db.insert(subscriptionPlans).values({ name: p.name, ...updatesFull });
+        } catch (err) {
+          await db.insert(subscriptionPlans).values({ name: p.name, ...updatesMinimal });
+        }
+      } else {
+        try {
+          await db.update(subscriptionPlans).set(updatesFull).where(eq(subscriptionPlans.name, p.name));
+        } catch (_) {
+          await db.update(subscriptionPlans).set(updatesMinimal).where(eq(subscriptionPlans.name, p.name));
+        }
+      }
+    }
   }
 
   async getSubscriptionPlans(): Promise<SubscriptionPlan[]> {
-    return await db.select().from(subscriptionPlans).orderBy(subscriptionPlans.durationMonths);
+    await this.ensureSubscriptionPlansSync();
+    const all = await db.select().from(subscriptionPlans).orderBy(subscriptionPlans.durationMonths);
+    const want = ['monthly', '6-month', '1-year'];
+    const seen = new Set<string>();
+    return all.filter((p) => {
+      if (!want.includes(p.name) || seen.has(p.name)) return false;
+      seen.add(p.name);
+      return true;
+    });
   }
 
   async createSubscriptionTransaction(transaction: InsertSubscriptionTransaction): Promise<SubscriptionTransaction> {
@@ -832,13 +882,22 @@ export class DatabaseStorage implements IStorage {
     return active[0];
   }
 
+  /** Cancel subscription: turn off Stripe billing if present, keep access until subscriptionEndsAt. */
   async cancelUserSubscription(userId: string): Promise<void> {
+    const [user] = await db.select().from(users).where(eq(users.id, userId));
+    if (!user) return;
+
+    if (user.stripeSubscriptionId) {
+      const { cancelStripeSubscriptionAtPeriodEnd } = await import("./stripe");
+      await cancelStripeSubscriptionAtPeriodEnd(user.stripeSubscriptionId);
+    }
+
     await db
       .update(users)
       .set({
-        subscriptionStatus: 'expired',
-        subscriptionPlan: undefined,
-        subscriptionEndsAt: new Date(),
+        subscriptionStatus: 'canceled',
+        stripeSubscriptionId: undefined,
+        updatedAt: new Date(),
       })
       .where(eq(users.id, userId));
   }
@@ -849,6 +908,92 @@ export class DatabaseStorage implements IStorage {
       .from(subscriptionTransactions)
       .where(eq(subscriptionTransactions.userId, userId))
       .orderBy(desc(subscriptionTransactions.createdAt));
+  }
+
+  // Ensure institutional_codes table exists (idempotent; safe if migration wasn't run)
+  private async ensureInstitutionalCodesTable(): Promise<void> {
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS "institutional_codes" (
+        "id" varchar PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+        "code_hash" varchar NOT NULL UNIQUE,
+        "institution_name" varchar NOT NULL,
+        "created_at" timestamp DEFAULT now()
+      )
+    `);
+    await pool.query(`
+      CREATE INDEX IF NOT EXISTS "idx_institutional_codes_code_hash" ON "institutional_codes" USING btree ("code_hash")
+    `);
+  }
+
+  // Ensure institutional_access_affiliation column exists and backfill from profile field (one-time per process)
+  private async ensureInstitutionalAccessAffiliationMigration(): Promise<void> {
+    if (institutionalMigrationDone) return;
+    institutionalMigrationDone = true;
+    await pool.query(`
+      ALTER TABLE "users" ADD COLUMN IF NOT EXISTS "institutional_access_affiliation" varchar
+    `);
+    await pool.query(`
+      UPDATE "users"
+      SET "institutional_access_affiliation" = COALESCE(NULLIF(TRIM("institutional_access_affiliation"), ''), TRIM("institutional_affiliation"))
+      WHERE "institutional_affiliation" IS NOT NULL AND TRIM("institutional_affiliation") != ''
+    `);
+    await db
+      .update(users)
+      .set({
+        institutionalAccessAffiliation: "Emory University",
+        updatedAt: new Date(),
+      })
+      .where(
+        sql`${users.institutionalAccessAffiliation} IS NOT NULL AND TRIM(${users.institutionalAccessAffiliation}) != ''`
+      );
+  }
+
+  // Ensure institutional_access_expires_at column exists; backfill Emory users with 365-day expiry from today
+  private async ensureInstitutionalAccessExpiresAtMigration(): Promise<void> {
+    if (institutionalExpiresMigrationDone) return;
+    institutionalExpiresMigrationDone = true;
+    await pool.query(`
+      ALTER TABLE "users" ADD COLUMN IF NOT EXISTS "institutional_access_expires_at" timestamp
+    `);
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 365);
+    await db
+      .update(users)
+      .set({
+        institutionalAccessExpiresAt: expiresAt,
+        updatedAt: new Date(),
+      })
+      .where(
+        sql`TRIM(${users.institutionalAccessAffiliation}) = 'Emory University' AND ${users.institutionalAccessExpiresAt} IS NULL`
+      );
+  }
+
+  // Institutional codes (hashed in DB)
+  async ensureInstitutionalCodesSeed(): Promise<void> {
+    await this.ensureInstitutionalCodesTable();
+    await this.ensureInstitutionalAccessAffiliationMigration();
+    await this.ensureInstitutionalAccessExpiresAtMigration();
+
+    const existing = await db.select().from(institutionalCodes).limit(1);
+    if (existing.length > 0) return;
+
+    const codeHash = await bcrypt.hash("1127", INSTITUTIONAL_CODE_SALT_ROUNDS);
+    await db.insert(institutionalCodes).values({
+      codeHash,
+      institutionName: "Emory University",
+    });
+  }
+
+  async validateInstitutionalCode(plainCode: string): Promise<string | null> {
+    await this.ensureInstitutionalCodesSeed();
+    const rows = await db.select().from(institutionalCodes);
+    const trimmed = plainCode.trim();
+    if (!trimmed) return null;
+    for (const row of rows) {
+      const match = await bcrypt.compare(trimmed, row.codeHash);
+      if (match) return row.institutionName;
+    }
+    return null;
   }
 
   // Theme preference operations

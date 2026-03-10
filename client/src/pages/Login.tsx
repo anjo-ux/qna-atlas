@@ -3,7 +3,7 @@ import { useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Moon, Sun, ChevronsUpDown, Check, Mail, Lock } from 'lucide-react';
+import { Moon, Sun, ChevronsUpDown, Check, Mail, Lock, Home } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -80,7 +80,8 @@ export default function Login() {
       const data = await response.json();
 
       if (!response.ok) {
-        toast.error(data.message || 'Authentication Failed');
+        const msg = data.message || 'Authentication Failed.';
+        toast.error(msg.endsWith('.') || msg.endsWith('!') || msg.endsWith('?') ? msg : msg + '.');
         return;
       }
 
@@ -130,7 +131,8 @@ export default function Login() {
       const data = await response.json();
 
       if (!response.ok) {
-        toast.error(data.message || 'Failed to send password retrieval email');
+        const msg = data.message || 'Failed to send password retrieval email.';
+        toast.error(msg.endsWith('.') || msg.endsWith('!') || msg.endsWith('?') ? msg : msg + '.');
         return;
       }
 
@@ -170,11 +172,12 @@ export default function Login() {
       const data = await response.json();
 
       if (!response.ok) {
-        toast.error(data.message || 'Failed to change password');
+        const msg = data.message || 'Failed to change password.';
+        toast.error(msg.endsWith('.') || msg.endsWith('!') || msg.endsWith('?') ? msg : msg + '.');
         return;
       }
 
-      toast.success('Password changed successfully!');
+      toast.success('Password changed successfully!.');
       setShowChangePassword(false);
       setNewPassword('');
       setConfirmNewPassword('');
@@ -197,20 +200,41 @@ export default function Login() {
   return (
     <div className={`flex flex-col h-full ${isDark ? 'dark' : ''}`}>
       <div className="flex flex-col h-full bg-gradient-to-br from-blue-50 via-cyan-50 to-purple-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
-      {/* Header */}
-      <header className="sticky top-0 z-50 glass-surface border-glass border-b flex-shrink-0">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <button 
-            onClick={() => window.location.href = '/'} 
-            className="flex items-center gap-3 rounded-md p-1 cursor-pointer"
-            data-testid="button-home"
-          >
-            <img src={atlasLogo} alt="Atlas Logo" className="w-8 h-8 object-contain" />
-            <h1 className="text-xl font-bold gradient-text">The Atlas Review</h1>
-          </button>
-          <button onClick={toggleTheme} className="p-2 hover-elevate rounded-md" data-testid="button-theme-toggle">
-            {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-          </button>
+      {/* Header - same styling as site-wide nav */}
+      <header className="glass-nav w-full sticky top-0 z-50 rounded-b-2xl flex-shrink-0">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-3 pb-2">
+          <div className="flex items-center justify-between">
+            <button
+              onClick={() => window.location.href = '/'}
+              className="flex items-center gap-3 min-w-0 rounded-xl px-4 py-1.5 cursor-pointer hover:bg-primary/10 outline-none focus-visible:ring-0"
+              data-testid="button-home"
+            >
+              <div className="logo-glass flex items-center justify-center p-1.5 flex-shrink-0 ring-1 ring-black/5 dark:ring-white/10">
+                <img src={atlasLogo} alt="Atlas Logo" className="h-7 w-7 sm:h-8 sm:w-8 object-contain" />
+              </div>
+              <div className="hidden sm:flex flex-col min-w-0">
+                <span className="text-base sm:text-lg font-bold tracking-tight gradient-text leading-tight truncate">
+                  Atlas
+                </span>
+                <span className="text-xs font-medium text-muted-foreground tracking-widest uppercase truncate">
+                  Review
+                </span>
+              </div>
+            </button>
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <button onClick={toggleTheme} className="p-2 hover-elevate rounded-md" data-testid="button-theme-toggle" title="Toggle theme">
+                {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+              </button>
+              <button
+                onClick={() => window.location.href = '/'}
+                className="p-2 hover-elevate rounded-md hover:bg-primary/10"
+                title="Back to home"
+                data-testid="button-home-nav"
+              >
+                <Home className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
         </div>
       </header>
 
@@ -227,7 +251,7 @@ export default function Login() {
               </CardTitle>
               <CardDescription className="text-center">
                 {isSignUp
-                  ? 'Start your 30-day free trial of the Atlas Review.'
+                  ? 'Start your 7-day free trial of the Atlas Review.'
                   : 'Access your plastic surgery study materials today.'}
               </CardDescription>
             </CardHeader>

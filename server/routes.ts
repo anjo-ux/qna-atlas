@@ -33,19 +33,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   if (process.env.ENABLE_ADMIN_GENERATED_QUESTIONS_UI === "true") {
     app.get("/api/admin/generated-questions", async (req: any, res) => {
       if (!requireAdminCode(req)) {
-        return res.status(403).json({ message: "Invalid admin code" });
+        return res.status(403).json({ message: "Invalid admin code." });
       }
       try {
         const drafts = await storage.getDraftGeneratedQuestions();
         res.json(drafts);
       } catch (error) {
         console.error("Error fetching draft questions:", error);
-        res.status(500).json({ message: "Failed to fetch draft questions" });
+        res.status(500).json({ message: "Failed to fetch draft questions." });
       }
     });
     app.post("/api/admin/generate-questions", async (req: any, res) => {
       if (!requireAdminCode(req)) {
-        return res.status(403).json({ message: "Invalid admin code" });
+        return res.status(403).json({ message: "Invalid admin code." });
       }
       try {
         const { runQuestionGenerationJob } = await import("./jobs/questionGenerationJob");
@@ -54,7 +54,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } catch (error) {
         console.error("Error running question generation:", error);
         res.status(500).json({
-          message: "Question generation failed",
+          message: "Question generation failed.",
           error: error instanceof Error ? error.message : String(error),
         });
       }
@@ -64,23 +64,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Admin: set user tester status (beta access to Atlas Trainer). Requires X-Admin-Code.
   app.patch("/api/admin/users/:userId/tester", async (req: any, res) => {
     if (!requireAdminCode(req)) {
-      return res.status(403).json({ message: "Invalid admin code" });
+      return res.status(403).json({ message: "Invalid admin code." });
     }
     const { userId } = req.params;
     const tester = req.body?.tester;
     if (typeof tester !== "boolean") {
-      return res.status(400).json({ message: "Body must include { tester: true | false }" });
+      return res.status(400).json({ message: "Body must include { tester: true | false }." });
     }
     try {
       const user = await storage.getUser(userId);
       if (!user) {
-        return res.status(404).json({ message: "User not found" });
+        return res.status(404).json({ message: "User not found." });
       }
       const updated = await storage.updateUserTester(userId, tester);
       res.json(sanitizeUser(updated));
     } catch (error) {
       console.error("Error updating user tester status:", error);
-      res.status(500).json({ message: "Failed to update tester status" });
+      res.status(500).json({ message: "Failed to update tester status." });
     }
   });
 
@@ -113,7 +113,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const validationResult = insertQuestionSchema.safeParse(req.body);
       if (!validationResult.success) {
         return res.status(400).json({
-          message: "Invalid request data",
+          message: "Invalid request data.",
           errors: validationResult.error.flatten().fieldErrors,
         });
       }
@@ -123,14 +123,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const formatResult = validateQuestionFormat(data.question, data.answer);
         if (!formatResult.valid) {
           return res.status(400).json({
-            message: "Generated question failed format validation",
+            message: "Generated question failed format validation.",
             errors: formatResult.errors,
           });
         }
         const contentResult = contentRulesForGenerated(data.question);
         if (!contentResult.pass) {
           return res.status(400).json({
-            message: contentResult.reason ?? "Generated question failed content rules",
+            message: contentResult.reason ?? "Generated question failed content rules.",
           });
         }
       }
@@ -138,18 +138,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(201).json({ id });
     } catch (error) {
       console.error("Error importing question:", error);
-      res.status(500).json({ message: "Failed to import question" });
+      res.status(500).json({ message: "Failed to import question." });
     }
   });
 
   // Questions API (sections with nested subsections and questions)
-  app.get('/api/sections', isAuthenticated, async (req: any, res) => {
+  // Public so unauthenticated users can load the preview test at /preview
+  app.get('/api/sections', async (req: any, res) => {
     try {
       const sections = await storage.getSections();
       res.json(sections);
     } catch (error) {
       console.error("Error fetching sections:", error);
-      res.status(500).json({ message: "Failed to fetch sections" });
+      res.status(500).json({ message: "Failed to fetch sections." });
     }
   });
 
@@ -159,7 +160,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const validationResult = insertQuestionSchema.safeParse(req.body);
       if (!validationResult.success) {
         return res.status(400).json({
-          message: "Invalid request data",
+          message: "Invalid request data.",
           errors: validationResult.error.flatten().fieldErrors,
         });
       }
@@ -168,14 +169,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const formatResult = validateQuestionFormat(data.question, data.answer);
         if (!formatResult.valid) {
           return res.status(400).json({
-            message: "Generated question failed format validation",
+            message: "Generated question failed format validation.",
             errors: formatResult.errors,
           });
         }
         const contentResult = contentRulesForGenerated(data.question);
         if (!contentResult.pass) {
           return res.status(400).json({
-            message: contentResult.reason ?? "Generated question failed content rules",
+            message: contentResult.reason ?? "Generated question failed content rules.",
           });
         }
       }
@@ -183,7 +184,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(201).json({ id });
     } catch (error) {
       console.error("Error creating question:", error);
-      res.status(500).json({ message: "Failed to create question" });
+      res.status(500).json({ message: "Failed to create question." });
     }
   });
 
@@ -192,26 +193,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const hasAuth = req.session?.userId;
     const hasCode = requireAdminCode(req);
     if (!hasAuth && !hasCode) {
-      return res.status(401).json({ message: "Unauthorized" });
+      return res.status(401).json({ message: "Unauthorized." });
     }
     try {
       const { id } = req.params;
       const { visible } = req.body;
       if (typeof visible !== "boolean") {
-        return res.status(400).json({ message: "Body must include visible: boolean" });
+        return res.status(400).json({ message: "Body must include visible: boolean." });
       }
       const question = await storage.getQuestion(id);
       if (!question) {
-        return res.status(404).json({ message: "Question not found" });
+        return res.status(404).json({ message: "Question not found." });
       }
       const updated = await storage.updateQuestionVisibility(id, visible);
       if (!updated) {
-        return res.status(500).json({ message: "Failed to update question" });
+        return res.status(500).json({ message: "Failed to update question." });
       }
       res.json({ id, visible });
     } catch (error) {
       console.error("Error updating question visibility:", error);
-      res.status(500).json({ message: "Failed to update question" });
+      res.status(500).json({ message: "Failed to update question." });
     }
   });
 
@@ -228,7 +229,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(sanitizeUser(user) ?? null);
     } catch (error) {
       console.error("Error fetching user:", error);
-      res.status(500).json({ message: "Failed to fetch user" });
+      res.status(500).json({ message: "Failed to fetch user." });
     }
   });
 
@@ -240,7 +241,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.session?.userId;
       if (!userId) {
-        return res.status(401).json({ message: "Unauthorized" });
+        return res.status(401).json({ message: "Unauthorized." });
       }
       const body = req.body ?? {};
       const updates: Record<string, string | undefined> = {};
@@ -268,7 +269,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(sanitizeUser(updatedUser));
     } catch (error) {
       console.error("Error updating user:", error);
-      res.status(500).json({ message: "Failed to update user" });
+      res.status(500).json({ message: "Failed to update user." });
     }
   });
 
@@ -278,16 +279,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.session?.userId;
       if (!userId) {
         console.warn("[tester-redirect] 401: No session userId");
-        return res.status(401).json({ message: "Unauthorized" });
+        return res.status(401).json({ message: "Unauthorized." });
       }
       const user = await storage.getUser(userId);
       if (!user) {
         console.warn("[tester-redirect] 401: User not found", { userId });
-        return res.status(401).json({ message: "User not found" });
+        return res.status(401).json({ message: "User not found." });
       }
       if (user.tester !== true) {
         console.warn("[tester-redirect] 403: User is not a tester", { userId });
-        return res.status(403).json({ message: "Beta testing access required" });
+        return res.status(403).json({ message: "Beta testing access required." });
       }
       const token = createTesterRedirectToken(userId);
       const url = `${ATLAS_TRAINER_CALLBACK_URL}?token=${encodeURIComponent(token)}`;
@@ -299,7 +300,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.redirect(302, url);
     } catch (error) {
       console.error("Error creating tester redirect:", error);
-      res.status(500).json({ message: "Failed to create redirect" });
+      res.status(500).json({ message: "Failed to create redirect." });
     }
   });
 
@@ -323,22 +324,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const secret = req.headers["x-tester-verify-secret"] ?? req.headers.authorization?.replace(/^Bearer\s+/i, "");
       if (secret !== TESTER_VERIFY_SECRET) {
         console.warn("[verify-tester-token] 403: Invalid or missing verification secret");
-        return res.status(403).json({ message: "Invalid or missing verification secret" });
+        return res.status(403).json({ message: "Invalid or missing verification secret." });
       }
     }
     if (!tokenStr) {
       console.warn("[verify-tester-token] 400: Missing token");
-      return res.status(400).json({ message: "Missing token" });
+      return res.status(400).json({ message: "Missing token." });
     }
     const payload = verifyTesterRedirectToken(tokenStr);
     if (!payload) {
       console.warn("[verify-tester-token] 401: Invalid or expired token");
-      return res.status(401).json({ message: "Invalid or expired token" });
+      return res.status(401).json({ message: "Invalid or expired token." });
     }
     const user = await storage.getUser(payload.userId);
     if (!user || user.tester !== true) {
       console.warn("[verify-tester-token] 403: User not found or not a tester", { userId: payload.userId });
-      return res.status(403).json({ message: "User is not a tester" });
+      return res.status(403).json({ message: "User is not a tester." });
     }
     res.json({ valid: true, user: sanitizeUser(user) });
   };
@@ -364,14 +365,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.session?.userId;
       if (!userId) {
-        return res.status(401).json({ message: "Unauthorized" });
+        return res.status(401).json({ message: "Unauthorized." });
       }
 
       const percentile = await storage.getUserPercentileRank(userId);
       res.json({ percentile });
     } catch (error) {
       console.error("Error calculating percentile:", error);
-      res.status(500).json({ message: "Failed to calculate percentile" });
+      res.status(500).json({ message: "Failed to calculate percentile." });
     }
   });
 
@@ -388,39 +389,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.json({ status: 'none', daysRemaining: 0, trialEndsAt: null, isLocked: false });
       }
 
-      // Emory University institutional affiliation override - unlimited access
-      const hasEmoryAccess = user.institutionalAffiliation?.toLowerCase().includes('emory');
-      if (hasEmoryAccess) {
-        return res.json({ 
-          status: 'institutional', 
-          daysRemaining: -1,
+      // Access-granting institution only (set by code redemption; independent of profile affiliation)
+      const hasInstitutionalAffiliation = !!user.institutionalAccessAffiliation?.trim();
+      const institutionalExpiresAt = user.institutionalAccessExpiresAt ? new Date(user.institutionalAccessExpiresAt) : null;
+      const institutionalExpired = institutionalExpiresAt !== null && institutionalExpiresAt <= new Date();
+      if (institutionalExpired && hasInstitutionalAffiliation) {
+        await storage.updateUserProfile(userId, {
+          institutionalAccessAffiliation: null as any,
+          institutionalAccessExpiresAt: null as any,
+        });
+      }
+      const hasInstitutionalAccess = hasInstitutionalAffiliation && !institutionalExpired;
+      if (hasInstitutionalAccess) {
+        const daysRemaining = institutionalExpiresAt
+          ? Math.max(0, Math.ceil((institutionalExpiresAt.getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
+          : -1;
+        return res.json({
+          status: 'institutional',
+          daysRemaining,
           trialEndsAt: null,
           isLocked: false,
-          subscriptionType: 'Institutional Affiliation'
+          subscriptionType: 'Institutional Affiliation',
         });
       }
 
       const now = new Date();
       const trialEndsAt = user.trialEndsAt ? new Date(user.trialEndsAt) : null;
-      
+      const subscriptionEndsAt = user.subscriptionEndsAt ? new Date(user.subscriptionEndsAt) : null;
+
       let status = user.subscriptionStatus || 'trial';
       let daysRemaining = 0;
 
-      if (trialEndsAt) {
+      if (status === 'canceled' && subscriptionEndsAt && subscriptionEndsAt > now) {
+        daysRemaining = Math.max(0, Math.ceil((subscriptionEndsAt.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
+      } else if (trialEndsAt) {
         const diffTime = trialEndsAt.getTime() - now.getTime();
         daysRemaining = Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
-        
+
         if (daysRemaining === 0 && status === 'trial') {
           status = 'expired';
           await storage.updateUserProfile(user.id, { subscriptionStatus: 'expired' });
         }
       }
 
-      res.json({ 
-        status, 
-        daysRemaining, 
+      // Lock when expired or when on trial with no days left (e.g. new account with no plan). Canceled = access until end.
+      const isLocked =
+        status === 'expired' ||
+        (status === 'trial' && daysRemaining === 0) ||
+        (status === 'canceled' && (!subscriptionEndsAt || subscriptionEndsAt <= now));
+
+      res.json({
+        status,
+        daysRemaining,
         trialEndsAt,
-        isLocked: status === 'expired'
+        isLocked,
       });
     } catch (error) {
       console.error('Error checking subscription:', error);
@@ -439,7 +461,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(connections.map(c => c.provider));
     } catch (error) {
       console.error("Error fetching connections:", error);
-      res.status(500).json({ message: "Failed to fetch connections" });
+      res.status(500).json({ message: "Failed to fetch connections." });
     }
   });
 
@@ -463,19 +485,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.session?.userId;
       if (!userId) {
-        return res.status(401).json({ message: "Unauthorized" });
+        return res.status(401).json({ message: "Unauthorized." });
       }
       const { theme } = req.body;
       
       if (!theme || (theme !== 'light' && theme !== 'dark')) {
-        return res.status(400).json({ message: "Invalid theme" });
+        return res.status(400).json({ message: "Invalid theme." });
       }
       
       const updatedTheme = await storage.updateThemePreference(userId, theme);
       res.json({ theme: updatedTheme });
     } catch (error) {
       console.error("Error updating theme preference:", error);
-      res.status(500).json({ message: "Failed to update theme preference" });
+      res.status(500).json({ message: "Failed to update theme preference." });
     }
   });
 
@@ -484,7 +506,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.session?.userId;
       if (!userId) {
-        return res.status(401).json({ message: "Unauthorized" });
+        return res.status(401).json({ message: "Unauthorized." });
       }
       const { provider } = req.params;
       
@@ -492,7 +514,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ provider, added: true });
     } catch (error) {
       console.error("Error adding connection:", error);
-      res.status(500).json({ message: "Failed to add connection" });
+      res.status(500).json({ message: "Failed to add connection." });
     }
   });
 
@@ -501,20 +523,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.session?.userId;
       if (!userId) {
-        return res.status(401).json({ message: "Unauthorized" });
+        return res.status(401).json({ message: "Unauthorized." });
       }
       const { provider } = req.params;
       
       const connections = await storage.getLoginConnections(userId);
       if (connections.length <= 1) {
-        return res.status(400).json({ message: "Cannot remove last connection" });
+        return res.status(400).json({ message: "Cannot remove last connection." });
       }
       
       await storage.removeLoginConnection(userId, provider);
       res.json({ provider, removed: true });
     } catch (error) {
       console.error("Error removing connection:", error);
-      res.status(500).json({ message: "Failed to remove connection" });
+      res.status(500).json({ message: "Failed to remove connection." });
     }
   });
 
@@ -526,7 +548,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(sessions);
     } catch (error) {
       console.error("Error fetching test sessions:", error);
-      res.status(500).json({ message: "Failed to fetch test sessions" });
+      res.status(500).json({ message: "Failed to fetch test sessions." });
     }
   });
 
@@ -537,7 +559,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(sessions);
     } catch (error) {
       console.error("Error fetching in-progress sessions:", error);
-      res.status(500).json({ message: "Failed to fetch in-progress sessions" });
+      res.status(500).json({ message: "Failed to fetch in-progress sessions." });
     }
   });
 
@@ -547,17 +569,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const session = await storage.getTestSession(req.params.id);
       
       if (!session) {
-        return res.status(404).json({ message: "Test session not found" });
+        return res.status(404).json({ message: "Test session not found." });
       }
       
       if (session.userId !== userId) {
-        return res.status(403).json({ message: "Forbidden" });
+        return res.status(403).json({ message: "Forbidden." });
       }
       
       res.json(session);
     } catch (error) {
       console.error("Error fetching test session:", error);
-      res.status(500).json({ message: "Failed to fetch test session" });
+      res.status(500).json({ message: "Failed to fetch test session." });
     }
   });
 
@@ -569,7 +591,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const validationResult = insertTestSessionSchema.safeParse(req.body);
       if (!validationResult.success) {
         return res.status(400).json({ 
-          message: "Invalid request data",
+          message: "Invalid request data.",
           errors: validationResult.error.flatten().fieldErrors
         });
       }
@@ -583,7 +605,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(session);
     } catch (error) {
       console.error("Error creating test session:", error);
-      res.status(500).json({ message: "Failed to create test session" });
+      res.status(500).json({ message: "Failed to create test session." });
     }
   });
 
@@ -593,18 +615,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const session = await storage.getTestSession(req.params.id);
       
       if (!session) {
-        return res.status(404).json({ message: "Test session not found" });
+        return res.status(404).json({ message: "Test session not found." });
       }
       
       if (session.userId !== userId) {
-        return res.status(403).json({ message: "Forbidden" });
+        return res.status(403).json({ message: "Forbidden." });
       }
       
       // Validate and whitelist allowed fields
       const validationResult = updateTestSessionSchema.safeParse(req.body);
       if (!validationResult.success) {
         return res.status(400).json({ 
-          message: "Invalid request data",
+          message: "Invalid request data.",
           errors: validationResult.error.errors 
         });
       }
@@ -613,7 +635,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(updated);
     } catch (error) {
       console.error("Error updating test session:", error);
-      res.status(500).json({ message: "Failed to update test session" });
+      res.status(500).json({ message: "Failed to update test session." });
     }
   });
 
@@ -623,18 +645,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const session = await storage.getTestSession(req.params.id);
       
       if (!session) {
-        return res.status(404).json({ message: "Test session not found" });
+        return res.status(404).json({ message: "Test session not found." });
       }
       
       if (session.userId !== userId) {
-        return res.status(403).json({ message: "Forbidden" });
+        return res.status(403).json({ message: "Forbidden." });
       }
       
       const completed = await storage.completeTestSession(req.params.id);
       res.json(completed);
     } catch (error) {
       console.error("Error completing test session:", error);
-      res.status(500).json({ message: "Failed to complete test session" });
+      res.status(500).json({ message: "Failed to complete test session." });
     }
   });
 
@@ -644,18 +666,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const session = await storage.getTestSession(req.params.id);
       
       if (!session) {
-        return res.status(404).json({ message: "Test session not found" });
+        return res.status(404).json({ message: "Test session not found." });
       }
       
       if (session.userId !== userId) {
-        return res.status(403).json({ message: "Forbidden" });
+        return res.status(403).json({ message: "Forbidden." });
       }
       
       await storage.deleteTestSession(req.params.id);
       res.status(204).send();
     } catch (error) {
       console.error("Error deleting test session:", error);
-      res.status(500).json({ message: "Failed to delete test session" });
+      res.status(500).json({ message: "Failed to delete test session." });
     }
   });
 
@@ -668,7 +690,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const validationResult = insertQuestionResponseSchema.safeParse(req.body);
       if (!validationResult.success) {
         return res.status(400).json({ 
-          message: "Invalid request data",
+          message: "Invalid request data.",
           errors: validationResult.error.flatten().fieldErrors
         });
       }
@@ -679,7 +701,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (testSessionId) {
         const session = await storage.getTestSession(testSessionId);
         if (!session || session.userId !== userId) {
-          return res.status(403).json({ message: "Forbidden" });
+          return res.status(403).json({ message: "Forbidden." });
         }
       }
       
@@ -693,7 +715,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(response);
     } catch (error) {
       console.error("Error saving question response:", error);
-      res.status(500).json({ message: "Failed to save question response" });
+      res.status(500).json({ message: "Failed to save question response." });
     }
   });
 
@@ -703,18 +725,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const session = await storage.getTestSession(req.params.id);
       
       if (!session) {
-        return res.status(404).json({ message: "Test session not found" });
+        return res.status(404).json({ message: "Test session not found." });
       }
       
       if (session.userId !== userId) {
-        return res.status(403).json({ message: "Forbidden" });
+        return res.status(403).json({ message: "Forbidden." });
       }
       
       const responses = await storage.getTestSessionResponses(req.params.id);
       res.json(responses);
     } catch (error) {
       console.error("Error fetching responses:", error);
-      res.status(500).json({ message: "Failed to fetch responses" });
+      res.status(500).json({ message: "Failed to fetch responses." });
     }
   });
 
@@ -727,7 +749,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(userNotes);
     } catch (error) {
       console.error("Error fetching notes:", error);
-      res.status(500).json({ message: "Failed to fetch notes" });
+      res.status(500).json({ message: "Failed to fetch notes." });
     }
   });
 
@@ -750,7 +772,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(note);
     } catch (error) {
       console.error("Error creating note:", error);
-      res.status(500).json({ message: "Failed to create note" });
+      res.status(500).json({ message: "Failed to create note." });
     }
   });
 
@@ -765,7 +787,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const note = userNotes.find(n => n.id === noteId);
       
       if (!note) {
-        return res.status(404).json({ message: "Note not found" });
+        return res.status(404).json({ message: "Note not found." });
       }
       
       const updates: any = {};
@@ -777,7 +799,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(updatedNote);
     } catch (error) {
       console.error("Error updating note:", error);
-      res.status(500).json({ message: "Failed to update note" });
+      res.status(500).json({ message: "Failed to update note." });
     }
   });
 
@@ -791,14 +813,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const note = userNotes.find(n => n.id === noteId);
       
       if (!note) {
-        return res.status(404).json({ message: "Note not found" });
+        return res.status(404).json({ message: "Note not found." });
       }
       
       await storage.deleteNote(noteId);
       res.json({ success: true });
     } catch (error) {
       console.error("Error deleting note:", error);
-      res.status(500).json({ message: "Failed to delete note" });
+      res.status(500).json({ message: "Failed to delete note." });
     }
   });
 
@@ -812,7 +834,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(bookmarks);
     } catch (error) {
       console.error("Error fetching bookmarks:", error);
-      res.status(500).json({ message: "Failed to fetch bookmarks" });
+      res.status(500).json({ message: "Failed to fetch bookmarks." });
     }
   });
 
@@ -822,7 +844,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { questionId, sectionId, subsectionId } = req.body;
       
       if (!questionId || !sectionId || !subsectionId) {
-        return res.status(400).json({ message: "Missing required fields" });
+        return res.status(400).json({ message: "Missing required fields." });
       }
       
       const bookmark = await storage.addBookmark({
@@ -835,7 +857,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(bookmark);
     } catch (error) {
       console.error("Error adding bookmark:", error);
-      res.status(500).json({ message: "Failed to add bookmark" });
+      res.status(500).json({ message: "Failed to add bookmark." });
     }
   });
 
@@ -848,7 +870,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ success: true });
     } catch (error) {
       console.error("Error removing bookmark:", error);
-      res.status(500).json({ message: "Failed to remove bookmark" });
+      res.status(500).json({ message: "Failed to remove bookmark." });
     }
   });
 
@@ -861,7 +883,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ isBookmarked });
     } catch (error) {
       console.error("Error checking bookmark:", error);
-      res.status(500).json({ message: "Failed to check bookmark" });
+      res.status(500).json({ message: "Failed to check bookmark." });
     }
   });
 
@@ -874,7 +896,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(highlights);
     } catch (error) {
       console.error("Error fetching highlights:", error);
-      res.status(500).json({ message: "Failed to fetch highlights" });
+      res.status(500).json({ message: "Failed to fetch highlights." });
     }
   });
 
@@ -884,7 +906,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { text, color, sectionId, subsectionId, location, questionId, startOffset, endOffset } = req.body;
       
       if (!text || !sectionId || !subsectionId || !location || startOffset === undefined || endOffset === undefined) {
-        return res.status(400).json({ message: "Missing required fields" });
+        return res.status(400).json({ message: "Missing required fields." });
       }
       
       const highlight = await storage.createHighlight({
@@ -902,7 +924,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(highlight);
     } catch (error) {
       console.error("Error creating highlight:", error);
-      res.status(500).json({ message: "Failed to create highlight" });
+      res.status(500).json({ message: "Failed to create highlight." });
     }
   });
 
@@ -917,14 +939,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const highlight = userHighlights.find(h => h.id === highlightId);
       
       if (!highlight) {
-        return res.status(404).json({ message: "Highlight not found" });
+        return res.status(404).json({ message: "Highlight not found." });
       }
       
       const updatedHighlight = await storage.updateHighlight(highlightId, updates);
       res.json(updatedHighlight);
     } catch (error) {
       console.error("Error updating highlight:", error);
-      res.status(500).json({ message: "Failed to update highlight" });
+      res.status(500).json({ message: "Failed to update highlight." });
     }
   });
 
@@ -938,14 +960,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const highlight = userHighlights.find(h => h.id === highlightId);
       
       if (!highlight) {
-        return res.status(404).json({ message: "Highlight not found" });
+        return res.status(404).json({ message: "Highlight not found." });
       }
       
       await storage.deleteHighlight(highlightId);
       res.json({ success: true });
     } catch (error) {
       console.error("Error deleting highlight:", error);
-      res.status(500).json({ message: "Failed to delete highlight" });
+      res.status(500).json({ message: "Failed to delete highlight." });
     }
   });
 
@@ -956,7 +978,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { highlights: localHighlights } = req.body;
       
       if (!Array.isArray(localHighlights)) {
-        return res.status(400).json({ message: "Invalid highlights data" });
+        return res.status(400).json({ message: "Invalid highlights data." });
       }
       
       // Get server highlights
@@ -995,7 +1017,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(allHighlights);
     } catch (error) {
       console.error("Error syncing highlights:", error);
-      res.status(500).json({ message: "Failed to sync highlights" });
+      res.status(500).json({ message: "Failed to sync highlights." });
     }
   });
 
@@ -1008,7 +1030,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(responses);
     } catch (error) {
       console.error("Error fetching question responses:", error);
-      res.status(500).json({ message: "Failed to fetch question responses" });
+      res.status(500).json({ message: "Failed to fetch question responses." });
     }
   });
 
@@ -1019,7 +1041,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { sectionId, subsectionId, selectedAnswer, correctAnswer, isCorrect } = req.body;
       
       if (!sectionId || !subsectionId || !selectedAnswer || isCorrect === undefined) {
-        return res.status(400).json({ message: "Missing required fields" });
+        return res.status(400).json({ message: "Missing required fields." });
       }
       
       const response = await storage.upsertStudyModeResponse(userId, {
@@ -1034,7 +1056,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(response);
     } catch (error) {
       console.error("Error saving question response:", error);
-      res.status(500).json({ message: "Failed to save question response" });
+      res.status(500).json({ message: "Failed to save question response." });
     }
   });
 
@@ -1043,10 +1065,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.session?.userId;
       await storage.deleteAllStudyModeResponses(userId);
-      res.json({ message: "All responses deleted" });
+      res.json({ message: "All responses deleted." });
     } catch (error) {
       console.error("Error deleting all question responses:", error);
-      res.status(500).json({ message: "Failed to delete question responses" });
+      res.status(500).json({ message: "Failed to delete question responses." });
     }
   });
 
@@ -1057,7 +1079,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { responses: localResponses } = req.body;
       
       if (!Array.isArray(localResponses)) {
-        return res.status(400).json({ message: "Invalid responses data" });
+        return res.status(400).json({ message: "Invalid responses data." });
       }
       
       // Process each local response
@@ -1079,7 +1101,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(allResponses);
     } catch (error) {
       console.error("Error syncing question responses:", error);
-      res.status(500).json({ message: "Failed to sync question responses" });
+      res.status(500).json({ message: "Failed to sync question responses." });
     }
   });
 
@@ -1091,7 +1113,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(dueQuestions);
     } catch (error) {
       console.error("Error fetching due questions:", error);
-      res.status(500).json({ message: "Failed to fetch due questions" });
+      res.status(500).json({ message: "Failed to fetch due questions." });
     }
   });
 
@@ -1101,7 +1123,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { questionId, sectionId, subsectionId, quality: rawQuality } = req.body;
 
       if (!questionId || rawQuality === undefined) {
-        return res.status(400).json({ message: "Missing required fields" });
+        return res.status(400).json({ message: "Missing required fields." });
       }
 
       // Get existing SR data or create new
@@ -1150,7 +1172,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(updatedSR);
     } catch (error) {
       console.error("Error updating spaced repetition:", error);
-      res.status(500).json({ message: "Failed to update spaced repetition" });
+      res.status(500).json({ message: "Failed to update spaced repetition." });
     }
   });
 
@@ -1163,7 +1185,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(sr || { nextReviewAt: new Date() });
     } catch (error) {
       console.error("Error fetching SR data:", error);
-      res.status(500).json({ message: "Failed to fetch SR data" });
+      res.status(500).json({ message: "Failed to fetch SR data." });
     }
   });
 
@@ -1177,7 +1199,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(topicStats);
     } catch (error) {
       console.error("Error fetching topic stats:", error);
-      res.status(500).json({ message: "Failed to fetch topic stats" });
+      res.status(500).json({ message: "Failed to fetch topic stats." });
     }
   });
 
@@ -1189,7 +1211,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(plans);
     } catch (error) {
       console.error("Error fetching subscription plans:", error);
-      res.status(500).json({ message: "Failed to fetch subscription plans" });
+      res.status(500).json({ message: "Failed to fetch subscription plans." });
+    }
+  });
+
+  // Create Stripe Checkout Session (redirects user to Stripe's hosted checkout page)
+  const { createCheckoutSession } = await import("./stripe");
+  app.post('/api/subscription/checkout', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session?.userId;
+      const { planId } = req.body ?? {};
+      if (!planId || typeof planId !== "string") {
+        return res.status(400).json({ message: "Plan ID required." });
+      }
+      const user = await storage.getUser(userId);
+      const result = await createCheckoutSession({
+        userId,
+        userEmail: user?.email ?? null,
+        planId: planId.trim(),
+      });
+      if ("error" in result) {
+        return res.status(400).json({ message: result.error });
+      }
+      res.json({ sessionUrl: result.url });
+    } catch (error) {
+      console.error("Error creating checkout session:", error);
+      res.status(500).json({ message: "Failed to start checkout." });
+    }
+  });
+
+  // Fulfill after Payment Link checkout (session_id + planId from client)
+  app.post("/api/subscription/fulfill", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session?.userId;
+      const body = req.body ?? {};
+      const sessionId = typeof body.session_id === "string" ? body.session_id.trim() : "";
+      const planId = typeof body.planId === "string" ? body.planId.trim() : "";
+      if (!sessionId || !planId) {
+        return res.status(400).json({ message: "session_id and planId required." });
+      }
+      const { fulfillFromCheckoutSession } = await import("./stripe");
+      const result = await fulfillFromCheckoutSession(sessionId, userId, planId);
+      if ("error" in result) {
+        return res.status(400).json({ message: result.error });
+      }
+      res.json({ message: "Subscription activated." });
+    } catch (error) {
+      console.error("Error fulfilling subscription:", error);
+      res.status(500).json({ message: "Failed to activate subscription." });
     }
   });
 
@@ -1198,26 +1267,107 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.session?.userId;
       const user = await storage.getUser(userId);
+      const hasInstitutionalAffiliation = !!user?.institutionalAccessAffiliation?.trim();
+      const institutionalExpiresAt = user?.institutionalAccessExpiresAt ? new Date(user.institutionalAccessExpiresAt) : null;
+      const institutionalExpired = institutionalExpiresAt !== null && institutionalExpiresAt <= new Date();
+      const hasInstitutional = hasInstitutionalAffiliation && !institutionalExpired;
+
+      if (hasInstitutional) {
+        const daysRemaining = institutionalExpiresAt
+          ? Math.max(0, Math.ceil((institutionalExpiresAt.getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
+          : null;
+        return res.json({
+          plan: 'institutional',
+          status: 'institutional',
+          institutionalAffiliation: user?.institutionalAccessAffiliation?.trim() ?? '',
+          endsAt: institutionalExpiresAt ? institutionalExpiresAt.toISOString() : undefined,
+          trialEndsAt: undefined,
+          daysRemaining,
+          transactionCount: 0,
+        });
+      }
+
+      const now = new Date();
       const activeSubscription = await storage.getUserActiveSubscription(userId);
       const transactions = await storage.getUserSubscriptionTransactions(userId);
+      const plans = await storage.getSubscriptionPlans();
 
-      let daysRemaining = 0;
-      if (activeSubscription?.endDate) {
-        const now = new Date();
+      // Legacy plan names (DB may have old values): normalize for display and persist
+      const LEGACY_PLAN_MAP: Record<string, string> = { '3-month': '1-year', '1-month': 'monthly' };
+      const rawPlan = user?.subscriptionPlan;
+      let planForDisplay = rawPlan;
+      if (rawPlan && LEGACY_PLAN_MAP[rawPlan]) {
+        planForDisplay = LEGACY_PLAN_MAP[rawPlan];
+        await storage.updateUserProfile(userId, { subscriptionPlan: planForDisplay as any });
+      }
+      // Prefer plan from latest active transaction (reflects actual purchase)
+      if (activeSubscription?.planId) {
+        const txPlan = plans.find((p) => p.id === activeSubscription.planId);
+        if (txPlan) {
+          planForDisplay = txPlan.name;
+          if (rawPlan !== txPlan.name) {
+            await storage.updateUserProfile(userId, { subscriptionPlan: txPlan.name as any });
+          }
+        }
+      }
+
+      let status = user?.subscriptionStatus || 'trial';
+      const trialEndsAt = user?.trialEndsAt ? new Date(user.trialEndsAt) : null;
+      const userEndsAt = user?.subscriptionEndsAt ? new Date(user.subscriptionEndsAt) : null;
+      const activeEndDate = activeSubscription?.endDate ? new Date(activeSubscription.endDate) : null;
+      const hasFutureAccess = (userEndsAt && userEndsAt.getTime() > now.getTime()) || (activeEndDate && activeEndDate.getTime() > now.getTime());
+
+      // If trial period has ended, treat as active for display
+      if (status === 'trial' && trialEndsAt && trialEndsAt.getTime() <= now.getTime()) {
+        status = 'active';
+      }
+      // If user has future subscription end but DB says expired, treat as active and fix DB
+      if (status === 'expired' && hasFutureAccess) {
+        status = 'active';
+        await storage.updateUserProfile(userId, { subscriptionStatus: 'active' as any });
+        if (activeEndDate && !userEndsAt) {
+          await storage.updateUserProfile(userId, { subscriptionEndsAt: activeEndDate as any });
+        }
+      }
+
+      let daysRemaining: number | null = null;
+      let endsAt: string | undefined;
+
+      if (status === 'trial' && trialEndsAt) {
+        daysRemaining = Math.max(0, Math.ceil((trialEndsAt.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
+        endsAt = undefined;
+      } else if (userEndsAt && (status === 'active' || status === 'canceled')) {
+        daysRemaining = Math.max(0, Math.ceil((userEndsAt.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
+        endsAt = userEndsAt.toISOString();
+      } else if (activeEndDate && activeEndDate.getTime() > now.getTime()) {
+        daysRemaining = Math.max(0, Math.ceil((activeEndDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
+        endsAt = activeEndDate.toISOString();
+      } else if (activeSubscription?.endDate) {
         const endDate = new Date(activeSubscription.endDate);
         daysRemaining = Math.max(0, Math.ceil((endDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
+        endsAt = endDate.toISOString();
+      } else {
+        endsAt = undefined;
+      }
+
+      let planPrice: number | undefined;
+      if (planForDisplay && planForDisplay !== 'institutional') {
+        const plan = plans.find((p) => p.name === planForDisplay);
+        if (plan) planPrice = plan.priceUSD;
       }
 
       res.json({
-        plan: user?.subscriptionPlan,
-        status: user?.subscriptionStatus || 'trial',
-        endsAt: activeSubscription?.endDate,
+        plan: planForDisplay,
+        status,
+        endsAt,
+        trialEndsAt: trialEndsAt?.toISOString() ?? undefined,
         daysRemaining,
         transactionCount: transactions.length,
+        planPrice,
       });
     } catch (error) {
       console.error("Error fetching subscription details:", error);
-      res.status(500).json({ message: "Failed to fetch subscription details" });
+      res.status(500).json({ message: "Failed to fetch subscription details." });
     }
   });
 
@@ -1228,12 +1378,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { planId } = req.body;
 
       if (!planId) {
-        return res.status(400).json({ message: "Plan ID required" });
+        return res.status(400).json({ message: "Plan ID required." });
       }
 
       const plan = (await storage.getSubscriptionPlans()).find(p => p.id === planId);
       if (!plan) {
-        return res.status(404).json({ message: "Plan not found" });
+        return res.status(404).json({ message: "Plan not found." });
       }
 
       // Create transaction
@@ -1257,22 +1407,68 @@ export async function registerRoutes(app: Express): Promise<Server> {
         subscriptionEndsAt: endDate,
       });
 
-      res.json({ message: "Subscription updated successfully" });
+      res.json({ message: "Subscription updated successfully." });
     } catch (error) {
       console.error("Error changing subscription:", error);
-      res.status(500).json({ message: "Failed to change subscription" });
+      res.status(500).json({ message: "Failed to change subscription." });
     }
   });
 
-  // Cancel subscription
+  // Cancel subscription (institutional: ends instantly; paid: Stripe billing off, access until period end)
   app.post('/api/subscription/cancel', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.session?.userId;
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found." });
+      }
+
+      if (user.institutionalAccessAffiliation?.trim()) {
+        const now = new Date();
+        const trialEndsAt = user.trialEndsAt ? new Date(user.trialEndsAt) : null;
+        const newStatus = trialEndsAt && trialEndsAt > now ? 'trial' : 'expired';
+        await storage.updateUserProfile(userId, {
+          institutionalAccessAffiliation: null as any,
+          institutionalAccessExpiresAt: null as any,
+          subscriptionStatus: newStatus,
+        });
+        return res.json({ message: "Institutional access removed. You can re-enter a code anytime to reactivate." });
+      }
+
       await storage.cancelUserSubscription(userId);
-      res.json({ message: "Subscription canceled successfully" });
+      res.json({ message: "Subscription canceled. You have access until the end of your billing period." });
     } catch (error) {
       console.error("Error canceling subscription:", error);
-      res.status(500).json({ message: "Failed to cancel subscription" });
+      res.status(500).json({ message: "Failed to cancel subscription." });
+    }
+  });
+
+  // Redeem institutional access code (codes stored hashed in DB; user gets institution display name)
+  app.post('/api/subscription/institutional-code', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session?.userId;
+      const { code } = req.body;
+      const raw = typeof code === 'string' ? code.trim() : '';
+      if (!raw) {
+        return res.status(400).json({ message: "Code is required." });
+      }
+      const institutionName = await storage.validateInstitutionalCode(raw);
+      if (!institutionName) {
+        return res.status(400).json({ message: "Invalid code." });
+      }
+      const expiresAt = new Date();
+      expiresAt.setDate(expiresAt.getDate() + 365);
+      await storage.updateUserProfile(userId, {
+        institutionalAccessAffiliation: institutionName,
+        institutionalAccessExpiresAt: expiresAt,
+      });
+      res.json({ message: "Access Granted!." });
+    } catch (error: any) {
+      console.error("Error redeeming institutional code:", error);
+      const message = process.env.NODE_ENV !== "production" && error?.message
+        ? error.message
+        : "Failed to redeem code.";
+      res.status(500).json({ message });
     }
   });
 
@@ -1285,7 +1481,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ threadId });
     } catch (error) {
       console.error('Error initializing oral board thread:', error);
-      res.status(500).json({ message: 'Failed to initialize oral board session' });
+      res.status(500).json({ message: 'Failed to initialize oral board session.' });
     }
   });
 
@@ -1294,18 +1490,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { threadId, message } = req.body;
 
       if (!threadId || !message) {
-        return res.status(400).json({ message: 'Missing threadId or message' });
+        return res.status(400).json({ message: 'Missing threadId or message.' });
       }
 
       if (!validateThreadExists(threadId)) {
-        return res.status(401).json({ message: 'Invalid thread ID' });
+        return res.status(401).json({ message: 'Invalid thread ID.' });
       }
 
       const response = await sendMessage(threadId, message);
       res.json({ response });
     } catch (error) {
       console.error('Error processing chat message:', error);
-      res.status(500).json({ message: 'Failed to process message' });
+      res.status(500).json({ message: 'Failed to process message.' });
     }
   });
 
@@ -1322,7 +1518,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ threadId });
     } catch (error) {
       console.error('Error initializing chat bubble thread:', error);
-      res.status(500).json({ message: 'Failed to initialize chat bubble session' });
+      res.status(500).json({ message: 'Failed to initialize chat bubble session.' });
     }
   });
 
@@ -1331,18 +1527,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { threadId, message } = req.body;
 
       if (!threadId || !message) {
-        return res.status(400).json({ message: 'Missing threadId or message' });
+        return res.status(400).json({ message: 'Missing threadId or message.' });
       }
 
       if (!validateChatBubbleThread(threadId)) {
-        return res.status(401).json({ message: 'Invalid thread ID' });
+        return res.status(401).json({ message: 'Invalid thread ID.' });
       }
 
       const response = await sendChatBubbleMessage(threadId, message);
       res.json({ response });
     } catch (error) {
       console.error('Error processing chat bubble message:', error);
-      res.status(500).json({ message: 'Failed to process message' });
+      res.status(500).json({ message: 'Failed to process message.' });
     }
   });
 

@@ -176,13 +176,13 @@ export async function setupAuth(app: Express) {
       (req as any).session.save((err: any) => {
         if (err) {
           console.error('Session Save Error:', err);
-          return res.status(500).json({ message: 'Session Creation Failed' });
+          return res.status(500).json({ message: 'Session Creation Failed.' });
         }
         res.json({ success: true, user: sanitizeUser(user), passwordNeedsReset: user.passwordNeedsReset || false });
       });
     } catch (error) {
       console.error('Login Error:', error);
-      res.status(500).json({ message: 'Login Failed' });
+      res.status(500).json({ message: 'Login Failed.' });
     }
   });
 
@@ -191,7 +191,7 @@ export async function setupAuth(app: Express) {
     try {
       const userId = (req as any).session?.userId;
       if (!userId) {
-        return res.status(401).json({ message: 'Unauthorized' });
+        return res.status(401).json({ message: 'Unauthorized.' });
       }
 
       const { newPassword, confirmPassword } = req.body;
@@ -218,7 +218,7 @@ export async function setupAuth(app: Express) {
       res.json({ success: true, message: 'Password changed successfully.' });
     } catch (error) {
       console.error('Change password error:', error);
-      res.status(500).json({ message: 'Failed to change password' });
+      res.status(500).json({ message: 'Failed to change password.' });
     }
   });
 
@@ -294,13 +294,13 @@ export async function setupAuth(app: Express) {
       (req as any).session.save((err: any) => {
         if (err) {
           console.error('Session save error:', err);
-          return res.status(500).json({ message: 'Session creation failed' });
+          return res.status(500).json({ message: 'Session creation failed.' });
         }
         res.status(201).json({ success: true, user: sanitizeUser(newUser) });
       });
     } catch (error) {
       console.error('Register error:', error);
-      res.status(500).json({ message: 'Registration failed' });
+      res.status(500).json({ message: 'Registration failed.' });
     }
   });
 
@@ -308,7 +308,7 @@ export async function setupAuth(app: Express) {
   app.post('/api/auth/logout', (req, res) => {
     (req as any).session.destroy((err: any) => {
       if (err) {
-        return res.status(500).json({ message: 'Logout failed' });
+        return res.status(500).json({ message: 'Logout failed.' });
       }
       res.clearCookie('connect.sid');
       res.json({ success: true });
@@ -320,13 +320,13 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
   const session = (req as any).session;
 
   if (!session?.userId) {
-    return res.status(401).json({ message: 'Unauthorized' });
+    return res.status(401).json({ message: 'Unauthorized.' });
   }
 
   // Verify user still exists
   const currentUser = await storage.getUser(session.userId);
   if (!currentUser) {
-    return res.status(401).json({ message: 'Unauthorized' });
+    return res.status(401).json({ message: 'Unauthorized.' });
   }
 
   // Attach user to request for use in route handlers

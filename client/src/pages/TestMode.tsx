@@ -29,8 +29,10 @@ interface TestModeProps {
 type TestState = 'setup' | 'testing' | 'results' | 'review';
 
 export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, isPreview }: TestModeProps) {
-  const [testState, setTestState] = useState<TestState>('setup');
+  const startInPreview = Boolean(isPreview && previewQuestions && previewQuestions.length > 0);
+  const [testState, setTestState] = useState<TestState>(() => (startInPreview ? 'testing' : 'setup'));
   const [questionCount, setQuestionCount] = useState<number>(10);
+  const [questionCountInput, setQuestionCountInput] = useState<string>('10');
   const [selectedSubsections, setSelectedSubsections] = useState<Set<string>>(new Set());
   const [useAllQuestions, setUseAllQuestions] = useState(true);
   const [useBookmarkedOnly, setUseBookmarkedOnly] = useState(false);
@@ -40,7 +42,7 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
   const [expandedSections, setExpandedSections] = useState<Set<string>>(
     new Set(sections.map(s => s.id))
   );
-  const [testQuestions, setTestQuestions] = useState<Question[]>([]);
+  const [testQuestions, setTestQuestions] = useState<Question[]>(() => (startInPreview && previewQuestions ? previewQuestions : []));
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [responses, setResponses] = useState<Record<string, QuestionResponse>>({});
   const [flaggedQuestions, setFlaggedQuestions] = useState<Set<string>>(new Set());
@@ -294,7 +296,9 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
     setCurrentSession(session);
     
     // Restore configuration
-    setQuestionCount(session.questionCount as 10 | 20 | 30 | 40);
+    const count = session.questionCount as 10 | 20 | 30 | 40;
+    setQuestionCount(count);
+    setQuestionCountInput(String(count));
     setUseAllQuestions(session.useAllQuestions);
     setSelectedSubsections(new Set(session.selectedSectionIds));
     
@@ -310,7 +314,9 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
     setCurrentSession(session);
     
     // Restore configuration
-    setQuestionCount(session.questionCount as 10 | 20 | 30 | 40);
+    const count = session.questionCount as 10 | 20 | 30 | 40;
+    setQuestionCount(count);
+    setQuestionCountInput(String(count));
     setUseAllQuestions(session.useAllQuestions);
     setSelectedSubsections(new Set(session.selectedSectionIds));
     
@@ -737,10 +743,21 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
                             id="question-count"
                             type="number"
                             min="1"
-                            value={questionCount}
+                            value={questionCountInput}
                             onChange={(e) => {
-                              const value = Math.max(1, parseInt(e.target.value) || 1);
-                              setQuestionCount(value);
+                              const raw = e.target.value;
+                              setQuestionCountInput(raw);
+                              const parsed = parseInt(raw, 10);
+                              if (raw !== '' && !Number.isNaN(parsed) && parsed >= 1) {
+                                setQuestionCount(parsed);
+                              }
+                            }}
+                            onBlur={() => {
+                              const parsed = parseInt(questionCountInput, 10);
+                              if (questionCountInput === '' || Number.isNaN(parsed) || parsed < 1) {
+                                setQuestionCount(1);
+                                setQuestionCountInput('1');
+                              }
                             }}
                             placeholder="Enter number"
                             className={cn("w-24", hasError && "border-destructive bg-destructive/10")}
@@ -800,6 +817,7 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
                               setUseIncorrectOnly(false);
                               if (bookmarks.length < questionCount) {
                                 setQuestionCount(bookmarks.length);
+                                setQuestionCountInput(String(bookmarks.length));
                               }
                             }}
                           >
@@ -840,6 +858,7 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
                                 setUseBookmarkedOnly(false);
                                 if (incorrectIds.size < questionCount) {
                                   setQuestionCount(incorrectIds.size);
+                                  setQuestionCountInput(String(incorrectIds.size));
                                 }
                               }}
                             >
@@ -1004,7 +1023,21 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
     const currentQuestion = testQuestions[currentQuestionIndex];
     
     return (
-      <div className="flex flex-col h-screen w-full md:flex-row md:h-screen md:overflow-hidden overflow-hidden">
+      <div className="flex flex-col h-screen w-full overflow-hidden">
+        {/* Preview: Create Account banner */}
+        {isPreview && (
+          <div className="w-full flex-shrink-0 bg-primary text-primary-foreground px-4 py-2 flex items-center justify-center gap-2 text-sm">
+            <span className="font-medium">Start your 7-day free trial today.</span>
+            <button
+              type="button"
+              onClick={() => { window.location.href = '/signup'; }}
+              className="font-semibold underline underline-offset-2 hover:no-underline focus:outline-none"
+            >
+              Create Account Now!
+            </button>
+          </div>
+        )}
+        <div className="flex-1 flex flex-col md:flex-row min-h-0 overflow-hidden">
         {/* Question Panel - Top on mobile, Right on desktop */}
         {!isFullscreen && (
         <div className={cn(
@@ -1072,7 +1105,7 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
             </div>
           </div>
 
-          <div className="p-3 border-t border-border space-y-2 text-xs">
+          <div className={cn("p-3 border-t border-border space-y-2 text-xs", isPreview && "pb-[3.75rem]")}>
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 rounded bg-green-500/20"></div>
               <span className="text-muted-foreground">Correct</span>
@@ -1190,6 +1223,7 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
               </Button>
             </div>
           </div>
+        </div>
         </div>
       </div>
     );

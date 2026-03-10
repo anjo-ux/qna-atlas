@@ -8,25 +8,19 @@ import { toast } from 'sonner';
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-
-interface Plan {
-  id: string;
-  name: string;
-  durationMonths: number;
-  priceUSD: number;
-}
+import { SubscriptionPlans } from '@/components/SubscriptionPlans';
 
 interface SubscriptionDetails {
   plan?: string;
   status: string;
+  institutionalAffiliation?: string;
   endsAt?: string;
-  daysRemaining: number;
+  trialEndsAt?: string;
+  daysRemaining: number | null;
   transactionCount: number;
+  planPrice?: number;
 }
 
 interface MobileSubscriptionWidgetProps {
@@ -40,107 +34,148 @@ export function MobileSubscriptionWidget({ hasEmoryAccess = false }: MobileSubsc
     queryKey: ['/api/subscription/details'],
   });
 
-  const { data: plans = [] } = useQuery<Plan[]>({
-    queryKey: ['/api/subscription/plans'],
-  });
-
-  const changeSubscriptionMutation = useMutation({
-    mutationFn: async (planId: string) => {
-      return await apiRequest('/api/subscription/change', {
-        method: 'POST',
-        body: JSON.stringify({ planId }),
-      });
-    },
-    onSuccess: () => {
-      toast.success('Subscription updated successfully!');
-      setIsChangingPlan(false);
-      queryClient.invalidateQueries({ queryKey: ['/api/subscription/details'] });
-    },
-    onError: (error: any) => {
-      toast.error(error.message || 'Failed to change subscription');
-    },
-  });
-
   const cancelSubscriptionMutation = useMutation({
     mutationFn: async () => {
       return await apiRequest('/api/subscription/cancel', { method: 'POST' });
     },
-    onSuccess: () => {
-      toast.success('Subscription canceled. Trial access restored.');
-      queryClient.invalidateQueries({ queryKey: ['/api/subscription/details'] });
+    onSuccess: async (data: { message?: string } | null) => {
+      toast.success(data?.message ?? 'Subscription canceled.');
+      await Promise.all([
+        queryClient.refetchQueries({ queryKey: ['/api/subscription'] }),
+        queryClient.refetchQueries({ queryKey: ['/api/subscription/details'] }),
+        queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] }),
+      ]);
     },
     onError: (error: any) => {
-      toast.error(error.message || 'Failed to cancel subscription');
+      const msg = error.message || 'Failed to cancel subscription.';
+      toast.error(msg.endsWith('.') || msg.endsWith('!') || msg.endsWith('?') ? msg : msg + '.');
     },
   });
 
-  const getPlanDetails = (plan: Plan) => {
-    const monthlyPrice = plan.priceUSD / 100 / plan.durationMonths;
-    return {
-      displayName: `${plan.durationMonths}M`,
-      price: `$${(plan.priceUSD / 100).toFixed(2)}`,
-      monthlyPrice: `$${monthlyPrice.toFixed(2)}/mo`,
-    };
+  const planDisplayName = (name: string) => {
+    const labels: Record<string, string> = { monthly: 'Monthly', '6-month': '6-Month Plan', '1-year': '1-Year Plan' };
+    return labels[name] ?? name.charAt(0).toUpperCase() + name.slice(1);
   };
 
+  const institutionalDisplayName = (affiliation: string) => {
+    return affiliation?.trim() ?? '';
+  };
+
+  const isInstitutional = subscription?.status === 'institutional';
+  const isTrial = subscription?.status === 'trial';
+  const isActive = subscription?.status === 'active';
+  const isCanceled = subscription?.status === 'canceled';
   const isTrialOrExpired = !subscription?.plan || subscription?.status === 'trial' || subscription?.status === 'expired';
+  const showUnlimitedTime = subscription?.daysRemaining == null;
+
+  const formatDate = (iso?: string) => iso ? new Date(iso).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : '';
+  const formatDateMMDDYYYY = (iso?: string) => iso ? new Date(iso).toLocaleDateString(undefined, { month: '2-digit', day: '2-digit', year: 'numeric' }) : '';
 
   return (
-    <Card className="p-6 bg-gradient-to-br from-chart-1/10 to-chart-2/10 border-chart-1/20">
+    <Card className="p-4 sm:p-6 bg-gradient-to-br from-chart-1/10 to-chart-2/10 border-chart-1/20 min-w-0 overflow-hidden">
       <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
-        <CreditCard className="h-5 w-5" />
+        <CreditCard className="h-5 w-5 flex-shrink-0" />
         Subscription
       </h2>
 
-      <div className="space-y-4">
-        {/* Grid with Plan and Status */}
-        <div className="grid grid-cols-2 gap-4">
-          <div>
+      <div className="space-y-4 min-w-0">
+        {/* Grid with Plan and Status - stacks on very small screens */}
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 min-w-0">
+          <div className="min-w-0">
             <p className="text-xs text-muted-foreground font-medium">Current Plan</p>
-            <p className="font-semibold text-foreground mt-1">
-              {subscription?.plan 
-                ? `${subscription.plan.charAt(0).toUpperCase() + subscription.plan.slice(1)}`
-                : hasEmoryAccess 
-                ? 'Institutional Access'
-                : 'Free Trial'
-              }
-            </p>
+            {isInstitutional ? (
+              <div className="mt-1 min-w-0">
+                <p className="font-semibold text-foreground">Institutional Plan</p>
+                <p className="text-sm text-muted-foreground truncate" title={institutionalDisplayName(subscription?.institutionalAffiliation ?? '')}>
+                  {institutionalDisplayName(subscription?.institutionalAffiliation ?? '')}
+                </p>
+              </div>
+            ) : (
+              <p className="font-semibold text-foreground mt-1 truncate">
+                {subscription?.plan ? planDisplayName(subscription.plan) : 'Free Trial'}
+              </p>
+            )}
           </div>
-          <div>
+          <div className="min-w-0">
             <p className="text-xs text-muted-foreground font-medium">Status</p>
-            <p className={`font-semibold mt-1 flex items-center gap-1 ${
+            <p className={`font-semibold mt-1 flex items-center gap-1 min-w-0 ${
               subscription?.status === 'expired' ? 'text-destructive' : 'text-success'
             }`}>
               {subscription?.status === 'expired' ? (
-                <AlertCircle className="h-3 w-3" />
+                <AlertCircle className="h-3 w-3 flex-shrink-0" />
               ) : (
-                <Check className="h-3 w-3" />
+                <Check className="h-3 w-3 flex-shrink-0" />
               )}
-              {subscription?.status === 'expired' ? 'Expired' : 'Active'}
+              <span className="truncate">{subscription?.status === 'expired' ? 'Expired' : isCanceled ? 'Active until end date' : 'Active'}</span>
             </p>
           </div>
         </div>
 
-        {/* Time Remaining */}
-        {subscription?.daysRemaining !== undefined && !isTrialOrExpired && (
-          <div>
-            <p className="text-xs text-muted-foreground font-medium">Time Remaining</p>
-            <p className="font-semibold text-foreground mt-1">{subscription.daysRemaining} days</p>
+        {subscription?.planPrice != null && !isInstitutional && (
+          <div className="border-t border-border pt-4 min-w-0">
+            <p className="text-xs text-muted-foreground font-medium">Plan Price</p>
+            <p className="font-semibold text-foreground mt-1">
+              ${(subscription.planPrice / 100).toFixed(2)} / {subscription.plan === 'monthly' ? 'month' : subscription.plan === '6-month' ? '6 months' : 'year'}
+            </p>
           </div>
         )}
 
-        {/* Subscription History */}
-        {subscription?.transactionCount !== undefined && (subscription.transactionCount > 0 || subscription?.endsAt) && (
+        {/* Time remaining and end date side by side */}
+        <div className="min-w-0">
+          <div className="grid grid-cols-2 gap-3 sm:gap-4 min-w-0">
+            <div className="min-w-0">
+              <p className="text-xs text-muted-foreground font-medium">Time Remaining</p>
+              <p className="font-semibold text-foreground mt-1 break-words">
+                {showUnlimitedTime
+                  ? 'Unlimited'
+                  : isTrial
+                    ? `${subscription?.daysRemaining ?? 0} Trial Days Remaining`
+                    : isActive
+                      ? `${subscription?.daysRemaining ?? 0} Subscription Days Remaining`
+                      : isInstitutional
+                        ? `${subscription?.daysRemaining ?? 0} Days Remaining`
+                        : subscription?.status === 'expired'
+                          ? 'Expired'
+                          : `${subscription?.daysRemaining ?? 0} days`}
+              </p>
+            </div>
+            {(isTrial && subscription?.trialEndsAt) || ((isActive || isCanceled || isInstitutional) && subscription?.endsAt) ? (
+              <div className="min-w-0">
+                <p className="text-xs text-muted-foreground font-medium">
+                  {isTrial ? 'Trial Ends' : isInstitutional ? 'Access Ends' : isCanceled ? 'Subscription Ends' : 'Next Billing Date'}
+                </p>
+                <p className="font-semibold text-foreground mt-1">
+                  {isTrial && subscription?.trialEndsAt
+                    ? formatDate(subscription.trialEndsAt)
+                    : isCanceled && subscription?.endsAt
+                      ? `Subscription Ends - ${formatDateMMDDYYYY(subscription.endsAt)}`
+                      : subscription?.endsAt
+                        ? formatDateMMDDYYYY(subscription.endsAt)
+                        : ''}
+                </p>
+              </div>
+            ) : null}
+          </div>
+        </div>
+
+        {/* Subscription Details / History */}
+        {((subscription?.transactionCount !== undefined && subscription.transactionCount > 0) || subscription?.endsAt || subscription?.trialEndsAt) && (
           <div className="bg-muted/30 rounded-lg p-3 border border-border">
             <p className="text-sm text-muted-foreground mb-2">Subscription Details</p>
             <div className="space-y-2">
-              {subscription?.endsAt && (
+              {subscription?.trialEndsAt && isTrial && (
                 <div className="flex justify-between text-xs">
-                  <span className="text-foreground">Renewal Date</span>
-                  <span className="text-muted-foreground">{new Date(subscription.endsAt).toLocaleDateString()}</span>
+                  <span className="text-foreground">Trial Ends</span>
+                  <span className="text-muted-foreground">{formatDate(subscription.trialEndsAt)}</span>
                 </div>
               )}
-              {subscription?.transactionCount !== undefined && (
+              {(subscription?.endsAt && (isActive || isCanceled)) && (
+                <div className="flex justify-between text-xs">
+                  <span className="text-foreground">{isCanceled ? 'Subscription Ends' : 'Renewal Date'}</span>
+                  <span className="text-muted-foreground">{formatDateMMDDYYYY(subscription.endsAt)}</span>
+                </div>
+              )}
+              {subscription?.transactionCount !== undefined && subscription.transactionCount > 0 && (
                 <div className="flex justify-between text-xs">
                   <span className="text-foreground">Transactions</span>
                   <span className="text-muted-foreground">{subscription.transactionCount}</span>
@@ -151,7 +186,7 @@ export function MobileSubscriptionWidget({ hasEmoryAccess = false }: MobileSubsc
         )}
 
         {/* Action Buttons */}
-        <div className="space-y-2 pt-2">
+        <div className="space-y-2 pt-2 min-w-0">
           <Dialog open={isChangingPlan} onOpenChange={setIsChangingPlan}>
             <DialogTrigger asChild>
               <Button 
@@ -161,60 +196,27 @@ export function MobileSubscriptionWidget({ hasEmoryAccess = false }: MobileSubsc
                 {isTrialOrExpired ? 'Upgrade Plan' : 'Change Plan'}
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-2xl">
-              <DialogHeader>
-                <DialogTitle>Choose Plan</DialogTitle>
-                <DialogDescription>
-                  {isTrialOrExpired
-                    ? 'Upgrade to premium access.'
-                    : 'Switch to a different subscription plan.'}
-                </DialogDescription>
-              </DialogHeader>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {plans.map((plan) => {
-                  const details = getPlanDetails(plan);
-                  const isCurrentPlan = subscription?.plan === plan.name;
-                  return (
-                    <div
-                      key={plan.id}
-                      className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
-                        isCurrentPlan
-                          ? 'border-accent bg-accent/10'
-                          : 'border-border hover:border-accent/50'
-                      }`}
-                      onClick={() => !isCurrentPlan && changeSubscriptionMutation.mutate(plan.id)}
-                    >
-                      <h4 className="font-semibold mb-2">{details.displayName}</h4>
-                      <p className="text-lg font-bold mb-1">{details.price}</p>
-                      <p className="text-xs text-muted-foreground mb-3">{details.monthlyPrice}</p>
-                      <Button
-                        size="sm"
-                        className="w-full"
-                        disabled={isCurrentPlan || changeSubscriptionMutation.isPending}
-                        variant={isCurrentPlan ? 'secondary' : 'default'}
-                      >
-                        {isCurrentPlan ? 'Current' : 'Select'}
-                      </Button>
-                    </div>
-                  );
-                })}
-              </div>
+            <DialogContent hideCloseButton className="max-w-lg w-[calc(100vw-2rem)] max-h-[90vh] p-0 gap-0 border-0 bg-transparent shadow-none overflow-y-auto overflow-x-hidden [&>button]:!hidden">
+              <SubscriptionPlans asDialog={false} />
             </DialogContent>
           </Dialog>
 
-          {!isTrialOrExpired && (
+          {!isTrialOrExpired && !isCanceled && (
             <Button
               variant="outline"
               className="w-full text-destructive hover:text-destructive"
               onClick={() => {
-                if (confirm('Are you sure you want to cancel your subscription?')) {
+                const message = isInstitutional
+                  ? 'Remove institutional access? Your access will end immediately. You can re-enter a code anytime to reactivate.'
+                  : 'Are you sure you want to cancel your subscription? You will keep access until the end of your billing period.';
+                if (confirm(message)) {
                   cancelSubscriptionMutation.mutate();
                 }
               }}
               disabled={cancelSubscriptionMutation.isPending}
               data-testid="button-mobile-cancel"
             >
-              Cancel
+              {isInstitutional ? 'Remove Access' : 'Cancel'}
             </Button>
           )}
         </div>

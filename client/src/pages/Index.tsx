@@ -15,6 +15,7 @@ import { PreviewWizard } from '@/components/PreviewWizard';
 import { ChatBubble } from '@/components/ChatBubble';
 import { TestMode } from './TestMode';
 import { Settings as SettingsPage } from './Settings';
+import SubscriptionPage from './SubscriptionPage';
 import { Input } from '@/components/ui/input';
 import { Search, Menu, X, BookOpen, FileQuestion, Columns2, Home, FileText, Settings, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, Bookmark, Lightbulb, Zap, Mic } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -26,6 +27,8 @@ import { useBookmarks } from '@/hooks/useBookmarks';
 import { useSpacedRepetition } from '@/hooks/useSpacedRepetition';
 import { useLocation } from 'wouter';
 import { toast } from 'sonner';
+import { useQuery } from '@tanstack/react-query';
+import { queryClient, apiRequest } from '@/lib/queryClient';
 
 type ViewMode = 'questions' | 'reference' | 'split';
 type FilterMode = 'all' | 'incorrect' | 'unanswered';
@@ -47,8 +50,16 @@ export default function Index() {
   const [screenMode, setScreenMode] = useState<ScreenMode>('study');
   const [testModeState, setTestModeState] = useState<TestModeState>({ mode: 'new' });
   const searchRef = useRef<HTMLDivElement>(null);
-  const [subscription, setSubscription] = useState<any>(null);
-  const [isCheckingSubscription, setIsCheckingSubscription] = useState(true);
+  const subscriptionSuccessIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const { data: subscription, isLoading: isCheckingSubscription, refetch: refetchSubscription } = useQuery({
+    queryKey: ['/api/subscription'],
+    queryFn: async () => {
+      const res = await fetch('/api/subscription', { credentials: 'include' });
+      if (!res.ok) return { status: 'none', daysRemaining: 0, trialEndsAt: null, isLocked: false };
+      return res.json();
+    },
+    staleTime: 0,
+  });
   const [showPreviewWizard, setShowPreviewWizard] = useState(false);
   const [isMobileLayout, setIsMobileLayout] = useState(window.innerWidth < 1024);
   const { bookmarks } = useBookmarks();
@@ -90,24 +101,83 @@ export default function Index() {
   const searchResults = useGlobalSearch(sections, referenceSections, notes, searchQuery);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        // Check subscription status first
-        const subRes = await fetch('/api/subscription');
-        const subData = await subRes.json();
-        setSubscription(subData);
+    try {
+      const referenceData = loadReferenceText();
+      setReferenceSections(referenceData);
+    } catch (error) {
+      console.error('Error loading reference data:', error);
+    }
+  }, []);
 
-        const referenceData = loadReferenceText();
-        setReferenceSections(referenceData);
-      } catch (error) {
-        console.error('Error loading data:', error);
-      } finally {
-        setIsCheckingSubscription(false);
+  // After Stripe Payment Link return: fulfill with session_id + planId, then open Settings and poll
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('subscription') !== 'success') return;
+
+    const sessionId = params.get('session_id') ?? '';
+    const planId = (() => {
+      try {
+        return sessionStorage.getItem('subscription_pending_plan') ?? '';
+      } catch {
+        return '';
       }
+    })();
+
+    const runSuccess = () => {
+      try {
+        sessionStorage.removeItem('subscription_pending_plan');
+      } catch {}
+      setScreenMode('settings');
+      toast.success('Subscription active! Your plan has been updated.');
+      queryClient.invalidateQueries({ queryKey: ['/api/subscription/details'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/subscription'] });
+      window.history.replaceState(null, '', window.location.pathname + window.location.hash);
+
+      refetchSubscription().then(({ data }) => {
+        if (data && !data.isLocked) return;
+        let attempts = 0;
+        subscriptionSuccessIntervalRef.current = setInterval(() => {
+          attempts += 1;
+          refetchSubscription().then(({ data: next }) => {
+            if (next && !next.isLocked && subscriptionSuccessIntervalRef.current) {
+              clearInterval(subscriptionSuccessIntervalRef.current);
+              subscriptionSuccessIntervalRef.current = null;
+            }
+          });
+          if (attempts >= 15 && subscriptionSuccessIntervalRef.current) {
+            clearInterval(subscriptionSuccessIntervalRef.current);
+            subscriptionSuccessIntervalRef.current = null;
+          }
+        }, 1500);
+      });
     };
 
-    fetchData();
-  }, []);
+    if (sessionId && planId) {
+      apiRequest('/api/subscription/fulfill', {
+        method: 'POST',
+        body: JSON.stringify({ session_id: sessionId, planId }),
+      })
+        .then(runSuccess)
+        .catch((err) => {
+          toast.error(err?.message ?? 'Could not activate subscription.');
+          window.history.replaceState(null, '', window.location.pathname + window.location.hash);
+        });
+      return () => {
+        if (subscriptionSuccessIntervalRef.current) {
+          clearInterval(subscriptionSuccessIntervalRef.current);
+          subscriptionSuccessIntervalRef.current = null;
+        }
+      };
+    }
+
+    runSuccess();
+    return () => {
+      if (subscriptionSuccessIntervalRef.current) {
+        clearInterval(subscriptionSuccessIntervalRef.current);
+        subscriptionSuccessIntervalRef.current = null;
+      }
+    };
+  }, [refetchSubscription]);
 
   // Handle window resize for responsive mobile layout
   useEffect(() => {
@@ -249,13 +319,13 @@ export default function Index() {
   const handleResetSubsection = () => {
     if (selectedSection && selectedSubsection) {
       resetSubsection(selectedSection, selectedSubsection);
-      toast.success('Section progress reset');
+      toast.success('Section progress reset.');
     }
   };
 
   const handleResetAll = () => {
     resetAll();
-    toast.success('All progress reset');
+    toast.success('All progress reset.');
   };
 
   const handleNavigate = (sectionId: string, subsectionId: string) => {
@@ -361,17 +431,9 @@ export default function Index() {
     setScreenMode('test');
   };
 
-  // Check if trial is expired
+  // No active plan: show subscription UI at / (no redirect so URL stays / and sign-in doesn’t send user back to /subscribe)
   if (!isCheckingSubscription && subscription?.isLocked) {
-    return (
-      <Paywall 
-        daysRemaining={subscription.daysRemaining}
-        onUpgrade={() => {
-          toast.info('Upgrade options coming soon');
-        }}
-        onSettings={() => setScreenMode('settings')}
-      />
-    );
+    return <SubscriptionPage />;
   }
 
   if (screenMode === 'test') {
@@ -441,13 +503,13 @@ export default function Index() {
                     handleGoHome();
                     (e.currentTarget as HTMLButtonElement).blur();
                   }}
-                  className="hover:bg-primary/10 flex-shrink-0 outline-none focus-visible:ring-0 rounded-xl"
+                  className="hover:bg-primary/20 hover:text-primary flex-shrink-0 outline-none focus-visible:ring-0 rounded-xl transition-colors"
                   title="Go to Dashboard"
                 >
                   <Home className="h-5 w-5" />
                 </Button>
                 
-                <div className="flex items-center gap-3 min-w-0">
+                <div className="flex items-center gap-3 min-w-0 px-4 py-1.5 rounded-xl">
                   <div className="logo-glass flex items-center justify-center p-1.5 flex-shrink-0 ring-1 ring-black/5 dark:ring-white/10">
                     <img 
                       src="/atlas-logo.png" 
@@ -541,10 +603,10 @@ export default function Index() {
           </div>
 
           {/* Bottom Row: Search Bar + View Mode Toggle - Always Visible */}
-          <div className="border-t border-white/40 dark:border-white/10 px-4 sm:px-6 lg:px-8 py-3 bg-white/20 dark:bg-white/5 backdrop-blur-sm">
-            <div className="w-full max-w-6xl mx-auto flex items-center gap-4">
+          <div className="border-t border-white/40 dark:border-white/10 px-4 sm:px-6 lg:px-8 py-3 bg-white/20 dark:bg-white/5 backdrop-blur-sm min-w-0">
+            <div className="w-full max-w-6xl mx-auto flex items-center gap-2 sm:gap-4 min-w-0">
               {/* Search Bar */}
-              <div className="relative z-[9999] flex-1 min-w-0" ref={searchRef}>
+              <div className="relative z-[9999] flex-1 min-w-0 max-w-full" ref={searchRef}>
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                 <Input
                   type="text"
@@ -680,11 +742,15 @@ export default function Index() {
           </div>
         )}
         
-        {/* Mobile Navigation Overlay */}
+        {/* Mobile Navigation Overlay - below header, full-height safe area */}
         {isNavOpen && isMobileLayout && (
           <>
-            <div className="fixed inset-0 bg-black/50 z-40" onClick={() => setIsNavOpen(false)} />
-            <div className="absolute left-12 top-16 w-80 glass-surface border-glass rounded-lg shadow-lg z-50 max-h-96 overflow-y-auto">
+            <div className="fixed inset-0 bg-black/50 z-40" onClick={() => setIsNavOpen(false)} aria-hidden />
+            <div
+              className="fixed left-12 right-4 top-[7.5rem] z-50 w-[min(20rem,calc(100vw-3rem))] max-h-[calc(100vh-8.5rem)] overflow-y-auto rounded-lg border border-border bg-background/95 shadow-lg backdrop-blur-sm sm:left-14 sm:right-6 sm:top-28 sm:max-h-[calc(100vh-9rem)]"
+              role="dialog"
+              aria-label="Content navigation"
+            >
               <Navigation
                 sections={sections}
                 selectedSection={selectedSection}

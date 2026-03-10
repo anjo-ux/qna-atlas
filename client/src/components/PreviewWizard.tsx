@@ -83,8 +83,8 @@ export function PreviewWizard({ open, onClose, onStart }: PreviewWizardProps) {
       ),
     },
     {
-      title: 'Ready to Start?',
-      description: 'Try the preview test now',
+      title: 'Start Now?',
+      description: 'Try this sample test now.',
       icon: Lock,
       content: (
         <div className="space-y-4">
@@ -94,7 +94,7 @@ export function PreviewWizard({ open, onClose, onStart }: PreviewWizardProps) {
           </Card>
           <Card className="p-4 bg-accent/5 border-accent/20">
             <p className="text-sm text-foreground font-medium">Sign Up For Full Access</p>
-            <p className="text-xs text-muted-foreground mt-2">Start your 30-day free trial and access hundreds of questions now. Upgrade to extend your subscription at anytime.</p>
+            <p className="text-xs text-muted-foreground mt-2">Start your 7-day free trial and access thousands of questions now, and our unique oral boards review agent. Upgrade to extend your subscription at anytime.</p>
           </Card>
         </div>
       ),
@@ -106,7 +106,7 @@ export function PreviewWizard({ open, onClose, onStart }: PreviewWizardProps) {
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-md w-[calc(100vw-2rem)] max-h-[90vh] overflow-y-auto overflow-x-hidden">
         <DialogHeader>
           <div className="flex items-center gap-2">
             <Icon className="w-5 h-5 text-primary" />

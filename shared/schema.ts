@@ -32,7 +32,9 @@ export const users = pgTable("users", {
   lastName: varchar("last_name"),
   avatarIcon: varchar("avatar_icon").default('smile'),
   themePreference: varchar("theme_preference").default('light'), // 'light' or 'dark'
-  institutionalAffiliation: varchar("institutional_affiliation"),
+  institutionalAffiliation: varchar("institutional_affiliation"), // Profile only: user's registered/display affiliation (settings, signup)
+  institutionalAccessAffiliation: varchar("institutional_access_affiliation"), // Access only: set by redeeming code; grants subscription access
+  institutionalAccessExpiresAt: timestamp("institutional_access_expires_at"), // When set (e.g. Emory 365-day codes), access ends at this time; null = unlimited
   subscriptionStatus: varchar("subscription_status").default('trial'), // trial, active, expired
   subscriptionPlan: varchar("subscription_plan"), // 1-month, 3-month, 6-month
   trialEndsAt: timestamp("trial_ends_at"),
@@ -228,6 +230,8 @@ export const subscriptionPlans = pgTable("subscription_plans", {
   durationMonths: integer("duration_months").notNull(),
   priceUSD: integer("price_usd").notNull(), // in cents: 2500 = $25.00
   stripePriceId: varchar("stripe_price_id"),
+  stripeProductId: varchar("stripe_product_id"), // Stripe product id (prod_xxx) for Checkout
+  stripePaymentLinkUrl: varchar("stripe_payment_link_url"), // Payment Link URL (with trial); preferred when set
   createdAt: timestamp("created_at").defaultNow(),
 }, (table) => [
   index("idx_subscription_plans_name").on(table.name),
@@ -254,3 +258,16 @@ export const subscriptionTransactions = pgTable("subscription_transactions", {
 
 export type SubscriptionTransaction = typeof subscriptionTransactions.$inferSelect;
 export type InsertSubscriptionTransaction = typeof subscriptionTransactions.$inferInsert;
+
+// Institutional access codes (code stored as bcrypt hash; never store plaintext)
+export const institutionalCodes = pgTable("institutional_codes", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  codeHash: varchar("code_hash").notNull().unique(),
+  institutionName: varchar("institution_name").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_institutional_codes_code_hash").on(table.codeHash),
+]);
+
+export type InstitutionalCode = typeof institutionalCodes.$inferSelect;
+export type InsertInstitutionalCode = typeof institutionalCodes.$inferInsert;

@@ -38,7 +38,7 @@ export function useBookmarks() {
       return { previousBookmarks };
     },
     onSuccess: async () => {
-      toast.success('Question bookmarked!');
+      toast.success('Question bookmarked!.');
       // Refetch to ensure we have the real IDs from the server
       await queryClient.invalidateQueries({ queryKey: ['/api/bookmarks'] });
       await queryClient.refetchQueries({ queryKey: ['/api/bookmarks'] });
@@ -49,8 +49,8 @@ export function useBookmarks() {
       if (context?.previousBookmarks) {
         queryClient.setQueryData(['/api/bookmarks'], context.previousBookmarks);
       }
-      const message = error.message || 'Failed to bookmark question';
-      toast.error(message);
+      const message = error.message || 'Failed to bookmark question.';
+      toast.error(message.endsWith('.') || message.endsWith('!') || message.endsWith('?') ? message : message + '.');
     },
   });
 
@@ -81,7 +81,7 @@ export function useBookmarks() {
     },
     onSuccess: async () => {
       console.log('[Bookmark] onSuccess called - bookmark removed successfully');
-      toast.success('Bookmark removed!');
+      toast.success('Bookmark removed!.');
       // Refetch to ensure consistency
       await queryClient.invalidateQueries({ queryKey: ['/api/bookmarks'] });
       console.log('[Bookmark] Bookmarks invalidated');
@@ -94,8 +94,8 @@ export function useBookmarks() {
       if (context?.previousBookmarks) {
         queryClient.setQueryData(['/api/bookmarks'], context.previousBookmarks);
       }
-      const message = error.message || 'Failed to remove bookmark';
-      toast.error(message);
+      const message = error.message || 'Failed to remove bookmark.';
+      toast.error(message.endsWith('.') || message.endsWith('!') || message.endsWith('?') ? message : message + '.');
     },
   });
 

@@ -16,6 +16,7 @@ import Login from "./pages/Login";
 import { BookmarksPage } from "./pages/Bookmarks";
 import { SpacedRepetitionPage } from "./pages/SpacedRepetition";
 import OralBoardSimulator from "./pages/OralBoardSimulator";
+import SubscriptionPage from "./pages/SubscriptionPage";
 // Hidden by default: set VITE_ENABLE_ADMIN_GENERATED_QUESTIONS_UI=true to show /admin/generated-questions
 const ENABLE_ADMIN_GENERATED_QUESTIONS_UI =
   import.meta.env.VITE_ENABLE_ADMIN_GENERATED_QUESTIONS_UI === "true";
@@ -111,6 +112,7 @@ function Router() {
         <Route component={Landing} />
       ) : (
         <>
+          <Route path="/subscribe" component={SubscriptionPage} />
           <Route path="/" component={Index} />
           <Route path="/bookmarks">
             {() => <BookmarksPage onBack={() => window.history.back()} />}

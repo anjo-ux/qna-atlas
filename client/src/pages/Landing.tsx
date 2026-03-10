@@ -26,19 +26,30 @@ export default function Landing() {
         }}
       />
 
-      <header className="sticky top-0 z-50 glass-surface border-glass border-b flex-shrink-0">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <img src="/atlas-logo.png" alt="Plastic Surgery Atlas" className="w-8 h-8 object-contain" />
-            <h1 className="text-xl font-bold gradient-text">Atlas Review</h1>
-          </div>
-          <div className="flex items-center gap-2">
+      <header className="glass-nav w-full sticky top-0 z-50 rounded-b-2xl flex-shrink-0">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-3 pb-2">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3 min-w-0 px-4 py-1.5 rounded-xl">
+              <div className="logo-glass flex items-center justify-center p-1.5 flex-shrink-0 ring-1 ring-black/5 dark:ring-white/10">
+                <img src="/atlas-logo.png" alt="Atlas Logo" className="h-7 w-7 sm:h-8 sm:w-8 object-contain" />
+              </div>
+              <div className="hidden sm:flex flex-col min-w-0">
+                <span className="text-base sm:text-lg font-bold tracking-tight gradient-text leading-tight truncate">
+                  Atlas
+                </span>
+                <span className="text-xs font-medium text-muted-foreground tracking-widest uppercase truncate">
+                  Review
+                </span>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
             <Button onClick={handleSignUp} data-testid="button-signup-header" variant="outline" className="transition-glow">
               Sign Up
             </Button>
             <Button onClick={handleLogin} data-testid="button-login" className="glow-primary transition-glow">
               Sign In
             </Button>
+            </div>
           </div>
         </div>
       </header>

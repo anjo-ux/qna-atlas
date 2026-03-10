@@ -14,7 +14,7 @@ export function useAuth() {
     mutationFn: async () => {
       await fetch('/api/auth/logout', { method: 'POST' });
       queryClient.clear();
-      window.location.href = '/login';
+      window.location.href = '/';
     },
     onSuccess: () => {
       queryClient.clear();

@@ -41,7 +41,7 @@ export function ChatBubble() {
         setMessages([{
           id: '0',
           role: 'assistant',
-          content: 'Hello! How can I help you today?',
+          content: 'I can answer any plastic surgery questions you may have using only validated sources.',
           timestamp: new Date()
         }]);
       }
@@ -155,7 +155,7 @@ export function ChatBubble() {
 
       {isOpen ? (
         // Chat Window (Expanded or Normal)
-        <Card className={`flex flex-col bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm border-white/20 dark:border-slate-700/20 shadow-xl ${isExpanded ? 'chat-window-expanded md:w-96' : 'chat-window-open w-96 h-96'} ${isExpanded ? 'chat-window-expanded-mobile' : ''}`}
+        <Card className={`flex flex-col overflow-hidden rounded-lg bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm border-white/20 dark:border-slate-700/20 shadow-xl ${isExpanded ? 'chat-window-expanded md:w-96' : 'chat-window-open w-96 h-96'} ${isExpanded ? 'chat-window-expanded-mobile' : ''}`}
           style={!isExpanded ? undefined : (window.innerWidth < 768 ? undefined : { height: 'calc(100vh - 140px)' })}
         >
           {/* Header with Close and Expand Buttons */}

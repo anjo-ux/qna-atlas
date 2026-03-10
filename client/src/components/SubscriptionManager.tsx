@@ -8,25 +8,19 @@ import { toast } from 'sonner';
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-
-interface Plan {
-  id: string;
-  name: string;
-  durationMonths: number;
-  priceUSD: number;
-}
+import { SubscriptionPlans } from '@/components/SubscriptionPlans';
 
 interface SubscriptionDetails {
   plan?: string;
   status: string;
+  institutionalAffiliation?: string;
   endsAt?: string;
-  daysRemaining: number;
+  trialEndsAt?: string;
+  daysRemaining: number | null;
   transactionCount: number;
+  planPrice?: number; // price in cents
 }
 
 export function SubscriptionManager() {
@@ -36,50 +30,42 @@ export function SubscriptionManager() {
     queryKey: ['/api/subscription/details'],
   });
 
-  const { data: plans = [] } = useQuery<Plan[]>({
-    queryKey: ['/api/subscription/plans'],
-  });
-
-  const changeSubscriptionMutation = useMutation({
-    mutationFn: async (planId: string) => {
-      return await apiRequest('/api/subscription/change', {
-        method: 'POST',
-        body: JSON.stringify({ planId }),
-      });
-    },
-    onSuccess: () => {
-      toast.success('Subscription updated successfully!');
-      setIsChangingPlan(false);
-      queryClient.invalidateQueries({ queryKey: ['/api/subscription/details'] });
-    },
-    onError: (error: any) => {
-      toast.error(error.message || 'Failed to change subscription');
-    },
-  });
-
   const cancelSubscriptionMutation = useMutation({
     mutationFn: async () => {
       return await apiRequest('/api/subscription/cancel', { method: 'POST' });
     },
-    onSuccess: () => {
-      toast.success('Subscription canceled. Trial access restored.');
-      queryClient.invalidateQueries({ queryKey: ['/api/subscription/details'] });
+    onSuccess: async (data: { message?: string } | null) => {
+      toast.success(data?.message ?? 'Subscription canceled.');
+      await Promise.all([
+        queryClient.refetchQueries({ queryKey: ['/api/subscription'] }),
+        queryClient.refetchQueries({ queryKey: ['/api/subscription/details'] }),
+        queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] }),
+      ]);
     },
     onError: (error: any) => {
-      toast.error(error.message || 'Failed to cancel subscription');
+      const msg = error.message || 'Failed to cancel subscription.';
+      toast.error(msg.endsWith('.') || msg.endsWith('!') || msg.endsWith('?') ? msg : msg + '.');
     },
   });
 
-  const getPlanDetails = (plan: Plan) => {
-    const monthlyPrice = plan.priceUSD / 100 / plan.durationMonths;
-    return {
-      displayName: `${plan.durationMonths} Month${plan.durationMonths > 1 ? 's' : ''}`,
-      price: `$${(plan.priceUSD / 100).toFixed(2)}`,
-      monthlyPrice: `$${monthlyPrice.toFixed(2)}/mo`,
-    };
+  const planDisplayName = (name: string) => {
+    const labels: Record<string, string> = { monthly: 'Monthly', '6-month': '6-Month Plan', '1-year': '1-Year Plan' };
+    return labels[name] ?? name.charAt(0).toUpperCase() + name.slice(1);
   };
 
+  const institutionalDisplayName = (affiliation: string) => {
+    return affiliation?.trim() ?? '';
+  };
+
+  const isInstitutional = subscription?.status === 'institutional';
+  const isTrial = subscription?.status === 'trial';
+  const isActive = subscription?.status === 'active';
+  const isCanceled = subscription?.status === 'canceled';
   const isTrialOrExpired = !subscription?.plan || subscription?.status === 'trial' || subscription?.status === 'expired';
+  const showUnlimitedTime = subscription?.daysRemaining == null;
+
+  const formatDate = (iso?: string) => iso ? new Date(iso).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : '';
+  const formatDateMMDDYYYY = (iso?: string) => iso ? new Date(iso).toLocaleDateString(undefined, { month: '2-digit', day: '2-digit', year: 'numeric' }) : '';
 
   return (
     <Card className="p-6">
@@ -92,10 +78,29 @@ export function SubscriptionManager() {
         {/* Current Plan */}
         <div>
           <p className="text-xs text-muted-foreground font-medium">Current Plan</p>
-          <p className="font-semibold text-foreground mt-1">
-            {subscription?.plan ? `${subscription.plan.charAt(0).toUpperCase() + subscription.plan.slice(1)}` : 'Free Trial'}
-          </p>
+          {isInstitutional ? (
+            <div className="mt-1">
+              <p className="font-semibold text-foreground">Institutional Plan</p>
+              <p className="text-sm text-muted-foreground">
+                {institutionalDisplayName(subscription?.institutionalAffiliation ?? '')}
+              </p>
+            </div>
+          ) : (
+            <p className="font-semibold text-foreground mt-1">
+              {subscription?.plan ? planDisplayName(subscription.plan) : 'Free Trial'}
+            </p>
+          )}
         </div>
+
+        {/* Plan price (paid plans only) */}
+        {subscription?.planPrice != null && !isInstitutional && (
+          <div className="border-t border-border pt-4">
+            <p className="text-xs text-muted-foreground font-medium">Plan Price</p>
+            <p className="font-semibold text-foreground mt-1">
+              ${(subscription.planPrice / 100).toFixed(2)} / {subscription.plan === 'monthly' ? 'month' : subscription.plan === '6-month' ? '6 months' : 'year'}
+            </p>
+          </div>
+        )}
 
         {/* Status */}
         <div className="border-t border-border pt-4">
@@ -111,29 +116,49 @@ export function SubscriptionManager() {
             ) : (
               <>
                 <Check className="h-4 w-4" />
-                Active
+                {isCanceled ? 'Active until end date' : 'Active'}
               </>
             )}
           </p>
         </div>
 
-        {/* Time Remaining */}
-        {subscription?.daysRemaining !== undefined && !isTrialOrExpired && (
-          <div className="border-t border-border pt-4">
-            <p className="text-xs text-muted-foreground font-medium">Time Remaining</p>
-            <p className="font-semibold text-foreground mt-2">{subscription.daysRemaining} days</p>
+        {/* Time remaining and end date side by side */}
+        <div className="border-t border-border pt-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <p className="text-xs text-muted-foreground font-medium">Time Remaining</p>
+              <p className="font-semibold text-foreground mt-1">
+                {showUnlimitedTime
+                  ? 'Unlimited'
+                  : isTrial
+                    ? `${subscription?.daysRemaining ?? 0} Trial Days Remaining`
+                    : isActive
+                      ? `${subscription?.daysRemaining ?? 0} Subscription Days Remaining`
+                      : isInstitutional
+                        ? `${subscription?.daysRemaining ?? 0} Days Remaining`
+                        : subscription?.status === 'expired'
+                          ? 'Expired'
+                          : `${subscription?.daysRemaining ?? 0} days`}
+              </p>
+            </div>
+            {(isTrial && subscription?.trialEndsAt) || ((isActive || isCanceled || isInstitutional) && subscription?.endsAt) ? (
+              <div>
+                <p className="text-xs text-muted-foreground font-medium">
+                  {isTrial ? 'Trial Ends' : isInstitutional ? 'Access Ends' : isCanceled ? 'Subscription Ends' : 'Next Billing Date'}
+                </p>
+                <p className="font-semibold text-foreground mt-1">
+                  {isTrial && subscription?.trialEndsAt
+                    ? formatDate(subscription.trialEndsAt)
+                    : isCanceled && subscription?.endsAt
+                      ? `Subscription Ends - ${formatDateMMDDYYYY(subscription.endsAt)}`
+                      : subscription?.endsAt
+                        ? formatDateMMDDYYYY(subscription.endsAt)
+                        : ''}
+                </p>
+              </div>
+            ) : null}
           </div>
-        )}
-
-        {/* Renewal Date */}
-        {subscription?.endsAt && !isTrialOrExpired && (
-          <div className="border-t border-border pt-4">
-            <p className="text-xs text-muted-foreground font-medium">Renews</p>
-            <p className="font-semibold text-foreground mt-2">
-              {new Date(subscription.endsAt).toLocaleDateString()}
-            </p>
-          </div>
-        )}
+        </div>
 
         {/* Action Buttons */}
         <div className="border-t border-border pt-4 space-y-2">
@@ -147,60 +172,27 @@ export function SubscriptionManager() {
                 {isTrialOrExpired ? 'Upgrade Plan' : 'Change Plan'}
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-2xl">
-              <DialogHeader>
-                <DialogTitle>Choose a Plan</DialogTitle>
-                <DialogDescription>
-                  {isTrialOrExpired
-                    ? 'Upgrade to premium access'
-                    : 'Switch to a different subscription plan'}
-                </DialogDescription>
-              </DialogHeader>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {plans.map((plan) => {
-                  const details = getPlanDetails(plan);
-                  const isCurrentPlan = subscription?.plan === plan.name;
-                  return (
-                    <div
-                      key={plan.id}
-                      className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
-                        isCurrentPlan
-                          ? 'border-accent bg-accent/10'
-                          : 'border-border hover:border-accent/50'
-                      }`}
-                      onClick={() => !isCurrentPlan && changeSubscriptionMutation.mutate(plan.id)}
-                    >
-                      <h4 className="font-semibold mb-2">{details.displayName}</h4>
-                      <p className="text-lg font-bold mb-1">{details.price}</p>
-                      <p className="text-xs text-muted-foreground mb-3">{details.monthlyPrice}</p>
-                      <Button
-                        size="sm"
-                        className="w-full"
-                        disabled={isCurrentPlan || changeSubscriptionMutation.isPending}
-                        variant={isCurrentPlan ? 'secondary' : 'default'}
-                      >
-                        {isCurrentPlan ? 'Current Plan' : 'Select'}
-                      </Button>
-                    </div>
-                  );
-                })}
-              </div>
+            <DialogContent hideCloseButton className="max-w-lg w-[calc(100vw-2rem)] max-h-[90vh] p-0 gap-0 border-0 bg-transparent shadow-none overflow-y-auto overflow-x-hidden [&>button]:!hidden">
+              <SubscriptionPlans asDialog={false} />
             </DialogContent>
           </Dialog>
 
-          {!isTrialOrExpired && (
+          {!isTrialOrExpired && !isCanceled && (
             <Button
               variant="ghost"
               className="w-full text-destructive hover:text-destructive"
               onClick={() => {
-                if (confirm('Are you sure you want to cancel your subscription?')) {
+                const message = isInstitutional
+                  ? 'Remove institutional access? Your access will end immediately. You can re-enter a code anytime to reactivate.'
+                  : 'Are you sure you want to cancel your subscription? You will keep access until the end of your billing period.';
+                if (confirm(message)) {
                   cancelSubscriptionMutation.mutate();
                 }
               }}
               disabled={cancelSubscriptionMutation.isPending}
               data-testid="button-cancel-subscription"
             >
-              Cancel Subscription
+              {isInstitutional ? 'Remove Institutional Access' : 'Cancel Subscription'}
             </Button>
           )}
         </div>

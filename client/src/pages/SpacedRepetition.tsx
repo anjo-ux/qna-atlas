@@ -139,13 +139,13 @@ export function SpacedRepetitionPage({ onBack }: SpacedRepetitionProps) {
         setFlipped(false);
         setSelectedAnswer(null);
       } else {
-        toast.success('Review complete!');
+        toast.success('Review complete!.');
         setCurrentIndex(0);
         setFlipped(false);
         setSelectedAnswer(null);
       }
     } catch (error) {
-      toast.error('Failed to save review');
+      toast.error('Failed to save review.');
       console.error(error);
     }
   };

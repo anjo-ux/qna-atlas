@@ -27,7 +27,7 @@ import { getUniversityOptions } from '@/data/universities';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { queryClient } from '@/lib/queryClient';
-import { Smile, Sparkles, Zap, Heart, Rocket, Lightbulb, Flame, Crown, Coffee, Moon, Sun, Star } from 'lucide-react';
+import { Smile, Sparkles, Zap, Heart, Rocket, Lightbulb, Flame, Crown, Coffee, Moon, Sun, Star, LogOut } from 'lucide-react';
 
 interface SettingsProps {
   onBack: () => void;
@@ -35,7 +35,7 @@ interface SettingsProps {
 }
 
 export function Settings({ onBack, subscription }: SettingsProps) {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const { getAllStats } = useQuestionStats();
   const overallStats = getAllStats();
   const [isSaving, setIsSaving] = useState(false);
@@ -45,7 +45,7 @@ export function Settings({ onBack, subscription }: SettingsProps) {
   const [percentileLoading, setPercentileLoading] = useState(false);
 
   // Determine if Emory affiliation grants free access
-  const hasEmoryAccess = user?.institutionalAffiliation?.toLowerCase().includes('emory');
+  const hasEmoryAccess = user?.institutionalAccessAffiliation?.toLowerCase().includes('emory');
   const displaySubscription = subscription || { status: 'none', daysRemaining: 0 };
 
   const [formData, setFormData] = useState({
@@ -137,7 +137,8 @@ export function Settings({ onBack, subscription }: SettingsProps) {
       toast.success('Profile updated successfully.');
       await queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Failed to save profile.');
+      const msg = error instanceof Error ? error.message : 'Failed to save profile.';
+      toast.error(msg.endsWith('.') || msg.endsWith('!') || msg.endsWith('?') ? msg : msg + '.');
       console.error(error);
     } finally {
       setIsSaving(false);
@@ -171,27 +172,27 @@ export function Settings({ onBack, subscription }: SettingsProps) {
     formData.avatarIcon !== (user?.avatarIcon || 'smile');
 
   return (
-    <div className="flex-1 flex flex-col overflow-hidden">
-      <div className="p-6 border-b border-border">
-        <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={onBack}>
+    <div className="flex-1 flex flex-col overflow-hidden min-w-0">
+      <div className="p-4 sm:p-6 border-b border-border flex-shrink-0">
+        <div className="flex items-center gap-3 min-w-0">
+          <Button variant="ghost" size="icon" onClick={onBack} className="flex-shrink-0">
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <h1 className="text-3xl font-bold text-foreground">Settings</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground truncate">Settings</h1>
         </div>
       </div>
 
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex overflow-hidden min-w-0">
         {/* Main Content Area - Scrollable */}
-        <div className="flex-1 overflow-y-auto">
-          <div className="p-6">
-            <div className="max-w-2xl mx-auto space-y-6">
+        <div className="flex-1 overflow-y-auto overflow-x-hidden min-w-0">
+          <div className="p-4 sm:p-6">
+            <div className="max-w-2xl mx-auto space-y-6 min-w-0">
               {/* Profile Section */}
               <Card className="p-6">
                 <h2 className="text-lg font-semibold text-foreground mb-4">Profile Information</h2>
                 <div className="mb-6">
                   <p className="text-sm text-muted-foreground mb-3">Avatar Icon</p>
-                  <div className="grid grid-cols-6 gap-2">
+                  <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
                     {AVATAR_ICONS.map((avatar) => {
                       const IconComponent = avatar.icon;
                       const isSelected = formData.avatarIcon === avatar.id;
@@ -224,7 +225,7 @@ export function Settings({ onBack, subscription }: SettingsProps) {
                     />
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <Label className="text-sm font-medium text-foreground">First Name</Label>
                       <Input 
@@ -337,9 +338,9 @@ export function Settings({ onBack, subscription }: SettingsProps) {
               </Card>
 
               {/* Statistics Section */}
-              <Card className="p-6 bg-gradient-to-br from-chart-1/10 to-chart-2/10 border-chart-1/20">
+              <Card className="p-6 bg-gradient-to-br from-chart-1/10 to-chart-2/10 border-chart-1/20 min-w-0 overflow-hidden">
                 <h2 className="text-lg font-semibold text-foreground mb-4">Learning Statistics</h2>
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 min-w-0">
                   <div className="flex flex-col items-center p-4 bg-white dark:bg-slate-950 rounded-lg border border-border/50">
                     <div className="flex items-center justify-center h-10 w-10 rounded-full bg-chart-1/20 mb-2">
                       <BookOpen className="h-5 w-5 text-chart-1" />
@@ -425,6 +426,17 @@ export function Settings({ onBack, subscription }: SettingsProps) {
 
               {/* Mobile Subscription Section */}
               <MobileSubscriptionWidget hasEmoryAccess={hasEmoryAccess} />
+
+              {/* Log Out */}
+              <Button
+                variant="outline"
+                className="w-full gap-2 text-muted-foreground hover:text-destructive hover:border-destructive/50"
+                onClick={() => logout()}
+                data-testid="button-logout-settings"
+              >
+                <LogOut className="h-4 w-4" />
+                Log Out
+              </Button>
             </div>
           </div>
         </div>

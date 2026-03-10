@@ -5,6 +5,24 @@ import { setupVite, serveStatic, log } from "./vite";
 const app = express();
 // Limit body size to mitigate DoS via large payloads
 const BODY_LIMIT = '100kb';
+
+// Stripe webhook needs raw body for signature verification (must be before express.json)
+const { handleStripeWebhook } = await import("./stripe");
+app.post(
+  "/api/webhooks/stripe",
+  express.raw({ type: "application/json", limit: "100kb" }),
+  (req: express.Request, res: express.Response) => {
+    const rawReq = req as express.Request & { body: Buffer };
+    handleStripeWebhook(
+      { body: rawReq.body, headers: req.headers },
+      res
+    ).catch((err) => {
+      console.error("Stripe webhook error:", err);
+      res.status(500).send("Webhook handler error");
+    });
+  }
+);
+
 app.use(express.json({ limit: BODY_LIMIT }));
 app.use(express.urlencoded({ extended: false, limit: BODY_LIMIT }));
 
@@ -13,7 +31,7 @@ const REQUEST_TIMEOUT_MS = 60000;
 app.use((req, res, next) => {
   const t = setTimeout(() => {
     if (!res.headersSent) {
-      res.status(504).json({ message: "Request timeout" });
+      res.status(504).json({ message: "Request timeout." });
     }
   }, REQUEST_TIMEOUT_MS);
   res.on("finish", () => clearTimeout(t));
@@ -55,7 +73,7 @@ app.use((req, res, next) => {
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
-    const message = err.message || "Internal Server Error";
+    const message = err.message || "Internal Server Error.";
 
     res.status(status).json({ message });
     throw err;
@@ -67,30 +85,50 @@ app.use((req, res, next) => {
     serveStatic(app);
   }
 
-  const PORT = 5000;
-  server.listen(PORT, "0.0.0.0", () => {
-    log(`Server running on port ${PORT}`);
-    const sgKey = process.env.SENDGRID_API_KEY;
-    const sgFrom = process.env.SENDGRID_FROM_EMAIL;
-    log(`SendGrid: SENDGRID_API_KEY=${sgKey ? "set" : "NOT SET"}, SENDGRID_FROM_EMAIL=${sgFrom ? "set" : "not set"}`);
-    if (!sgKey) {
-      log("Forgot-password emails will not be sent. Add SENDGRID_API_KEY to your environment (e.g. Replit Secrets) and restart the server.");
-    }
+  const desiredPort = Number(process.env.PORT) || 5000;
+  const maxAttempts = 10;
 
-    // Scheduled AI question generation (per docs/questions_db_migration_plan.md requirement 3)
-    const genEnabled = process.env.QUESTION_GENERATION_ENABLED === "true";
-    const genIntervalMs = Number(process.env.QUESTION_GENERATION_INTERVAL_MS) || 86400000; // default 24h
-    if (genEnabled && genIntervalMs > 0) {
-      import("./jobs/questionGenerationJob").then(({ runQuestionGenerationJob }) => {
-        const run = () => {
-          runQuestionGenerationJob()
-            .then((r) => log(`[questionGenerationJob] created=${r.created} total=${r.total} skipped=${r.skipped}`))
-            .catch((e) => log(`[questionGenerationJob] error: ${e}`));
-        };
-        run(); // run once after startup
-        setInterval(run, genIntervalMs);
-        log(`[questionGenerationJob] scheduled every ${genIntervalMs}ms`);
-      });
-    }
-  });
+  function tryListen(port: number, attempt: number) {
+    server.listen(port, "0.0.0.0", () => {
+      log(`Server running on port ${port}`);
+      const sgKey = process.env.SENDGRID_API_KEY;
+      const sgFrom = process.env.SENDGRID_FROM_EMAIL;
+      log(`SendGrid: SENDGRID_API_KEY=${sgKey ? "set" : "NOT SET"}, SENDGRID_FROM_EMAIL=${sgFrom ? "set" : "not set"}`);
+      if (!sgKey) {
+        log("Forgot-password emails will not be sent. Add SENDGRID_API_KEY to your environment (e.g. Replit Secrets) and restart the server.");
+      }
+      const stripeKey = process.env.STRIPE_SECRET_KEY;
+      const stripeWebhook = process.env.STRIPE_WEBHOOK_SECRET;
+      log(`Stripe: STRIPE_SECRET_KEY=${stripeKey ? "set" : "NOT SET"}, STRIPE_WEBHOOK_SECRET=${stripeWebhook ? "set" : "NOT SET"}`);
+      if (!stripeKey) {
+        log("Subscription checkout will not work. Add STRIPE_SECRET_KEY and configure Stripe webhook (STRIPE_WEBHOOK_SECRET) for production.");
+      }
+
+      // Scheduled AI question generation (per docs/questions_db_migration_plan.md requirement 3)
+      const genEnabled = process.env.QUESTION_GENERATION_ENABLED === "true";
+      const genIntervalMs = Number(process.env.QUESTION_GENERATION_INTERVAL_MS) || 86400000; // default 24h
+      if (genEnabled && genIntervalMs > 0) {
+        import("./jobs/questionGenerationJob").then(({ runQuestionGenerationJob }) => {
+          const run = () => {
+            runQuestionGenerationJob()
+              .then((r) => log(`[questionGenerationJob] created=${r.created} total=${r.total} skipped=${r.skipped}`))
+              .catch((e) => log(`[questionGenerationJob] error: ${e}`));
+          };
+          run(); // run once after startup
+          setInterval(run, genIntervalMs);
+          log(`[questionGenerationJob] scheduled every ${genIntervalMs}ms`);
+        });
+      }
+    });
+    server.once("error", (err: NodeJS.ErrnoException) => {
+      if (err.code === "EADDRINUSE" && attempt < maxAttempts) {
+        log(`Port ${port} in use, trying ${port + 1}...`);
+        tryListen(port + 1, attempt + 1);
+      } else {
+        throw err;
+      }
+    });
+  }
+
+  tryListen(desiredPort, 0);
 })();
