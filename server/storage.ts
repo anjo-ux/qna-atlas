@@ -40,6 +40,7 @@ import { eq, and, asc, desc, lte, sql } from "drizzle-orm";
 const INSTITUTIONAL_CODE_SALT_ROUNDS = 10;
 let institutionalMigrationDone = false;
 let institutionalExpiresMigrationDone = false;
+let subscriptionResetDone = false;
 
 export type SectionDto = {
   id: string;
@@ -134,6 +135,8 @@ export interface IStorage {
   // Institutional codes (hashed in DB; validate returns institution display name)
   ensureInstitutionalCodesSeed(): Promise<void>;
   validateInstitutionalCode(plainCode: string): Promise<string | null>;
+  /** When RUN_SUBSCRIPTION_RESET=true, reset all users to no subscription once. Call at startup. */
+  runSubscriptionResetIfRequested(): Promise<void>;
 
   // Theme preference operations
   getThemePreference(userId: string): Promise<string>;
@@ -797,9 +800,9 @@ export class DatabaseStorage implements IStorage {
 
   /** Payment Link URLs (with free trial) – used when set; otherwise fallback to product/price. */
   private static readonly PAYMENT_LINK_URLS: Record<string, string> = {
-    'monthly': 'https://buy.stripe.com/test_8x25kC0LT5G3gwU2Ue6J200',
-    '6-month': 'https://buy.stripe.com/test_3cI14mbqx6K76WkcuO6J201',
-    '1-year': 'https://buy.stripe.com/test_dRm7sK9ip3xV3K8eCW6J202',
+    'monthly': 'https://buy.stripe.com/28E14m4X6dd36H8f2pcV202',
+    '6-month': 'https://buy.stripe.com/7sYeVc0GQ7SJc1saM9cV201',
+    '1-year': 'https://buy.stripe.com/aFaaEW2OY3Ct6H88E1cV200',
   };
 
   /** Ensures the three subscription plans (monthly $50, 6-month $270, 1-year $450) exist and are up to date. */
@@ -882,7 +885,7 @@ export class DatabaseStorage implements IStorage {
     return active[0];
   }
 
-  /** Cancel subscription: turn off Stripe billing if present, keep access until subscriptionEndsAt. */
+  /** Cancel subscription: turn off Stripe billing if present, keep access until subscriptionEndsAt. User content (responses, notes, bookmarks) is never deleted. */
   async cancelUserSubscription(userId: string): Promise<void> {
     const [user] = await db.select().from(users).where(eq(users.id, userId));
     if (!user) return;
@@ -925,7 +928,8 @@ export class DatabaseStorage implements IStorage {
     `);
   }
 
-  // Ensure institutional_access_affiliation column exists and backfill from profile field (one-time per process)
+  // Ensure institutional_access_affiliation column exists and backfill from profile field (one-time per process).
+  // No default Emory institutional access; users get access only by redeeming a code.
   private async ensureInstitutionalAccessAffiliationMigration(): Promise<void> {
     if (institutionalMigrationDone) return;
     institutionalMigrationDone = true;
@@ -937,35 +941,34 @@ export class DatabaseStorage implements IStorage {
       SET "institutional_access_affiliation" = COALESCE(NULLIF(TRIM("institutional_access_affiliation"), ''), TRIM("institutional_affiliation"))
       WHERE "institutional_affiliation" IS NOT NULL AND TRIM("institutional_affiliation") != ''
     `);
-    await db
-      .update(users)
-      .set({
-        institutionalAccessAffiliation: "Emory University",
-        updatedAt: new Date(),
-      })
-      .where(
-        sql`${users.institutionalAccessAffiliation} IS NOT NULL AND TRIM(${users.institutionalAccessAffiliation}) != ''`
-      );
   }
 
-  // Ensure institutional_access_expires_at column exists; backfill Emory users with 365-day expiry from today
+  // Ensure institutional_access_expires_at column exists (no backfill; expiry set when user redeems a code).
   private async ensureInstitutionalAccessExpiresAtMigration(): Promise<void> {
     if (institutionalExpiresMigrationDone) return;
     institutionalExpiresMigrationDone = true;
     await pool.query(`
       ALTER TABLE "users" ADD COLUMN IF NOT EXISTS "institutional_access_expires_at" timestamp
     `);
-    const expiresAt = new Date();
-    expiresAt.setDate(expiresAt.getDate() + 365);
-    await db
-      .update(users)
-      .set({
-        institutionalAccessExpiresAt: expiresAt,
-        updatedAt: new Date(),
-      })
-      .where(
-        sql`TRIM(${users.institutionalAccessAffiliation}) = 'Emory University' AND ${users.institutionalAccessExpiresAt} IS NULL`
-      );
+  }
+
+  /** When RUN_SUBSCRIPTION_RESET=true, reset all users to no subscription once this process. Progress/data (responses, notes, bookmarks) is preserved. Unset env after running. */
+  private async ensureSubscriptionResetMigration(): Promise<void> {
+    if (subscriptionResetDone || process.env.RUN_SUBSCRIPTION_RESET !== 'true') return;
+    subscriptionResetDone = true;
+    await pool.query(`
+      UPDATE "users"
+      SET
+        "subscription_status" = 'expired',
+        "trial_ends_at" = NULL,
+        "subscription_ends_at" = NULL,
+        "subscription_plan" = NULL,
+        "institutional_access_affiliation" = NULL,
+        "institutional_access_expires_at" = NULL,
+        "stripe_customer_id" = NULL,
+        "stripe_subscription_id" = NULL,
+        "updated_at" = CURRENT_TIMESTAMP
+    `);
   }
 
   // Institutional codes (hashed in DB)
@@ -973,6 +976,7 @@ export class DatabaseStorage implements IStorage {
     await this.ensureInstitutionalCodesTable();
     await this.ensureInstitutionalAccessAffiliationMigration();
     await this.ensureInstitutionalAccessExpiresAtMigration();
+    await this.ensureSubscriptionResetMigration();
 
     const existing = await db.select().from(institutionalCodes).limit(1);
     if (existing.length > 0) return;
@@ -982,6 +986,10 @@ export class DatabaseStorage implements IStorage {
       codeHash,
       institutionName: "Emory University",
     });
+  }
+
+  async runSubscriptionResetIfRequested(): Promise<void> {
+    await this.ensureSubscriptionResetMigration();
   }
 
   async validateInstitutionalCode(plainCode: string): Promise<string | null> {

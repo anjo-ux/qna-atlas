@@ -270,10 +270,8 @@ export async function setupAuth(app: Express) {
         return res.status(409).json({ message: 'Email already registered, please login instead.' });
       }
 
-      // Create user
+      // Create user (no trial; they must go to subscription page to choose a plan or use institutional code)
       const passwordHash = await hashPassword(password);
-      const trialEndsAt = new Date();
-      trialEndsAt.setDate(trialEndsAt.getDate() + 30);
 
       const newUser = await storage.upsertUser({
         email,
@@ -281,8 +279,8 @@ export async function setupAuth(app: Express) {
         firstName,
         lastName,
         institutionalAffiliation: institutionalAffiliation || '',
-        subscriptionStatus: 'trial',
-        trialEndsAt,
+        subscriptionStatus: 'expired',
+        trialEndsAt: null,
       });
 
       // Create session (store only sanitized user; never persist passwordHash in session)

@@ -224,7 +224,8 @@ export function SpacedRepetitionPage({ onBack }: SpacedRepetitionProps) {
         )}
 
         {!isLoading && filtered.length > 0 && current && parsed && (
-          <div className="max-w-2xl mx-auto w-full flex flex-col flex-1">
+          <div className="max-w-2xl mx-auto w-full pb-4">
+            {/* Progress above card */}
             <div className="flex justify-between items-center text-sm text-muted-foreground mb-4">
               <span>
                 {currentIndex + 1} of {filtered.length}
@@ -234,166 +235,148 @@ export function SpacedRepetitionPage({ onBack }: SpacedRepetitionProps) {
               </span>
             </div>
 
-            <div className="flex-1 min-h-0 flip-card-root">
-              <div className={cn('flip-card-inner', flipped && 'flipped')}>
-                {/* Front: question + choices */}
-                <div
-                  className={cn(
-                    'flip-card-face',
-                    flipped && 'pointer-events-none'
+            {/* Single expanding card: question side or answer side (no fixed height; page scrolls) */}
+            {!flipped ? (
+              <Card variant="glass" className="p-6">
+                <div className="text-lg font-semibold text-foreground mb-4">
+                  <ReactMarkdown
+                    skipHtml
+                    components={{
+                      p: ({ node, ...props }) => <p className="whitespace-pre-wrap mb-2" {...props} />,
+                    }}
+                  >
+                    {parsed.text}
+                  </ReactMarkdown>
+                </div>
+
+                {hasChoices ? (
+                  <div className="space-y-2 mt-4">
+                    {parsed.choices.map((choice) => (
+                      <button
+                        key={choice.letter}
+                        type="button"
+                        onClick={() => setSelectedAnswer(choice.letter)}
+                        className={cn(
+                          'w-full flex items-start gap-3 p-3 rounded-lg border text-left text-sm transition-colors',
+                          selectedAnswer === choice.letter
+                            ? 'border-primary bg-primary/10'
+                            : 'border-border hover:bg-accent/5'
+                        )}
+                      >
+                        <span className="font-semibold shrink-0">{choice.letter}.</span>
+                        <ReactMarkdown
+                          skipHtml
+                          components={{
+                            p: ({ node, children, ...props }) => <span {...props}>{children}</span>,
+                          }}
+                        >
+                          {choice.text}
+                        </ReactMarkdown>
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground mt-2">No answer choices — reveal to see the answer.</p>
+                )}
+
+                <div className="mt-6 flex gap-3">
+                  {hasChoices ? (
+                    <Button
+                      variant="outline"
+                      onClick={handleReveal}
+                      disabled={!canReveal}
+                      data-testid="button-reveal-answer"
+                      className="flex-1"
+                    >
+                      Reveal answer
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="default"
+                      onClick={handleReveal}
+                      data-testid="button-reveal-answer"
+                      className="flex-1"
+                    >
+                      Reveal answer
+                    </Button>
                   )}
-                >
-                  <Card variant="glass" className="p-6 h-full flex flex-col">
-                    <div className="text-lg font-semibold text-foreground mb-4 flex-1 overflow-auto">
+                </div>
+              </Card>
+            ) : (
+              <Card variant="glass" className="p-6">
+                <div className="space-y-4">
+                  {hasChoices && isCorrect !== null && (
+                    <div
+                      className={cn(
+                        'p-3 rounded-lg border-l-4 font-semibold',
+                        isCorrect
+                          ? 'bg-green-500/10 border-green-500 text-green-700 dark:text-green-300'
+                          : 'bg-red-500/10 border-red-500 text-red-700 dark:text-red-300'
+                      )}
+                    >
+                      {isCorrect ? (
+                        <span className="flex items-center gap-2">
+                          <CheckCircle2 className="h-4 w-4" /> Correct
+                        </span>
+                      ) : (
+                        <span className="flex items-center gap-2">
+                          <XCircle className="h-4 w-4" /> Incorrect
+                          {correctAnswer && (
+                            <span className="font-normal"> — correct: {correctAnswer}</span>
+                          )}
+                        </span>
+                      )}
+                    </div>
+                  )}
+
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground mb-2">Answer</p>
+                    <div className="text-foreground text-sm leading-relaxed">
                       <ReactMarkdown
                         skipHtml
                         components={{
-                          p: ({ node, ...props }) => <p className="whitespace-pre-wrap mb-2" {...props} />,
+                          p: ({ node, ...props }) => <p className="whitespace-pre-wrap my-1" {...props} />,
                         }}
                       >
-                        {parsed.text}
+                        {current.question?.answer ?? ''}
                       </ReactMarkdown>
                     </div>
+                  </div>
 
-                    {hasChoices ? (
-                      <div className="space-y-2 mt-4">
-                        {parsed.choices.map((choice) => (
-                          <button
-                            key={choice.letter}
-                            type="button"
-                            onClick={() => setSelectedAnswer(choice.letter)}
-                            className={cn(
-                              'w-full flex items-start gap-3 p-3 rounded-lg border text-left text-sm transition-colors',
-                              selectedAnswer === choice.letter
-                                ? 'border-primary bg-primary/10'
-                                : 'border-border hover:bg-accent/5'
-                            )}
-                          >
-                            <span className="font-semibold shrink-0">{choice.letter}.</span>
-                            <ReactMarkdown
-                              skipHtml
-                              components={{
-                                p: ({ node, children, ...props }) => <span {...props}>{children}</span>,
-                              }}
-                            >
-                              {choice.text}
-                            </ReactMarkdown>
-                          </button>
-                        ))}
-                      </div>
-                    ) : (
-                      <p className="text-sm text-muted-foreground mt-2">No answer choices — reveal to see the answer.</p>
-                    )}
-
-                    <div className="mt-6 flex gap-3">
-                      {hasChoices && (
+                  <div className="pt-4 border-t border-border">
+                    <p className="text-sm font-medium text-foreground mb-3">How confident were you?</p>
+                    <div className="grid grid-cols-3 gap-2">
+                      {[0, 1, 2, 3, 4, 5].map((q) => (
                         <Button
-                          variant="outline"
-                          onClick={handleReveal}
-                          disabled={!canReveal}
-                          data-testid="button-reveal-answer"
-                          className="flex-1"
+                          key={q}
+                          variant={q >= 3 ? (q === 5 ? 'default' : 'outline') : q === 0 ? 'destructive' : 'outline'}
+                          size="sm"
+                          onClick={() => handleConfidence(q)}
+                          disabled={isPending}
+                          className="h-9"
+                          data-testid={`button-confidence-${q}`}
                         >
-                          Reveal answer
+                          {q}
                         </Button>
-                      )}
-                      {!hasChoices && (
-                        <Button
-                          variant="default"
-                          onClick={handleReveal}
-                          data-testid="button-reveal-answer"
-                          className="flex-1"
-                        >
-                          Reveal answer
-                        </Button>
-                      )}
+                      ))}
                     </div>
-                  </Card>
+                    <p className="text-xs text-muted-foreground mt-2">
+                      0 = complete blackout, 3 = vague recall, 5 = perfect
+                    </p>
+                  </div>
                 </div>
 
-                {/* Back: result + answer + confidence */}
-                <div
-                  className={cn(
-                    'flip-card-face flip-card-back',
-                    !flipped && 'pointer-events-none'
-                  )}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={resetCard}
+                  className="mt-4 self-start"
+                  data-testid="button-flip-back"
                 >
-                  <Card variant="glass" className="p-6 h-full flex flex-col">
-                    <div className="flex-1 overflow-auto space-y-4">
-                      {hasChoices && isCorrect !== null && (
-                        <div
-                          className={cn(
-                            'p-3 rounded-lg border-l-4 font-semibold',
-                            isCorrect
-                              ? 'bg-green-500/10 border-green-500 text-green-700 dark:text-green-300'
-                              : 'bg-red-500/10 border-red-500 text-red-700 dark:text-red-300'
-                          )}
-                        >
-                          {isCorrect ? (
-                            <span className="flex items-center gap-2">
-                              <CheckCircle2 className="h-4 w-4" /> Correct
-                            </span>
-                          ) : (
-                            <span className="flex items-center gap-2">
-                              <XCircle className="h-4 w-4" /> Incorrect
-                              {correctAnswer && (
-                                <span className="font-normal"> — correct: {correctAnswer}</span>
-                              )}
-                            </span>
-                          )}
-                        </div>
-                      )}
-
-                      <div>
-                        <p className="text-sm font-medium text-muted-foreground mb-2">Answer</p>
-                        <div className="text-foreground text-sm leading-relaxed">
-                          <ReactMarkdown
-                            skipHtml
-                            components={{
-                              p: ({ node, ...props }) => <p className="whitespace-pre-wrap my-1" {...props} />,
-                            }}
-                          >
-                            {current.question?.answer ?? ''}
-                          </ReactMarkdown>
-                        </div>
-                      </div>
-
-                      <div className="pt-4 border-t border-border">
-                        <p className="text-sm font-medium text-foreground mb-3">How confident were you?</p>
-                        <div className="grid grid-cols-3 gap-2">
-                          {[0, 1, 2, 3, 4, 5].map((q) => (
-                            <Button
-                              key={q}
-                              variant={q >= 3 ? (q === 5 ? 'default' : 'outline') : q === 0 ? 'destructive' : 'outline'}
-                              size="sm"
-                              onClick={() => handleConfidence(q)}
-                              disabled={isPending}
-                              className="h-9"
-                              data-testid={`button-confidence-${q}`}
-                            >
-                              {q}
-                            </Button>
-                          ))}
-                        </div>
-                        <p className="text-xs text-muted-foreground mt-2">
-                          0 = complete blackout, 3 = vague recall, 5 = perfect
-                        </p>
-                      </div>
-                    </div>
-
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={resetCard}
-                      className="mt-4 self-start"
-                      data-testid="button-flip-back"
-                    >
-                      <RotateCcw className="h-4 w-4 mr-1" /> Flip back
-                    </Button>
-                  </Card>
-                </div>
-              </div>
-            </div>
+                  <RotateCcw className="h-4 w-4 mr-1" /> Flip back
+                </Button>
+              </Card>
+            )}
 
             <div className="flex justify-between mt-4">
               <Button

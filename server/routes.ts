@@ -29,6 +29,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Set up authentication middleware
   await setupAuth(app);
 
+  // One-time reset all users to no subscription when RUN_SUBSCRIPTION_RESET=true (unset after running)
+  await storage.runSubscriptionResetIfRequested();
+
   // Hidden by default: set ENABLE_ADMIN_GENERATED_QUESTIONS_UI=true to expose. Admin: list generated draft questions (requires admin code; no auth)
   if (process.env.ENABLE_ADMIN_GENERATED_QUESTIONS_UI === "true") {
     app.get("/api/admin/generated-questions", async (req: any, res) => {
@@ -433,6 +436,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Lock when expired or when on trial with no days left (e.g. new account with no plan). Canceled = access until end.
+      // Expiry/cancel only update subscription status; user data (progress, notes, bookmarks) is never deleted.
       const isLocked =
         status === 'expired' ||
         (status === 'trial' && daysRemaining === 0) ||
@@ -1109,8 +1113,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/spaced-repetition/due', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.session?.userId;
-      const dueQuestions = await storage.getUserDueQuestions(userId);
-      res.json(dueQuestions);
+      const [dueQuestions, reviewedQuestionIds, incorrectQuestionIds] = await Promise.all([
+        storage.getUserDueQuestions(userId),
+        storage.getUserSpacedRepetitionQuestionIds(userId),
+        storage.getUserIncorrectQuestionIds(userId),
+      ]);
+      res.json({
+        due: dueQuestions,
+        reviewedQuestionIds,
+        incorrectQuestionIds,
+      });
     } catch (error) {
       console.error("Error fetching due questions:", error);
       res.status(500).json({ message: "Failed to fetch due questions." });
@@ -1129,20 +1141,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get existing SR data or create new
       let sr = await storage.getSpacedRepetition(userId, questionId);
       
-      // Calculate new interval based on SM-2 algorithm (simplified)
+      // Spaced intervals (comfortable for ~20 questions/day: fewer, longer intervals)
       const quality = Math.max(0, Math.min(5, rawQuality)); // 0-5 scale
       let repetitionCount = (sr?.repetitionCount || 0) + 1;
       let easeFactor = sr?.easeFactor || 2500;
       let interval = 1;
 
       if (quality >= 3) {
-        // Correct or acceptable answer
+        // Correct or acceptable answer — space out more to avoid daily overload
         if (repetitionCount === 1) {
-          interval = 1;
+          interval = 3;   // first review in 3 days (was 1)
         } else if (repetitionCount === 2) {
-          interval = 3;
+          interval = 10;  // second review in 10 days (was 3)
         } else {
-          interval = Math.round((sr?.interval || 1) * (easeFactor / 100));
+          const multiplier = Math.max(easeFactor / 100, 2.2); // grow at least 2.2x each time
+          interval = Math.max(sr?.interval ?? 10, Math.round((sr?.interval || 10) * multiplier));
         }
       } else {
         // Incorrect or difficult answer - reset
@@ -1414,7 +1427,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Cancel subscription (institutional: ends instantly; paid: Stripe billing off, access until period end)
+  // Cancel subscription (institutional: ends instantly; paid: Stripe billing off, access until period end).
+  // User data (progress, notes, bookmarks, etc.) is never deleted; re-subscribing restores full access to the same account.
   app.post('/api/subscription/cancel', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.session?.userId;

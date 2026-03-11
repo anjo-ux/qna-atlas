@@ -51,16 +51,14 @@ function updateUserSession(
 }
 
 async function upsertUser(claims: any) {
-  const trialEndsAt = new Date();
-  trialEndsAt.setDate(trialEndsAt.getDate() + 30);
-  
+  // New users get no trial; they must go to subscription page to choose a plan or use institutional code
   await storage.upsertUser({
     id: claims["sub"],
     email: claims["email"],
     firstName: claims["first_name"],
     lastName: claims["last_name"],
-    subscriptionStatus: 'trial',
-    trialEndsAt,
+    subscriptionStatus: 'expired',
+    trialEndsAt: null,
   });
 }
 

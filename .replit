@@ -7,7 +7,7 @@ channel = "stable-25_05"
 
 [deployment]
 deploymentTarget = "autoscale"
-run = ["npm", "run", "start"]
+run = ["sh", "-c", "PORT=5001 npm run start"]
 build = ["npm", "run", "build"]
 
 [workflows]
@@ -33,7 +33,6 @@ waitForPort = 5000
 
 [[ports]]
 localPort = 5000
-externalPort = 5000
 
 [[ports]]
 localPort = 5001
@@ -54,5 +53,6 @@ externalPort = 3002
 [userenv]
 
 [userenv.shared]
+PORT = "5000"
 OPENAI_ASSISTANT_ID = "asst_tt8Ci5ShxyJNCMUA2ob7EB8m"
 QUESTION_IMPORT_API_KEY = "wf0JKM0SWLSr-zVDv8j9JrsOplqw2YwndRMiFq3RVg4"
