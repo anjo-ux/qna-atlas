@@ -271,3 +271,19 @@ export const institutionalCodes = pgTable("institutional_codes", {
 
 export type InstitutionalCode = typeof institutionalCodes.$inferSelect;
 export type InsertInstitutionalCode = typeof institutionalCodes.$inferInsert;
+
+// Question reports - user-reported issues with questions (also emailed to support)
+export const questionReports = pgTable("question_reports", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  questionId: varchar("question_id", { length: 128 }).notNull(),
+  message: text("message").notNull(),
+  userEmail: varchar("user_email"), // null if submitted anonymously
+  userId: varchar("user_id").references(() => users.id, { onDelete: "set null" }), // null if anonymous
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => [
+  index("idx_question_reports_question_id").on(table.questionId),
+  index("idx_question_reports_created_at").on(table.createdAt),
+]);
+
+export type QuestionReport = typeof questionReports.$inferSelect;
+export type InsertQuestionReport = typeof questionReports.$inferInsert;

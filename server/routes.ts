@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { setupAuth, isAuthenticated, sendReportQuestionEmail } from "./customAuth";
+import { setupAuth, isAuthenticated } from "./customAuth";
 import { sanitizeUser } from "./authUtils";
 import { createTesterRedirectToken, verifyTesterRedirectToken, ATLAS_TRAINER_CALLBACK_URL } from "./testerToken";
 import { insertTestSessionSchema, updateTestSessionSchema, insertQuestionResponseSchema, insertQuestionSchema } from "@shared/schemas";
@@ -235,13 +235,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       const MAX_MESSAGE = 2000;
       const trimmedMessage = message.trim().slice(0, MAX_MESSAGE);
+      const trimmedQuestionId = questionId.trim();
       let userEmail: string | null = null;
-      const userId = req.session?.userId;
+      const userId = req.session?.userId ?? null;
       if (userId) {
         const user = await storage.getUser(userId);
         userEmail = user?.email ?? null;
       }
-      await sendReportQuestionEmail(questionId.trim(), trimmedMessage, userEmail);
+      await storage.createQuestionReport({
+        questionId: trimmedQuestionId,
+        message: trimmedMessage,
+        userEmail: userEmail ?? undefined,
+        userId: userId ?? undefined,
+      });
+      // Email disabled for now; reports are stored in DB only. Run npm run summarize:reports to view.
       res.json({ message: 'Report sent.' });
     } catch (error) {
       console.error('Error sending question report:', error);

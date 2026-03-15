@@ -11,6 +11,7 @@ import {
   subscriptionPlans,
   subscriptionTransactions,
   institutionalCodes,
+  questionReports,
   sections,
   subsections,
   questions,
@@ -33,6 +34,8 @@ import {
   type InsertSubscriptionPlan,
   type SubscriptionTransaction,
   type InsertSubscriptionTransaction,
+  type QuestionReport,
+  type InsertQuestionReport,
 } from "@shared/schema";
 import { db, pool } from "./db";
 import { eq, and, asc, desc, lte, sql } from "drizzle-orm";
@@ -147,6 +150,10 @@ export interface IStorage {
 
   // Question bank (sections API)
   getSections(): Promise<SectionDto[]>;
+
+  // Question reports
+  createQuestionReport(report: InsertQuestionReport): Promise<QuestionReport>;
+  getAllQuestionReports(): Promise<QuestionReport[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -688,6 +695,16 @@ export class DatabaseStorage implements IStorage {
       }));
       return { id: sec.id, title: sec.title, subsections: subs };
     });
+  }
+
+  async createQuestionReport(report: InsertQuestionReport): Promise<QuestionReport> {
+    const [row] = await db.insert(questionReports).values(report).returning();
+    if (!row) throw new Error("Failed to insert question report");
+    return row;
+  }
+
+  async getAllQuestionReports(): Promise<QuestionReport[]> {
+    return db.select().from(questionReports).orderBy(desc(questionReports.createdAt));
   }
 
   async createQuestion(data: {
