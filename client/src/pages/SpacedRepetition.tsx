@@ -228,7 +228,7 @@ export function SpacedRepetitionPage({ onBack }: SpacedRepetitionProps) {
             {/* Progress above card */}
             <div className="flex justify-between items-center text-sm text-muted-foreground mb-4">
               <span>
-                {currentIndex + 1} of {filtered.length}
+                {currentIndex + 1} / {filtered.length}
               </span>
               <span>
                 {current.sectionTitle} → {current.subsectionTitle}
@@ -276,7 +276,7 @@ export function SpacedRepetitionPage({ onBack }: SpacedRepetitionProps) {
                     ))}
                   </div>
                 ) : (
-                  <p className="text-sm text-muted-foreground mt-2">No answer choices — reveal to see the answer.</p>
+                  <p className="text-sm text-muted-foreground mt-2">No answer choices, reveal card to see the answer.</p>
                 )}
 
                 <div className="mt-6 flex gap-3">
@@ -288,7 +288,7 @@ export function SpacedRepetitionPage({ onBack }: SpacedRepetitionProps) {
                       data-testid="button-reveal-answer"
                       className="flex-1"
                     >
-                      Reveal answer
+                      Reveal Answer
                     </Button>
                   ) : (
                     <Button
@@ -297,7 +297,7 @@ export function SpacedRepetitionPage({ onBack }: SpacedRepetitionProps) {
                       data-testid="button-reveal-answer"
                       className="flex-1"
                     >
-                      Reveal answer
+                      Reveal Answer
                     </Button>
                   )}
                 </div>

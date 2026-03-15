@@ -1607,7 +1607,7 @@ Difficulty with nasal breathing from the internal nasal valve occurs from separa
 
 External nasal valve problems occur from over-resection of the lower lateral cartilages. It presents with inward rotation and malposition of the lower lateral crura. Treatment includes lateral crural strut graft.`,
 
-    'eye-aesthetic-reconstructive': `# Eye Aesthetic and Reconstructive
+    'eye-aesthetic-reconstructive': `# Eye Aesthetic & Reconstructive
 
 ## Pre-Operative Evaluation
 
@@ -2208,7 +2208,7 @@ const subsectionTitles: Record<string, Record<string, string>> = {
     'breast-reconstruction': 'Breast Reconstruction',
     'facial-rejuvenation': 'Facial Rejuvenation',
     'rhinoplasty': 'Rhinoplasty',
-    'eye-aesthetic-reconstructive': 'Eye Aesthetic and Reconstructive',
+    'eye-aesthetic-reconstructive': 'Eye Aesthetic & Reconstructive',
     'body-contouring': 'Body Contouring',
   },
   'core-surgical': {

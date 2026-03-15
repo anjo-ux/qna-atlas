@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { setupAuth, isAuthenticated } from "./customAuth";
+import { setupAuth, isAuthenticated, sendReportQuestionEmail } from "./customAuth";
 import { sanitizeUser } from "./authUtils";
 import { createTesterRedirectToken, verifyTesterRedirectToken, ATLAS_TRAINER_CALLBACK_URL } from "./testerToken";
 import { insertTestSessionSchema, updateTestSessionSchema, insertQuestionResponseSchema, insertQuestionSchema } from "@shared/schemas";
@@ -30,7 +30,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   await setupAuth(app);
 
   // One-time reset all users to no subscription when RUN_SUBSCRIPTION_RESET=true (unset after running)
-  await storage.runSubscriptionResetIfRequested();
+  try {
+    await storage.runSubscriptionResetIfRequested();
+  } catch (err) {
+    console.error("Subscription reset (RUN_SUBSCRIPTION_RESET) failed; server continuing:", err);
+  }
 
   // Hidden by default: set ENABLE_ADMIN_GENERATED_QUESTIONS_UI=true to expose. Admin: list generated draft questions (requires admin code; no auth)
   if (process.env.ENABLE_ADMIN_GENERATED_QUESTIONS_UI === "true") {
@@ -216,6 +220,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error updating question visibility:", error);
       res.status(500).json({ message: "Failed to update question." });
+    }
+  });
+
+  // Report question (sends email to support; works with or without auth)
+  app.post('/api/report-question', async (req: any, res) => {
+    try {
+      const { questionId, message } = req.body ?? {};
+      if (typeof questionId !== 'string' || !questionId.trim()) {
+        return res.status(400).json({ message: 'Missing or invalid question ID.' });
+      }
+      if (typeof message !== 'string' || !message.trim()) {
+        return res.status(400).json({ message: 'Please describe what is wrong with the question.' });
+      }
+      const MAX_MESSAGE = 2000;
+      const trimmedMessage = message.trim().slice(0, MAX_MESSAGE);
+      let userEmail: string | null = null;
+      const userId = req.session?.userId;
+      if (userId) {
+        const user = await storage.getUser(userId);
+        userEmail = user?.email ?? null;
+      }
+      await sendReportQuestionEmail(questionId.trim(), trimmedMessage, userEmail);
+      res.json({ message: 'Report sent.' });
+    } catch (error) {
+      console.error('Error sending question report:', error);
+      res.status(500).json({ message: 'Failed to send report. Please try again later.' });
     }
   });
 

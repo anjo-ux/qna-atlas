@@ -286,7 +286,10 @@ export function SubscriptionPlans({ open = true, onOpenChange, asDialog = true, 
                 <div className={cn('p-4 pb-6', contentBoxClass)}>
                   <h3 className={cn('font-semibold', contentTitleClass)}>Institutional Plan</h3>
                   {user?.institutionalAccessAffiliation?.trim() ? (
-                    <p className={cn('text-sm mt-1', contentMutedClass)}>Current University: <span className="font-medium text-foreground">{user.institutionalAccessAffiliation.trim()}</span></p>
+                    <>
+                      <p className={cn('text-sm mt-1', contentMutedClass)}>Current University: <span className="font-medium text-white">{user.institutionalAccessAffiliation.trim()}</span></p>
+                      <p className="text-sm mt-2 text-yellow-500 dark:text-yellow-400 font-medium">Warning, entering a new code will invalidate your prior subscription.</p>
+                    </>
                   ) : (
                     <p className={cn('text-sm mt-1', contentMutedClass)}>Enter your institution code (provided by your program director) to unlock the platform.</p>
                   )}

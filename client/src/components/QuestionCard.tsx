@@ -11,9 +11,10 @@ import { HighlightToolbar } from '@/components/HighlightToolbar';
 import { StickyNote } from '@/components/StickyNote';
 import { useTextHighlight } from '@/hooks/useTextHighlight';
 import { QuestionResponse } from '@/hooks/useQuestionStats';
-import { Bookmark, Flag } from 'lucide-react';
+import { AlertCircle, Bookmark } from 'lucide-react';
 import { queryClient } from '@/lib/queryClient';
 import ReactMarkdown from 'react-markdown';
+import { ReportQuestionDialog } from '@/components/ReportQuestionDialog';
 
 interface QuestionCardProps {
   question: Question;
@@ -51,6 +52,7 @@ export function QuestionCard({
   const [showExplanation, setShowExplanation] = useState(!!savedResponse);
   const [isEraserMode, setIsEraserMode] = useState(false);
   const [crossedOutChoices, setCrossedOutChoices] = useState<Set<string>>(new Set());
+  const [reportDialogOpen, setReportDialogOpen] = useState(false);
 
   const {
     activeColor,
@@ -311,39 +313,57 @@ export function QuestionCard({
             isEraserMode={isEraserMode}
             onEraserToggle={() => setIsEraserMode(!isEraserMode)}
           />
-          <Button
-            size="icon"
-            variant="ghost"
-            onClick={() => {
-              console.log('[QuestionCard] Bookmark button clicked for question:', {
-                id: question.id,
-                sectionId,
-                subsectionId,
-              });
-              (async () => {
-                try {
-                  console.log('[QuestionCard] Bookmark button handler: attempting to toggle bookmark');
-                  await toggleBookmark(question.id, sectionId, subsectionId);
-                  console.log('[QuestionCard] Bookmark toggle completed successfully');
-                  // Force a fresh fetch of bookmarks to ensure all views update
-                  console.log('[QuestionCard] Force refetching bookmarks...');
-                  await queryClient.refetchQueries({ queryKey: ['/api/bookmarks'] });
-                  console.log('[QuestionCard] Bookmarks refetch completed');
-                } catch (error) {
-                  console.error('[QuestionCard] Bookmark toggle error:', error);
-                }
-              })();
-            }}
-            disabled={isBookmarkPending}
-            data-testid={`button-bookmark-${question.id}`}
-            className={cn(
-              "flex-shrink-0 transition-colors",
-              questionIsBookmarked && "text-accent"
-            )}
-          >
-            <Bookmark className={cn("h-5 w-5", questionIsBookmarked && "fill-accent")} />
-          </Button>
+          <div className="flex items-center gap-1">
+            <Button
+              size="icon"
+              variant="ghost"
+              onClick={() => setReportDialogOpen(true)}
+              data-testid={`button-report-${question.id}`}
+              className="flex-shrink-0 transition-colors"
+              title="Report question"
+            >
+              <AlertCircle className="h-5 w-5" />
+            </Button>
+            <Button
+              size="icon"
+              variant="ghost"
+              onClick={() => {
+                console.log('[QuestionCard] Bookmark button clicked for question:', {
+                  id: question.id,
+                  sectionId,
+                  subsectionId,
+                });
+                (async () => {
+                  try {
+                    console.log('[QuestionCard] Bookmark button handler: attempting to toggle bookmark');
+                    await toggleBookmark(question.id, sectionId, subsectionId);
+                    console.log('[QuestionCard] Bookmark toggle completed successfully');
+                    // Force a fresh fetch of bookmarks to ensure all views update
+                    console.log('[QuestionCard] Force refetching bookmarks...');
+                    await queryClient.refetchQueries({ queryKey: ['/api/bookmarks'] });
+                    console.log('[QuestionCard] Bookmarks refetch completed');
+                  } catch (error) {
+                    console.error('[QuestionCard] Bookmark toggle error:', error);
+                  }
+                })();
+              }}
+              disabled={isBookmarkPending}
+              data-testid={`button-bookmark-${question.id}`}
+              className={cn(
+                "flex-shrink-0 transition-colors",
+                questionIsBookmarked && "text-accent"
+              )}
+              title="Bookmark"
+            >
+              <Bookmark className={cn("h-5 w-5", questionIsBookmarked && "fill-accent")} />
+            </Button>
+          </div>
         </div>
+        <ReportQuestionDialog
+          open={reportDialogOpen}
+          onOpenChange={setReportDialogOpen}
+          questionId={question.id}
+        />
         
         <div className="flex items-start gap-3 md:gap-4">
           <div className="flex-shrink-0 w-7 h-7 md:w-8 md:h-8 rounded-full bg-primary/10 flex items-center justify-center">

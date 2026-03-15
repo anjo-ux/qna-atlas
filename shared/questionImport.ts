@@ -198,7 +198,7 @@ export const subsectionTitles: Record<string, string> = {
   'breast-reconstruction': 'Breast Reconstruction',
   'facial-rejuvenation': 'Facial Rejuvenation',
   'rhinoplasty': 'Rhinoplasty',
-  'eye-aesthetic-reconstructive': 'Eye Aesthetic and Reconstructive',
+  'eye-aesthetic-reconstructive': 'Eye Aesthetic & Reconstructive',
   'body-contouring': 'Body Contouring',
   'anesthesia': 'Anesthesia',
   'perioperative-care': 'Perioperative Care',

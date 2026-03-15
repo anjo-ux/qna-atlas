@@ -96,6 +96,42 @@ async function sendPasswordEmail(email: string, password: string): Promise<void>
   }
 }
 
+const REPORT_SUPPORT_EMAIL = 'support@prs-atlas.com';
+
+export async function sendReportQuestionEmail(
+  questionId: string,
+  message: string,
+  userEmail?: string | null
+): Promise<void> {
+  const apiKey = process.env.SENDGRID_API_KEY;
+  const fromEmail = process.env.SENDGRID_FROM_EMAIL || 'noreply@prs-atlas.com';
+
+  if (!apiKey) {
+    console.warn('[Report question] SENDGRID_API_KEY is not set — no email will be sent. Question ID:', questionId);
+    return;
+  }
+
+  const body = `A question has been reported.\n\nQuestion ID: ${questionId}\n\nReport:\n${message}${userEmail ? `\n\nReported by: ${userEmail}` : '\n\n(Submitted anonymously)'}`;
+
+  try {
+    sgMail.setApiKey(apiKey);
+    await sgMail.send({
+      to: REPORT_SUPPORT_EMAIL,
+      from: fromEmail,
+      subject: 'Question Reported',
+      text: body,
+    });
+    console.log('[Report question] Email sent to', REPORT_SUPPORT_EMAIL, 'for question', questionId);
+  } catch (error: unknown) {
+    const err = error as { response?: { body?: unknown; statusCode?: number } };
+    console.error('[Report question] SendGrid error:', err);
+    if (err.response?.body) {
+      console.error('[Report question] SendGrid response body:', JSON.stringify(err.response.body, null, 2));
+    }
+    throw error;
+  }
+}
+
 /** Rate limiter for auth-sensitive endpoints (login, register, forgot-password) to prevent brute force. */
 const authRateLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
