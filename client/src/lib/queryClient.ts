@@ -16,7 +16,11 @@ async function throwError(response: Response) {
 }
 
 async function fetcher(url: string) {
-  const res = await fetch(url, { credentials: "include" });
+  const res = await fetch(url, {
+    credentials: "include",
+    // Avoid stale subscription state after institutional redeem / Stripe (304 + cached body).
+    cache: typeof url === "string" && url.includes("/api/subscription") ? "no-store" : "default",
+  });
 
   // For auth endpoint, return null on 401/403 instead of throwing
   if (url.includes('/api/auth/user') && (res.status === 401 || res.status === 403)) {

@@ -21,6 +21,8 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { SubscriptionPlans } from '@/components/SubscriptionPlans';
+import { SubscriptionTransactionHistoryDialog } from '@/components/SubscriptionTransactionHistoryDialog';
+import { cn } from '@/lib/utils';
 
 const PAID_PERSONAL_PLANS = ['monthly', '6-month', '1-year'] as const;
 
@@ -38,6 +40,7 @@ interface SubscriptionDetails {
 export function SubscriptionManager() {
   const [isChangingPlan, setIsChangingPlan] = useState(false);
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
+  const [transactionHistoryOpen, setTransactionHistoryOpen] = useState(false);
 
   const { data: subscription } = useQuery<SubscriptionDetails>({
     queryKey: ['/api/subscription/details'],
@@ -190,7 +193,7 @@ export function SubscriptionManager() {
               </Button>
             </DialogTrigger>
             <DialogContent hideCloseButton className="max-w-lg w-[calc(100vw-2rem)] max-h-[90vh] p-0 gap-0 border-0 bg-transparent shadow-none overflow-y-auto overflow-x-hidden [&>button]:!hidden">
-              <SubscriptionPlans asDialog={false} />
+              <SubscriptionPlans asDialog={false} open={isChangingPlan} onOpenChange={setIsChangingPlan} />
             </DialogContent>
           </Dialog>
 
@@ -246,14 +249,39 @@ export function SubscriptionManager() {
           )}
         </div>
 
-        {/* Transaction History */}
+        {/* Transaction History — click opens Stripe receipts / invoices */}
         {subscription?.transactionCount !== undefined && subscription.transactionCount > 0 && (
-          <div className="border-t border-border pt-4">
-            <p className="text-xs text-muted-foreground font-medium">Transactions</p>
-            <p className="text-sm text-foreground mt-1">{subscription.transactionCount} transaction{subscription.transactionCount !== 1 ? 's' : ''}</p>
+          <div
+            role="button"
+            tabIndex={0}
+            className={cn(
+              'border-t border-border pt-4 rounded-md -mx-1 px-1 cursor-pointer',
+              'hover:bg-muted/40 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring'
+            )}
+            aria-label="View subscription transaction history and Stripe invoices"
+            onClick={() => setTransactionHistoryOpen(true)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                setTransactionHistoryOpen(true);
+              }
+            }}
+          >
+            <div className="flex items-center justify-between gap-2">
+              <p className="text-xs text-muted-foreground font-medium">Transactions</p>
+              <span className="text-[10px] uppercase tracking-wide text-primary font-medium">View history</span>
+            </div>
+            <p className="text-sm text-foreground mt-1">
+              {subscription.transactionCount} transaction{subscription.transactionCount !== 1 ? 's' : ''}
+            </p>
           </div>
         )}
       </div>
+
+      <SubscriptionTransactionHistoryDialog
+        open={transactionHistoryOpen}
+        onOpenChange={setTransactionHistoryOpen}
+      />
     </Card>
   );
 }

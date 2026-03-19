@@ -30,23 +30,49 @@ function userHasPersonalSubscriptionAccess(
 ): boolean {
   if (!user) return false;
   const now = Date.now();
-  if (user.stripeSubscriptionId?.trim()) return true;
 
   const plan = user.subscriptionPlan ?? undefined;
   const hasNamedPaidPlan = plan ? PAID_SUBSCRIPTION_PLAN_NAMES.has(plan) : false;
   const txEndOk = !!(activeTx && new Date(activeTx.endDate).getTime() > now);
 
+  const st = user.subscriptionStatus || "trial";
+
+  /**
+   * Stale `stripe_subscription_id` (e.g. after cancel or webhook lag) must NOT block institutional access.
+   * Only treat Stripe as "personal access" when status + dates show real ongoing entitlement.
+   */
+  if (user.stripeSubscriptionId?.trim()) {
+    if (st === "active") return true;
+    if (st === "trial" && user.trialEndsAt && new Date(user.trialEndsAt).getTime() > now) return true;
+    if (st === "canceled" && user.subscriptionEndsAt && new Date(user.subscriptionEndsAt).getTime() > now)
+      return true;
+    if (txEndOk) return true;
+    // else: expired / ended sub with leftover id — fall through to plan/tx checks only
+  }
+
   if (!hasNamedPaidPlan) {
     return txEndOk;
   }
 
-  const st = user.subscriptionStatus || "trial";
   if (st === "active") return true;
   if (st === "trial" && user.trialEndsAt && new Date(user.trialEndsAt).getTime() > now) return true;
   if (st === "canceled" && user.subscriptionEndsAt && new Date(user.subscriptionEndsAt).getTime() > now)
     return true;
   return txEndOk;
 }
+
+/** True when the user row reflects an ongoing personal (paid/trial) period — institutional UI should not replace this. */
+function userHasCoherentPersonalPaidRow(user: User | undefined, now: Date): boolean {
+  if (!user) return false;
+  const st = user.subscriptionStatus || "trial";
+  const userEndsAt = user.subscriptionEndsAt ? new Date(user.subscriptionEndsAt) : null;
+  const trialEndsAt = user.trialEndsAt ? new Date(user.trialEndsAt) : null;
+  if (st === "active" && userEndsAt && userEndsAt.getTime() > now.getTime()) return true;
+  if (st === "canceled" && userEndsAt && userEndsAt.getTime() > now.getTime()) return true;
+  if (st === "trial" && trialEndsAt && trialEndsAt.getTime() > now.getTime()) return true;
+  return false;
+}
+
 const QUESTION_IMPORT_API_KEY = process.env.QUESTION_IMPORT_API_KEY;
 
 function requireAdminCode(req: any): boolean {
@@ -477,6 +503,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Check subscription status
   app.get('/api/subscription', async (req: any, res) => {
     try {
+      // Never cache: browsers/proxies were returning 304 + stale "expired" after institutional redeem.
+      res.set("Cache-Control", "no-store, no-cache, must-revalidate, private");
+      res.set("Pragma", "no-cache");
+      res.set("Expires", "0");
+
       const userId = req.session?.userId;
       if (!userId) {
         return res.json({ status: 'none', daysRemaining: 0, trialEndsAt: null, isLocked: false });
@@ -498,19 +529,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       const hasInstitutionalAccess = hasInstitutionalAffiliation && !institutionalExpired;
-      const activeTxEarly = await storage.getUserActiveSubscription(userId);
-      if (hasInstitutionalAccess && !userHasPersonalSubscriptionAccess(user, activeTxEarly)) {
-        const daysRemaining = institutionalExpiresAt
-          ? Math.max(0, Math.ceil((institutionalExpiresAt.getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
-          : -1;
-        return res.json({
-          status: 'institutional',
-          daysRemaining,
-          trialEndsAt: null,
-          isLocked: false,
-          subscriptionType: 'Institutional Affiliation',
-        });
-      }
 
       const now = new Date();
       const trialEndsAt = user.trialEndsAt ? new Date(user.trialEndsAt) : null;
@@ -533,10 +551,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Lock when expired or when on trial with no days left (e.g. new account with no plan). Canceled = access until end.
       // Expiry/cancel only update subscription status; user data (progress, notes, bookmarks) is never deleted.
-      const isLocked =
+      let isLocked =
         status === 'expired' ||
         (status === 'trial' && daysRemaining === 0) ||
         (status === 'canceled' && (!subscriptionEndsAt || subscriptionEndsAt <= now));
+
+      /**
+       * Valid institutional access must unlock the app even when personal row still says "expired"
+       * (e.g. leftover Stripe ids, edge cases in personal-access detection).
+       */
+      if (hasInstitutionalAccess && isLocked) {
+        const daysInst = institutionalExpiresAt
+          ? Math.max(0, Math.ceil((institutionalExpiresAt.getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
+          : -1;
+        return res.json({
+          status: "institutional",
+          daysRemaining: daysInst,
+          trialEndsAt: null,
+          isLocked: false,
+          subscriptionType: "Institutional Affiliation",
+        });
+      }
 
       res.json({
         status,
@@ -1383,11 +1418,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const institutionalExpired = institutionalExpiresAt !== null && institutionalExpiresAt <= new Date();
       const hasInstitutional = hasInstitutionalAffiliation && !institutionalExpired;
       const activeSubscription = await storage.getUserActiveSubscription(userId);
+      const now = new Date();
 
-      if (hasInstitutional && !userHasPersonalSubscriptionAccess(user, activeSubscription)) {
+      /**
+       * Show institutional plan/price when a code grants access, unless the user row shows a real ongoing
+       * personal subscription/trial (avoids stale completed transactions forcing "1-Year $450" + broken days).
+       */
+      if (hasInstitutional && !userHasCoherentPersonalPaidRow(user, now)) {
         const daysRemaining = institutionalExpiresAt
-          ? Math.max(0, Math.ceil((institutionalExpiresAt.getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
+          ? Math.max(0, Math.ceil((institutionalExpiresAt.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)))
           : null;
+        const txs = await storage.getUserSubscriptionTransactions(userId);
         return res.json({
           plan: 'institutional',
           status: 'institutional',
@@ -1395,11 +1436,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           endsAt: institutionalExpiresAt ? institutionalExpiresAt.toISOString() : undefined,
           trialEndsAt: undefined,
           daysRemaining,
-          transactionCount: 0,
+          transactionCount: txs.length,
         });
       }
 
-      const now = new Date();
       const transactions = await storage.getUserSubscriptionTransactions(userId);
       const plans = await storage.getSubscriptionPlans();
 
@@ -1447,18 +1487,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (status === 'trial' && trialEndsAt) {
         daysRemaining = Math.max(0, Math.ceil((trialEndsAt.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
         endsAt = undefined;
-      } else if (userEndsAt && (status === 'active' || status === 'canceled')) {
-        daysRemaining = Math.max(0, Math.ceil((userEndsAt.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
-        endsAt = userEndsAt.toISOString();
-      } else if (activeEndDate && activeEndDate.getTime() > now.getTime()) {
-        daysRemaining = Math.max(0, Math.ceil((activeEndDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
-        endsAt = activeEndDate.toISOString();
-      } else if (activeSubscription?.endDate) {
-        const endDate = new Date(activeSubscription.endDate);
-        daysRemaining = Math.max(0, Math.ceil((endDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
-        endsAt = endDate.toISOString();
       } else {
-        endsAt = undefined;
+        const futureCandidates: Date[] = [];
+        if (userEndsAt && userEndsAt.getTime() > now.getTime()) futureCandidates.push(userEndsAt);
+        if (activeEndDate && activeEndDate.getTime() > now.getTime()) futureCandidates.push(activeEndDate);
+        const bestEnd =
+          futureCandidates.length > 0
+            ? futureCandidates.reduce((a, b) => (a.getTime() > b.getTime() ? a : b))
+            : null;
+        if (bestEnd && (status === 'active' || status === 'canceled' || status === 'trial')) {
+          daysRemaining = Math.max(0, Math.ceil((bestEnd.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
+          endsAt = bestEnd.toISOString();
+        } else if (activeSubscription?.endDate) {
+          const endDate = new Date(activeSubscription.endDate);
+          daysRemaining = Math.max(0, Math.ceil((endDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
+          endsAt = endDate.toISOString();
+        } else {
+          endsAt = undefined;
+        }
       }
 
       let planPrice: number | undefined;
@@ -1479,6 +1525,80 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching subscription details:", error);
       res.status(500).json({ message: "Failed to fetch subscription details." });
+    }
+  });
+
+  // Subscription transaction history (with Stripe receipt / hosted invoice URLs when available)
+  app.get("/api/subscription/transactions", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session?.userId;
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.json({ transactions: [] });
+      }
+
+      const now = new Date();
+      const txs = await storage.getUserSubscriptionTransactions(userId);
+      const plans = await storage.getSubscriptionPlans();
+      const planNameById = new Map(plans.map((p) => [p.id, p.name]));
+      const { getReceiptOrInvoiceUrlForTransaction } = await import("./stripe");
+
+      const hasInstitutionalAffiliation = !!user.institutionalAccessAffiliation?.trim();
+      const instExp = user.institutionalAccessExpiresAt ? new Date(user.institutionalAccessExpiresAt) : null;
+      const institutionalExpired = instExp !== null && instExp.getTime() <= now.getTime();
+      const institutionalActive = hasInstitutionalAffiliation && !institutionalExpired;
+      const personalCoherent = userHasCoherentPersonalPaidRow(user, now);
+
+      let transactions = await Promise.all(
+        txs.map(async (t) => {
+          const hasStripeIds = !!(t.stripePaymentIntentId?.trim() || t.stripeInvoiceId?.trim());
+          const stripeReceiptOrInvoiceUrl = await getReceiptOrInvoiceUrlForTransaction(
+            t.stripePaymentIntentId,
+            t.stripeInvoiceId
+          );
+          return {
+            id: t.id,
+            planName: planNameById.get(t.planId) ?? t.planId,
+            amountCents: t.amount,
+            status: t.status,
+            createdAt: t.createdAt ? new Date(t.createdAt).toISOString() : null,
+            periodStart: t.startDate ? new Date(t.startDate).toISOString() : null,
+            periodEnd: t.endDate ? new Date(t.endDate).toISOString() : null,
+            stripeReceiptOrInvoiceUrl,
+            hasStripeIds,
+            isInstitutionalGrant: false as const,
+          };
+        })
+      );
+
+      /**
+       * Hide legacy non-Stripe DB rows (e.g. from /subscription/change) when access is only institutional —
+       * they show wrong plan/amount vs. code-based access.
+       */
+      if (institutionalActive && !personalCoherent) {
+        transactions = transactions.filter((row) => row.hasStripeIds);
+      }
+
+      if (institutionalActive) {
+        const aff = user.institutionalAccessAffiliation!.trim();
+        transactions.unshift({
+          id: "__institutional_access__",
+          planName: aff,
+          amountCents: 0,
+          status: "completed",
+          createdAt: null,
+          periodStart: null,
+          periodEnd: instExp ? instExp.toISOString() : null,
+          stripeReceiptOrInvoiceUrl: null,
+          hasStripeIds: false,
+          isInstitutionalGrant: true as const,
+        });
+      }
+
+      res.json({ transactions });
+    } catch (error) {
+      console.error("Error fetching subscription transactions:", error);
+      res.status(500).json({ message: "Failed to fetch transactions." });
     }
   });
 
@@ -1587,7 +1707,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         institutionalAccessAffiliation: institutionName,
         institutionalAccessExpiresAt: expiresAt,
       });
-      res.json({ message: "Access Granted!." });
+      res.json({ message: "Access Granted!" });
     } catch (error: any) {
       console.error("Error redeeming institutional code:", error);
       const message = process.env.NODE_ENV !== "production" && error?.message

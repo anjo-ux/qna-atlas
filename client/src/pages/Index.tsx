@@ -54,7 +54,10 @@ export default function Index() {
   const { data: subscription, isLoading: isCheckingSubscription, refetch: refetchSubscription } = useQuery({
     queryKey: ['/api/subscription'],
     queryFn: async () => {
-      const res = await fetch('/api/subscription', { credentials: 'include' });
+      const res = await fetch('/api/subscription', {
+        credentials: 'include',
+        cache: 'no-store',
+      });
       if (!res.ok) return { status: 'none', daysRemaining: 0, trialEndsAt: null, isLocked: false };
       return res.json();
     },
@@ -433,7 +436,7 @@ export default function Index() {
 
   // No active plan: show subscription UI at / (no redirect so URL stays / and sign-in doesn’t send user back to /subscribe)
   if (!isCheckingSubscription && subscription?.isLocked) {
-    return <SubscriptionPage />;
+    return <SubscriptionPage onSubscriptionUnlocked={() => refetchSubscription()} />;
   }
 
   if (screenMode === 'test') {

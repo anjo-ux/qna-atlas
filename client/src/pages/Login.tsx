@@ -177,7 +177,7 @@ export default function Login() {
         return;
       }
 
-      toast.success('Password changed successfully!.');
+      toast.success('Password changed successfully!');
       setShowChangePassword(false);
       setNewPassword('');
       setConfirmNewPassword('');

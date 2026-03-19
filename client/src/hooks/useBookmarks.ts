@@ -38,7 +38,7 @@ export function useBookmarks() {
       return { previousBookmarks };
     },
     onSuccess: async () => {
-      toast.success('Question bookmarked!.');
+      toast.success('Question bookmarked!');
       // Refetch to ensure we have the real IDs from the server
       await queryClient.invalidateQueries({ queryKey: ['/api/bookmarks'] });
       await queryClient.refetchQueries({ queryKey: ['/api/bookmarks'] });
@@ -81,7 +81,7 @@ export function useBookmarks() {
     },
     onSuccess: async () => {
       console.log('[Bookmark] onSuccess called - bookmark removed successfully');
-      toast.success('Bookmark removed!.');
+      toast.success('Bookmark removed!');
       // Refetch to ensure consistency
       await queryClient.invalidateQueries({ queryKey: ['/api/bookmarks'] });
       console.log('[Bookmark] Bookmarks invalidated');

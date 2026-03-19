@@ -21,6 +21,8 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { SubscriptionPlans } from '@/components/SubscriptionPlans';
+import { SubscriptionTransactionHistoryDialog } from '@/components/SubscriptionTransactionHistoryDialog';
+import { cn } from '@/lib/utils';
 
 const PAID_PERSONAL_PLANS = ['monthly', '6-month', '1-year'] as const;
 
@@ -42,6 +44,7 @@ interface MobileSubscriptionWidgetProps {
 export function MobileSubscriptionWidget({ hasEmoryAccess = false }: MobileSubscriptionWidgetProps) {
   const [isChangingPlan, setIsChangingPlan] = useState(false);
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
+  const [transactionHistoryOpen, setTransactionHistoryOpen] = useState(false);
 
   const { data: subscription } = useQuery<SubscriptionDetails>({
     queryKey: ['/api/subscription/details'],
@@ -177,8 +180,42 @@ export function MobileSubscriptionWidget({ hasEmoryAccess = false }: MobileSubsc
 
         {/* Subscription Details / History */}
         {((subscription?.transactionCount !== undefined && subscription.transactionCount > 0) || subscription?.endsAt || subscription?.trialEndsAt) && (
-          <div className="bg-muted/30 rounded-lg p-3 border border-border">
-            <p className="text-sm text-muted-foreground mb-2">Subscription Details</p>
+          <div
+            className={cn(
+              'bg-muted/30 rounded-lg p-3 border border-border',
+              subscription?.transactionCount !== undefined &&
+                subscription.transactionCount > 0 &&
+                'cursor-pointer hover:bg-muted/50 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring'
+            )}
+            role={subscription?.transactionCount ? 'button' : undefined}
+            tabIndex={subscription?.transactionCount ? 0 : undefined}
+            aria-label={
+              subscription?.transactionCount
+                ? 'View subscription transaction history and Stripe invoices'
+                : undefined
+            }
+            onClick={() => {
+              if (subscription?.transactionCount && subscription.transactionCount > 0) {
+                setTransactionHistoryOpen(true);
+              }
+            }}
+            onKeyDown={(e) => {
+              if (
+                (e.key === 'Enter' || e.key === ' ') &&
+                subscription?.transactionCount &&
+                subscription.transactionCount > 0
+              ) {
+                e.preventDefault();
+                setTransactionHistoryOpen(true);
+              }
+            }}
+          >
+            <div className="flex items-start justify-between gap-2 mb-2">
+              <p className="text-sm text-muted-foreground">Subscription Details</p>
+              {subscription?.transactionCount !== undefined && subscription.transactionCount > 0 && (
+                <span className="text-[10px] uppercase tracking-wide text-primary font-medium">Tap to view</span>
+              )}
+            </div>
             <div className="space-y-2">
               {subscription?.trialEndsAt && isTrial && (
                 <div className="flex justify-between text-xs">
@@ -214,7 +251,7 @@ export function MobileSubscriptionWidget({ hasEmoryAccess = false }: MobileSubsc
               </Button>
             </DialogTrigger>
             <DialogContent hideCloseButton className="max-w-lg w-[calc(100vw-2rem)] max-h-[90vh] p-0 gap-0 border-0 bg-transparent shadow-none overflow-y-auto overflow-x-hidden [&>button]:!hidden">
-              <SubscriptionPlans asDialog={false} />
+              <SubscriptionPlans asDialog={false} open={isChangingPlan} onOpenChange={setIsChangingPlan} />
             </DialogContent>
           </Dialog>
 
@@ -269,6 +306,11 @@ export function MobileSubscriptionWidget({ hasEmoryAccess = false }: MobileSubsc
           )}
         </div>
       </div>
+
+      <SubscriptionTransactionHistoryDialog
+        open={transactionHistoryOpen}
+        onOpenChange={setTransactionHistoryOpen}
+      />
     </Card>
   );
 }

@@ -252,6 +252,8 @@ export const subscriptionTransactions = pgTable("subscription_transactions", {
   userId: varchar("user_id").notNull().references(() => users.id, { onDelete: 'cascade' }),
   planId: varchar("plan_id").notNull().references(() => subscriptionPlans.id),
   stripePaymentIntentId: varchar("stripe_payment_intent_id"),
+  /** Stripe invoice id (in_xxx) when checkout created a subscription invoice — used for hosted invoice links */
+  stripeInvoiceId: varchar("stripe_invoice_id"),
   amount: integer("amount").notNull(), // in cents
   status: varchar("status").notNull(), // pending, completed, failed
   startDate: timestamp("start_date").notNull(),

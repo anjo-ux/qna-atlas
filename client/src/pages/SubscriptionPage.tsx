@@ -2,15 +2,22 @@ import { useLocation } from 'wouter';
 import { Home, Settings, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { SubscriptionPlans } from '@/components/SubscriptionPlans';
-import { queryClient } from '@/lib/queryClient';
 import { useAuth } from '@/hooks/useAuth';
+
+export type SubscriptionPageProps = {
+  /**
+   * When SubscriptionPage is embedded in Index (paywall at `/`), pass the parent’s
+   * subscription refetch so `isLocked` updates immediately after institutional / checkout success.
+   */
+  onSubscriptionUnlocked?: () => void | Promise<void>;
+};
 
 /**
  * Full-page subscription/upgrade page (like ChatGPT or Claude).
  * Shown when the user is logged in with no subscription or trial active.
  * Same 4 options (Monthly, 6-Month, 1-Year, Institutional), slider, and Stripe API.
  */
-export default function SubscriptionPage() {
+export default function SubscriptionPage({ onSubscriptionUnlocked }: SubscriptionPageProps) {
   const [, setLocation] = useLocation();
   const { logout } = useAuth();
 
@@ -19,11 +26,9 @@ export default function SubscriptionPage() {
     setLocation('/');
   };
 
-  const handleAccessGranted = () => {
-    queryClient.invalidateQueries({ queryKey: ['/api/subscription'] });
-    queryClient.invalidateQueries({ queryKey: ['/api/subscription/details'] });
-    queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
-    setLocation('/');
+  const handleAccessGranted = async () => {
+    await onSubscriptionUnlocked?.();
+    // Home navigation is handled in SubscriptionPlans via location.replace('/') after this runs.
   };
 
   return (

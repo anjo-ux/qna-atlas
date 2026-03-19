@@ -202,12 +202,17 @@ export async function handleStripeWebhook(
         ? session.payment_intent
         : (session.payment_intent as Stripe.PaymentIntent)?.id ?? null;
 
+    const invRaw = session.invoice;
+    const invoiceIdFromSession =
+      typeof invRaw === "string" ? invRaw : (invRaw as Stripe.Invoice | null | undefined)?.id ?? null;
+
     await storage.createSubscriptionTransaction({
       userId,
       planId,
       amount: plan.priceUSD,
       status: "completed",
       stripePaymentIntentId: paymentIntentId,
+      stripeInvoiceId: invoiceIdFromSession,
       startDate,
       endDate,
     });
@@ -234,7 +239,7 @@ export async function fulfillFromCheckoutSession(sessionId: string, userId: stri
     return { error: "Stripe is not configured." };
   }
   try {
-    const session = await client.checkout.sessions.retrieve(sessionId, { expand: ["subscription"] });
+    const session = await client.checkout.sessions.retrieve(sessionId, { expand: ["subscription", "invoice"] });
     if (session.payment_status !== "paid" && session.status !== "complete") return { error: "Checkout session not paid." };
     const plans = await storage.getSubscriptionPlans();
     const plan = plans.find((p) => p.id === planId);
@@ -261,12 +266,17 @@ export async function fulfillFromCheckoutSession(sessionId: string, userId: stri
       }
     }
 
+    const invRaw = session.invoice;
+    const invoiceIdFromSession =
+      typeof invRaw === "string" ? invRaw : invRaw && typeof invRaw === "object" && "id" in invRaw ? (invRaw as Stripe.Invoice).id : null;
+
     await storage.createSubscriptionTransaction({
       userId,
       planId: plan.id,
       amount: plan.priceUSD,
       status: "completed",
       stripePaymentIntentId: typeof session.payment_intent === "string" ? session.payment_intent : session.payment_intent?.id ?? null,
+      stripeInvoiceId: invoiceIdFromSession,
       startDate,
       endDate,
     });
@@ -318,7 +328,7 @@ export async function cancelStripeSubscriptionAtPeriodEnd(subscriptionId: string
 }
 
 /** Stripe clients that may own subscriptions (test default + optional live key). */
-function stripeClientsForSubscriptionMutations(): Stripe[] {
+export function stripeClientsForSubscriptionMutations(): Stripe[] {
   const clients: Stripe[] = [];
   if (stripe) clients.push(stripe);
   const live = STRIPE_LIVE_SECRET_KEY?.trim();
@@ -359,4 +369,67 @@ export async function cancelStripeSubscriptionImmediately(subscriptionId: string
     }
   }
   return false;
+}
+
+/**
+ * Resolve a customer-viewable URL for a completed checkout:
+ * 1) Invoice: `hosted_invoice_url` (best), then `invoice_pdf`, then underlying `charge.receipt_url`.
+ * 2) PaymentIntent: `latest_charge.receipt_url` (charge may be an id string — we retrieve it).
+ *
+ * Tries `STRIPE_SECRET_KEY` client first, then `STRIPE_LIVE_SECRET_KEY` when configured (same account
+ * as subscription cancel / fulfill).
+ */
+async function receiptUrlFromCharge(
+  client: Stripe,
+  latestCharge: string | Stripe.Charge | null | undefined
+): Promise<string | null> {
+  if (latestCharge == null) return null;
+  try {
+    const ch =
+      typeof latestCharge === "string"
+        ? await client.charges.retrieve(latestCharge)
+        : latestCharge;
+    return ch.receipt_url ?? null;
+  } catch {
+    return null;
+  }
+}
+
+export async function getReceiptOrInvoiceUrlForTransaction(
+  stripePaymentIntentId: string | null | undefined,
+  stripeInvoiceId: string | null | undefined
+): Promise<string | null> {
+  const clients = stripeClientsForSubscriptionMutations();
+  if (clients.length === 0) return null;
+
+  const invId = stripeInvoiceId?.trim();
+  if (invId) {
+    for (const c of clients) {
+      try {
+        const inv = await c.invoices.retrieve(invId, { expand: ["charge"] });
+        if (inv.hosted_invoice_url) return inv.hosted_invoice_url;
+        if (inv.invoice_pdf) return inv.invoice_pdf;
+        const chargeRef = inv.charge as string | Stripe.Charge | null | undefined;
+        const fromInvCharge = await receiptUrlFromCharge(c, chargeRef ?? null);
+        if (fromInvCharge) return fromInvCharge;
+      } catch {
+        continue;
+      }
+    }
+  }
+
+  const piId = stripePaymentIntentId?.trim();
+  if (piId) {
+    for (const c of clients) {
+      try {
+        const pi = await c.paymentIntents.retrieve(piId, { expand: ["latest_charge"] });
+        const fromPi = await receiptUrlFromCharge(c, pi.latest_charge);
+        if (fromPi) return fromPi;
+      } catch {
+        continue;
+      }
+    }
+  }
+
+  return null;
 }

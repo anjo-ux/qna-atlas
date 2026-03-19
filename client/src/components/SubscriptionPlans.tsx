@@ -79,7 +79,7 @@ interface SubscriptionPlansProps {
   /** When true, content is rendered on the page without the grey/opaque Card (for full-page subscribe view) */
   embeddedInPage?: boolean;
   /** Called when user gains access (e.g. institutional code) so parent can refetch subscription */
-  onAccessGranted?: () => void;
+  onAccessGranted?: () => void | Promise<void>;
 }
 
 export function SubscriptionPlans({ open = true, onOpenChange, asDialog = true, noPlanOverlay = false, embeddedInPage = false, onAccessGranted }: SubscriptionPlansProps) {
@@ -134,13 +134,17 @@ export function SubscriptionPlans({ open = true, onOpenChange, asDialog = true, 
         body: JSON.stringify({ code: code.trim() }),
       });
     },
-    onSuccess: () => {
-      toast.success('Access granted. Welcome!.');
-      queryClient.invalidateQueries({ queryKey: ['/api/subscription'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/subscription/details'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
+    onSuccess: async () => {
+      toast.success('Access granted. Welcome!');
+      await queryClient.refetchQueries({ queryKey: ['/api/subscription'] });
+      await queryClient.refetchQueries({ queryKey: ['/api/subscription/details'] });
+      await queryClient.refetchQueries({ queryKey: ['/api/auth/user'] });
       onOpenChange?.(false);
-      onAccessGranted?.();
+      await Promise.resolve(onAccessGranted?.());
+      // Full navigation: works from /subscribe, paywall at /, and nested upgrade dialogs (wouter alone often no-ops on /).
+      if (typeof window !== 'undefined') {
+        window.location.replace('/');
+      }
     },
     onError: (err: any) => {
       const msg = err?.message ?? 'Invalid code.';

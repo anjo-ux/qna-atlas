@@ -874,6 +874,9 @@ export class DatabaseStorage implements IStorage {
     await pool.query(`
       ALTER TABLE "subscription_plans" ADD COLUMN IF NOT EXISTS "stripe_payment_link_url_no_trial" varchar
     `);
+    await pool.query(`
+      ALTER TABLE "subscription_transactions" ADD COLUMN IF NOT EXISTS "stripe_invoice_id" varchar
+    `);
   }
 
   /** Call once at server startup so user rows match schema before any getUser(). */
