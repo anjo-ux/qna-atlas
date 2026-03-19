@@ -172,7 +172,9 @@ export function SubscriptionTransactionHistoryDialog({
                     <div className="min-w-0 space-y-0.5">
                       {t.isInstitutionalGrant ? (
                         <>
-                          <p className="font-semibold text-foreground">Institutional Access</p>
+                          <p className={cn('font-semibold', canceled ? 'text-destructive' : 'text-foreground')}>
+                            {canceled ? 'Cancelled' : 'Institutional Access'}
+                          </p>
                           <p className="text-muted-foreground text-xs">{t.planName}</p>
                           <p className="text-xs text-muted-foreground">
                             {t.periodStart && t.periodEnd
@@ -188,7 +190,10 @@ export function SubscriptionTransactionHistoryDialog({
                             {t.planName.replace(/-/g, ' ')}
                           </p>
                           <p className="text-muted-foreground text-xs">
-                            {formatMoney(t.amountCents)} - {statusLabel}
+                            {formatMoney(t.amountCents)}{' '}
+                            <span className={cn(canceled && 'text-destructive font-medium')}>
+                              - {statusLabel}
+                            </span>
                           </p>
                           {periodLine && (
                             <p className="text-xs text-muted-foreground">{periodLine}</p>
@@ -200,11 +205,11 @@ export function SubscriptionTransactionHistoryDialog({
                       )}
                     </div>
                     <div className="shrink-0 flex sm:flex-col gap-2 sm:items-end">
-                      {t.isInstitutionalGrant ? (
+                      {t.isInstitutionalGrant && !canceled ? (
                         <span className="text-xs text-muted-foreground font-medium px-1">
                           Institutional Access
                         </span>
-                      ) : hasUrl ? (
+                      ) : t.isInstitutionalGrant ? null : hasUrl ? (
                         <Button variant="outline" size="sm" asChild className="gap-1 font-medium">
                           <a href={t.stripeReceiptOrInvoiceUrl!} target="_blank" rel="noopener noreferrer">
                             View Invoice

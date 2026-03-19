@@ -1660,26 +1660,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
         transactions = transactions.filter((row) => row.hasStripeIds);
       }
 
-      if (institutionalActive) {
+      if (hasInstitutionalRedemption) {
         const aff = (user.institutionalAccessAffiliation ?? "").trim() || "Institutional Access";
-        /** Codes default to +365 days from redeem; we don't store redeem time — approximate start for display. */
-        const institutionalPeriodStartIso =
-          instExp != null
-            ? new Date(instExp.getTime() - 365 * 24 * 60 * 60 * 1000).toISOString()
+        const institutionalEndIso = instExp
+          ? instExp.toISOString()
+          : user.updatedAt
+            ? new Date(user.updatedAt).toISOString()
             : null;
+        /** Codes default to +365 days from redeem; if canceled, end date is cancellation timestamp. */
+        const institutionalPeriodStartIso =
+          institutionalEndIso != null
+            ? new Date(new Date(institutionalEndIso).getTime() - 365 * 24 * 60 * 60 * 1000).toISOString()
+            : null;
+        const institutionalCanceled =
+          !institutionalActive &&
+          (!!institutionalEndIso ? new Date(institutionalEndIso).getTime() <= now.getTime() : true);
         transactions.unshift({
           id: "__institutional_access__",
           planName: aff,
           planDurationMonths: null,
           amountCents: 0,
-          status: "completed",
+          status: institutionalCanceled ? "canceled" : "completed",
           createdAt: null,
           periodStart: institutionalPeriodStartIso,
-          periodEnd: instExp ? instExp.toISOString() : null,
-          canceledAt: null,
+          periodEnd: institutionalEndIso,
+          canceledAt: institutionalCanceled ? institutionalEndIso : null,
           stripeReceiptOrInvoiceUrl: null,
           hasStripeIds: false,
           isInstitutionalGrant: true as const,
+          isTrialPeriod: false as const,
         });
       }
 
@@ -1751,15 +1760,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
        * Otherwise stale completed transactions make userHasPersonalSubscriptionAccess true, we run Stripe cancel,
        * return the wrong toast, and leave institutional fields intact — user keeps access.
        */
-      if (await userIsInstitutionalPrimaryAccess(userId, user, now)) {
+      const hasRedemption = await storage.userHasAnyInstitutionalRedemption(userId);
+      const institutionalActive = institutionalAccessPeriodActive(hasRedemption, user, now);
+      if (institutionalActive || (await userIsInstitutionalPrimaryAccess(userId, user, now))) {
+        const trialEndsAt = user.trialEndsAt ? new Date(user.trialEndsAt) : null;
+        const newStatus = trialEndsAt && trialEndsAt > now ? "trial" : "expired";
         await storage.updateUserProfile(userId, {
           institutionalAccessAffiliation: null as any,
-          institutionalAccessExpiresAt: null as any,
-          subscriptionStatus: "expired" as any,
-          subscriptionPlan: null as any,
-          subscriptionEndsAt: null as any,
-          trialEndsAt: null as any,
-          stripeSubscriptionId: null as any,
+          /** Keep cancellation timestamp for transaction-history period end. */
+          institutionalAccessExpiresAt: now as any,
+          subscriptionStatus: newStatus as any,
         });
         return res.json({
           message:
@@ -1777,7 +1787,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      const hasRedemption = await storage.userHasAnyInstitutionalRedemption(userId);
       const hasInstitutionalFields = !!(
         user.institutionalAccessAffiliation?.trim() || user.institutionalAccessExpiresAt
       );
@@ -1786,7 +1795,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const newStatus = trialEndsAt && trialEndsAt > now ? "trial" : "expired";
         await storage.updateUserProfile(userId, {
           institutionalAccessAffiliation: null as any,
-          institutionalAccessExpiresAt: null as any,
+          institutionalAccessExpiresAt: now as any,
           subscriptionStatus: newStatus,
         });
         return res.json({
