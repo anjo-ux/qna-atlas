@@ -902,21 +902,27 @@ export class DatabaseStorage implements IStorage {
     return active[0];
   }
 
-  /** Cancel subscription: turn off Stripe billing if present, keep access until subscriptionEndsAt. User content (responses, notes, bookmarks) is never deleted. */
+  /**
+   * Cancel personal subscription immediately: Stripe subscription canceled now (no trial conversion / no renewal),
+   * Atlas access ends immediately. User content (responses, notes, bookmarks) is never deleted.
+   */
   async cancelUserSubscription(userId: string): Promise<void> {
     const [user] = await db.select().from(users).where(eq(users.id, userId));
     if (!user) return;
 
-    if (user.stripeSubscriptionId) {
-      const { cancelStripeSubscriptionAtPeriodEnd } = await import("./stripe");
-      await cancelStripeSubscriptionAtPeriodEnd(user.stripeSubscriptionId);
+    if (user.stripeSubscriptionId?.trim()) {
+      const { cancelStripeSubscriptionImmediately } = await import("./stripe");
+      await cancelStripeSubscriptionImmediately(user.stripeSubscriptionId.trim());
     }
 
     await db
       .update(users)
       .set({
-        subscriptionStatus: 'canceled',
-        stripeSubscriptionId: undefined,
+        subscriptionStatus: "expired",
+        subscriptionPlan: null as any,
+        subscriptionEndsAt: null as any,
+        trialEndsAt: null as any,
+        stripeSubscriptionId: null as any,
         updatedAt: new Date(),
       })
       .where(eq(users.id, userId));

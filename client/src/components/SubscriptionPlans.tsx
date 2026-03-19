@@ -287,8 +287,21 @@ export function SubscriptionPlans({ open = true, onOpenChange, asDialog = true, 
                   <h3 className={cn('font-semibold', contentTitleClass)}>Institutional Plan</h3>
                   {user?.institutionalAccessAffiliation?.trim() ? (
                     <>
-                      <p className={cn('text-sm mt-1', contentMutedClass)}>Current University: <span className="font-medium text-white">{user.institutionalAccessAffiliation.trim()}</span></p>
-                      <p className="text-sm mt-2 text-yellow-500 dark:text-yellow-400 font-medium">Warning, entering a new code will invalidate your prior subscription.</p>
+                      <p className={cn('text-sm mt-1', contentMutedClass)}>
+                        Current University:{' '}
+                        <span className={cn('font-medium', contentTitleClass)}>{user.institutionalAccessAffiliation.trim()}</span>
+                      </p>
+                      <p
+                        className={cn(
+                          'text-sm mt-2 rounded-md border px-3 py-2 font-medium',
+                          isPage
+                            ? 'border-amber-300/90 bg-amber-50 text-amber-950 dark:border-amber-800 dark:bg-amber-950/50 dark:text-amber-100'
+                            : 'border-amber-600/50 bg-amber-950/40 text-amber-100 dark:text-amber-50'
+                        )}
+                        role="note"
+                      >
+                        Warning - entering a new code will invalidate your prior subscription.
+                      </p>
                     </>
                   ) : (
                     <p className={cn('text-sm mt-1', contentMutedClass)}>Enter your institution code (provided by your program director) to unlock the platform.</p>

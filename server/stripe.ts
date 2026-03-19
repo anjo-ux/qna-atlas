@@ -295,3 +295,47 @@ export async function cancelStripeSubscriptionAtPeriodEnd(subscriptionId: string
     return false;
   }
 }
+
+/** Stripe clients that may own subscriptions (test default + optional live key). */
+function stripeClientsForSubscriptionMutations(): Stripe[] {
+  const clients: Stripe[] = [];
+  if (stripe) clients.push(stripe);
+  const live = STRIPE_LIVE_SECRET_KEY?.trim();
+  if (live?.startsWith("sk_live_") && !STRIPE_SECRET_KEY?.startsWith("sk_live_")) {
+    clients.push(new Stripe(live));
+  }
+  return clients;
+}
+
+function isStripeSubscriptionMissingError(err: unknown): boolean {
+  const e = err as { code?: string; message?: string };
+  if (e?.code === "resource_missing") return true;
+  const m = typeof e?.message === "string" ? e.message : "";
+  return m.includes("No such subscription") || m.includes("a similar object exists in live mode");
+}
+
+/**
+ * Cancel a Stripe subscription immediately (no further invoices; trialing subs end without converting to paid).
+ * Tries default secret key then live key when both are configured.
+ */
+export async function cancelStripeSubscriptionImmediately(subscriptionId: string): Promise<boolean> {
+  const clients = stripeClientsForSubscriptionMutations();
+  if (clients.length === 0) return false;
+  let lastErr: unknown;
+  for (let i = 0; i < clients.length; i++) {
+    try {
+      await clients[i].subscriptions.cancel(subscriptionId);
+      return true;
+    } catch (err: unknown) {
+      lastErr = err;
+      if (isStripeSubscriptionMissingError(err) && i < clients.length - 1) continue;
+      if (isStripeSubscriptionMissingError(err)) {
+        console.warn("Stripe immediate cancel: subscription not found;", subscriptionId);
+        return false;
+      }
+      console.error("Stripe immediate cancel error:", (err as { message?: string })?.message);
+      throw err;
+    }
+  }
+  return false;
+}

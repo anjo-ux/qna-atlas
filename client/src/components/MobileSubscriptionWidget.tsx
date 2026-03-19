@@ -10,7 +10,19 @@ import {
   DialogContent,
   DialogTrigger,
 } from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { SubscriptionPlans } from '@/components/SubscriptionPlans';
+
+const PAID_PERSONAL_PLANS = ['monthly', '6-month', '1-year'] as const;
 
 interface SubscriptionDetails {
   plan?: string;
@@ -29,6 +41,7 @@ interface MobileSubscriptionWidgetProps {
 
 export function MobileSubscriptionWidget({ hasEmoryAccess = false }: MobileSubscriptionWidgetProps) {
   const [isChangingPlan, setIsChangingPlan] = useState(false);
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
 
   const { data: subscription } = useQuery<SubscriptionDetails>({
     queryKey: ['/api/subscription/details'],
@@ -65,7 +78,11 @@ export function MobileSubscriptionWidget({ hasEmoryAccess = false }: MobileSubsc
   const isTrial = subscription?.status === 'trial';
   const isActive = subscription?.status === 'active';
   const isCanceled = subscription?.status === 'canceled';
-  const isTrialOrExpired = !subscription?.plan || subscription?.status === 'trial' || subscription?.status === 'expired';
+  const hasPaidPlanName =
+    !!subscription?.plan && PAID_PERSONAL_PLANS.includes(subscription.plan as (typeof PAID_PERSONAL_PLANS)[number]);
+  const isTrialOrExpired =
+    isInstitutional ? false : !hasPaidPlanName || subscription?.status === 'expired';
+  const showCancelSubscription = !isCanceled && (isInstitutional || hasPaidPlanName);
   const showUnlimitedTime = subscription?.daysRemaining == null;
 
   const formatDate = (iso?: string) => iso ? new Date(iso).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : '';
@@ -201,23 +218,52 @@ export function MobileSubscriptionWidget({ hasEmoryAccess = false }: MobileSubsc
             </DialogContent>
           </Dialog>
 
-          {!isTrialOrExpired && !isCanceled && (
-            <Button
-              variant="outline"
-              className="w-full text-destructive hover:text-destructive"
-              onClick={() => {
-                const message = isInstitutional
-                  ? 'Remove institutional access? Your access will end immediately. You can re-enter a code anytime to reactivate.'
-                  : 'Are you sure you want to cancel your subscription? You will keep access until the end of your billing period.';
-                if (confirm(message)) {
-                  cancelSubscriptionMutation.mutate();
-                }
-              }}
-              disabled={cancelSubscriptionMutation.isPending}
-              data-testid="button-mobile-cancel"
-            >
-              {isInstitutional ? 'Remove Access' : 'Cancel'}
-            </Button>
+          {showCancelSubscription && (
+            <>
+              <Button
+                variant="outline"
+                className="w-full text-destructive hover:text-destructive"
+                onClick={() => setCancelDialogOpen(true)}
+                disabled={cancelSubscriptionMutation.isPending}
+                data-testid="button-mobile-cancel"
+              >
+                {isInstitutional ? 'Remove Access' : 'Cancel Subscription'}
+              </Button>
+              <AlertDialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>
+                      {isInstitutional ? 'Remove institutional access?' : 'Cancel subscription?'}
+                    </AlertDialogTitle>
+                    <AlertDialogDescription className="space-y-2">
+                      {isInstitutional ? (
+                        <>
+                          Your institutional access will end immediately. You can enter a code again anytime to
+                          reactivate.
+                        </>
+                      ) : (
+                        <>
+                          This ends your subscription immediately on Atlas and in Stripe. If you are in a free
+                          trial, it ends now and you will <strong>not</strong> be charged.
+                        </>
+                      )}
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Keep {isInstitutional ? 'access' : 'subscription'}</AlertDialogCancel>
+                    <AlertDialogAction
+                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      onClick={() => {
+                        cancelSubscriptionMutation.mutate();
+                        setCancelDialogOpen(false);
+                      }}
+                    >
+                      {isInstitutional ? 'Remove access' : 'Yes, cancel now'}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </>
           )}
         </div>
       </div>

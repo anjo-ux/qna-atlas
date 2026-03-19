@@ -7,8 +7,46 @@ import { createTesterRedirectToken, verifyTesterRedirectToken, ATLAS_TRAINER_CAL
 import { insertTestSessionSchema, updateTestSessionSchema, insertQuestionResponseSchema, insertQuestionSchema } from "@shared/schemas";
 import { validateQuestionFormat, contentRulesForGenerated } from "@shared/questionFormat";
 import { subsectionOrder, subsectionTitles } from "@shared/questionImport";
+import type { User, SubscriptionTransaction } from "@shared/schema";
 
 const ADMIN_CODE = process.env.ADMIN_CODE || "1127";
+
+/** Paid personal plans (Stripe / checkout); institutional is excluded. */
+const PAID_SUBSCRIPTION_PLAN_NAMES = new Set([
+  "monthly",
+  "6-month",
+  "1-year",
+  "1-month",
+  "3-month",
+]);
+
+/**
+ * True when the user should be treated as on a personal paid/trial subscription path.
+ * Takes precedence over institutional access for API + UI so a paid sub overrides an old institutional grant.
+ */
+function userHasPersonalSubscriptionAccess(
+  user: User | undefined,
+  activeTx?: SubscriptionTransaction | undefined
+): boolean {
+  if (!user) return false;
+  const now = Date.now();
+  if (user.stripeSubscriptionId?.trim()) return true;
+
+  const plan = user.subscriptionPlan ?? undefined;
+  const hasNamedPaidPlan = plan ? PAID_SUBSCRIPTION_PLAN_NAMES.has(plan) : false;
+  const txEndOk = !!(activeTx && new Date(activeTx.endDate).getTime() > now);
+
+  if (!hasNamedPaidPlan) {
+    return txEndOk;
+  }
+
+  const st = user.subscriptionStatus || "trial";
+  if (st === "active") return true;
+  if (st === "trial" && user.trialEndsAt && new Date(user.trialEndsAt).getTime() > now) return true;
+  if (st === "canceled" && user.subscriptionEndsAt && new Date(user.subscriptionEndsAt).getTime() > now)
+    return true;
+  return txEndOk;
+}
 const QUESTION_IMPORT_API_KEY = process.env.QUESTION_IMPORT_API_KEY;
 
 function requireAdminCode(req: any): boolean {
@@ -440,7 +478,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       const hasInstitutionalAccess = hasInstitutionalAffiliation && !institutionalExpired;
-      if (hasInstitutionalAccess) {
+      const activeTxEarly = await storage.getUserActiveSubscription(userId);
+      if (hasInstitutionalAccess && !userHasPersonalSubscriptionAccess(user, activeTxEarly)) {
         const daysRemaining = institutionalExpiresAt
           ? Math.max(0, Math.ceil((institutionalExpiresAt.getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
           : -1;
@@ -1321,8 +1360,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const institutionalExpiresAt = user?.institutionalAccessExpiresAt ? new Date(user.institutionalAccessExpiresAt) : null;
       const institutionalExpired = institutionalExpiresAt !== null && institutionalExpiresAt <= new Date();
       const hasInstitutional = hasInstitutionalAffiliation && !institutionalExpired;
+      const activeSubscription = await storage.getUserActiveSubscription(userId);
 
-      if (hasInstitutional) {
+      if (hasInstitutional && !userHasPersonalSubscriptionAccess(user, activeSubscription)) {
         const daysRemaining = institutionalExpiresAt
           ? Math.max(0, Math.ceil((institutionalExpiresAt.getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
           : null;
@@ -1338,7 +1378,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const now = new Date();
-      const activeSubscription = await storage.getUserActiveSubscription(userId);
       const transactions = await storage.getUserSubscriptionTransactions(userId);
       const plans = await storage.getSubscriptionPlans();
 
@@ -1464,7 +1503,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Cancel subscription (institutional: ends instantly; paid: Stripe billing off, access until period end).
+  // Cancel subscription (institutional: ends instantly; paid: immediate Stripe + Atlas end, no further charges).
   // User data (progress, notes, bookmarks, etc.) is never deleted; re-subscribing restores full access to the same account.
   app.post('/api/subscription/cancel', isAuthenticated, async (req: any, res) => {
     try {
@@ -1472,6 +1511,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const user = await storage.getUser(userId);
       if (!user) {
         return res.status(404).json({ message: "User not found." });
+      }
+
+      const activeTx = await storage.getUserActiveSubscription(userId);
+      if (userHasPersonalSubscriptionAccess(user, activeTx)) {
+        await storage.cancelUserSubscription(userId);
+        return res.json({
+          message:
+            "Your subscription was canceled immediately. You will not be charged again for this plan. If you were in a free trial, it has ended and you will not be billed.",
+        });
       }
 
       if (user.institutionalAccessAffiliation?.trim()) {
@@ -1487,7 +1535,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       await storage.cancelUserSubscription(userId);
-      res.json({ message: "Subscription canceled. You have access until the end of your billing period." });
+      res.json({
+        message:
+          "Your subscription was canceled immediately. You will not be charged again for this plan. If you were in a free trial, it has ended and you will not be billed.",
+      });
     } catch (error) {
       console.error("Error canceling subscription:", error);
       res.status(500).json({ message: "Failed to cancel subscription." });
