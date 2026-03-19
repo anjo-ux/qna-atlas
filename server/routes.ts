@@ -1445,6 +1445,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           ? Math.max(0, Math.ceil((institutionalExpiresAt.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)))
           : null;
         const txs = await storage.getUserSubscriptionTransactions(userId);
+        /** Match GET /api/subscription/transactions: synthetic institutional row + Stripe-backed rows only when filtering legacy rows. */
+        const stripeBackedCount = txs.filter(
+          (t) => !!(t.stripePaymentIntentId?.trim() || t.stripeInvoiceId?.trim())
+        ).length;
+        const transactionCountForHistory = 1 + stripeBackedCount;
         return res.json({
           plan: 'institutional',
           status: 'institutional',
@@ -1452,7 +1457,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           endsAt: institutionalExpiresAt ? institutionalExpiresAt.toISOString() : undefined,
           trialEndsAt: undefined,
           daysRemaining,
-          transactionCount: txs.length,
+          transactionCount: transactionCountForHistory,
         });
       }
 

@@ -101,7 +101,7 @@ export function SubscriptionManager() {
           <p className="text-xs text-muted-foreground font-medium">Current Plan</p>
           {isInstitutional ? (
             <div className="mt-1">
-              <p className="font-semibold text-foreground">Institutional Plan</p>
+              <p className="font-semibold text-foreground">Institutional Access</p>
               <p className="text-sm text-muted-foreground">
                 {institutionalDisplayName(subscription?.institutionalAffiliation ?? '')}
               </p>

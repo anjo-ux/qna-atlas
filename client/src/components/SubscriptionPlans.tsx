@@ -299,7 +299,7 @@ export function SubscriptionPlans({ open = true, onOpenChange, asDialog = true, 
             <div style={{ minHeight: CONTENT_MIN_HEIGHT }} className="min-w-0">
               {selectedIndex === 3 ? (
                 <div className={cn('p-4 pb-6', contentBoxClass)}>
-                  <h3 className={cn('font-semibold', contentTitleClass)}>Institutional Plan</h3>
+                  <h3 className={cn('font-semibold', contentTitleClass)}>Institutional Access</h3>
                   {institutionalRedeemLocked ? (
                     <>
                       {user?.institutionalAccessAffiliation?.trim() ? (

@@ -106,7 +106,7 @@ export function MobileSubscriptionWidget({ hasEmoryAccess = false }: MobileSubsc
             <p className="text-xs text-muted-foreground font-medium">Current Plan</p>
             {isInstitutional ? (
               <div className="mt-1 min-w-0">
-                <p className="font-semibold text-foreground">Institutional Plan</p>
+                <p className="font-semibold text-foreground">Institutional Access</p>
                 <p className="text-sm text-muted-foreground truncate" title={institutionalDisplayName(subscription?.institutionalAffiliation ?? '')}>
                   {institutionalDisplayName(subscription?.institutionalAffiliation ?? '')}
                 </p>
@@ -180,7 +180,10 @@ export function MobileSubscriptionWidget({ hasEmoryAccess = false }: MobileSubsc
         </div>
 
         {/* Subscription Details / History */}
-        {((subscription?.transactionCount !== undefined && subscription.transactionCount > 0) || subscription?.endsAt || subscription?.trialEndsAt) && (
+        {((subscription?.transactionCount !== undefined && subscription.transactionCount > 0) ||
+          subscription?.endsAt ||
+          subscription?.trialEndsAt ||
+          isInstitutional) && (
           <div
             className={cn(
               'bg-muted/30 rounded-lg p-3 border border-border',
@@ -188,8 +191,8 @@ export function MobileSubscriptionWidget({ hasEmoryAccess = false }: MobileSubsc
                 subscription.transactionCount > 0 &&
                 'cursor-pointer hover:bg-muted/50 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring'
             )}
-            role={subscription?.transactionCount ? 'button' : undefined}
-            tabIndex={subscription?.transactionCount ? 0 : undefined}
+            role={subscription?.transactionCount && subscription.transactionCount > 0 ? 'button' : undefined}
+            tabIndex={subscription?.transactionCount && subscription.transactionCount > 0 ? 0 : undefined}
             aria-label={
               subscription?.transactionCount
                 ? 'View subscription transaction history and Stripe invoices'
@@ -228,6 +231,26 @@ export function MobileSubscriptionWidget({ hasEmoryAccess = false }: MobileSubsc
                 <div className="flex justify-between text-xs">
                   <span className="text-foreground">{isCanceled ? 'Subscription Ends' : 'Renewal Date'}</span>
                   <span className="text-muted-foreground">{formatDateMMDDYYYY(subscription.endsAt)}</span>
+                </div>
+              )}
+              {isInstitutional && subscription?.institutionalAffiliation?.trim() && (
+                <div className="flex justify-between gap-2 text-xs min-w-0">
+                  <span className="text-foreground shrink-0">Institution</span>
+                  <span className="text-muted-foreground text-right truncate" title={subscription.institutionalAffiliation.trim()}>
+                    {subscription.institutionalAffiliation.trim()}
+                  </span>
+                </div>
+              )}
+              {isInstitutional && subscription?.endsAt && (
+                <div className="flex justify-between text-xs">
+                  <span className="text-foreground">Access Ends</span>
+                  <span className="text-muted-foreground">{formatDateMMDDYYYY(subscription.endsAt)}</span>
+                </div>
+              )}
+              {isInstitutional && !subscription?.endsAt && (
+                <div className="flex justify-between text-xs">
+                  <span className="text-foreground">Access</span>
+                  <span className="text-muted-foreground">Unlimited</span>
                 </div>
               )}
               {subscription?.transactionCount !== undefined && subscription.transactionCount > 0 && (
