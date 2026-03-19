@@ -8,6 +8,7 @@ import {
   timestamp,
   varchar,
   boolean,
+  uniqueIndex,
 } from "drizzle-orm/pg-core";
 
 // Session storage table
@@ -33,9 +34,9 @@ export const users = pgTable("users", {
   avatarIcon: varchar("avatar_icon").default('smile'),
   themePreference: varchar("theme_preference").default('light'), // 'light' or 'dark'
   institutionalAffiliation: varchar("institutional_affiliation"), // Profile only: user's registered/display affiliation (settings, signup)
-  institutionalAccessAffiliation: varchar("institutional_access_affiliation"), // Access only: set by redeeming code; grants subscription access
-  institutionalAccessExpiresAt: timestamp("institutional_access_expires_at"), // When set (e.g. Emory 365-day codes), access ends at this time; null = unlimited
-  /** Set once when an institutional code is redeemed (or legacy backfill); never cleared — blocks further code redeems on this account. */
+  institutionalAccessAffiliation: varchar("institutional_access_affiliation"), // Display name from last code redeem; access requires redemption row + future expires_at
+  institutionalAccessExpiresAt: timestamp("institutional_access_expires_at"), // End of code-granted access; must be in the future (with a redemption) to unlock
+  /** Legacy timestamp; redemption limits use `user_institutional_code_redemptions` (per code per account). */
   institutionalCodeRedeemedAt: timestamp("institutional_code_redeemed_at"),
   subscriptionStatus: varchar("subscription_status").default('trial'), // trial, active, expired
   subscriptionPlan: varchar("subscription_plan"), // 1-month, 3-month, 6-month
@@ -277,13 +278,36 @@ export const institutionalCodes = pgTable("institutional_codes", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   codeHash: varchar("code_hash").notNull().unique(),
   institutionName: varchar("institution_name").notNull(),
+  /** When false, no new redemptions; existing users keep access until expiry / removal. */
+  active: boolean("active").notNull().default(true),
   createdAt: timestamp("created_at").defaultNow(),
 }, (table) => [
   index("idx_institutional_codes_code_hash").on(table.codeHash),
+  index("idx_institutional_codes_active").on(table.active),
 ]);
 
 export type InstitutionalCode = typeof institutionalCodes.$inferSelect;
 export type InsertInstitutionalCode = typeof institutionalCodes.$inferInsert;
+
+/** Tracks which institutional codes each user has redeemed (same user cannot redeem the same code twice; unlimited other accounts may use the same code while it is active). */
+export const userInstitutionalCodeRedemptions = pgTable(
+  "user_institutional_code_redemptions",
+  {
+    id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+    userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+    institutionalCodeId: varchar("institutional_code_id")
+      .notNull()
+      .references(() => institutionalCodes.id, { onDelete: "cascade" }),
+    redeemedAt: timestamp("redeemed_at").defaultNow(),
+  },
+  (table) => [
+    uniqueIndex("uidx_user_institutional_code").on(table.userId, table.institutionalCodeId),
+    index("idx_user_institutional_redemptions_user_id").on(table.userId),
+  ]
+);
+
+export type UserInstitutionalCodeRedemption = typeof userInstitutionalCodeRedemptions.$inferSelect;
+export type InsertUserInstitutionalCodeRedemption = typeof userInstitutionalCodeRedemptions.$inferInsert;
 
 // Question reports - user-reported issues with questions (also emailed to support)
 export const questionReports = pgTable("question_reports", {

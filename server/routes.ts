@@ -74,19 +74,43 @@ function userHasCoherentPersonalPaidRow(user: User | undefined, now: Date): bool
 }
 
 /**
- * Same rule as GET /api/subscription/details institutional branch: code-based access is primary,
+ * Institutional access is granted only by redeeming a code (`user_institutional_code_redemptions`),
+ * not by profile `institutional_affiliation`. Requires a future `institutional_access_expires_at`.
+ */
+function institutionalAccessPeriodActive(
+  hasCodeRedemption: boolean,
+  user: User | undefined,
+  now: Date
+): boolean {
+  if (!hasCodeRedemption || !user) return false;
+  const exp = user.institutionalAccessExpiresAt ? new Date(user.institutionalAccessExpiresAt) : null;
+  if (!exp || exp.getTime() <= now.getTime()) return false;
+  return true;
+}
+
+/**
+ * Same rule as GET /api/subscription/details institutional branch: code redemption is required,
  * and stale personal/Stripe rows must not send "Remove access" through the paid cancel path.
  */
-function userIsInstitutionalPrimaryAccess(user: User | undefined, now: Date): boolean {
+async function userIsInstitutionalPrimaryAccess(
+  userId: string,
+  user: User | undefined,
+  now: Date
+): Promise<boolean> {
   if (!user) return false;
-  const hasInstitutionalAffiliation = !!user.institutionalAccessAffiliation?.trim();
-  const institutionalExpiresAt = user.institutionalAccessExpiresAt
-    ? new Date(user.institutionalAccessExpiresAt)
-    : null;
-  const institutionalExpired =
-    institutionalExpiresAt !== null && institutionalExpiresAt.getTime() <= now.getTime();
-  const hasInstitutionalAccess = hasInstitutionalAffiliation && !institutionalExpired;
-  return hasInstitutionalAccess && !userHasCoherentPersonalPaidRow(user, now);
+  const hasRedemption = await storage.userHasAnyInstitutionalRedemption(userId);
+  if (!institutionalAccessPeriodActive(hasRedemption, user, now)) return false;
+  return !userHasCoherentPersonalPaidRow(user, now);
+}
+
+async function loadUserForSubscription(userId: string): Promise<{
+  user: User | undefined;
+  hasInstitutionalRedemption: boolean;
+}> {
+  const user = await storage.getUser(userId);
+  if (!user) return { user: undefined, hasInstitutionalRedemption: false };
+  const hasInstitutionalRedemption = await storage.userHasAnyInstitutionalRedemption(userId);
+  return { user, hasInstitutionalRedemption };
 }
 
 const QUESTION_IMPORT_API_KEY = process.env.QUESTION_IMPORT_API_KEY;
@@ -529,22 +553,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.json({ status: 'none', daysRemaining: 0, trialEndsAt: null, isLocked: false });
       }
       
-      const user = await storage.getUser(userId);
+      const { user, hasInstitutionalRedemption } = await loadUserForSubscription(userId);
       if (!user) {
         return res.json({ status: 'none', daysRemaining: 0, trialEndsAt: null, isLocked: false });
       }
 
-      // Access-granting institution only (set by code redemption; independent of profile affiliation)
-      const hasInstitutionalAffiliation = !!user.institutionalAccessAffiliation?.trim();
-      const institutionalExpiresAt = user.institutionalAccessExpiresAt ? new Date(user.institutionalAccessExpiresAt) : null;
-      const institutionalExpired = institutionalExpiresAt !== null && institutionalExpiresAt <= new Date();
-      if (institutionalExpired && hasInstitutionalAffiliation) {
+      const institutionalExpiresAt = user.institutionalAccessExpiresAt
+        ? new Date(user.institutionalAccessExpiresAt)
+        : null;
+      const institutionalExpired =
+        institutionalExpiresAt !== null && institutionalExpiresAt.getTime() <= Date.now();
+      /** Clear display name after natural expiry; keep expires_at so we never re-backfill access from redemption row alone. */
+      if (institutionalExpired && hasInstitutionalRedemption && user.institutionalAccessAffiliation?.trim()) {
         await storage.updateUserProfile(userId, {
           institutionalAccessAffiliation: null as any,
-          institutionalAccessExpiresAt: null as any,
         });
       }
-      const hasInstitutionalAccess = hasInstitutionalAffiliation && !institutionalExpired;
+      const hasInstitutionalAccess = institutionalAccessPeriodActive(hasInstitutionalRedemption, user, new Date());
 
       const now = new Date();
       const trialEndsAt = user.trialEndsAt ? new Date(user.trialEndsAt) : null;
@@ -585,7 +610,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           daysRemaining: daysInst,
           trialEndsAt: null,
           isLocked: false,
-          subscriptionType: "Institutional Affiliation",
+          subscriptionType: "Institutional Access",
         });
       }
 
@@ -1428,11 +1453,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/subscription/details', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.session?.userId;
-      const user = await storage.getUser(userId);
-      const hasInstitutionalAffiliation = !!user?.institutionalAccessAffiliation?.trim();
-      const institutionalExpiresAt = user?.institutionalAccessExpiresAt ? new Date(user.institutionalAccessExpiresAt) : null;
-      const institutionalExpired = institutionalExpiresAt !== null && institutionalExpiresAt <= new Date();
-      const hasInstitutional = hasInstitutionalAffiliation && !institutionalExpired;
+      const { user, hasInstitutionalRedemption } = await loadUserForSubscription(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found." });
+      }
+      const institutionalExpiresAt = user.institutionalAccessExpiresAt
+        ? new Date(user.institutionalAccessExpiresAt)
+        : null;
+      const hasInstitutional = institutionalAccessPeriodActive(hasInstitutionalRedemption, user, new Date());
       const activeSubscription = await storage.getUserActiveSubscription(userId);
       const now = new Date();
 
@@ -1553,7 +1581,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/subscription/transactions", isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.session?.userId;
-      const user = await storage.getUser(userId);
+      const { user, hasInstitutionalRedemption } = await loadUserForSubscription(userId);
       if (!user) {
         return res.json({ transactions: [] });
       }
@@ -1564,10 +1592,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const planNameById = new Map(plans.map((p) => [p.id, p.name]));
       const { getReceiptOrInvoiceUrlForTransaction } = await import("./stripe");
 
-      const hasInstitutionalAffiliation = !!user.institutionalAccessAffiliation?.trim();
       const instExp = user.institutionalAccessExpiresAt ? new Date(user.institutionalAccessExpiresAt) : null;
-      const institutionalExpired = instExp !== null && instExp.getTime() <= now.getTime();
-      const institutionalActive = hasInstitutionalAffiliation && !institutionalExpired;
+      const institutionalActive = institutionalAccessPeriodActive(hasInstitutionalRedemption, user, now);
       const personalCoherent = userHasCoherentPersonalPaidRow(user, now);
 
       const planById = new Map(plans.map((p) => [p.id, p]));
@@ -1606,7 +1632,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       if (institutionalActive) {
-        const aff = user.institutionalAccessAffiliation!.trim();
+        const aff = (user.institutionalAccessAffiliation ?? "").trim() || "Institutional Access";
         /** Codes default to +365 days from redeem; we don't store redeem time — approximate start for display. */
         const institutionalPeriodStartIso =
           instExp != null
@@ -1696,7 +1722,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
        * Otherwise stale completed transactions make userHasPersonalSubscriptionAccess true, we run Stripe cancel,
        * return the wrong toast, and leave institutional fields intact — user keeps access.
        */
-      if (userIsInstitutionalPrimaryAccess(user, now)) {
+      if (await userIsInstitutionalPrimaryAccess(userId, user, now)) {
         await storage.updateUserProfile(userId, {
           institutionalAccessAffiliation: null as any,
           institutionalAccessExpiresAt: null as any,
@@ -1705,11 +1731,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           subscriptionEndsAt: null as any,
           trialEndsAt: null as any,
           stripeSubscriptionId: null as any,
-          institutionalCodeRedeemedAt: user.institutionalCodeRedeemedAt ?? new Date(),
         });
         return res.json({
           message:
-            "Institutional access removed. Subscribe for personal access to restore the platform. This account cannot redeem another institutional code.",
+            "Institutional access removed. Subscribe for personal access, or redeem a different institution code if your program provides one.",
           removedInstitutional: true,
         });
       }
@@ -1723,18 +1748,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      if (user.institutionalAccessAffiliation?.trim()) {
+      const hasRedemption = await storage.userHasAnyInstitutionalRedemption(userId);
+      const hasInstitutionalFields = !!(
+        user.institutionalAccessAffiliation?.trim() || user.institutionalAccessExpiresAt
+      );
+      if (hasRedemption || hasInstitutionalFields) {
         const trialEndsAt = user.trialEndsAt ? new Date(user.trialEndsAt) : null;
         const newStatus = trialEndsAt && trialEndsAt > now ? "trial" : "expired";
         await storage.updateUserProfile(userId, {
           institutionalAccessAffiliation: null as any,
           institutionalAccessExpiresAt: null as any,
           subscriptionStatus: newStatus,
-          institutionalCodeRedeemedAt: user.institutionalCodeRedeemedAt ?? new Date(),
         });
         return res.json({
           message:
-            "Institutional access removed. Subscribe for personal access to restore the platform. This account cannot redeem another institutional code.",
+            "Institutional access removed. Subscribe for personal access, or redeem a different institution code if your program provides one.",
           removedInstitutional: true,
         });
       }
@@ -1754,33 +1782,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/subscription/institutional-code', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.session?.userId;
-      const user = await storage.getUser(userId);
-      if (!user) {
-        return res.status(404).json({ message: "User not found." });
-      }
-      if (user.institutionalCodeRedeemedAt) {
-        return res.status(403).json({
-          message:
-            "This account has already redeemed an institutional access code. Institutional codes can only be used once per account. Subscribe for personal access or contact support if you need help.",
-        });
-      }
       const { code } = req.body;
       const raw = typeof code === 'string' ? code.trim() : '';
       if (!raw) {
         return res.status(400).json({ message: "Code is required." });
       }
-      const institutionName = await storage.validateInstitutionalCode(raw);
-      if (!institutionName) {
+      const resolved = await storage.resolveInstitutionalCode(raw);
+      if (resolved.type === "not_found") {
         return res.status(400).json({ message: "Invalid code." });
+      }
+      if (resolved.type === "inactive") {
+        return res.status(400).json({
+          message:
+            "This institution code is no longer active. If you already redeemed it, your access is unchanged. Ask your program for a new code or subscribe for personal access.",
+        });
+      }
+      if (await storage.hasUserRedeemedInstitutionalCode(userId, resolved.codeId)) {
+        return res.status(400).json({
+          message:
+            "You have already redeemed this code on your account. Use a different code or subscribe for personal access.",
+        });
       }
       const expiresAt = new Date();
       expiresAt.setDate(expiresAt.getDate() + 365);
-      const redeemedNow = new Date();
       await storage.updateUserProfile(userId, {
-        institutionalAccessAffiliation: institutionName,
+        institutionalAccessAffiliation: resolved.institutionName,
         institutionalAccessExpiresAt: expiresAt,
-        institutionalCodeRedeemedAt: redeemedNow,
       });
+      await storage.recordInstitutionalCodeRedemption(userId, resolved.codeId);
       res.json({ message: "Access Granted!" });
     } catch (error: any) {
       console.error("Error redeeming institutional code:", error);
@@ -1788,6 +1817,79 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ? error.message
         : "Failed to redeem code.";
       res.status(500).json({ message });
+    }
+  });
+
+  /**
+   * Admin: institutional codes (header X-Admin-Code, same as other admin routes).
+   * Many accounts may redeem the same code while it is active; PATCH active:false stops new redemptions only.
+   */
+  app.get("/api/admin/institutional-codes", async (req: any, res) => {
+    if (!requireAdminCode(req)) {
+      return res.status(403).json({ message: "Invalid admin code." });
+    }
+    try {
+      const codes = await storage.getInstitutionalCodesAdmin();
+      res.json({ codes });
+    } catch (error) {
+      console.error("Error listing institutional codes:", error);
+      res.status(500).json({ message: "Failed to list codes." });
+    }
+  });
+
+  app.post("/api/admin/institutional-codes", async (req: any, res) => {
+    if (!requireAdminCode(req)) {
+      return res.status(403).json({ message: "Invalid admin code." });
+    }
+    try {
+      const plaintext = typeof req.body?.plaintextCode === "string" ? req.body.plaintextCode.trim() : "";
+      const institutionName =
+        typeof req.body?.institutionName === "string" ? req.body.institutionName.trim().slice(0, 200) : "";
+      if (!plaintext || !institutionName) {
+        return res.status(400).json({ message: "plaintextCode and institutionName are required." });
+      }
+      const { id } = await storage.createInstitutionalCodeAdmin(plaintext, institutionName);
+      res.status(201).json({
+        id,
+        message:
+          "Code created and active. The plaintext code is not stored — copy it now for the institution. Anyone with the code can redeem while it stays active.",
+      });
+    } catch (error: unknown) {
+      const err = error as { code?: string; message?: string };
+      const msg = typeof err?.message === "string" ? err.message : "";
+      if (err?.code === "23505" || msg.includes("unique") || msg.includes("duplicate")) {
+        return res.status(409).json({ message: "This exact code already exists in the system." });
+      }
+      console.error("Error creating institutional code:", error);
+      res.status(500).json({ message: "Failed to create code." });
+    }
+  });
+
+  app.patch("/api/admin/institutional-codes/:id", async (req: any, res) => {
+    if (!requireAdminCode(req)) {
+      return res.status(403).json({ message: "Invalid admin code." });
+    }
+    try {
+      const { id } = req.params;
+      if (!id || typeof id !== "string") {
+        return res.status(400).json({ message: "Invalid id." });
+      }
+      const active = req.body?.active;
+      if (typeof active !== "boolean") {
+        return res.status(400).json({ message: "JSON body must include active: true or false." });
+      }
+      const ok = await storage.setInstitutionalCodeActiveAdmin(id, active);
+      if (!ok) {
+        return res.status(404).json({ message: "Code not found." });
+      }
+      res.json({
+        message: active
+          ? "Code is active. New users can redeem it."
+          : "Code deactivated. New users cannot redeem it; existing subscribers keep access until it expires or they remove it.",
+      });
+    } catch (error) {
+      console.error("Error updating institutional code:", error);
+      res.status(500).json({ message: "Failed to update code." });
     }
   });
 

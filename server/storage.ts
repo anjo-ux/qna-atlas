@@ -11,6 +11,7 @@ import {
   subscriptionPlans,
   subscriptionTransactions,
   institutionalCodes,
+  userInstitutionalCodeRedemptions,
   questionReports,
   sections,
   subsections,
@@ -41,9 +42,10 @@ import { db, pool } from "./db";
 import { eq, and, asc, desc, lte, sql, count, inArray } from "drizzle-orm";
 
 const INSTITUTIONAL_CODE_SALT_ROUNDS = 10;
-let institutionalMigrationDone = false;
-let institutionalExpiresMigrationDone = false;
+let institutionalUserColumnsMigrationDone = false;
+let institutionalRedemptionConsistencyMigrationDone = false;
 let subscriptionResetDone = false;
+let userInstitutionalRedemptionsTableDone = false;
 
 export type SectionDto = {
   id: string;
@@ -144,6 +146,26 @@ export interface IStorage {
   // Institutional codes (hashed in DB; validate returns institution display name)
   ensureInstitutionalCodesSeed(): Promise<void>;
   validateInstitutionalCode(plainCode: string): Promise<string | null>;
+  /** Match plaintext to a code row; used for redeem (needs code id for per-code dedup). */
+  resolveInstitutionalCode(plainCode: string): Promise<
+    | { type: "ok"; institutionName: string; codeId: string }
+    | { type: "inactive" }
+    | { type: "not_found" }
+  >;
+  getInstitutionalCodesAdmin(): Promise<
+    { id: string; institutionName: string; active: boolean; createdAt: Date | null }[]
+  >;
+  createInstitutionalCodeAdmin(plainCode: string, institutionName: string): Promise<{ id: string }>;
+  setInstitutionalCodeActiveAdmin(id: string, active: boolean): Promise<boolean>;
+  hasUserRedeemedInstitutionalCode(userId: string, institutionalCodeId: string): Promise<boolean>;
+  recordInstitutionalCodeRedemption(userId: string, institutionalCodeId: string): Promise<void>;
+  /** True if this account has redeemed at least one institutional code (access is still gated by expires_at). */
+  userHasAnyInstitutionalRedemption(userId: string): Promise<boolean>;
+  /**
+   * If user has a code redemption row but no expiry (legacy), set 365 days from now.
+   * Idempotent when expiry already set. Does nothing when there are no redemptions.
+   */
+  ensureInstitutionalAccessExpiryWhenMissing(userId: string, userHint?: User | undefined): Promise<void>;
   /** When RUN_SUBSCRIPTION_RESET=true, reset all users to no subscription once. Call at startup. */
   runSubscriptionResetIfRequested(): Promise<void>;
 
@@ -888,7 +910,11 @@ export class DatabaseStorage implements IStorage {
   /** Call once at server startup so user rows match schema before any getUser(). */
   async warmupSubscriptionSchema(): Promise<void> {
     await this.ensureSubscriptionTrialMigrations();
+    await this.ensureInstitutionalCodesTable();
+    await this.ensureInstitutionalUserAccessColumnsMigration();
     await this.ensureInstitutionalCodeRedeemedAtMigration();
+    await this.ensureUserInstitutionalRedemptionsTable();
+    await this.ensureInstitutionalAccessRedemptionConsistencyMigration();
   }
 
   /** Ensures the three subscription plans (monthly $50, 6-month $270, 1-year $450) exist and are up to date. */
@@ -1092,49 +1118,90 @@ export class DatabaseStorage implements IStorage {
         "id" varchar PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
         "code_hash" varchar NOT NULL UNIQUE,
         "institution_name" varchar NOT NULL,
+        "active" boolean NOT NULL DEFAULT true,
         "created_at" timestamp DEFAULT now()
       )
     `);
     await pool.query(`
+      ALTER TABLE "institutional_codes" ADD COLUMN IF NOT EXISTS "active" boolean NOT NULL DEFAULT true
+    `);
+    await pool.query(`
       CREATE INDEX IF NOT EXISTS "idx_institutional_codes_code_hash" ON "institutional_codes" USING btree ("code_hash")
+    `);
+    await pool.query(`
+      CREATE INDEX IF NOT EXISTS "idx_institutional_codes_active" ON "institutional_codes" USING btree ("active")
     `);
   }
 
-  // Ensure institutional_access_affiliation column exists and backfill from profile field (one-time per process).
-  // No default Emory institutional access; users get access only by redeeming a code.
-  private async ensureInstitutionalAccessAffiliationMigration(): Promise<void> {
-    if (institutionalMigrationDone) return;
-    institutionalMigrationDone = true;
+  /**
+   * Add institutional access columns only. Profile `institutional_affiliation` is display/settings only and must
+   * never grant access — access comes only from redeeming a code (redemptions table + these columns).
+   */
+  private async ensureInstitutionalUserAccessColumnsMigration(): Promise<void> {
+    if (institutionalUserColumnsMigrationDone) return;
+    institutionalUserColumnsMigrationDone = true;
     await pool.query(`
       ALTER TABLE "users" ADD COLUMN IF NOT EXISTS "institutional_access_affiliation" varchar
     `);
-    await pool.query(`
-      UPDATE "users"
-      SET "institutional_access_affiliation" = COALESCE(NULLIF(TRIM("institutional_access_affiliation"), ''), TRIM("institutional_affiliation"))
-      WHERE "institutional_affiliation" IS NOT NULL AND TRIM("institutional_affiliation") != ''
-    `);
-  }
-
-  // Ensure institutional_access_expires_at column exists (no backfill; expiry set when user redeems a code).
-  private async ensureInstitutionalAccessExpiresAtMigration(): Promise<void> {
-    if (institutionalExpiresMigrationDone) return;
-    institutionalExpiresMigrationDone = true;
     await pool.query(`
       ALTER TABLE "users" ADD COLUMN IF NOT EXISTS "institutional_access_expires_at" timestamp
     `);
   }
 
-  /** One institutional code redeem per account, ever. */
+  /**
+   * Strip access fields for users with no code redemptions; backfill expiry for redeemers missing it.
+   * Runs after `user_institutional_code_redemptions` exists.
+   */
+  private async ensureInstitutionalAccessRedemptionConsistencyMigration(): Promise<void> {
+    if (institutionalRedemptionConsistencyMigrationDone) return;
+    institutionalRedemptionConsistencyMigrationDone = true;
+    await pool.query(`
+      UPDATE "users" u
+      SET "institutional_access_affiliation" = NULL,
+          "institutional_access_expires_at" = NULL
+      WHERE NOT EXISTS (
+        SELECT 1 FROM "user_institutional_code_redemptions" r WHERE r.user_id = u.id
+      )
+      AND (
+        (u.institutional_access_affiliation IS NOT NULL AND TRIM(u.institutional_access_affiliation) != '')
+        OR u.institutional_access_expires_at IS NOT NULL
+      )
+    `);
+    await pool.query(`
+      UPDATE "users" u
+      SET "institutional_access_expires_at" = CURRENT_TIMESTAMP + INTERVAL '365 days'
+      WHERE EXISTS (
+        SELECT 1 FROM "user_institutional_code_redemptions" r WHERE r.user_id = u.id
+      )
+      AND u.institutional_access_expires_at IS NULL
+    `);
+  }
+
+  /** Legacy column; no longer used to gate redemption (per-code redemptions table is authoritative). */
   private async ensureInstitutionalCodeRedeemedAtMigration(): Promise<void> {
     await pool.query(`
       ALTER TABLE "users" ADD COLUMN IF NOT EXISTS "institutional_code_redeemed_at" timestamp
     `);
-    // Users who already have code-based access should not get a second redeem.
+  }
+
+  private async ensureUserInstitutionalRedemptionsTable(): Promise<void> {
+    if (userInstitutionalRedemptionsTableDone) return;
+    userInstitutionalRedemptionsTableDone = true;
     await pool.query(`
-      UPDATE "users"
-      SET "institutional_code_redeemed_at" = COALESCE("institutional_code_redeemed_at", "updated_at", CURRENT_TIMESTAMP)
-      WHERE "institutional_access_affiliation" IS NOT NULL
-        AND TRIM("institutional_access_affiliation") != ''
+      CREATE TABLE IF NOT EXISTS "user_institutional_code_redemptions" (
+        "id" varchar PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+        "user_id" varchar NOT NULL REFERENCES "users"("id") ON DELETE CASCADE,
+        "institutional_code_id" varchar NOT NULL REFERENCES "institutional_codes"("id") ON DELETE CASCADE,
+        "redeemed_at" timestamp DEFAULT now()
+      )
+    `);
+    await pool.query(`
+      CREATE UNIQUE INDEX IF NOT EXISTS "uidx_user_institutional_code"
+      ON "user_institutional_code_redemptions" ("user_id", "institutional_code_id")
+    `);
+    await pool.query(`
+      CREATE INDEX IF NOT EXISTS "idx_user_institutional_redemptions_user_id"
+      ON "user_institutional_code_redemptions" ("user_id")
     `);
   }
 
@@ -1154,9 +1221,10 @@ export class DatabaseStorage implements IStorage {
   // Institutional codes (hashed in DB)
   async ensureInstitutionalCodesSeed(): Promise<void> {
     await this.ensureInstitutionalCodesTable();
-    await this.ensureInstitutionalAccessAffiliationMigration();
-    await this.ensureInstitutionalAccessExpiresAtMigration();
+    await this.ensureInstitutionalUserAccessColumnsMigration();
     await this.ensureInstitutionalCodeRedeemedAtMigration();
+    await this.ensureUserInstitutionalRedemptionsTable();
+    await this.ensureInstitutionalAccessRedemptionConsistencyMigration();
     await this.ensureSubscriptionResetMigration();
 
     const existing = await db.select().from(institutionalCodes).limit(1);
@@ -1166,6 +1234,7 @@ export class DatabaseStorage implements IStorage {
     await db.insert(institutionalCodes).values({
       codeHash,
       institutionName: "Emory University",
+      active: true,
     });
   }
 
@@ -1173,16 +1242,130 @@ export class DatabaseStorage implements IStorage {
     await this.ensureSubscriptionResetMigration();
   }
 
-  async validateInstitutionalCode(plainCode: string): Promise<string | null> {
+  async resolveInstitutionalCode(plainCode: string): Promise<
+    | { type: "ok"; institutionName: string; codeId: string }
+    | { type: "inactive" }
+    | { type: "not_found" }
+  > {
     await this.ensureInstitutionalCodesSeed();
     const rows = await db.select().from(institutionalCodes);
     const trimmed = plainCode.trim();
-    if (!trimmed) return null;
+    if (!trimmed) return { type: "not_found" };
     for (const row of rows) {
       const match = await bcrypt.compare(trimmed, row.codeHash);
-      if (match) return row.institutionName;
+      if (match) {
+        if (row.active === false) return { type: "inactive" };
+        return { type: "ok", institutionName: row.institutionName, codeId: row.id };
+      }
     }
-    return null;
+    return { type: "not_found" };
+  }
+
+  async validateInstitutionalCode(plainCode: string): Promise<string | null> {
+    const r = await this.resolveInstitutionalCode(plainCode);
+    return r.type === "ok" ? r.institutionName : null;
+  }
+
+  async getInstitutionalCodesAdmin(): Promise<
+    { id: string; institutionName: string; active: boolean; createdAt: Date | null }[]
+  > {
+    await this.ensureInstitutionalCodesSeed();
+    const rows = await db
+      .select({
+        id: institutionalCodes.id,
+        institutionName: institutionalCodes.institutionName,
+        active: institutionalCodes.active,
+        createdAt: institutionalCodes.createdAt,
+      })
+      .from(institutionalCodes)
+      .orderBy(desc(institutionalCodes.createdAt));
+    return rows.map((r) => ({
+      id: r.id,
+      institutionName: r.institutionName,
+      active: r.active !== false,
+      createdAt: r.createdAt ?? null,
+    }));
+  }
+
+  async createInstitutionalCodeAdmin(plainCode: string, institutionName: string): Promise<{ id: string }> {
+    await this.ensureInstitutionalCodesSeed();
+    const trimmed = plainCode.trim();
+    const name = institutionName.trim();
+    if (!trimmed || !name) {
+      throw new Error("plainCode and institutionName are required");
+    }
+    /** Bcrypt salts differ per row — detect duplicate plaintext by comparing against existing hashes. */
+    const duplicate = await this.resolveInstitutionalCode(trimmed);
+    if (duplicate.type === "ok" || duplicate.type === "inactive") {
+      const err = new Error("An institutional code with this exact value already exists.");
+      (err as NodeJS.ErrnoException).code = "23505";
+      throw err;
+    }
+    const codeHash = await bcrypt.hash(trimmed, INSTITUTIONAL_CODE_SALT_ROUNDS);
+    const [inserted] = await db
+      .insert(institutionalCodes)
+      .values({
+        codeHash,
+        institutionName: name,
+        active: true,
+      })
+      .returning({ id: institutionalCodes.id });
+    if (!inserted) throw new Error("Insert failed");
+    return { id: inserted.id };
+  }
+
+  async setInstitutionalCodeActiveAdmin(id: string, active: boolean): Promise<boolean> {
+    await this.ensureInstitutionalCodesSeed();
+    const [updated] = await db
+      .update(institutionalCodes)
+      .set({ active })
+      .where(eq(institutionalCodes.id, id))
+      .returning({ id: institutionalCodes.id });
+    return !!updated;
+  }
+
+  async hasUserRedeemedInstitutionalCode(userId: string, institutionalCodeId: string): Promise<boolean> {
+    await this.ensureUserInstitutionalRedemptionsTable();
+    const [row] = await db
+      .select({ id: userInstitutionalCodeRedemptions.id })
+      .from(userInstitutionalCodeRedemptions)
+      .where(
+        and(
+          eq(userInstitutionalCodeRedemptions.userId, userId),
+          eq(userInstitutionalCodeRedemptions.institutionalCodeId, institutionalCodeId)
+        )
+      )
+      .limit(1);
+    return !!row;
+  }
+
+  async recordInstitutionalCodeRedemption(userId: string, institutionalCodeId: string): Promise<void> {
+    await this.ensureUserInstitutionalRedemptionsTable();
+    await db.insert(userInstitutionalCodeRedemptions).values({
+      userId,
+      institutionalCodeId,
+    });
+  }
+
+  async userHasAnyInstitutionalRedemption(userId: string): Promise<boolean> {
+    await this.ensureUserInstitutionalRedemptionsTable();
+    const [row] = await db
+      .select({ id: userInstitutionalCodeRedemptions.id })
+      .from(userInstitutionalCodeRedemptions)
+      .where(eq(userInstitutionalCodeRedemptions.userId, userId))
+      .limit(1);
+    return !!row;
+  }
+
+  async ensureInstitutionalAccessExpiryWhenMissing(userId: string, userHint?: User | undefined): Promise<void> {
+    const hasRedemption = await this.userHasAnyInstitutionalRedemption(userId);
+    if (!hasRedemption) return;
+    const u = userHint ?? (await this.getUser(userId));
+    if (!u) return;
+    if (u.institutionalAccessExpiresAt) return;
+    const end = new Date();
+    end.setDate(end.getDate() + 365);
+    await this.updateUserProfile(userId, { institutionalAccessExpiresAt: end });
   }
 
   // Theme preference operations

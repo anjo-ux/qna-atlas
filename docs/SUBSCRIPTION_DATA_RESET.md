@@ -4,8 +4,8 @@ This wipes **database** subscription state for **every user**. It does **not** c
 
 ## What gets cleared
 
-- All rows in `subscription_transactions`
-- On every user: `subscription_status` → `expired`, plan/trial/end dates, Stripe customer + subscription IDs, `subscription_trial_used` → `false`, institutional **access** fields + `institutional_code_redeemed_at`
+- All rows in `subscription_transactions` and `user_institutional_code_redemptions`
+- On every user: `subscription_status` → `expired`, plan/trial/end dates, Stripe customer + subscription IDs, `subscription_trial_used` → `false`, institutional **access** fields + `institutional_code_redeemed_at` (legacy column, cleared)
 
 ## What is kept
 

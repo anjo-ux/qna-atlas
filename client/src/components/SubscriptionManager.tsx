@@ -218,8 +218,8 @@ export function SubscriptionManager() {
                     <AlertDialogDescription className="space-y-2">
                       {isInstitutional ? (
                         <>
-                          Your institutional access will end immediately. This account cannot redeem another
-                          institutional code—you can subscribe for personal access anytime.
+                          Your institutional access will end immediately. You can subscribe for personal access or
+                          redeem a different institution code later; you cannot reuse a code you already redeemed.
                         </>
                       ) : (
                         <>

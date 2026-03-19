@@ -95,7 +95,6 @@ export function SubscriptionPlans({ open = true, onOpenChange, asDialog = true, 
   // When API fails or returns empty, show fallback so "Choose a plan below" still displays all options
   const displayPlans = plans.length > 0 ? plans : FALLBACK_PLANS;
   const isInstitutional = selectedIndex === 3;
-  const institutionalRedeemLocked = !!user?.institutionalCodeRedeemedAt;
   const selectedPlan = selectedIndex < displayPlans.length ? displayPlans[selectedIndex] : null;
   const selectedPlanForCheckout = selectedIndex < plans.length ? plans[selectedIndex] : null;
 
@@ -300,16 +299,14 @@ export function SubscriptionPlans({ open = true, onOpenChange, asDialog = true, 
               {selectedIndex === 3 ? (
                 <div className={cn('p-4 pb-6', contentBoxClass)}>
                   <h3 className={cn('font-semibold', contentTitleClass)}>Institutional Access</h3>
-                  {institutionalRedeemLocked ? (
+                  {user?.institutionalAccessAffiliation?.trim() ? (
                     <>
-                      {user?.institutionalAccessAffiliation?.trim() ? (
-                        <p className={cn('text-sm mt-1', contentMutedClass)}>
-                          Current University:{' '}
-                          <span className={cn('font-medium', contentTitleClass)}>
-                            {user.institutionalAccessAffiliation.trim()}
-                          </span>
-                        </p>
-                      ) : null}
+                      <p className={cn('text-sm mt-1', contentMutedClass)}>
+                        Current University:{' '}
+                        <span className={cn('font-medium', contentTitleClass)}>
+                          {user.institutionalAccessAffiliation.trim()}
+                        </span>
+                      </p>
                       <p
                         className={cn(
                           'text-sm mt-2 rounded-md border px-3 py-2 font-medium',
@@ -319,19 +316,14 @@ export function SubscriptionPlans({ open = true, onOpenChange, asDialog = true, 
                         )}
                         role="note"
                       >
-                        This account has already used an institutional access code. Codes are limited to one redemption
-                        per account. Subscribe for personal access, or contact support if you need help.
+                        The same code can be shared with many people. On your account, each code works only once—you
+                        can enter a <strong>different</strong> code if your program issues one.
                       </p>
                     </>
-                  ) : user?.institutionalAccessAffiliation?.trim() ? (
-                    <p className={cn('text-sm mt-1', contentMutedClass)}>
-                      Current University:{' '}
-                      <span className={cn('font-medium', contentTitleClass)}>{user.institutionalAccessAffiliation.trim()}</span>
-                    </p>
                   ) : (
-                    <p className={cn('text-sm mt-1', contentMutedClass)}>
-                      Enter your institution code (provided by your program director) to unlock the platform. Each
-                      account may redeem a code only once.
+                      <p className={cn('text-sm mt-1', contentMutedClass)}>
+                      Enter your institution code (provided by your program director) to unlock the platform. The
+                      same code may be shared with many people; you can only use a given code once on your account.
                     </p>
                   )}
                   <Input
@@ -339,18 +331,13 @@ export function SubscriptionPlans({ open = true, onOpenChange, asDialog = true, 
                     placeholder="Enter Code"
                     value={institutionalCode}
                     onChange={(e) => setInstitutionalCode(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && !institutionalRedeemLocked && handleUnlockInstitutional()}
+                    onKeyDown={(e) => e.key === 'Enter' && handleUnlockInstitutional()}
                     className={cn('border', inputClass)}
                     data-testid="input-institutional-code"
-                    disabled={institutionalRedeemLocked}
                   />
                   <Button
                     onClick={handleUnlockInstitutional}
-                    disabled={
-                      institutionalRedeemLocked ||
-                      institutionalMutation.isPending ||
-                      !institutionalCode.trim()
-                    }
+                    disabled={institutionalMutation.isPending || !institutionalCode.trim()}
                     className="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow-md"
                     size="lg"
                     data-testid="button-unlock-institutional"

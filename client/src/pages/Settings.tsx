@@ -44,8 +44,6 @@ export function Settings({ onBack, subscription }: SettingsProps) {
   const [percentile, setPercentile] = useState<number | null>(null);
   const [percentileLoading, setPercentileLoading] = useState(false);
 
-  // Determine if Emory affiliation grants free access
-  const hasEmoryAccess = user?.institutionalAccessAffiliation?.toLowerCase().includes('emory');
   const displaySubscription = subscription || { status: 'none', daysRemaining: 0 };
 
   const [formData, setFormData] = useState({
@@ -425,7 +423,7 @@ export function Settings({ onBack, subscription }: SettingsProps) {
               </Card>
 
               {/* Mobile Subscription Section */}
-              <MobileSubscriptionWidget hasEmoryAccess={hasEmoryAccess} />
+              <MobileSubscriptionWidget />
 
               {/* Log Out */}
               <Button

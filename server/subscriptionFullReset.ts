@@ -11,6 +11,12 @@ export async function runFullSubscriptionDataReset(pool: Pool): Promise<{
   const client = await pool.connect();
   try {
     await client.query("BEGIN");
+    try {
+      await client.query(`DELETE FROM "user_institutional_code_redemptions"`);
+    } catch (e: unknown) {
+      const err = e as { code?: string };
+      if (err?.code !== "42P01") throw e;
+    }
     const del = await client.query(`DELETE FROM "subscription_transactions"`);
     const upd = await client.query(`
       UPDATE "users"
