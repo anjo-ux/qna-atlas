@@ -35,6 +35,8 @@ export const users = pgTable("users", {
   institutionalAffiliation: varchar("institutional_affiliation"), // Profile only: user's registered/display affiliation (settings, signup)
   institutionalAccessAffiliation: varchar("institutional_access_affiliation"), // Access only: set by redeeming code; grants subscription access
   institutionalAccessExpiresAt: timestamp("institutional_access_expires_at"), // When set (e.g. Emory 365-day codes), access ends at this time; null = unlimited
+  /** Set once when an institutional code is redeemed (or legacy backfill); never cleared — blocks further code redeems on this account. */
+  institutionalCodeRedeemedAt: timestamp("institutional_code_redeemed_at"),
   subscriptionStatus: varchar("subscription_status").default('trial'), // trial, active, expired
   subscriptionPlan: varchar("subscription_plan"), // 1-month, 3-month, 6-month
   trialEndsAt: timestamp("trial_ends_at"),
@@ -255,9 +257,12 @@ export const subscriptionTransactions = pgTable("subscription_transactions", {
   /** Stripe invoice id (in_xxx) when checkout created a subscription invoice — used for hosted invoice links */
   stripeInvoiceId: varchar("stripe_invoice_id"),
   amount: integer("amount").notNull(), // in cents
-  status: varchar("status").notNull(), // pending, completed, failed
+  /** pending | completed | failed | canceled (canceled = ended before period end; see canceledAt) */
+  status: varchar("status").notNull(),
   startDate: timestamp("start_date").notNull(),
   endDate: timestamp("end_date").notNull(),
+  /** When the subscription/access for this row was canceled (e.g. user canceled or Stripe sub deleted). */
+  canceledAt: timestamp("canceled_at"),
   createdAt: timestamp("created_at").defaultNow(),
 }, (table) => [
   index("idx_subscription_transactions_user_id").on(table.userId),

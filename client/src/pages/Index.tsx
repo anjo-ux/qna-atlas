@@ -63,6 +63,14 @@ export default function Index() {
     },
     staleTime: 0,
   });
+
+  // When access is revoked (e.g. remove institutional), leave Settings/Test so unlock returns to study, not Settings.
+  useEffect(() => {
+    if (subscription?.isLocked) {
+      setScreenMode('study');
+    }
+  }, [subscription?.isLocked]);
+
   const [showPreviewWizard, setShowPreviewWizard] = useState(false);
   const [isMobileLayout, setIsMobileLayout] = useState(window.innerWidth < 1024);
   const { bookmarks } = useBookmarks();

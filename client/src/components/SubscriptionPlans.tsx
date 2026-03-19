@@ -95,6 +95,7 @@ export function SubscriptionPlans({ open = true, onOpenChange, asDialog = true, 
   // When API fails or returns empty, show fallback so "Choose a plan below" still displays all options
   const displayPlans = plans.length > 0 ? plans : FALLBACK_PLANS;
   const isInstitutional = selectedIndex === 3;
+  const institutionalRedeemLocked = !!user?.institutionalCodeRedeemedAt;
   const selectedPlan = selectedIndex < displayPlans.length ? displayPlans[selectedIndex] : null;
   const selectedPlanForCheckout = selectedIndex < plans.length ? plans[selectedIndex] : null;
 
@@ -299,12 +300,16 @@ export function SubscriptionPlans({ open = true, onOpenChange, asDialog = true, 
               {selectedIndex === 3 ? (
                 <div className={cn('p-4 pb-6', contentBoxClass)}>
                   <h3 className={cn('font-semibold', contentTitleClass)}>Institutional Plan</h3>
-                  {user?.institutionalAccessAffiliation?.trim() ? (
+                  {institutionalRedeemLocked ? (
                     <>
-                      <p className={cn('text-sm mt-1', contentMutedClass)}>
-                        Current University:{' '}
-                        <span className={cn('font-medium', contentTitleClass)}>{user.institutionalAccessAffiliation.trim()}</span>
-                      </p>
+                      {user?.institutionalAccessAffiliation?.trim() ? (
+                        <p className={cn('text-sm mt-1', contentMutedClass)}>
+                          Current University:{' '}
+                          <span className={cn('font-medium', contentTitleClass)}>
+                            {user.institutionalAccessAffiliation.trim()}
+                          </span>
+                        </p>
+                      ) : null}
                       <p
                         className={cn(
                           'text-sm mt-2 rounded-md border px-3 py-2 font-medium',
@@ -314,24 +319,38 @@ export function SubscriptionPlans({ open = true, onOpenChange, asDialog = true, 
                         )}
                         role="note"
                       >
-                        Warning - entering a new code will invalidate your prior subscription.
+                        This account has already used an institutional access code. Codes are limited to one redemption
+                        per account. Subscribe for personal access, or contact support if you need help.
                       </p>
                     </>
+                  ) : user?.institutionalAccessAffiliation?.trim() ? (
+                    <p className={cn('text-sm mt-1', contentMutedClass)}>
+                      Current University:{' '}
+                      <span className={cn('font-medium', contentTitleClass)}>{user.institutionalAccessAffiliation.trim()}</span>
+                    </p>
                   ) : (
-                    <p className={cn('text-sm mt-1', contentMutedClass)}>Enter your institution code (provided by your program director) to unlock the platform.</p>
+                    <p className={cn('text-sm mt-1', contentMutedClass)}>
+                      Enter your institution code (provided by your program director) to unlock the platform. Each
+                      account may redeem a code only once.
+                    </p>
                   )}
                   <Input
                     type="text"
                     placeholder="Enter Code"
                     value={institutionalCode}
                     onChange={(e) => setInstitutionalCode(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && handleUnlockInstitutional()}
+                    onKeyDown={(e) => e.key === 'Enter' && !institutionalRedeemLocked && handleUnlockInstitutional()}
                     className={cn('border', inputClass)}
                     data-testid="input-institutional-code"
+                    disabled={institutionalRedeemLocked}
                   />
                   <Button
                     onClick={handleUnlockInstitutional}
-                    disabled={institutionalMutation.isPending || !institutionalCode.trim()}
+                    disabled={
+                      institutionalRedeemLocked ||
+                      institutionalMutation.isPending ||
+                      !institutionalCode.trim()
+                    }
                     className="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow-md"
                     size="lg"
                     data-testid="button-unlock-institutional"

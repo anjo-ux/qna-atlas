@@ -38,7 +38,7 @@ import {
   type InsertQuestionReport,
 } from "@shared/schema";
 import { db, pool } from "./db";
-import { eq, and, asc, desc, lte, sql, count } from "drizzle-orm";
+import { eq, and, asc, desc, lte, sql, count, inArray } from "drizzle-orm";
 
 const INSTITUTIONAL_CODE_SALT_ROUNDS = 10;
 let institutionalMigrationDone = false;
@@ -135,6 +135,9 @@ export interface IStorage {
   getUserActiveSubscription(userId: string): Promise<SubscriptionTransaction | undefined>;
   cancelUserSubscription(userId: string): Promise<void>;
   getUserSubscriptionTransactions(userId: string): Promise<SubscriptionTransaction[]>;
+  /** Idempotent Stripe invoice handling (renewals). */
+  getSubscriptionTransactionByStripeInvoiceId(invoiceId: string): Promise<SubscriptionTransaction | undefined>;
+  getUserByStripeSubscriptionId(stripeSubscriptionId: string): Promise<User | undefined>;
   /** False if user already consumed intro trial (flag or any completed subscription purchase). */
   getIntroTrialEligibility(userId: string): Promise<boolean>;
 
@@ -877,11 +880,15 @@ export class DatabaseStorage implements IStorage {
     await pool.query(`
       ALTER TABLE "subscription_transactions" ADD COLUMN IF NOT EXISTS "stripe_invoice_id" varchar
     `);
+    await pool.query(`
+      ALTER TABLE "subscription_transactions" ADD COLUMN IF NOT EXISTS "canceled_at" timestamp
+    `);
   }
 
   /** Call once at server startup so user rows match schema before any getUser(). */
   async warmupSubscriptionSchema(): Promise<void> {
     await this.ensureSubscriptionTrialMigrations();
+    await this.ensureInstitutionalCodeRedeemedAtMigration();
   }
 
   /** Ensures the three subscription plans (monthly $50, 6-month $270, 1-year $450) exist and are up to date. */
@@ -1000,9 +1007,22 @@ export class DatabaseStorage implements IStorage {
     const [user] = await db.select().from(users).where(eq(users.id, userId));
     if (!user) return;
 
+    const activeTx = await this.getUserActiveSubscription(userId);
+    const canceledNow = new Date();
+
     if (user.stripeSubscriptionId?.trim()) {
       const { cancelStripeSubscriptionImmediately } = await import("./stripe");
       await cancelStripeSubscriptionImmediately(user.stripeSubscriptionId.trim());
+    }
+
+    if (activeTx) {
+      await db
+        .update(subscriptionTransactions)
+        .set({
+          status: "canceled",
+          canceledAt: canceledNow,
+        })
+        .where(eq(subscriptionTransactions.id, activeTx.id));
     }
 
     await db
@@ -1027,6 +1047,26 @@ export class DatabaseStorage implements IStorage {
       .orderBy(desc(subscriptionTransactions.createdAt));
   }
 
+  async getSubscriptionTransactionByStripeInvoiceId(
+    invoiceId: string
+  ): Promise<SubscriptionTransaction | undefined> {
+    const id = invoiceId?.trim();
+    if (!id) return undefined;
+    const [row] = await db
+      .select()
+      .from(subscriptionTransactions)
+      .where(eq(subscriptionTransactions.stripeInvoiceId, id))
+      .limit(1);
+    return row;
+  }
+
+  async getUserByStripeSubscriptionId(stripeSubscriptionId: string): Promise<User | undefined> {
+    const sid = stripeSubscriptionId?.trim();
+    if (!sid) return undefined;
+    const [u] = await db.select().from(users).where(eq(users.stripeSubscriptionId, sid)).limit(1);
+    return u;
+  }
+
   async getIntroTrialEligibility(userId: string): Promise<boolean> {
     const user = await this.getUser(userId);
     if (!user) return false;
@@ -1037,7 +1077,7 @@ export class DatabaseStorage implements IStorage {
       .where(
         and(
           eq(subscriptionTransactions.userId, userId),
-          eq(subscriptionTransactions.status, 'completed')
+          inArray(subscriptionTransactions.status, ["completed", "canceled"])
         )
       )
       .limit(1);
@@ -1084,23 +1124,31 @@ export class DatabaseStorage implements IStorage {
     `);
   }
 
-  /** When RUN_SUBSCRIPTION_RESET=true, reset all users to no subscription once this process. Progress/data (responses, notes, bookmarks) is preserved. Unset env after running. */
+  /** One institutional code redeem per account, ever. */
+  private async ensureInstitutionalCodeRedeemedAtMigration(): Promise<void> {
+    await pool.query(`
+      ALTER TABLE "users" ADD COLUMN IF NOT EXISTS "institutional_code_redeemed_at" timestamp
+    `);
+    // Users who already have code-based access should not get a second redeem.
+    await pool.query(`
+      UPDATE "users"
+      SET "institutional_code_redeemed_at" = COALESCE("institutional_code_redeemed_at", "updated_at", CURRENT_TIMESTAMP)
+      WHERE "institutional_access_affiliation" IS NOT NULL
+        AND TRIM("institutional_access_affiliation") != ''
+    `);
+  }
+
+  /**
+   * When RUN_SUBSCRIPTION_RESET=true, once per process: delete all subscription_transactions and clear
+   * subscription + institutional access fields on every user. Preserves accounts, progress, notes, etc.
+   * Unset env after deploy. Does not cancel Stripe — do that in Dashboard if needed.
+   */
   private async ensureSubscriptionResetMigration(): Promise<void> {
     if (subscriptionResetDone || process.env.RUN_SUBSCRIPTION_RESET !== 'true') return;
     subscriptionResetDone = true;
-    await pool.query(`
-      UPDATE "users"
-      SET
-        "subscription_status" = 'expired',
-        "trial_ends_at" = NULL,
-        "subscription_ends_at" = NULL,
-        "subscription_plan" = NULL,
-        "institutional_access_affiliation" = NULL,
-        "institutional_access_expires_at" = NULL,
-        "stripe_customer_id" = NULL,
-        "stripe_subscription_id" = NULL,
-        "updated_at" = CURRENT_TIMESTAMP
-    `);
+    const { runFullSubscriptionDataReset } = await import("./subscriptionFullReset");
+    const result = await runFullSubscriptionDataReset(pool);
+    console.warn("[RUN_SUBSCRIPTION_RESET] Full subscription data reset:", result);
   }
 
   // Institutional codes (hashed in DB)
@@ -1108,6 +1156,7 @@ export class DatabaseStorage implements IStorage {
     await this.ensureInstitutionalCodesTable();
     await this.ensureInstitutionalAccessAffiliationMigration();
     await this.ensureInstitutionalAccessExpiresAtMigration();
+    await this.ensureInstitutionalCodeRedeemedAtMigration();
     await this.ensureSubscriptionResetMigration();
 
     const existing = await db.select().from(institutionalCodes).limit(1);

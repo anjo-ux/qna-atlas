@@ -13,11 +13,14 @@ import { cn } from '@/lib/utils';
 export type SubscriptionTransactionRow = {
   id: string;
   planName: string;
+  /** From plan row; used to label recurring monthly charges */
+  planDurationMonths?: number | null;
   amountCents: number;
   status: string;
   createdAt: string | null;
   periodStart: string | null;
   periodEnd: string | null;
+  canceledAt: string | null;
   stripeReceiptOrInvoiceUrl: string | null;
   /** True if a Stripe payment intent or invoice id exists on the record */
   hasStripeIds?: boolean;
@@ -43,6 +46,21 @@ function formatShortDate(iso: string | null) {
     day: 'numeric',
     year: 'numeric',
   });
+}
+
+/** User-facing status from DB value */
+function displayStatus(status: string): string {
+  const s = (status || '').toLowerCase();
+  if (s === 'canceled' || s === 'cancelled') return 'Cancelled';
+  if (s === 'completed') return 'Completed';
+  if (s === 'pending') return 'Pending';
+  if (s === 'failed') return 'Failed';
+  return status;
+}
+
+function isCanceledRow(t: SubscriptionTransactionRow): boolean {
+  const s = (t.status || '').toLowerCase();
+  return s === 'canceled' || s === 'cancelled';
 }
 
 export function SubscriptionTransactionHistoryDialog({
@@ -95,58 +113,106 @@ export function SubscriptionTransactionHistoryDialog({
             <ul className="space-y-3 overflow-y-auto max-h-[55vh] pr-1 -mr-1">
               {txs.map((t) => {
                 const hasUrl = !!t.stripeReceiptOrInvoiceUrl?.trim();
-                const hasStripeIds = t.hasStripeIds === true;
-                const rightLabel = hasUrl
-                  ? null
-                  : hasStripeIds
-                    ? 'unavailable'
-                    : 'code';
+                const canceled = isCanceledRow(t);
+                const statusLabel = displayStatus(t.status);
+                const periodLine = (() => {
+                  if (t.isInstitutionalGrant) return null;
+                  if (canceled) {
+                    const began = t.periodStart ?? t.createdAt;
+                    if (t.canceledAt) {
+                      return (
+                        <>
+                          Access {formatShortDate(began)} – {formatShortDate(t.canceledAt)}
+                        </>
+                      );
+                    }
+                    return <>Access {formatShortDate(began)} – Cancelled</>;
+                  }
+                  const start = t.periodStart ?? t.createdAt;
+                  const end = t.periodEnd;
+                  if (start && end) {
+                    return (
+                      <>
+                        Access {formatShortDate(start)} – {formatShortDate(end)}
+                      </>
+                    );
+                  }
+                  if (t.createdAt && end) {
+                    return (
+                      <>
+                        Access {formatShortDate(t.createdAt)} – {formatShortDate(end)}
+                      </>
+                    );
+                  }
+                  return t.createdAt ? formatShortDate(t.createdAt) : '—';
+                })();
+
+                const recurringHint =
+                  !t.isInstitutionalGrant &&
+                  !canceled &&
+                  (t.status || '').toLowerCase() === 'completed' &&
+                  t.planDurationMonths === 1 &&
+                  t.hasStripeIds
+                    ? 'Monthly Subscription Charged'
+                    : null;
 
                 return (
-                <li
-                  key={t.id}
-                  className={cn(
-                    'rounded-lg border border-border bg-card p-3 text-sm',
-                    'flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between'
-                  )}
-                >
-                  <div className="min-w-0 space-y-0.5">
-                    {t.isInstitutionalGrant ? (
-                      <>
-                        <p className="font-semibold text-foreground">Institutional Access</p>
-                        <p className="text-muted-foreground text-xs">{t.planName}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {t.periodEnd ? `Access Through ${formatShortDate(t.periodEnd)}` : 'Institution Code'}
-                        </p>
-                      </>
-                    ) : (
-                      <>
-                        <p className="font-semibold text-foreground capitalize">{t.planName.replace(/-/g, ' ')}</p>
-                        <p className="text-muted-foreground text-xs">
-                          {t.amountCents > 0 ? `${formatMoney(t.amountCents)} · ` : null}
-                          {t.status}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          {t.createdAt ? formatShortDate(t.createdAt) : '—'}
-                          {t.periodEnd ? ` · through ${formatShortDate(t.periodEnd)}` : null}
-                        </p>
-                      </>
+                  <li
+                    key={t.id}
+                    className={cn(
+                      'rounded-lg border border-border bg-card p-3 text-sm',
+                      'flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between'
                     )}
-                  </div>
-                  <div className="shrink-0 flex sm:flex-col gap-2 sm:items-end">
-                    {hasUrl ? (
-                      <Button variant="outline" size="sm" asChild className="gap-1 font-medium">
-                        <a href={t.stripeReceiptOrInvoiceUrl!} target="_blank" rel="noopener noreferrer">
-                          Invoice →
-                        </a>
-                      </Button>
-                    ) : rightLabel === 'unavailable' ? (
-                      <span className="text-xs text-muted-foreground px-1">Receipt Unavailable</span>
-                    ) : (
-                      <span className="text-xs text-muted-foreground font-medium px-1">Code Redeemed</span>
-                    )}
-                  </div>
-                </li>
+                  >
+                    <div className="min-w-0 space-y-0.5">
+                      {t.isInstitutionalGrant ? (
+                        <>
+                          <p className="font-semibold text-foreground">Institutional Access</p>
+                          <p className="text-muted-foreground text-xs">{t.planName}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {t.periodStart && t.periodEnd
+                              ? `Access ${formatShortDate(t.periodStart)} – ${formatShortDate(t.periodEnd)}`
+                              : t.periodEnd
+                                ? `Access — ${formatShortDate(t.periodEnd)}`
+                                : 'Institution Code'}
+                          </p>
+                        </>
+                      ) : (
+                        <>
+                          <p className="font-semibold text-foreground capitalize">
+                            {t.planName.replace(/-/g, ' ')}
+                          </p>
+                          <p className="text-muted-foreground text-xs">
+                            {t.amountCents > 0 ? `${formatMoney(t.amountCents)} · ` : null}
+                            {statusLabel}
+                          </p>
+                          {periodLine && (
+                            <p className="text-xs text-muted-foreground">{periodLine}</p>
+                          )}
+                          {recurringHint && (
+                            <p className="text-xs text-muted-foreground/80">{recurringHint}</p>
+                          )}
+                        </>
+                      )}
+                    </div>
+                    <div className="shrink-0 flex sm:flex-col gap-2 sm:items-end">
+                      {t.isInstitutionalGrant ? (
+                        <span className="text-xs text-muted-foreground font-medium px-1">
+                          Institutional Access
+                        </span>
+                      ) : hasUrl ? (
+                        <Button variant="outline" size="sm" asChild className="gap-1 font-medium">
+                          <a href={t.stripeReceiptOrInvoiceUrl!} target="_blank" rel="noopener noreferrer">
+                            View invoice →
+                          </a>
+                        </Button>
+                      ) : (
+                        <span className="text-xs text-muted-foreground font-medium px-1 text-right">
+                          Invoice Unavailable - Contact Support
+                        </span>
+                      )}
+                    </div>
+                  </li>
                 );
               })}
             </ul>

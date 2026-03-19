@@ -73,6 +73,22 @@ function userHasCoherentPersonalPaidRow(user: User | undefined, now: Date): bool
   return false;
 }
 
+/**
+ * Same rule as GET /api/subscription/details institutional branch: code-based access is primary,
+ * and stale personal/Stripe rows must not send "Remove access" through the paid cancel path.
+ */
+function userIsInstitutionalPrimaryAccess(user: User | undefined, now: Date): boolean {
+  if (!user) return false;
+  const hasInstitutionalAffiliation = !!user.institutionalAccessAffiliation?.trim();
+  const institutionalExpiresAt = user.institutionalAccessExpiresAt
+    ? new Date(user.institutionalAccessExpiresAt)
+    : null;
+  const institutionalExpired =
+    institutionalExpiresAt !== null && institutionalExpiresAt.getTime() <= now.getTime();
+  const hasInstitutionalAccess = hasInstitutionalAffiliation && !institutionalExpired;
+  return hasInstitutionalAccess && !userHasCoherentPersonalPaidRow(user, now);
+}
+
 const QUESTION_IMPORT_API_KEY = process.env.QUESTION_IMPORT_API_KEY;
 
 function requireAdminCode(req: any): boolean {
@@ -1549,6 +1565,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const institutionalActive = hasInstitutionalAffiliation && !institutionalExpired;
       const personalCoherent = userHasCoherentPersonalPaidRow(user, now);
 
+      const planById = new Map(plans.map((p) => [p.id, p]));
+
       let transactions = await Promise.all(
         txs.map(async (t) => {
           const hasStripeIds = !!(t.stripePaymentIntentId?.trim() || t.stripeInvoiceId?.trim());
@@ -1556,14 +1574,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
             t.stripePaymentIntentId,
             t.stripeInvoiceId
           );
+          const planRow = planById.get(t.planId);
           return {
             id: t.id,
             planName: planNameById.get(t.planId) ?? t.planId,
+            planDurationMonths: planRow?.durationMonths ?? null,
             amountCents: t.amount,
             status: t.status,
             createdAt: t.createdAt ? new Date(t.createdAt).toISOString() : null,
             periodStart: t.startDate ? new Date(t.startDate).toISOString() : null,
             periodEnd: t.endDate ? new Date(t.endDate).toISOString() : null,
+            canceledAt: t.canceledAt ? new Date(t.canceledAt).toISOString() : null,
             stripeReceiptOrInvoiceUrl,
             hasStripeIds,
             isInstitutionalGrant: false as const,
@@ -1581,14 +1602,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       if (institutionalActive) {
         const aff = user.institutionalAccessAffiliation!.trim();
+        /** Codes default to +365 days from redeem; we don't store redeem time — approximate start for display. */
+        const institutionalPeriodStartIso =
+          instExp != null
+            ? new Date(instExp.getTime() - 365 * 24 * 60 * 60 * 1000).toISOString()
+            : null;
         transactions.unshift({
           id: "__institutional_access__",
           planName: aff,
+          planDurationMonths: null,
           amountCents: 0,
           status: "completed",
           createdAt: null,
-          periodStart: null,
+          periodStart: institutionalPeriodStartIso,
           periodEnd: instExp ? instExp.toISOString() : null,
+          canceledAt: null,
           stripeReceiptOrInvoiceUrl: null,
           hasStripeIds: false,
           isInstitutionalGrant: true as const,
@@ -1656,6 +1684,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "User not found." });
       }
 
+      const now = new Date();
+
+      /**
+       * Institutional-primary users (subscription UI shows "Remove access") must clear code access here first.
+       * Otherwise stale completed transactions make userHasPersonalSubscriptionAccess true, we run Stripe cancel,
+       * return the wrong toast, and leave institutional fields intact — user keeps access.
+       */
+      if (userIsInstitutionalPrimaryAccess(user, now)) {
+        await storage.updateUserProfile(userId, {
+          institutionalAccessAffiliation: null as any,
+          institutionalAccessExpiresAt: null as any,
+          subscriptionStatus: "expired" as any,
+          subscriptionPlan: null as any,
+          subscriptionEndsAt: null as any,
+          trialEndsAt: null as any,
+          stripeSubscriptionId: null as any,
+          institutionalCodeRedeemedAt: user.institutionalCodeRedeemedAt ?? new Date(),
+        });
+        return res.json({
+          message:
+            "Institutional access removed. Subscribe for personal access to restore the platform. This account cannot redeem another institutional code.",
+          removedInstitutional: true,
+        });
+      }
+
       const activeTx = await storage.getUserActiveSubscription(userId);
       if (userHasPersonalSubscriptionAccess(user, activeTx)) {
         await storage.cancelUserSubscription(userId);
@@ -1666,15 +1719,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       if (user.institutionalAccessAffiliation?.trim()) {
-        const now = new Date();
         const trialEndsAt = user.trialEndsAt ? new Date(user.trialEndsAt) : null;
-        const newStatus = trialEndsAt && trialEndsAt > now ? 'trial' : 'expired';
+        const newStatus = trialEndsAt && trialEndsAt > now ? "trial" : "expired";
         await storage.updateUserProfile(userId, {
           institutionalAccessAffiliation: null as any,
           institutionalAccessExpiresAt: null as any,
           subscriptionStatus: newStatus,
+          institutionalCodeRedeemedAt: user.institutionalCodeRedeemedAt ?? new Date(),
         });
-        return res.json({ message: "Institutional access removed. You can re-enter a code anytime to reactivate." });
+        return res.json({
+          message:
+            "Institutional access removed. Subscribe for personal access to restore the platform. This account cannot redeem another institutional code.",
+          removedInstitutional: true,
+        });
       }
 
       await storage.cancelUserSubscription(userId);
@@ -1692,6 +1749,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/subscription/institutional-code', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.session?.userId;
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found." });
+      }
+      if (user.institutionalCodeRedeemedAt) {
+        return res.status(403).json({
+          message:
+            "This account has already redeemed an institutional access code. Institutional codes can only be used once per account. Subscribe for personal access or contact support if you need help.",
+        });
+      }
       const { code } = req.body;
       const raw = typeof code === 'string' ? code.trim() : '';
       if (!raw) {
@@ -1703,9 +1770,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       const expiresAt = new Date();
       expiresAt.setDate(expiresAt.getDate() + 365);
+      const redeemedNow = new Date();
       await storage.updateUserProfile(userId, {
         institutionalAccessAffiliation: institutionName,
         institutionalAccessExpiresAt: expiresAt,
+        institutionalCodeRedeemedAt: redeemedNow,
       });
       res.json({ message: "Access Granted!" });
     } catch (error: any) {

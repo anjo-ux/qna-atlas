@@ -18,7 +18,8 @@
     "clear:generated-questions": "tsx server/scripts/clearGeneratedQuestions.ts",
     "approve:questions": "tsx server/scripts/approveGeneratedQuestions.ts",
     "rephrase:questions": "tsx server/scripts/rephraseQuestions.ts",
-    "summarize:reports": "tsx server/scripts/summarizeQuestionReports.ts"
+    "summarize:reports": "tsx server/scripts/summarizeQuestionReports.ts",
+    "reset:subscription-data": "tsx server/scripts/resetAllSubscriptionData.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.78.0",

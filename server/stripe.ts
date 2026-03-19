@@ -227,6 +227,98 @@ export async function handleStripeWebhook(
     console.log("Stripe subscription fulfilled", { userId, planId, sessionId: session.id });
   }
 
+  /**
+   * Recurring subscription charges (Payment Link / Checkout in subscription mode).
+   * Skips subscription_create — initial period is handled by checkout.session.completed or fulfillFromCheckoutSession.
+   */
+  if (event.type === "invoice.paid") {
+    const inv = event.data.object as Stripe.Invoice;
+    const br = inv.billing_reason ?? "";
+    if (br === "subscription_create") {
+      res.status(200).send("OK");
+      return;
+    }
+    if (br !== "subscription_cycle" && br !== "subscription_update") {
+      res.status(200).send("OK");
+      return;
+    }
+
+    const invId = inv.id;
+    if (!invId) {
+      res.status(200).send("OK");
+      return;
+    }
+
+    const existing = await storage.getSubscriptionTransactionByStripeInvoiceId(invId);
+    if (existing) {
+      res.status(200).send("OK");
+      return;
+    }
+
+    const subRef = inv.subscription;
+    const subId =
+      typeof subRef === "string"
+        ? subRef
+        : subRef && typeof subRef === "object" && subRef !== null && "id" in subRef
+          ? (subRef as Stripe.Subscription).id
+          : null;
+    if (!subId) {
+      res.status(200).send("OK");
+      return;
+    }
+
+    const u = await storage.getUserByStripeSubscriptionId(subId);
+    if (!u) {
+      console.warn("Stripe invoice.paid: no user for subscription", { subId, invId });
+      res.status(200).send("OK");
+      return;
+    }
+
+    const planName = u.subscriptionPlan;
+    if (!planName || planName === "institutional") {
+      res.status(200).send("OK");
+      return;
+    }
+
+    const dbPlans = await storage.getSubscriptionPlans();
+    const plan = dbPlans.find((p) => p.name === planName);
+    if (!plan) {
+      console.error("Stripe invoice.paid: plan not found", { planName, userId: u.id });
+      res.status(200).send("OK");
+      return;
+    }
+
+    const periodStart = inv.period_start ? new Date(inv.period_start * 1000) : new Date();
+    const periodEnd = inv.period_end ? new Date(inv.period_end * 1000) : new Date(periodStart);
+    const amountCents = typeof inv.amount_paid === "number" ? inv.amount_paid : plan.priceUSD;
+    const piRef = inv.payment_intent;
+    const piId =
+      typeof piRef === "string"
+        ? piRef
+        : piRef && typeof piRef === "object" && piRef !== null && "id" in piRef
+          ? (piRef as Stripe.PaymentIntent).id
+          : null;
+
+    await storage.createSubscriptionTransaction({
+      userId: u.id,
+      planId: plan.id,
+      amount: amountCents,
+      status: "completed",
+      stripePaymentIntentId: piId,
+      stripeInvoiceId: invId,
+      startDate: periodStart,
+      endDate: periodEnd,
+    });
+
+    const nextEnd = periodEnd;
+    await storage.updateUserProfile(u.id, {
+      subscriptionEndsAt: nextEnd,
+      ...(u.subscriptionStatus !== "trial" ? { subscriptionStatus: "active" as const } : {}),
+    } as any);
+
+    console.log("Stripe invoice.paid recorded", { userId: u.id, invId, subId, br });
+  }
+
   res.status(200).send("OK");
 }
 

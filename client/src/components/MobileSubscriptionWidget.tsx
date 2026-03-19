@@ -54,11 +54,12 @@ export function MobileSubscriptionWidget({ hasEmoryAccess = false }: MobileSubsc
     mutationFn: async () => {
       return await apiRequest('/api/subscription/cancel', { method: 'POST' });
     },
-    onSuccess: async (data: { message?: string } | null) => {
+    onSuccess: async (data: { message?: string; removedInstitutional?: boolean } | null) => {
       toast.success(data?.message ?? 'Subscription canceled.');
       await Promise.all([
         queryClient.refetchQueries({ queryKey: ['/api/subscription'] }),
         queryClient.refetchQueries({ queryKey: ['/api/subscription/details'] }),
+        queryClient.invalidateQueries({ queryKey: ['/api/subscription/transactions'] }),
         queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] }),
       ]);
     },
@@ -275,8 +276,8 @@ export function MobileSubscriptionWidget({ hasEmoryAccess = false }: MobileSubsc
                     <AlertDialogDescription className="space-y-2">
                       {isInstitutional ? (
                         <>
-                          Your institutional access will end immediately. You can enter a code again anytime to
-                          reactivate.
+                          Your institutional access will end immediately. This account cannot redeem another
+                          institutional code—you can subscribe for personal access anytime.
                         </>
                       ) : (
                         <>
