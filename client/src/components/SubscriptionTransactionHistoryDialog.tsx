@@ -121,6 +121,18 @@ export function SubscriptionTransactionHistoryDialog({
                   if (t.isInstitutionalGrant) return null;
                   if (canceled) {
                     const began = t.periodStart ?? t.createdAt;
+                    if (t.periodEnd && t.canceledAt) {
+                      const endMs = new Date(t.periodEnd).getTime();
+                      const canceledMs = new Date(t.canceledAt).getTime();
+                      // Cancel-at-period-end: keep showing access through original period end.
+                      if (endMs > canceledMs) {
+                        return (
+                          <>
+                            Access {formatShortDate(began)} – {formatShortDate(t.periodEnd)}
+                          </>
+                        );
+                      }
+                    }
                     if (t.canceledAt) {
                       return (
                         <>

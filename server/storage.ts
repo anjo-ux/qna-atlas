@@ -1026,8 +1026,10 @@ export class DatabaseStorage implements IStorage {
   }
 
   /**
-   * Cancel personal subscription immediately: Stripe subscription canceled now (no trial conversion / no renewal),
-   * Atlas access ends immediately. User content (responses, notes, bookmarks) is never deleted.
+   * Cancel personal subscription:
+   * - Active paid subscription: cancel at period end (no further renewal; access remains until existing end date).
+   * - Active trial: cancel immediately (trial ends now; no conversion charge).
+   * User content (responses, notes, bookmarks) is never deleted.
    */
   async cancelUserSubscription(userId: string): Promise<void> {
     const [user] = await db.select().from(users).where(eq(users.id, userId));
@@ -1036,9 +1038,46 @@ export class DatabaseStorage implements IStorage {
     const activeTx = await this.getUserActiveSubscription(userId);
     const canceledNow = new Date();
 
+    const trialEndsAt = user.trialEndsAt ? new Date(user.trialEndsAt) : null;
+    const inActiveTrial =
+      (user.subscriptionStatus || "").toLowerCase() === "trial" &&
+      !!trialEndsAt &&
+      trialEndsAt.getTime() > canceledNow.getTime();
+
+    if (inActiveTrial) {
+      if (user.stripeSubscriptionId?.trim()) {
+        const { cancelStripeSubscriptionImmediately } = await import("./stripe");
+        await cancelStripeSubscriptionImmediately(user.stripeSubscriptionId.trim());
+      }
+
+      if (activeTx) {
+        await db
+          .update(subscriptionTransactions)
+          .set({
+            status: "canceled",
+            canceledAt: canceledNow,
+          })
+          .where(eq(subscriptionTransactions.id, activeTx.id));
+      }
+
+      await db
+        .update(users)
+        .set({
+          subscriptionStatus: "expired",
+          subscriptionPlan: null as any,
+          subscriptionEndsAt: null as any,
+          trialEndsAt: null as any,
+          stripeSubscriptionId: null as any,
+          subscriptionTrialUsed: true,
+          updatedAt: new Date(),
+        })
+        .where(eq(users.id, userId));
+      return;
+    }
+
     if (user.stripeSubscriptionId?.trim()) {
-      const { cancelStripeSubscriptionImmediately } = await import("./stripe");
-      await cancelStripeSubscriptionImmediately(user.stripeSubscriptionId.trim());
+      const { cancelStripeSubscriptionAtPeriodEnd } = await import("./stripe");
+      await cancelStripeSubscriptionAtPeriodEnd(user.stripeSubscriptionId.trim());
     }
 
     if (activeTx) {
@@ -1051,14 +1090,21 @@ export class DatabaseStorage implements IStorage {
         .where(eq(subscriptionTransactions.id, activeTx.id));
     }
 
+    const activeEnd = activeTx?.endDate ? new Date(activeTx.endDate) : null;
+    const userEnd = user.subscriptionEndsAt ? new Date(user.subscriptionEndsAt) : null;
+    const periodEnd =
+      userEnd && activeEnd
+        ? userEnd.getTime() > activeEnd.getTime()
+          ? userEnd
+          : activeEnd
+        : userEnd ?? activeEnd;
+
     await db
       .update(users)
       .set({
-        subscriptionStatus: "expired",
-        subscriptionPlan: null as any,
-        subscriptionEndsAt: null as any,
+        subscriptionStatus: "canceled",
+        subscriptionEndsAt: periodEnd ?? user.subscriptionEndsAt ?? null,
         trialEndsAt: null as any,
-        stripeSubscriptionId: null as any,
         subscriptionTrialUsed: true,
         updatedAt: new Date(),
       })

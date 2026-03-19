@@ -1780,10 +1780,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const activeTx = await storage.getUserActiveSubscription(userId);
       if (userHasPersonalSubscriptionAccess(user, activeTx)) {
+        const trialEndsAt = user.trialEndsAt ? new Date(user.trialEndsAt) : null;
+        const inActiveTrial =
+          (user.subscriptionStatus || "").toLowerCase() === "trial" &&
+          !!trialEndsAt &&
+          trialEndsAt.getTime() > now.getTime();
         await storage.cancelUserSubscription(userId);
         return res.json({
-          message:
-            "Your subscription was canceled immediately. You will not be charged again for this plan. If you were in a free trial, it has ended and you will not be billed.",
+          message: inActiveTrial
+            ? "Your free trial was canceled immediately. You will not be charged."
+            : "Your subscription will end on your current period end date. You won't be charged again for this plan.",
         });
       }
 
@@ -1808,7 +1814,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.cancelUserSubscription(userId);
       res.json({
         message:
-          "Your subscription was canceled immediately. You will not be charged again for this plan. If you were in a free trial, it has ended and you will not be billed.",
+          "Your subscription will end on your current period end date. You won't be charged again for this plan.",
       });
     } catch (error) {
       console.error("Error canceling subscription:", error);
