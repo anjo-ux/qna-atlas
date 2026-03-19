@@ -2,12 +2,43 @@ import Stripe from "stripe";
 import { storage } from "./storage";
 
 const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;
+const STRIPE_LIVE_SECRET_KEY = process.env.STRIPE_LIVE_SECRET_KEY;
 const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET;
 const APP_BASE_URL = process.env.APP_BASE_URL || process.env.VITE_APP_URL || "http://localhost:5000";
 
 export const stripe: Stripe | null = STRIPE_SECRET_KEY
   ? new Stripe(STRIPE_SECRET_KEY)
   : null;
+
+/**
+ * Live Payment Links produce cs_live_* sessions; they can only be retrieved with sk_live_*.
+ * If STRIPE_SECRET_KEY is sk_test_*, set STRIPE_LIVE_SECRET_KEY to sk_live_* for fulfill, or use sk_live_ as STRIPE_SECRET_KEY in production.
+ */
+function getStripeForCheckoutSessionRetrieve(sessionId: string): Stripe | null {
+  const defaultKey = STRIPE_SECRET_KEY || "";
+  const liveOnlyKey = STRIPE_LIVE_SECRET_KEY || "";
+  const isLiveSession = sessionId.startsWith("cs_live_");
+
+  if (isLiveSession) {
+    if (defaultKey.startsWith("sk_live_")) {
+      return stripe;
+    }
+    if (liveOnlyKey.startsWith("sk_live_")) {
+      return new Stripe(liveOnlyKey);
+    }
+    return null;
+  }
+
+  return stripe;
+}
+
+export function stripeLiveKeyMismatchMessage(): string {
+  return (
+    "This checkout was completed in Stripe Live mode, but the server is using a Test secret key (or no live key). " +
+    "Set STRIPE_SECRET_KEY to your sk_live_… key in production, or add STRIPE_LIVE_SECRET_KEY=sk_live_… while keeping STRIPE_SECRET_KEY for test. " +
+    "Also use a Live webhook signing secret (whsec_…) for live events."
+  );
+}
 
 export function isStripeConfigured(): boolean {
   return !!stripe;
@@ -175,9 +206,15 @@ export async function handleStripeWebhook(
 }
 
 export async function fulfillFromCheckoutSession(sessionId: string, userId: string, planId: string): Promise<{ ok: true } | { error: string }> {
-  if (!stripe) return { error: "Stripe is not configured." };
+  const client = getStripeForCheckoutSessionRetrieve(sessionId);
+  if (!client) {
+    if (sessionId.startsWith("cs_live_")) {
+      return { error: stripeLiveKeyMismatchMessage() };
+    }
+    return { error: "Stripe is not configured." };
+  }
   try {
-    const session = await stripe.checkout.sessions.retrieve(sessionId, { expand: ["subscription"] });
+    const session = await client.checkout.sessions.retrieve(sessionId, { expand: ["subscription"] });
     if (session.payment_status !== "paid" && session.status !== "complete") return { error: "Checkout session not paid." };
     const plans = await storage.getSubscriptionPlans();
     const plan = plans.find((p) => p.id === planId);
@@ -223,8 +260,22 @@ export async function fulfillFromCheckoutSession(sessionId: string, userId: stri
     await storage.updateUserProfile(userId, updates as any);
     return { ok: true };
   } catch (err: any) {
-    console.error("Stripe fulfill from session error:", err?.message);
-    return { error: err?.message ?? "Fulfill failed." };
+    const msg = err?.message ?? String(err);
+    console.error("Stripe fulfill from session error:", msg);
+    if (
+      typeof msg === "string" &&
+      (msg.includes("No such checkout.session") || msg.includes("resource_missing"))
+    ) {
+      if (sessionId.startsWith("cs_live_") && STRIPE_SECRET_KEY?.startsWith("sk_test_")) {
+        return { error: stripeLiveKeyMismatchMessage() };
+      }
+      return {
+        error:
+          msg +
+          " If this was a live checkout, ensure STRIPE_SECRET_KEY (or STRIPE_LIVE_SECRET_KEY) is a matching sk_live_ key.",
+      };
+    }
+    return { error: msg || "Fulfill failed." };
   }
 }
 
