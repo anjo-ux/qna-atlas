@@ -1,8 +1,10 @@
 import { useLocation } from 'wouter';
-import { Home, Settings, LogOut } from 'lucide-react';
+import { Home, Receipt, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { SubscriptionPlans } from '@/components/SubscriptionPlans';
 import { useAuth } from '@/hooks/useAuth';
+import { useState } from 'react';
+import { SubscriptionTransactionHistoryDialog } from '@/components/SubscriptionTransactionHistoryDialog';
 
 export type SubscriptionPageProps = {
   /**
@@ -20,6 +22,7 @@ export type SubscriptionPageProps = {
 export default function SubscriptionPage({ onSubscriptionUnlocked }: SubscriptionPageProps) {
   const [, setLocation] = useLocation();
   const { logout } = useAuth();
+  const [transactionHistoryOpen, setTransactionHistoryOpen] = useState(false);
 
   const handleLogout = () => {
     logout();
@@ -59,13 +62,15 @@ export default function SubscriptionPage({ onSubscriptionUnlocked }: Subscriptio
             </div>
             <div className="flex-1" />
             <Button
-              onClick={() => setLocation('/')}
+              onClick={() => setTransactionHistoryOpen(true)}
               variant="outline"
-              size="icon"
-              className="flex-shrink-0"
-              title="Settings"
+              size="sm"
+              className="flex-shrink-0 gap-2"
+              title="View transaction history"
+              data-testid="button-transaction-history-subscribe"
             >
-              <Settings className="h-5 w-5" />
+              <Receipt className="h-4 w-4" />
+              <span className="hidden sm:inline">Transaction History</span>
             </Button>
             <Button
               onClick={handleLogout}
@@ -91,6 +96,10 @@ export default function SubscriptionPage({ onSubscriptionUnlocked }: Subscriptio
           onAccessGranted={handleAccessGranted}
         />
       </main>
+      <SubscriptionTransactionHistoryDialog
+        open={transactionHistoryOpen}
+        onOpenChange={setTransactionHistoryOpen}
+      />
     </div>
   );
 }
