@@ -9,6 +9,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { TestHistory } from '@/components/TestHistory';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { Section } from '@/types/question';
+import { cn } from '@/lib/utils';
 import { BookOpen, Trophy, X, BarChart3, Crosshair, ChevronRight, RotateCcw, Lightbulb, Zap, LogOut, User, Settings, Eye, Smile, Sparkles, Heart, Rocket, Flame, Crown, Coffee, Moon, Sun, Star, Target, CheckCircle2, AlertCircle } from 'lucide-react';
 import { useMemo } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -23,6 +24,8 @@ import {
 
 interface HomePageProps {
   sections: Section[];
+  /** Same as All Content menu: open this section/subsection in the study view */
+  onNavigate?: (sectionId: string, subsectionId: string) => void;
   onReviewIncorrect?: () => void;
   onStartTest?: () => void;
   onResumeTest?: (sessionId: string) => void;
@@ -30,7 +33,7 @@ interface HomePageProps {
   onPreview?: () => void;
 }
 
-export function HomePage({ sections, onReviewIncorrect, onStartTest, onResumeTest, onSettings, onPreview }: HomePageProps) {
+export function HomePage({ sections, onNavigate, onReviewIncorrect, onStartTest, onResumeTest, onSettings, onPreview }: HomePageProps) {
   const { getAllStats, responses, getSubsectionStats, resetAll } = useQuestionStats();
   const { sessions, deleteSession } = useTestSessions();
   const { user, logout } = useAuth();
@@ -365,8 +368,8 @@ export function HomePage({ sections, onReviewIncorrect, onStartTest, onResumeTes
         <h2 className="text-lg md:text-xl font-semibold mb-6">Total Progress</h2>
         <Accordion type="multiple" className="space-y-3">
           {sectionProgress.map(({ section, totalSectionQuestions, answeredQuestions, percentage, accuracy, subsectionDetails }) => (
-            <AccordionItem key={section.id} value={section.id} className="border rounded-lg px-2 md:px-4">
-              <AccordionTrigger className="hover:no-underline py-3 md:py-4">
+            <AccordionItem key={section.id} value={section.id} className="border rounded-lg overflow-hidden">
+              <AccordionTrigger className="hover:no-underline py-3 md:py-4 px-2 md:px-4">
                 <div className="flex-1 space-y-2 min-w-0">
                   <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
                     <h3 className="font-medium text-foreground text-left text-sm md:text-base">{section.title}</h3>
@@ -383,24 +386,38 @@ export function HomePage({ sections, onReviewIncorrect, onStartTest, onResumeTes
                   <Progress value={percentage} className="h-2" />
                 </div>
               </AccordionTrigger>
-              <AccordionContent className="pb-3 md:pb-4">
-                <div className="space-y-2 md:space-y-3 mt-2">
+              <AccordionContent className="pb-3 md:pb-4 pt-0">
+                <div className="space-y-0 mt-0 border-t border-border/60">
                   {subsectionDetails.map(({ subsection, totalQuestions, answered, correct, percentage: subPercentage, accuracy: subAccuracy }) => (
-                    <div key={subsection.id} className="pl-2 md:pl-4 space-y-2 border-l-2 border-muted">
+                    <button
+                      key={subsection.id}
+                      type="button"
+                      disabled={!onNavigate}
+                      onClick={() => onNavigate?.(section.id, subsection.id)}
+                      className={cn(
+                        'w-full text-left space-y-2 px-2 md:px-4 py-2.5 md:py-3 transition-colors',
+                        'border-b border-border/40 last:border-b-0',
+                        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset',
+                        onNavigate &&
+                          'cursor-pointer hover:bg-muted active:bg-muted/80 dark:hover:bg-muted/90 dark:active:bg-muted/70',
+                        !onNavigate && 'cursor-default opacity-90'
+                      )}
+                      aria-label={`Open ${subsection.title}`}
+                    >
                       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-2">
-                        <div className="flex items-center gap-2 min-w-0">
+                        <div className="flex items-center gap-2 min-w-0 pl-0.5">
                           <ChevronRight className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                           <span className="text-xs md:text-sm font-medium text-foreground truncate">{subsection.title}</span>
                         </div>
-                        <div className="flex flex-wrap items-center gap-1 md:gap-3 text-xs">
+                        <div className="flex flex-wrap items-center gap-1 md:gap-3 text-xs sm:pl-2">
                           <span className="text-muted-foreground">
                             {answered} / {totalQuestions}
                           </span>
-                          <span className="font-semibold text-primary min-w-[35px] text-right">
+                          <span className="font-semibold text-primary min-w-[35px] text-right tabular-nums">
                             {subPercentage}%
                           </span>
                           {answered > 0 && (
-                            <span className="text-success min-w-fit text-right">
+                            <span className="text-green-700 dark:text-green-400 font-medium min-w-fit text-right tabular-nums">
                               {correct} Correct
                             </span>
                           )}
@@ -412,7 +429,7 @@ export function HomePage({ sections, onReviewIncorrect, onStartTest, onResumeTes
                         </div>
                       </div>
                       <Progress value={subPercentage} className="h-1.5" />
-                    </div>
+                    </button>
                   ))}
                 </div>
               </AccordionContent>

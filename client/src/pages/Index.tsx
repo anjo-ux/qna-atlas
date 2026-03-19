@@ -784,7 +784,8 @@ export default function Index() {
             <div className="flex-1 min-h-0 w-full overflow-y-auto overflow-x-hidden scrollbar-hide">
               <div className="min-h-full w-full">
                 <HomePage 
-                  sections={sections} 
+                  sections={sections}
+                  onNavigate={handleNavigate}
                   onReviewIncorrect={handleReviewIncorrect}
                   onStartTest={handleStartTest}
                   onResumeTest={handleResumeTest}
@@ -863,7 +864,7 @@ export default function Index() {
                               ? 'No incorrect answers yet. Start answering questions!'
                               : filterMode === 'unanswered'
                               ? 'All questions answered!'
-                              : 'No questions available.'}
+                              : 'No questions available yet. We are cooking up some new questions for you! Please check back soon.'}
                           </p>
                         </div>
                       ) : (
