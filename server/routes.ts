@@ -1619,9 +1619,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
             stripeReceiptOrInvoiceUrl,
             hasStripeIds,
             isInstitutionalGrant: false as const,
+            isTrialPeriod: false as const,
           };
         })
       );
+
+      /**
+       * Normalize current trial display:
+       * - Initial checkout rows may contain full-plan amount/period from Stripe subscription metadata.
+       * - While user is in active trial, show that row as a 7-day $0.00 trial window.
+       */
+      const trialEndsAt = user.trialEndsAt ? new Date(user.trialEndsAt) : null;
+      const inActiveTrial =
+        (user.subscriptionStatus || "").toLowerCase() === "trial" &&
+        trialEndsAt !== null &&
+        trialEndsAt.getTime() > now.getTime();
+      if (inActiveTrial && trialEndsAt) {
+        const trialStart = new Date(trialEndsAt.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
+        const trialEndIso = trialEndsAt.toISOString();
+        const trialCandidate = transactions.find(
+          (row) =>
+            !row.isInstitutionalGrant &&
+            !!row.hasStripeIds &&
+            row.planDurationMonths === 1 &&
+            (row.status || "").toLowerCase() === "completed"
+        );
+        if (trialCandidate) {
+          trialCandidate.amountCents = 0;
+          trialCandidate.periodStart = trialStart;
+          trialCandidate.periodEnd = trialEndIso;
+          trialCandidate.isTrialPeriod = true;
+        }
+      }
 
       /**
        * Hide legacy non-Stripe DB rows (e.g. from /subscription/change) when access is only institutional —

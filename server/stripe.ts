@@ -196,6 +196,9 @@ export async function handleStripeWebhook(
     const startDate = new Date();
     const endDate = new Date(startDate);
     endDate.setMonth(endDate.getMonth() + plan.durationMonths);
+    let transactionStartDate = startDate;
+    let transactionEndDate = endDate;
+    let transactionAmount = plan.priceUSD;
 
     const paymentIntentId =
       typeof session.payment_intent === "string"
@@ -206,15 +209,40 @@ export async function handleStripeWebhook(
     const invoiceIdFromSession =
       typeof invRaw === "string" ? invRaw : (invRaw as Stripe.Invoice | null | undefined)?.id ?? null;
 
+    const subRef = session.subscription;
+    const subId =
+      typeof subRef === "string"
+        ? subRef
+        : subRef && typeof subRef === "object" && "id" in subRef
+          ? (subRef as Stripe.Subscription).id
+          : null;
+    if (subId) {
+      try {
+        const sub = await stripe.subscriptions.retrieve(subId);
+        const trialEnd = sub.trial_end ? new Date(sub.trial_end * 1000) : null;
+        if (trialEnd && trialEnd.getTime() > Date.now()) {
+          const trialStart =
+            sub.trial_start != null
+              ? new Date(sub.trial_start * 1000)
+              : new Date(trialEnd.getTime() - 7 * 24 * 60 * 60 * 1000);
+          transactionStartDate = trialStart;
+          transactionEndDate = trialEnd;
+          transactionAmount = 0;
+        }
+      } catch (err: any) {
+        console.warn("Stripe webhook: unable to inspect subscription trial window", err?.message);
+      }
+    }
+
     await storage.createSubscriptionTransaction({
       userId,
       planId,
-      amount: plan.priceUSD,
+      amount: transactionAmount,
       status: "completed",
       stripePaymentIntentId: paymentIntentId,
       stripeInvoiceId: invoiceIdFromSession,
-      startDate,
-      endDate,
+      startDate: transactionStartDate,
+      endDate: transactionEndDate,
     });
 
     await storage.updateUserProfile(userId, {
@@ -342,6 +370,9 @@ export async function fulfillFromCheckoutSession(sessionId: string, userId: stri
     let startDate = new Date();
     let endDate = new Date(startDate);
     endDate.setMonth(endDate.getMonth() + plan.durationMonths);
+    let transactionStartDate = startDate;
+    let transactionEndDate = endDate;
+    let transactionAmount = plan.priceUSD;
     let subscriptionStatus: string = "active";
     let trialEndsAt: Date | null = null;
     let subscriptionEndsAt: Date = endDate;
@@ -355,6 +386,13 @@ export async function fulfillFromCheckoutSession(sessionId: string, userId: stri
       if (trialEnd && trialEnd.getTime() > Date.now()) {
         subscriptionStatus = "trial";
         trialEndsAt = trialEnd;
+        const trialStart =
+          sub.trial_start != null
+            ? new Date(sub.trial_start * 1000)
+            : new Date(trialEnd.getTime() - 7 * 24 * 60 * 60 * 1000);
+        transactionStartDate = trialStart;
+        transactionEndDate = trialEnd;
+        transactionAmount = 0;
       }
     }
 
@@ -365,12 +403,12 @@ export async function fulfillFromCheckoutSession(sessionId: string, userId: stri
     await storage.createSubscriptionTransaction({
       userId,
       planId: plan.id,
-      amount: plan.priceUSD,
+      amount: transactionAmount,
       status: "completed",
       stripePaymentIntentId: typeof session.payment_intent === "string" ? session.payment_intent : session.payment_intent?.id ?? null,
       stripeInvoiceId: invoiceIdFromSession,
-      startDate,
-      endDate,
+      startDate: transactionStartDate,
+      endDate: transactionEndDate,
     });
     const updates: Record<string, unknown> = {
       subscriptionStatus,

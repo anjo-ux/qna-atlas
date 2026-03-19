@@ -26,6 +26,8 @@ export type SubscriptionTransactionRow = {
   hasStripeIds?: boolean;
   /** Synthetic row for institution-code access (from API) */
   isInstitutionalGrant?: boolean;
+  /** Current trial window row (7-day free trial) */
+  isTrialPeriod?: boolean;
 };
 
 type Response = { transactions: SubscriptionTransactionRow[] };
@@ -148,13 +150,16 @@ export function SubscriptionTransactionHistoryDialog({
                 })();
 
                 const recurringHint =
-                  !t.isInstitutionalGrant &&
-                  !canceled &&
-                  (t.status || '').toLowerCase() === 'completed' &&
-                  t.planDurationMonths === 1 &&
-                  t.hasStripeIds
-                    ? 'Monthly Subscription Charged'
-                    : null;
+                  t.isTrialPeriod
+                    ? '7-Day Free Trial'
+                    : !t.isInstitutionalGrant &&
+                        !canceled &&
+                        (t.status || '').toLowerCase() === 'completed' &&
+                        t.amountCents > 0 &&
+                        t.planDurationMonths === 1 &&
+                        t.hasStripeIds
+                      ? 'Monthly Subscription Charged'
+                      : null;
 
                 return (
                   <li
@@ -183,8 +188,7 @@ export function SubscriptionTransactionHistoryDialog({
                             {t.planName.replace(/-/g, ' ')}
                           </p>
                           <p className="text-muted-foreground text-xs">
-                            {t.amountCents > 0 ? `${formatMoney(t.amountCents)} · ` : null}
-                            {statusLabel}
+                            {formatMoney(t.amountCents)} - {statusLabel}
                           </p>
                           {periodLine && (
                             <p className="text-xs text-muted-foreground">{periodLine}</p>
@@ -203,7 +207,7 @@ export function SubscriptionTransactionHistoryDialog({
                       ) : hasUrl ? (
                         <Button variant="outline" size="sm" asChild className="gap-1 font-medium">
                           <a href={t.stripeReceiptOrInvoiceUrl!} target="_blank" rel="noopener noreferrer">
-                            View invoice →
+                            View Invoice
                           </a>
                         </Button>
                       ) : (
