@@ -41,6 +41,8 @@ export const users = pgTable("users", {
   subscriptionEndsAt: timestamp("subscription_ends_at"),
   stripeCustomerId: varchar("stripe_customer_id"),
   stripeSubscriptionId: varchar("stripe_subscription_id"),
+  /** Once true, user should use no-trial Payment Links / checkout (set on fulfill + cancel). */
+  subscriptionTrialUsed: boolean("subscription_trial_used").notNull().default(false),
   passwordNeedsReset: boolean("password_needs_reset").default(false), // True if using temporary password
   tester: boolean("tester"), // True if user has beta access to Question Auth Platform (Atlas Trainer); set by admins; null/undefined treated as false
   createdAt: timestamp("created_at").defaultNow(),
@@ -212,6 +214,8 @@ export const questions = pgTable("questions", {
   tags: jsonb("tags").$type<string[]>().default([]).notNull(),
   source: varchar("source", { length: 32 }).notNull().default("imported"), // 'imported' | 'generated'
   visible: boolean("visible").notNull().default(true), // false = hidden from users (e.g. picture-based)
+  /** True once auto-hidden due to user report volume (>=10); stays true if visibility is restored by admin */
+  reported: boolean("reported").notNull().default(false),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 }, (table) => [index("idx_questions_subsection_id").on(table.subsectionId)]);
@@ -232,6 +236,8 @@ export const subscriptionPlans = pgTable("subscription_plans", {
   stripePriceId: varchar("stripe_price_id"),
   stripeProductId: varchar("stripe_product_id"), // Stripe product id (prod_xxx) for Checkout
   stripePaymentLinkUrl: varchar("stripe_payment_link_url"), // Payment Link URL (with trial); preferred when set
+  /** Payment Link URL without free trial — used for returning subscribers (same price/interval as trial link). */
+  stripePaymentLinkUrlNoTrial: varchar("stripe_payment_link_url_no_trial"),
   createdAt: timestamp("created_at").defaultNow(),
 }, (table) => [
   index("idx_subscription_plans_name").on(table.name),

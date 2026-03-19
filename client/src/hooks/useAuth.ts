@@ -2,8 +2,11 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
 import type { User } from "@shared/schema";
 
+/** /api/auth/user includes introTrialAvailable (server-computed). */
+export type AuthUser = User & { introTrialAvailable?: boolean };
+
 export function useAuth() {
-  const { data: user, isLoading, error } = useQuery<User | null>({
+  const { data: user, isLoading, error } = useQuery<AuthUser | null>({
     queryKey: ['/api/auth/user'],
     retry: false,
     staleTime: 5 * 60 * 1000, // 5 minutes

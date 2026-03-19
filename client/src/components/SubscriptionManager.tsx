@@ -227,7 +227,9 @@ export function SubscriptionManager() {
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
-                    <AlertDialogCancel>Keep {isInstitutional ? 'access' : 'subscription'}</AlertDialogCancel>
+                    <AlertDialogCancel>
+                      {isInstitutional ? 'Keep Access' : 'Keep Subscription'}
+                    </AlertDialogCancel>
                     <AlertDialogAction
                       className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                       onClick={() => {
@@ -235,7 +237,7 @@ export function SubscriptionManager() {
                         setCancelDialogOpen(false);
                       }}
                     >
-                      {isInstitutional ? 'Remove access' : 'Yes, cancel now'}
+                      {isInstitutional ? 'Remove Access' : 'Yes, Cancel Now'}
                     </AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>

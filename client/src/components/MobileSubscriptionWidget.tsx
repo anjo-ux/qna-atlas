@@ -250,7 +250,9 @@ export function MobileSubscriptionWidget({ hasEmoryAccess = false }: MobileSubsc
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
-                    <AlertDialogCancel>Keep {isInstitutional ? 'access' : 'subscription'}</AlertDialogCancel>
+                    <AlertDialogCancel>
+                      {isInstitutional ? 'Keep Access' : 'Keep Subscription'}
+                    </AlertDialogCancel>
                     <AlertDialogAction
                       className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                       onClick={() => {
@@ -258,7 +260,7 @@ export function MobileSubscriptionWidget({ hasEmoryAccess = false }: MobileSubsc
                         setCancelDialogOpen(false);
                       }}
                     >
-                      {isInstitutional ? 'Remove access' : 'Yes, cancel now'}
+                      {isInstitutional ? 'Remove Access' : 'Yes, Cancel Now'}
                     </AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>

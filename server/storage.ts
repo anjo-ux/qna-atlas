@@ -38,7 +38,7 @@ import {
   type InsertQuestionReport,
 } from "@shared/schema";
 import { db, pool } from "./db";
-import { eq, and, asc, desc, lte, sql } from "drizzle-orm";
+import { eq, and, asc, desc, lte, sql, count } from "drizzle-orm";
 
 const INSTITUTIONAL_CODE_SALT_ROUNDS = 10;
 let institutionalMigrationDone = false;
@@ -128,12 +128,15 @@ export interface IStorage {
   }[]>;
 
   // Subscription operations
+  warmupSubscriptionSchema(): Promise<void>;
   initializeSubscriptionPlans(): Promise<SubscriptionPlan[]>;
   getSubscriptionPlans(): Promise<SubscriptionPlan[]>;
   createSubscriptionTransaction(transaction: InsertSubscriptionTransaction): Promise<SubscriptionTransaction>;
   getUserActiveSubscription(userId: string): Promise<SubscriptionTransaction | undefined>;
   cancelUserSubscription(userId: string): Promise<void>;
   getUserSubscriptionTransactions(userId: string): Promise<SubscriptionTransaction[]>;
+  /** False if user already consumed intro trial (flag or any completed subscription purchase). */
+  getIntroTrialEligibility(userId: string): Promise<boolean>;
 
   // Institutional codes (hashed in DB; validate returns institution display name)
   ensureInstitutionalCodesSeed(): Promise<void>;
@@ -154,6 +157,9 @@ export interface IStorage {
   // Question reports
   createQuestionReport(report: InsertQuestionReport): Promise<QuestionReport>;
   getAllQuestionReports(): Promise<QuestionReport[]>;
+  countQuestionReportsForQuestion(questionId: string): Promise<number>;
+  /** If question exists, set visible=false and reported=true (idempotent). */
+  hideQuestionDueToReports(questionId: string): Promise<boolean>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -707,6 +713,23 @@ export class DatabaseStorage implements IStorage {
     return db.select().from(questionReports).orderBy(desc(questionReports.createdAt));
   }
 
+  async countQuestionReportsForQuestion(questionId: string): Promise<number> {
+    const [row] = await db
+      .select({ n: count() })
+      .from(questionReports)
+      .where(eq(questionReports.questionId, questionId));
+    return Number(row?.n ?? 0);
+  }
+
+  async hideQuestionDueToReports(questionId: string): Promise<boolean> {
+    const [updated] = await db
+      .update(questions)
+      .set({ visible: false, reported: true, updatedAt: new Date() })
+      .where(eq(questions.id, questionId))
+      .returning({ id: questions.id });
+    return !!updated;
+  }
+
   async createQuestion(data: {
     question: string;
     answer: string;
@@ -817,18 +840,76 @@ export class DatabaseStorage implements IStorage {
 
   /** Payment Link URLs (with free trial) – used when set; otherwise fallback to product/price. */
   private static readonly PAYMENT_LINK_URLS: Record<string, string> = {
-    'monthly': 'https://buy.stripe.com/28E14m4X6dd36H8f2pcV202',
+    monthly: 'https://buy.stripe.com/28E14m4X6dd36H8f2pcV202',
     '6-month': 'https://buy.stripe.com/7sYeVc0GQ7SJc1saM9cV201',
     '1-year': 'https://buy.stripe.com/aFaaEW2OY3Ct6H88E1cV200',
   };
 
+  /**
+   * Payment Links without a free trial (same products/prices as above, no trial in Stripe Dashboard).
+   * Paste URLs here and/or set env: STRIPE_PAYMENT_LINK_MONTHLY_NO_TRIAL, _6_MONTH_, _1_YEAR_.
+   */
+  private static readonly PAYMENT_LINK_URLS_NO_TRIAL: Record<string, string> = {
+    monthly: 'https://buy.stripe.com/00w14m2OYb4VfdE5rPcV203',
+    '6-month': 'https://buy.stripe.com/14A8wO9dmb4V8PgbQdcV204',
+    '1-year': 'https://buy.stripe.com/14A8wOahq6OF3uWf2pcV205',
+  };
+
+  private resolveNoTrialPaymentLink(planName: string): string {
+    const envMap: Record<string, string | undefined> = {
+      monthly: process.env.STRIPE_PAYMENT_LINK_MONTHLY_NO_TRIAL,
+      '6-month': process.env.STRIPE_PAYMENT_LINK_6_MONTH_NO_TRIAL,
+      '1-year': process.env.STRIPE_PAYMENT_LINK_1_YEAR_NO_TRIAL,
+    };
+    const fromEnv = envMap[planName]?.trim();
+    if (fromEnv) return fromEnv;
+    return (DatabaseStorage.PAYMENT_LINK_URLS_NO_TRIAL[planName] ?? '').trim();
+  }
+
+  /** Ensures DB columns for trial tracking and no-trial payment links exist (idempotent). */
+  private async ensureSubscriptionTrialMigrations(): Promise<void> {
+    await pool.query(`
+      ALTER TABLE "users" ADD COLUMN IF NOT EXISTS "subscription_trial_used" boolean NOT NULL DEFAULT false
+    `);
+    await pool.query(`
+      ALTER TABLE "subscription_plans" ADD COLUMN IF NOT EXISTS "stripe_payment_link_url_no_trial" varchar
+    `);
+  }
+
+  /** Call once at server startup so user rows match schema before any getUser(). */
+  async warmupSubscriptionSchema(): Promise<void> {
+    await this.ensureSubscriptionTrialMigrations();
+  }
+
   /** Ensures the three subscription plans (monthly $50, 6-month $270, 1-year $450) exist and are up to date. */
   async ensureSubscriptionPlansSync(): Promise<void> {
+    await this.ensureSubscriptionTrialMigrations();
     const targetPlans = [
-      { name: 'monthly', durationMonths: 1, priceUSD: 5000, stripeProductId: 'prod_U14VnZW3eRgkDL', stripePaymentLinkUrl: DatabaseStorage.PAYMENT_LINK_URLS['monthly'] },
-      { name: '6-month', durationMonths: 6, priceUSD: 27000, stripeProductId: 'prod_U14WP9DcWZEZWi', stripePaymentLinkUrl: DatabaseStorage.PAYMENT_LINK_URLS['6-month'] },
-      { name: '1-year', durationMonths: 12, priceUSD: 45000, stripeProductId: 'prod_U14X6csDhWjhrk', stripePaymentLinkUrl: DatabaseStorage.PAYMENT_LINK_URLS['1-year'] },
-    ] as const;
+      {
+        name: 'monthly' as const,
+        durationMonths: 1,
+        priceUSD: 5000,
+        stripeProductId: 'prod_U14VnZW3eRgkDL',
+        stripePaymentLinkUrl: DatabaseStorage.PAYMENT_LINK_URLS.monthly,
+        stripePaymentLinkUrlNoTrial: this.resolveNoTrialPaymentLink('monthly') || null,
+      },
+      {
+        name: '6-month' as const,
+        durationMonths: 6,
+        priceUSD: 27000,
+        stripeProductId: 'prod_U14WP9DcWZEZWi',
+        stripePaymentLinkUrl: DatabaseStorage.PAYMENT_LINK_URLS['6-month'],
+        stripePaymentLinkUrlNoTrial: this.resolveNoTrialPaymentLink('6-month') || null,
+      },
+      {
+        name: '1-year' as const,
+        durationMonths: 12,
+        priceUSD: 45000,
+        stripeProductId: 'prod_U14X6csDhWjhrk',
+        stripePaymentLinkUrl: DatabaseStorage.PAYMENT_LINK_URLS['1-year'],
+        stripePaymentLinkUrlNoTrial: this.resolveNoTrialPaymentLink('1-year') || null,
+      },
+    ];
 
     // Migrate old plan names to new
     const oneMonth = await db.select().from(subscriptionPlans).where(eq(subscriptionPlans.name, '1-month'));
@@ -847,7 +928,13 @@ export class DatabaseStorage implements IStorage {
     // Ensure each target plan exists and has correct Stripe product id and payment link URL
     for (const p of targetPlans) {
       const existing = await db.select().from(subscriptionPlans).where(eq(subscriptionPlans.name, p.name));
-      const updatesFull = { durationMonths: p.durationMonths, priceUSD: p.priceUSD, stripeProductId: p.stripeProductId, stripePaymentLinkUrl: p.stripePaymentLinkUrl };
+      const updatesFull = {
+        durationMonths: p.durationMonths,
+        priceUSD: p.priceUSD,
+        stripeProductId: p.stripeProductId,
+        stripePaymentLinkUrl: p.stripePaymentLinkUrl,
+        stripePaymentLinkUrlNoTrial: p.stripePaymentLinkUrlNoTrial,
+      };
       const updatesMinimal = { durationMonths: p.durationMonths, priceUSD: p.priceUSD, stripeProductId: p.stripeProductId };
       if (existing.length === 0) {
         try {
@@ -923,6 +1010,7 @@ export class DatabaseStorage implements IStorage {
         subscriptionEndsAt: null as any,
         trialEndsAt: null as any,
         stripeSubscriptionId: null as any,
+        subscriptionTrialUsed: true,
         updatedAt: new Date(),
       })
       .where(eq(users.id, userId));
@@ -934,6 +1022,24 @@ export class DatabaseStorage implements IStorage {
       .from(subscriptionTransactions)
       .where(eq(subscriptionTransactions.userId, userId))
       .orderBy(desc(subscriptionTransactions.createdAt));
+  }
+
+  async getIntroTrialEligibility(userId: string): Promise<boolean> {
+    const user = await this.getUser(userId);
+    if (!user) return false;
+    if (user.subscriptionTrialUsed) return false;
+    const [row] = await db
+      .select({ id: subscriptionTransactions.id })
+      .from(subscriptionTransactions)
+      .where(
+        and(
+          eq(subscriptionTransactions.userId, userId),
+          eq(subscriptionTransactions.status, 'completed')
+        )
+      )
+      .limit(1);
+    if (row) return false;
+    return true;
   }
 
   // Ensure institutional_codes table exists (idempotent; safe if migration wasn't run)

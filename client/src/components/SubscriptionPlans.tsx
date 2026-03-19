@@ -84,6 +84,8 @@ interface SubscriptionPlansProps {
 
 export function SubscriptionPlans({ open = true, onOpenChange, asDialog = true, noPlanOverlay = false, embeddedInPage = false, onAccessGranted }: SubscriptionPlansProps) {
   const { user } = useAuth();
+  /** false only when server says they used trial / had a prior personal subscription checkout */
+  const introTrialEligible = user?.introTrialAvailable !== false;
   const { data: plans = [], isLoading: plansLoading, isError: plansError, refetch: refetchPlans } = useQuery<Plan[]>({
     queryKey: ['/api/subscription/plans'],
   });
@@ -196,13 +198,21 @@ export function SubscriptionPlans({ open = true, onOpenChange, asDialog = true, 
           isPage ? 'text-2xl sm:text-3xl mb-2 text-foreground' : 'text-xl mb-1',
           !isPage && titleClass
         )}>
-          {noPlanOverlay ? 'Start Free Trial' : 'Choose Your Plan'}
+          {noPlanOverlay
+            ? introTrialEligible
+              ? 'Start Free Trial'
+              : 'Subscribe'
+            : 'Choose Your Plan'}
         </h2>
         <p className={cn(
           isPage ? 'text-base text-muted-foreground mb-8 max-w-md' : 'text-sm mb-5',
           subtitleClass
         )}>
-          {noPlanOverlay ? 'Choose a plan below or use your institution code to get started.' : 'Unlock full access with a subscription.'}
+          {noPlanOverlay
+            ? introTrialEligible
+              ? 'Choose a plan below or use your institution code to get started.'
+              : 'Choose a plan below. Your free trial was already used on this account — you will be charged when you subscribe. You can also use an institution code.'
+            : 'Unlock full access with a subscription.'}
         </p>
 
         {(plansError || (plans.length === 0 && !plansLoading)) && (
@@ -337,11 +347,21 @@ export function SubscriptionPlans({ open = true, onOpenChange, asDialog = true, 
                         <div className="flex items-start justify-between gap-3">
                           <div>
                             <h3 className={cn('font-semibold', contentTitleClass)}>{display.title}</h3>
-                            <p className="text-xs text-emerald-600 dark:text-emerald-400 mt-1 font-medium">Includes 7-Day Free Trial</p>
+                            {introTrialEligible ? (
+                              <p className="text-xs text-emerald-600 dark:text-emerald-400 mt-1 font-medium">Includes 7-Day Free Trial</p>
+                            ) : (
+                              <p className={cn('text-xs mt-1 font-medium', isPage ? 'text-amber-900 dark:text-amber-100' : 'text-amber-200')}>
+                                No free trial — your account already used its trial or had a prior subscription.
+                              </p>
+                            )}
                             <p className={cn('text-2xl font-bold mt-1', contentTitleClass)}>{display.price}</p>
                             {display.discount && <span className="inline-block mt-1 text-xs text-emerald-600 dark:text-emerald-400">{display.discount}</span>}
                             <p className={cn('text-sm mt-1', contentMutedClass)}>{display.billing}</p>
-                            <p className={cn('text-sm mt-0.5', contentMutedClass)}>Billing Begins {billingStartsStr}</p>
+                            {introTrialEligible ? (
+                              <p className={cn('text-sm mt-0.5', contentMutedClass)}>Billing Begins {billingStartsStr}</p>
+                            ) : (
+                              <p className={cn('text-sm mt-0.5', contentMutedClass)}>First charge when you complete checkout.</p>
+                            )}
                             <p className={cn('text-sm mt-1', contentDimClass)}>Cancel Anytime</p>
                           </div>
                           {display.bestDeal && (
@@ -396,8 +416,20 @@ export function SubscriptionPlans({ open = true, onOpenChange, asDialog = true, 
           )}
         >
           <DialogHeader className="sr-only">
-            <DialogTitle>{noPlanOverlay ? 'Start Free Trial! Choose Plan' : 'Choose Your Plan Below'}</DialogTitle>
-            <DialogDescription>{noPlanOverlay ? 'Choose a plan to start your free trial.' : 'Unlock full access with a subscription or institutional code.'}</DialogDescription>
+            <DialogTitle>
+              {noPlanOverlay
+                ? introTrialEligible
+                  ? 'Start Free Trial! Choose Plan'
+                  : 'Choose Your Plan'
+                : 'Choose Your Plan Below'}
+            </DialogTitle>
+            <DialogDescription>
+              {noPlanOverlay
+                ? introTrialEligible
+                  ? 'Choose a plan to start your free trial.'
+                  : 'Subscribe without a trial — you will be charged at checkout. Institution codes still work as before.'
+                : 'Unlock full access with a subscription or institutional code.'}
+            </DialogDescription>
           </DialogHeader>
           {popupContent}
         </DialogContent>

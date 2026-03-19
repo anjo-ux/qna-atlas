@@ -52,6 +52,8 @@ export async function createCheckoutSession(params: {
   userId: string;
   userEmail: string | null;
   planId: string;
+  /** When false, use no-trial Payment Link if configured (returning subscribers). */
+  introTrialEligible?: boolean;
   successUrl?: string;
   cancelUrl?: string;
 }): Promise<{ sessionId: string; url: string } | { error: string }> {
@@ -65,8 +67,25 @@ export async function createCheckoutSession(params: {
     return { error: "Plan not found" };
   }
 
+  const planRow = plan as {
+    stripePaymentLinkUrl?: string | null;
+    stripePaymentLinkUrlNoTrial?: string | null;
+  };
+  const introOk = params.introTrialEligible !== false;
+
+  if (!introOk) {
+    const noTrialUrl = planRow.stripePaymentLinkUrlNoTrial?.trim();
+    if (noTrialUrl) {
+      return { sessionId: "", url: noTrialUrl };
+    }
+    return {
+      error:
+        "No-trial checkout is not configured for this plan. In Stripe, duplicate each Payment Link without a trial phase, then set stripe_payment_link_url_no_trial in the DB or env STRIPE_PAYMENT_LINK_MONTHLY_NO_TRIAL / STRIPE_PAYMENT_LINK_6_MONTH_NO_TRIAL / STRIPE_PAYMENT_LINK_1_YEAR_NO_TRIAL.",
+    };
+  }
+
   // Prefer Payment Link URL (with free trial); Stripe redirects to success_url with session_id
-  const paymentLinkUrl = (plan as { stripePaymentLinkUrl?: string | null }).stripePaymentLinkUrl?.trim();
+  const paymentLinkUrl = planRow.stripePaymentLinkUrl?.trim();
   if (paymentLinkUrl) {
     return { sessionId: "", url: paymentLinkUrl };
   }
@@ -197,6 +216,7 @@ export async function handleStripeWebhook(
       subscriptionStatus: "active",
       subscriptionPlan: plan.name as any,
       subscriptionEndsAt: endDate,
+      subscriptionTrialUsed: true,
     });
 
     console.log("Stripe subscription fulfilled", { userId, planId, sessionId: session.id });
@@ -257,6 +277,7 @@ export async function fulfillFromCheckoutSession(sessionId: string, userId: stri
       trialEndsAt: trialEndsAt ?? null,
     };
     if (subId) updates.stripeSubscriptionId = subId;
+    updates.subscriptionTrialUsed = true;
     await storage.updateUserProfile(userId, updates as any);
     return { ok: true };
   } catch (err: any) {

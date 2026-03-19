@@ -67,6 +67,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Set up authentication middleware
   await setupAuth(app);
 
+  try {
+    await storage.warmupSubscriptionSchema();
+  } catch (err) {
+    console.error("Subscription schema warmup failed; server continuing:", err);
+  }
+
   // One-time reset all users to no subscription when RUN_SUBSCRIPTION_RESET=true (unset after running)
   try {
     await storage.runSubscriptionResetIfRequested();
@@ -286,6 +292,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         userEmail: userEmail ?? undefined,
         userId: userId ?? undefined,
       });
+      const reportCount = await storage.countQuestionReportsForQuestion(trimmedQuestionId);
+      if (reportCount >= 10) {
+        const hid = await storage.hideQuestionDueToReports(trimmedQuestionId);
+        if (hid) {
+          console.log(
+            `[report-question] Question ${trimmedQuestionId} auto-hidden (${reportCount} reports); reported flag set.`
+          );
+        }
+      }
       // Email disabled for now; reports are stored in DB only. Run npm run summarize:reports to view.
       res.json({ message: 'Report sent.' });
     } catch (error) {
@@ -304,7 +319,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const user = await storage.getUser(userId);
-      res.json(sanitizeUser(user) ?? null);
+      const sanitized = sanitizeUser(user);
+      if (!sanitized) {
+        return res.json(null);
+      }
+      const introTrialAvailable = await storage.getIntroTrialEligibility(userId);
+      res.json({ ...sanitized, introTrialAvailable });
     } catch (error) {
       console.error("Error fetching user:", error);
       res.status(500).json({ message: "Failed to fetch user." });
@@ -1314,10 +1334,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Plan ID required." });
       }
       const user = await storage.getUser(userId);
+      const introTrialEligible = await storage.getIntroTrialEligibility(userId);
       const result = await createCheckoutSession({
         userId,
         userEmail: user?.email ?? null,
         planId: planId.trim(),
+        introTrialEligible,
       });
       if ("error" in result) {
         return res.status(400).json({ message: result.error });
@@ -1494,6 +1516,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         subscriptionStatus: 'active',
         subscriptionPlan: plan.name as any,
         subscriptionEndsAt: endDate,
+        subscriptionTrialUsed: true,
       });
 
       res.json({ message: "Subscription updated successfully." });
