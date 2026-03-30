@@ -42,6 +42,8 @@ export const users = pgTable("users", {
   subscriptionPlan: varchar("subscription_plan"), // 1-month, 3-month, 6-month
   trialEndsAt: timestamp("trial_ends_at"),
   subscriptionEndsAt: timestamp("subscription_ends_at"),
+  subscriptionCancelAtPeriodEnd: boolean("subscription_cancel_at_period_end").notNull().default(false), // User canceled renewal; keep access until subscriptionEndsAt
+  subscriptionCanceledAt: timestamp("subscription_canceled_at"), // When user requested cancellation (period-end for paid, immediate for trial)
   stripeCustomerId: varchar("stripe_customer_id"),
   stripeSubscriptionId: varchar("stripe_subscription_id"),
   /** Once true, user should use no-trial Payment Links / checkout (set on fulfill + cancel). */

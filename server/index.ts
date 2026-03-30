@@ -103,6 +103,23 @@ app.use((req, res, next) => {
       if (!stripeKey) {
         log("Subscription checkout will not work. Add STRIPE_SECRET_KEY and configure Stripe webhook (STRIPE_WEBHOOK_SECRET) for production.");
       }
+      const stripeReconcileIntervalMs = Number(process.env.STRIPE_RECONCILIATION_INTERVAL_MS) || 3 * 24 * 60 * 60 * 1000;
+      if (stripeReconcileIntervalMs > 0) {
+        import("./stripe").then(({ reconcileStripeSubscriptions }) => {
+          const run = () => {
+            reconcileStripeSubscriptions()
+              .then((r) =>
+                log(
+                  `[stripeReconciliation] scanned=${r.scanned} updatedUsers=${r.updatedUsers} createdTransactions=${r.createdTransactions} errors=${r.errors}`
+                )
+              )
+              .catch((e) => log(`[stripeReconciliation] error: ${e}`));
+          };
+          run(); // run once immediately at startup
+          setInterval(run, stripeReconcileIntervalMs);
+          log(`[stripeReconciliation] scheduled every ${stripeReconcileIntervalMs}ms`);
+        });
+      }
 
       // Scheduled AI question generation (per docs/questions_db_migration_plan.md requirement 3)
       const genEnabled = process.env.QUESTION_GENERATION_ENABLED === "true";

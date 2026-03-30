@@ -31,6 +31,8 @@ export async function runFullSubscriptionDataReset(pool: Pool): Promise<{
         "stripe_customer_id" = NULL,
         "stripe_subscription_id" = NULL,
         "subscription_trial_used" = false,
+        "subscription_cancel_at_period_end" = false,
+        "subscription_canceled_at" = NULL,
         "updated_at" = CURRENT_TIMESTAMP
     `);
     await client.query("COMMIT");

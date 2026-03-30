@@ -249,6 +249,8 @@ export async function handleStripeWebhook(
       subscriptionStatus: "active",
       subscriptionPlan: plan.name as any,
       subscriptionEndsAt: endDate,
+      subscriptionCancelAtPeriodEnd: false as any,
+      subscriptionCanceledAt: null as any,
       subscriptionTrialUsed: true,
     });
 
@@ -341,6 +343,8 @@ export async function handleStripeWebhook(
     const nextEnd = periodEnd;
     await storage.updateUserProfile(u.id, {
       subscriptionEndsAt: nextEnd,
+      subscriptionCancelAtPeriodEnd: false as any,
+      subscriptionCanceledAt: null as any,
       ...(u.subscriptionStatus !== "trial" ? { subscriptionStatus: "active" as const } : {}),
     } as any);
 
@@ -414,6 +418,8 @@ export async function fulfillFromCheckoutSession(sessionId: string, userId: stri
       subscriptionStatus,
       subscriptionPlan: plan.name,
       subscriptionEndsAt,
+      subscriptionCancelAtPeriodEnd: false,
+      subscriptionCanceledAt: null,
       trialEndsAt: trialEndsAt ?? null,
     };
     if (subId) updates.stripeSubscriptionId = subId;
@@ -562,4 +568,143 @@ export async function getReceiptOrInvoiceUrlForTransaction(
   }
 
   return null;
+}
+
+async function retrieveStripeSubscriptionAcrossClients(
+  subscriptionId: string
+): Promise<Stripe.Subscription | null> {
+  const clients = stripeClientsForSubscriptionMutations();
+  for (let i = 0; i < clients.length; i++) {
+    try {
+      return await clients[i].subscriptions.retrieve(subscriptionId, {
+        expand: ["latest_invoice"],
+      });
+    } catch (err: unknown) {
+      if (isStripeSubscriptionMissingError(err) && i < clients.length - 1) continue;
+      if (isStripeSubscriptionMissingError(err)) return null;
+      throw err;
+    }
+  }
+  return null;
+}
+
+/**
+ * Periodic Stripe reconciliation:
+ * - Ensures user entitlement dates/status match Stripe subscription state
+ * - Backfills missed recurring paid invoices into subscription_transactions (idempotent by invoice id)
+ */
+export async function reconcileStripeSubscriptions(): Promise<{
+  scanned: number;
+  updatedUsers: number;
+  createdTransactions: number;
+  skippedNoStripe: number;
+  errors: number;
+}> {
+  if (!stripe) {
+    return { scanned: 0, updatedUsers: 0, createdTransactions: 0, skippedNoStripe: 0, errors: 0 };
+  }
+
+  const users = await storage.getUsersWithStripeSubscriptions();
+  const plans = await storage.getSubscriptionPlans();
+  const planByName = new Map(plans.map((p) => [p.name, p]));
+  let updatedUsers = 0;
+  let createdTransactions = 0;
+  let skippedNoStripe = 0;
+  let errors = 0;
+  const nowMs = Date.now();
+
+  for (const u of users) {
+    const subId = u.stripeSubscriptionId?.trim();
+    if (!subId) {
+      skippedNoStripe += 1;
+      continue;
+    }
+    try {
+      const sub = await retrieveStripeSubscriptionAcrossClients(subId);
+      if (!sub) continue;
+
+      const periodEnd =
+        typeof sub.current_period_end === "number"
+          ? new Date(sub.current_period_end * 1000)
+          : null;
+      const trialEnd =
+        typeof sub.trial_end === "number" && sub.trial_end > 0
+          ? new Date(sub.trial_end * 1000)
+          : null;
+      const cancelAtPeriodEnd = sub.cancel_at_period_end === true;
+
+      const updates: Record<string, unknown> = {};
+      if (periodEnd) updates.subscriptionEndsAt = periodEnd;
+      updates.subscriptionCancelAtPeriodEnd = cancelAtPeriodEnd;
+      updates.subscriptionCanceledAt = cancelAtPeriodEnd ? (u.subscriptionCanceledAt ?? new Date()) : null;
+
+      if (periodEnd && periodEnd.getTime() <= nowMs) {
+        updates.subscriptionStatus = "expired";
+      } else if (sub.status === "trialing" && trialEnd && trialEnd.getTime() > nowMs) {
+        updates.subscriptionStatus = "trial";
+        updates.trialEndsAt = trialEnd;
+      } else {
+        updates.subscriptionStatus = "active";
+        updates.trialEndsAt = null;
+      }
+
+      await storage.updateUserProfile(u.id, updates as any);
+      updatedUsers += 1;
+
+      const latestInvoice = sub.latest_invoice as Stripe.Invoice | string | null | undefined;
+      const inv =
+        latestInvoice && typeof latestInvoice === "object" && "id" in latestInvoice
+          ? (latestInvoice as Stripe.Invoice)
+          : null;
+      const invoiceId = inv?.id ?? null;
+      const invoicePaid = !!inv && (inv.status === "paid" || inv.paid === true);
+      const planName = u.subscriptionPlan ?? null;
+      const plan = planName ? planByName.get(planName) : undefined;
+      if (invoiceId && invoicePaid && plan) {
+        const existing = await storage.getSubscriptionTransactionByStripeInvoiceId(invoiceId);
+        if (!existing) {
+          const periodStart = inv?.period_start ? new Date(inv.period_start * 1000) : new Date();
+          const txEnd =
+            inv?.period_end
+              ? new Date(inv.period_end * 1000)
+              : periodEnd ?? new Date(periodStart.getTime() + plan.durationMonths * 30 * 24 * 60 * 60 * 1000);
+          const amountCents = typeof inv?.amount_paid === "number" ? inv.amount_paid : plan.priceUSD;
+          const piRef = inv?.payment_intent;
+          const piId =
+            typeof piRef === "string"
+              ? piRef
+              : piRef && typeof piRef === "object" && "id" in piRef
+                ? (piRef as Stripe.PaymentIntent).id
+                : null;
+
+          await storage.createSubscriptionTransaction({
+            userId: u.id,
+            planId: plan.id,
+            amount: amountCents,
+            status: "completed",
+            stripePaymentIntentId: piId,
+            stripeInvoiceId: invoiceId,
+            startDate: periodStart,
+            endDate: txEnd,
+          });
+          createdTransactions += 1;
+        }
+      }
+    } catch (err: any) {
+      errors += 1;
+      console.error("Stripe reconciliation user error:", {
+        userId: u.id,
+        stripeSubscriptionId: subId,
+        message: err?.message ?? String(err),
+      });
+    }
+  }
+
+  return {
+    scanned: users.length,
+    updatedUsers,
+    createdTransactions,
+    skippedNoStripe,
+    errors,
+  };
 }

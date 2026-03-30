@@ -11,4 +11,6 @@ SET
   "institutional_access_expires_at" = NULL,
   "stripe_customer_id" = NULL,
   "stripe_subscription_id" = NULL,
+  "subscription_cancel_at_period_end" = false,
+  "subscription_canceled_at" = NULL,
   "updated_at" = CURRENT_TIMESTAMP;

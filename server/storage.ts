@@ -140,6 +140,8 @@ export interface IStorage {
   /** Idempotent Stripe invoice handling (renewals). */
   getSubscriptionTransactionByStripeInvoiceId(invoiceId: string): Promise<SubscriptionTransaction | undefined>;
   getUserByStripeSubscriptionId(stripeSubscriptionId: string): Promise<User | undefined>;
+  /** Users currently linked to Stripe subscriptions (for periodic reconciliation). */
+  getUsersWithStripeSubscriptions(): Promise<User[]>;
   /** False if user already consumed intro trial (flag or any completed subscription purchase). */
   getIntroTrialEligibility(userId: string): Promise<boolean>;
 
@@ -905,6 +907,12 @@ export class DatabaseStorage implements IStorage {
     await pool.query(`
       ALTER TABLE "subscription_transactions" ADD COLUMN IF NOT EXISTS "canceled_at" timestamp
     `);
+    await pool.query(`
+      ALTER TABLE "users" ADD COLUMN IF NOT EXISTS "subscription_cancel_at_period_end" boolean NOT NULL DEFAULT false
+    `);
+    await pool.query(`
+      ALTER TABLE "users" ADD COLUMN IF NOT EXISTS "subscription_canceled_at" timestamp
+    `);
   }
 
   /** Call once at server startup so user rows match schema before any getUser(). */
@@ -1066,6 +1074,8 @@ export class DatabaseStorage implements IStorage {
           subscriptionStatus: "expired",
           subscriptionPlan: null as any,
           subscriptionEndsAt: null as any,
+          subscriptionCancelAtPeriodEnd: false,
+          subscriptionCanceledAt: canceledNow,
           trialEndsAt: null as any,
           stripeSubscriptionId: null as any,
           subscriptionTrialUsed: true,
@@ -1102,8 +1112,10 @@ export class DatabaseStorage implements IStorage {
     await db
       .update(users)
       .set({
-        subscriptionStatus: "canceled",
+        subscriptionStatus: "active",
         subscriptionEndsAt: periodEnd ?? user.subscriptionEndsAt ?? null,
+        subscriptionCancelAtPeriodEnd: true,
+        subscriptionCanceledAt: canceledNow,
         trialEndsAt: null as any,
         subscriptionTrialUsed: true,
         updatedAt: new Date(),
@@ -1137,6 +1149,11 @@ export class DatabaseStorage implements IStorage {
     if (!sid) return undefined;
     const [u] = await db.select().from(users).where(eq(users.stripeSubscriptionId, sid)).limit(1);
     return u;
+  }
+
+  async getUsersWithStripeSubscriptions(): Promise<User[]> {
+    const rows = await db.select().from(users);
+    return rows.filter((u) => !!u.stripeSubscriptionId?.trim());
   }
 
   async getIntroTrialEligibility(userId: string): Promise<boolean> {

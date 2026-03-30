@@ -574,12 +574,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const now = new Date();
       const trialEndsAt = user.trialEndsAt ? new Date(user.trialEndsAt) : null;
       const subscriptionEndsAt = user.subscriptionEndsAt ? new Date(user.subscriptionEndsAt) : null;
+      const activeSubscription = await storage.getUserActiveSubscription(userId);
+      const activeEndDate = activeSubscription?.endDate ? new Date(activeSubscription.endDate) : null;
+      const cancelAtPeriodEnd = user.subscriptionCancelAtPeriodEnd === true;
 
       let status = user.subscriptionStatus || 'trial';
       let daysRemaining = 0;
 
-      if (status === 'canceled' && subscriptionEndsAt && subscriptionEndsAt > now) {
-        daysRemaining = Math.max(0, Math.ceil((subscriptionEndsAt.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
+      const futureCandidates: Date[] = [];
+      if (subscriptionEndsAt && subscriptionEndsAt.getTime() > now.getTime()) futureCandidates.push(subscriptionEndsAt);
+      if (activeEndDate && activeEndDate.getTime() > now.getTime()) futureCandidates.push(activeEndDate);
+      const bestFutureEnd =
+        futureCandidates.length > 0
+          ? futureCandidates.reduce((a, b) => (a.getTime() > b.getTime() ? a : b))
+          : null;
+
+      // Dedicated cancellation flag controls "canceled but active until end date" semantics.
+      if (cancelAtPeriodEnd && bestFutureEnd) {
+        status = 'canceled';
+      } else if (cancelAtPeriodEnd && !bestFutureEnd) {
+        status = 'expired';
+        await storage.updateUserProfile(user.id, {
+          subscriptionStatus: 'expired' as any,
+          subscriptionCancelAtPeriodEnd: false as any,
+        });
+      }
+
+      if (status === 'canceled' && bestFutureEnd) {
+        daysRemaining = Math.max(0, Math.ceil((bestFutureEnd.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
+      } else if ((status === 'active' || status === 'trial') && bestFutureEnd) {
+        daysRemaining = Math.max(0, Math.ceil((bestFutureEnd.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
       } else if (trialEndsAt) {
         const diffTime = trialEndsAt.getTime() - now.getTime();
         daysRemaining = Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
@@ -595,7 +619,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let isLocked =
         status === 'expired' ||
         (status === 'trial' && daysRemaining === 0) ||
-        (status === 'canceled' && (!subscriptionEndsAt || subscriptionEndsAt <= now));
+        (status === 'canceled' && (!bestFutureEnd || bestFutureEnd <= now));
 
       /**
        * Valid institutional access must unlock the app even when personal row still says "expired"
@@ -1516,18 +1540,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userEndsAt = user?.subscriptionEndsAt ? new Date(user.subscriptionEndsAt) : null;
       const activeEndDate = activeSubscription?.endDate ? new Date(activeSubscription.endDate) : null;
       const hasFutureAccess = (userEndsAt && userEndsAt.getTime() > now.getTime()) || (activeEndDate && activeEndDate.getTime() > now.getTime());
+      const cancelAtPeriodEnd = user.subscriptionCancelAtPeriodEnd === true;
 
       // If trial period has ended, treat as active for display
       if (status === 'trial' && trialEndsAt && trialEndsAt.getTime() <= now.getTime()) {
         status = 'active';
       }
-      // If user has future subscription end but DB says expired, treat as active and fix DB
-      if (status === 'expired' && hasFutureAccess) {
-        status = 'active';
-        await storage.updateUserProfile(userId, { subscriptionStatus: 'active' as any });
-        if (activeEndDate && !userEndsAt) {
-          await storage.updateUserProfile(userId, { subscriptionEndsAt: activeEndDate as any });
-        }
+      if (cancelAtPeriodEnd && hasFutureAccess) {
+        status = 'canceled';
+      } else if (cancelAtPeriodEnd && !hasFutureAccess) {
+        status = 'expired';
+        await storage.updateUserProfile(userId, {
+          subscriptionStatus: 'expired' as any,
+          subscriptionCancelAtPeriodEnd: false as any,
+        });
       }
 
       let daysRemaining: number | null = null;
@@ -1733,6 +1759,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         subscriptionStatus: 'active',
         subscriptionPlan: plan.name as any,
         subscriptionEndsAt: endDate,
+        subscriptionCancelAtPeriodEnd: false as any,
+        subscriptionCanceledAt: null as any,
         subscriptionTrialUsed: true,
       });
 
