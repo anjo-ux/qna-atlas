@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Send, MessageCircle, X, Loader2, Maximize2, Minimize2 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
+import { cn } from '@/lib/utils';
 
 interface Message {
   id: string;
@@ -93,7 +94,19 @@ export function ChatBubble() {
   };
 
   return (
-    <div className="fixed z-40 bottom-6 right-6 md:bottom-6 md:right-6">
+    <div
+      className={cn(
+        'fixed',
+        !isOpen && 'bottom-6 right-6 z-40',
+        isOpen && 'z-[100]',
+        isOpen &&
+          isExpanded &&
+          'max-md:inset-0 max-md:flex max-md:flex-col max-md:pb-[env(safe-area-inset-bottom)] md:bottom-6 md:right-6 md:left-auto md:top-auto',
+        isOpen &&
+          !isExpanded &&
+          'max-md:bottom-6 max-md:left-1/2 max-md:right-auto max-md:w-[min(24rem,calc(100vw-1.5rem))] max-md:-translate-x-1/2 md:bottom-6 md:right-6 md:left-auto md:w-auto md:translate-x-0',
+      )}
+    >
       <style>{`
         @keyframes chatBubbleGrow {
           from {
@@ -142,26 +155,27 @@ export function ChatBubble() {
           animation: expandToFull 0.4s ease-out forwards;
         }
 
-        @media (max-width: 768px) {
-          .chat-window-expanded-mobile {
-            position: fixed;
-            inset: 60px 0 0 0;
-            border-radius: 0;
-            height: auto;
-            max-height: calc(100vh - 60px);
-          }
-        }
       `}</style>
 
       {isOpen ? (
         // Chat Window (Expanded or Normal)
-        <Card className={`flex flex-col overflow-hidden rounded-lg bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm border-white/20 dark:border-slate-700/20 shadow-xl ${isExpanded ? 'chat-window-expanded md:w-96' : 'chat-window-open w-96 h-96'} ${isExpanded ? 'chat-window-expanded-mobile' : ''}`}
-          style={!isExpanded ? undefined : (window.innerWidth < 768 ? undefined : { height: 'calc(100vh - 140px)' })}
+        <Card
+          className={cn(
+            'flex flex-col overflow-hidden rounded-lg bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm border-white/20 dark:border-slate-700/20 shadow-xl',
+            !isExpanded && 'chat-window-open h-96 w-full md:w-96',
+            isExpanded &&
+              'chat-window-expanded max-md:h-full max-md:min-h-0 max-md:w-full max-md:flex-1 max-md:rounded-none max-md:border-x-0 max-md:border-t-0 max-md:pt-[env(safe-area-inset-top)] md:h-[calc(100vh-140px)] md:w-96',
+          )}
         >
           {/* Header with Close and Expand Buttons */}
-          <div className="flex items-center justify-between p-4 border-b border-border/50 bg-primary/10">
-            <h3 className="font-semibold text-sm">Assistant</h3>
-            <div className="flex gap-1">
+          <div className="flex items-start justify-between gap-3 p-4 border-b border-border/50 bg-primary/10">
+            <div className="min-w-0 flex-1 pr-1">
+              <h3 className="font-semibold text-sm">Atlas Agent</h3>
+              <p className="mt-1 text-xs text-muted-foreground leading-snug">
+                Trained specifically in plastic and reconstructive surgery. Ask me any questions you may have.
+              </p>
+            </div>
+            <div className="flex shrink-0 gap-1">
               <Button
                 onClick={() => setIsExpanded(!isExpanded)}
                 size="icon"
@@ -237,8 +251,7 @@ export function ChatBubble() {
                 onClick={handleSendMessage}
                 disabled={!input.trim() || isLoading}
                 data-testid="chat-bubble-send"
-                size="icon"
-                className="h-9 w-9"
+                className="h-9 min-w-14 shrink-0 rounded-full px-5"
               >
                 {isLoading ? (
                   <Loader2 className="h-4 w-4 animate-spin" />

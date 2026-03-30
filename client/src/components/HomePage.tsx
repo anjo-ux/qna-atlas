@@ -170,11 +170,15 @@ export function HomePage({ sections, onNavigate, onReviewIncorrect, onStartTest,
           <ThemeToggle />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="gap-1 sm:gap-2 px-2 sm:px-3 group" data-testid="button-user-menu">
-                <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
+              <Button
+                variant="ghost"
+                className="gap-1 sm:gap-2 px-2 sm:px-3 group rounded-full border border-transparent profile-menu-trigger hover:text-foreground"
+                data-testid="button-user-menu"
+              >
+                <div className="profile-menu-avatar w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ring-1 ring-black/5 dark:ring-white/10">
                   {(() => {
                     const IconComponent = getAvatarIcon();
-                    return <IconComponent className="w-4 h-4 text-primary group-hover:text-white" />;
+                    return <IconComponent className="w-4 h-4 text-primary" />;
                   })()}
                 </div>
                 <span className="hidden sm:inline truncate">{user?.firstName || user?.email?.split('@')[0]}</span>

@@ -375,6 +375,92 @@ html, body {
       0 2px 12px -2px rgba(0, 0, 0, 0.3);
   }
 
+  /* Profile menu trigger – liquid glass hover (matches nav/logo glass, not accent fill) */
+  .profile-menu-avatar {
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.88) 0%,
+      rgba(255, 255, 255, 0.58) 100%
+    );
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow:
+      0 1px 0 0 rgba(255, 255, 255, 0.85) inset,
+      0 0 0 1px rgba(255, 255, 255, 0.45),
+      0 2px 8px -2px rgba(31, 38, 135, 0.1);
+  }
+
+  .dark .profile-menu-avatar {
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.14) 0%,
+      rgba(255, 255, 255, 0.07) 100%
+    );
+    box-shadow:
+      0 1px 0 0 rgba(255, 255, 255, 0.1) inset,
+      0 0 0 1px rgba(255, 255, 255, 0.1),
+      0 2px 12px -2px rgba(0, 0, 0, 0.25);
+  }
+
+  button.profile-menu-trigger:hover,
+  button.profile-menu-trigger[data-state="open"] {
+    background-color: transparent;
+    background-image: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.72) 0%,
+      rgba(255, 255, 255, 0.42) 100%
+    );
+    backdrop-filter: blur(16px) saturate(185%);
+    -webkit-backdrop-filter: blur(16px) saturate(185%);
+    box-shadow:
+      0 1px 0 0 rgba(255, 255, 255, 0.82) inset,
+      0 0 0 1px rgba(255, 255, 255, 0.48),
+      0 4px 20px -4px rgba(31, 38, 135, 0.1);
+    color: hsl(var(--foreground));
+  }
+
+  .dark button.profile-menu-trigger:hover,
+  .dark button.profile-menu-trigger[data-state="open"] {
+    background-image: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.16) 0%,
+      rgba(255, 255, 255, 0.06) 100%
+    );
+    backdrop-filter: blur(18px) saturate(165%);
+    -webkit-backdrop-filter: blur(18px) saturate(165%);
+    box-shadow:
+      0 1px 0 0 rgba(255, 255, 255, 0.1) inset,
+      0 0 0 1px rgba(255, 255, 255, 0.1),
+      0 4px 24px -4px rgba(0, 0, 0, 0.35);
+    color: hsl(var(--foreground));
+  }
+
+  button.profile-menu-trigger:hover .profile-menu-avatar,
+  button.profile-menu-trigger[data-state="open"] .profile-menu-avatar {
+    background-image: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.95) 0%,
+      rgba(255, 255, 255, 0.68) 100%
+    );
+    box-shadow:
+      0 1px 0 0 rgba(255, 255, 255, 0.95) inset,
+      0 0 0 1px rgba(255, 255, 255, 0.55),
+      0 2px 10px -2px rgba(31, 38, 135, 0.14);
+  }
+
+  .dark button.profile-menu-trigger:hover .profile-menu-avatar,
+  .dark button.profile-menu-trigger[data-state="open"] .profile-menu-avatar {
+    background-image: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.2) 0%,
+      rgba(255, 255, 255, 0.09) 100%
+    );
+    box-shadow:
+      0 1px 0 0 rgba(255, 255, 255, 0.14) inset,
+      0 0 0 1px rgba(255, 255, 255, 0.12),
+      0 2px 14px -2px rgba(0, 0, 0, 0.35);
+  }
+
   /* Gradient Text */
   .gradient-text {
     background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--secondary)));

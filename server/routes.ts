@@ -8,6 +8,7 @@ import { insertTestSessionSchema, updateTestSessionSchema, insertQuestionRespons
 import { validateQuestionFormat, contentRulesForGenerated } from "@shared/questionFormat";
 import { subsectionOrder, subsectionTitles } from "@shared/questionImport";
 import type { User, SubscriptionTransaction } from "@shared/schema";
+import { userHasAdminForeverAccess } from "./adminGrantedAccess";
 
 const ADMIN_CODE = process.env.ADMIN_CODE || "1127";
 
@@ -29,6 +30,7 @@ function userHasPersonalSubscriptionAccess(
   activeTx?: SubscriptionTransaction | undefined
 ): boolean {
   if (!user) return false;
+  if (userHasAdminForeverAccess(user)) return true;
   const now = Date.now();
 
   const plan = user.subscriptionPlan ?? undefined;
@@ -64,6 +66,7 @@ function userHasPersonalSubscriptionAccess(
 /** True when the user row reflects an ongoing personal (paid/trial) period — institutional UI should not replace this. */
 function userHasCoherentPersonalPaidRow(user: User | undefined, now: Date): boolean {
   if (!user) return false;
+  if (userHasAdminForeverAccess(user)) return true;
   const st = user.subscriptionStatus || "trial";
   const userEndsAt = user.subscriptionEndsAt ? new Date(user.subscriptionEndsAt) : null;
   const trialEndsAt = user.trialEndsAt ? new Date(user.trialEndsAt) : null;
@@ -390,7 +393,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.json(null);
       }
       const introTrialAvailable = await storage.getIntroTrialEligibility(userId);
-      res.json({ ...sanitized, introTrialAvailable });
+      const tester = sanitized.tester === true || userHasAdminForeverAccess(user);
+      res.json({ ...sanitized, tester, introTrialAvailable });
     } catch (error) {
       console.error("Error fetching user:", error);
       res.status(500).json({ message: "Failed to fetch user." });
@@ -450,7 +454,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.warn("[tester-redirect] 401: User not found", { userId });
         return res.status(401).json({ message: "User not found." });
       }
-      if (user.tester !== true) {
+      if (user.tester !== true && !userHasAdminForeverAccess(user)) {
         console.warn("[tester-redirect] 403: User is not a tester", { userId });
         return res.status(403).json({ message: "Beta testing access required." });
       }
@@ -501,11 +505,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(401).json({ message: "Invalid or expired token." });
     }
     const user = await storage.getUser(payload.userId);
-    if (!user || user.tester !== true) {
+    if (!user || (user.tester !== true && !userHasAdminForeverAccess(user))) {
       console.warn("[verify-tester-token] 403: User not found or not a tester", { userId: payload.userId });
       return res.status(403).json({ message: "User is not a tester." });
     }
-    res.json({ valid: true, user: sanitizeUser(user) });
+    const base = sanitizeUser(user);
+    const userOut =
+      base && userHasAdminForeverAccess(user) ? { ...base, tester: true as const } : base;
+    res.json({ valid: true, user: userOut });
   };
 
   app.get("/api/auth/verify-tester-token", (req, res, next) => {
@@ -556,6 +563,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { user, hasInstitutionalRedemption } = await loadUserForSubscription(userId);
       if (!user) {
         return res.json({ status: 'none', daysRemaining: 0, trialEndsAt: null, isLocked: false });
+      }
+
+      if (userHasAdminForeverAccess(user)) {
+        return res.json({
+          status: "active",
+          daysRemaining: null,
+          trialEndsAt: null,
+          isLocked: false,
+        });
       }
 
       const institutionalExpiresAt = user.institutionalAccessExpiresAt
@@ -1434,6 +1450,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Plan ID required." });
       }
       const user = await storage.getUser(userId);
+      if (user && userHasAdminForeverAccess(user)) {
+        return res.status(400).json({ message: "This account already has full access." });
+      }
       const introTrialEligible = await storage.getIntroTrialEligibility(userId);
       const result = await createCheckoutSession({
         userId,
@@ -1461,6 +1480,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!sessionId || !planId) {
         return res.status(400).json({ message: "session_id and planId required." });
       }
+      const user = await storage.getUser(userId);
+      if (user && userHasAdminForeverAccess(user)) {
+        return res.status(400).json({ message: "This account already has full access." });
+      }
       const { fulfillFromCheckoutSession } = await import("./stripe");
       const result = await fulfillFromCheckoutSession(sessionId, userId, planId);
       if ("error" in result) {
@@ -1481,6 +1504,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!user) {
         return res.status(404).json({ message: "User not found." });
       }
+
+      if (userHasAdminForeverAccess(user)) {
+        const transactions = await storage.getUserSubscriptionTransactions(userId);
+        return res.json({
+          plan: "1-year",
+          status: "active",
+          endsAt: undefined,
+          trialEndsAt: undefined,
+          daysRemaining: null,
+          transactionCount: transactions.length,
+          planPrice: undefined,
+        });
+      }
+
       const institutionalExpiresAt = user.institutionalAccessExpiresAt
         ? new Date(user.institutionalAccessExpiresAt)
         : null;
@@ -1729,6 +1766,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/subscription/change', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.session?.userId;
+      const user = await storage.getUser(userId);
+      if (user && userHasAdminForeverAccess(user)) {
+        return res.status(400).json({ message: "This account already has full access." });
+      }
       const { planId } = req.body;
 
       if (!planId) {
@@ -1779,6 +1820,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const user = await storage.getUser(userId);
       if (!user) {
         return res.status(404).json({ message: "User not found." });
+      }
+
+      if (userHasAdminForeverAccess(user)) {
+        return res.json({
+          message: "This account has permanent complimentary access; nothing to cancel.",
+          removedInstitutional: false,
+        });
       }
 
       const now = new Date();

@@ -30,6 +30,80 @@ interface SessionSetup {
   hinting: string;
 }
 
+function OralBoardSidebarPanel({
+  conversations,
+  currentConversationId,
+  onSelectConversation,
+  onNewChat,
+  onDeleteConversation,
+  onAfterInteraction,
+}: {
+  conversations: Conversation[];
+  currentConversationId: string;
+  onSelectConversation: (id: string) => void;
+  onNewChat: () => void | Promise<void>;
+  onDeleteConversation: (id: string) => void;
+  onAfterInteraction?: () => void;
+}) {
+  return (
+    <>
+      <div className="p-4 border-b border-border/50 shrink-0">
+        <Button
+          onClick={() => {
+            void onNewChat();
+            onAfterInteraction?.();
+          }}
+          className="w-full gap-2"
+          size="sm"
+          variant="outline"
+          data-testid="button-new-conversation"
+        >
+          <Plus className="h-4 w-4" />
+          New Chat
+        </Button>
+      </div>
+
+      <div className="flex-1 overflow-y-auto space-y-1 p-2 min-h-0">
+        {conversations.length === 0 ? (
+          <div className="text-xs text-muted-foreground text-center py-4">
+            No Conversations Yet
+          </div>
+        ) : (
+          conversations.map((conv) => (
+            <div
+              key={conv.id}
+              onClick={() => {
+                onSelectConversation(conv.id);
+                onAfterInteraction?.();
+              }}
+              className={`group flex items-center gap-2 p-3 rounded-md cursor-pointer transition-colors ${
+                currentConversationId === conv.id
+                  ? 'bg-primary/15 text-primary'
+                  : 'hover:bg-accent/50 text-muted-foreground'
+              }`}
+              data-testid={`conversation-${conv.id}`}
+            >
+              <span className="flex-1 truncate text-sm">{conv.title}</span>
+              <Button
+                size="icon"
+                variant="ghost"
+                className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDeleteConversation(conv.id);
+                }}
+                data-testid={`button-delete-${conv.id}`}
+              >
+                <Trash2 className="h-3 w-3" />
+              </Button>
+            </div>
+          ))
+        )}
+      </div>
+    </>
+  );
+}
+
 export default function OralBoardSimulator({ onBack }: { onBack: () => void }) {
   const { user } = useAuth();
   const [conversations, setConversations] = useState<Conversation[]>([]);
@@ -273,67 +347,21 @@ Hinting: ${sessionSetup.hinting}`;
 
   return (
     <div className="h-screen w-full flex bg-gradient-to-br from-purple-50 via-lavender-50 to-pink-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-900">
-      {/* Left Sidebar - Chat History */}
-      <div className={`flex flex-col border-r border-border bg-white/30 dark:bg-slate-900/30 backdrop-blur-sm transition-all duration-300 ${
-        isSidebarOpen ? 'w-64' : 'w-0'
-      } overflow-hidden lg:w-64 lg:overflow-visible`}>
-        {/* Header */}
-        <div className="p-4 border-b border-border/50">
-          <Button
-            onClick={handleNewConversation}
-            className="w-full gap-2"
-            size="sm"
-            variant="outline"
-            data-testid="button-new-conversation"
-          >
-            <Plus className="h-4 w-4" />
-            New Chat
-          </Button>
-        </div>
-
-        {/* Conversations List */}
-        <div className="flex-1 overflow-y-auto space-y-1 p-2">
-          {conversations.length === 0 ? (
-            <div className="text-xs text-muted-foreground text-center py-4">
-              No conversations yet
-            </div>
-          ) : (
-            conversations.map((conv) => (
-              <div
-                key={conv.id}
-                onClick={() => setCurrentConversationId(conv.id)}
-                className={`group flex items-center gap-2 p-3 rounded-md cursor-pointer transition-colors ${
-                  currentConversationId === conv.id
-                    ? 'bg-primary/15 text-primary'
-                    : 'hover:bg-accent/50 text-muted-foreground'
-                }`}
-                data-testid={`conversation-${conv.id}`}
-              >
-                <span className="flex-1 truncate text-sm">
-                  {conv.title}
-                </span>
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleDeleteConversation(conv.id);
-                  }}
-                  data-testid={`button-delete-${conv.id}`}
-                >
-                  <Trash2 className="h-3 w-3" />
-                </Button>
-              </div>
-            ))
-          )}
-        </div>
+      {/* Desktop: left sidebar (chat history) */}
+      <div className="hidden lg:flex lg:w-64 lg:shrink-0 flex-col border-r border-border bg-white/30 dark:bg-slate-900/30 backdrop-blur-sm overflow-hidden">
+        <OralBoardSidebarPanel
+          conversations={conversations}
+          currentConversationId={currentConversationId}
+          onSelectConversation={setCurrentConversationId}
+          onNewChat={handleNewConversation}
+          onDeleteConversation={handleDeleteConversation}
+        />
       </div>
 
       {/* Main Chat Area */}
-      <div className="flex-1 flex flex-col">
-        {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-border/50 bg-white/40 dark:bg-slate-900/40 backdrop-blur-md gap-3">
+      <div className="flex-1 flex flex-col min-h-0">
+        {/* Header — stays above the mobile overlay so back / menu always receive taps */}
+        <div className="flex items-center justify-between p-4 border-b border-border/50 bg-white/40 dark:bg-slate-900/40 backdrop-blur-md gap-3 shrink-0 relative z-10">
           <div className="flex items-center gap-3 min-w-0">
             <Button
               size="icon"
@@ -362,8 +390,55 @@ Hinting: ${sessionSetup.hinting}`;
           </div>
         </div>
 
-        {/* Messages Container or Setup Menu */}
-        <div className="flex-1 overflow-y-auto scrollbar-hide p-4 flex flex-col justify-center">
+        <div className="relative flex-1 flex flex-col min-h-0">
+          {/* Mobile: overlay only covers content below header (fixed overlay was stealing header taps) */}
+          {isSidebarOpen && (
+            <div
+              className="lg:hidden absolute inset-0 z-20 flex items-start justify-center pt-[max(0.75rem,6svh)] px-4 pb-6 pointer-events-none"
+              role="presentation"
+            >
+              <button
+                type="button"
+                className="absolute inset-0 bg-black/50 pointer-events-auto"
+                onClick={() => setIsSidebarOpen(false)}
+                aria-label="Close menu"
+              />
+              <div
+                className="relative z-10 flex flex-col w-full max-w-sm max-h-[min(28rem,calc(100svh-5rem))] rounded-xl border border-border bg-white/95 dark:bg-slate-900/95 shadow-xl backdrop-blur-md overflow-hidden pointer-events-auto"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="oral-board-sidebar-title"
+              >
+                <div className="flex items-center justify-between gap-2 px-3 py-2.5 border-b border-border/50 shrink-0 bg-white/80 dark:bg-slate-900/80">
+                  <h2 id="oral-board-sidebar-title" className="text-sm font-semibold truncate">
+                    Conversations
+                  </h2>
+                  <Button
+                    type="button"
+                    size="icon"
+                    variant="ghost"
+                    className="shrink-0"
+                    onClick={() => setIsSidebarOpen(false)}
+                    aria-label="Close conversations menu"
+                    data-testid="button-close-sidebar-overlay"
+                  >
+                    <X className="h-5 w-5" />
+                  </Button>
+                </div>
+                <OralBoardSidebarPanel
+                  conversations={conversations}
+                  currentConversationId={currentConversationId}
+                  onSelectConversation={setCurrentConversationId}
+                  onNewChat={handleNewConversation}
+                  onDeleteConversation={handleDeleteConversation}
+                  onAfterInteraction={() => setIsSidebarOpen(false)}
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Messages Container or Setup Menu */}
+          <div className="flex-1 overflow-y-auto scrollbar-hide p-4 flex flex-col justify-center min-h-0">
           {conversations.find(c => c.id === currentConversationId)?.showSetupMenu ? (
             // Setup Menu - Full Width
             <div className="w-full">
@@ -579,41 +654,42 @@ Hinting: ${sessionSetup.hinting}`;
             </>
           )}
           <div ref={messagesEndRef} />
-        </div>
-
-        {/* Input Area - Only show when not in setup menu */}
-        {!conversations.find(c => c.id === currentConversationId)?.showSetupMenu && (
-          <div className="p-6 border-t border-border/50 bg-white/40 dark:bg-slate-900/40 backdrop-blur-md">
-            <div className="flex gap-2 max-w-4xl mx-auto">
-              <Input
-                placeholder="Ask about plastic surgery concepts, techniques, or clinical scenarios..."
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyPress={(e) => {
-                  if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    handleSendMessage();
-                  }
-                }}
-                disabled={isLoading}
-                data-testid="input-message"
-                className="flex-1"
-              />
-              <Button
-                onClick={handleSendMessage}
-                disabled={!input.trim() || isLoading}
-                data-testid="button-send"
-                size="icon"
-              >
-                {isLoading ? (
-                  <Loader2 className="h-5 w-5 animate-spin" />
-                ) : (
-                  <Send className="h-5 w-5" />
-                )}
-              </Button>
-            </div>
           </div>
-        )}
+
+          {/* Input Area - Only show when not in setup menu */}
+          {!conversations.find(c => c.id === currentConversationId)?.showSetupMenu && (
+            <div className="p-6 border-t border-border/50 bg-white/40 dark:bg-slate-900/40 backdrop-blur-md shrink-0">
+              <div className="flex gap-2 max-w-4xl mx-auto">
+                <Input
+                  placeholder="Ask about plastic surgery concepts, techniques, or clinical scenarios..."
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault();
+                      handleSendMessage();
+                    }
+                  }}
+                  disabled={isLoading}
+                  data-testid="input-message"
+                  className="flex-1"
+                />
+                <Button
+                  onClick={handleSendMessage}
+                  disabled={!input.trim() || isLoading}
+                  data-testid="button-send"
+                  size="icon"
+                >
+                  {isLoading ? (
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                  ) : (
+                    <Send className="h-5 w-5" />
+                  )}
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
