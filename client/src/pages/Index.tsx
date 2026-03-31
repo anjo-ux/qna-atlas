@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useSections } from '@/hooks/useSections';
+import { useTheme } from '@/hooks/useTheme';
 import { Section } from '@/types/question';
 import { Navigation } from '@/components/Navigation';
 import { QuestionCard } from '@/components/QuestionCard';
@@ -44,6 +45,7 @@ type TestModeState = { mode: 'new' } | { mode: 'resume'; sessionId: string };
 
 export default function Index() {
   const [, setLocation] = useLocation();
+  const { theme } = useTheme();
   const { sections, isLoading: sectionsLoading } = useSections();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSection, setSelectedSection] = useState<string | null>(null);
@@ -538,7 +540,7 @@ export default function Index() {
                 <div className="flex items-center gap-3 min-w-0 px-4 py-1.5 rounded-xl">
                   <div className="logo-glass flex items-center justify-center p-1.5 flex-shrink-0 ring-1 ring-black/5 dark:ring-white/10">
                     <img 
-                      src="/atlas-logo.png" 
+                      src={theme === 'dark' ? '/atlas-logo-light.png' : '/atlas-logo.png'} 
                       alt="Atlas Logo" 
                       className="h-7 w-7 sm:h-8 sm:w-8 object-contain"
                     />
