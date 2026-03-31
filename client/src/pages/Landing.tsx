@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Check, Eye } from "lucide-react";
 import { useState } from "react";
 import { PreviewWizard } from "@/components/PreviewWizard";
+import { useTheme } from "@/hooks/useTheme";
 
 function handleLogin() {
   window.location.href = '/login';
@@ -14,6 +15,7 @@ function handleSignUp() {
 
 export default function Landing() {
   const [showPreviewWizard, setShowPreviewWizard] = useState(false);
+  const { theme } = useTheme();
 
   return (
     <div className="flex flex-col h-full">
@@ -31,7 +33,7 @@ export default function Landing() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3 min-w-0 px-4 py-1.5 rounded-xl">
               <div className="logo-glass flex items-center justify-center p-1.5 flex-shrink-0 ring-1 ring-black/5 dark:ring-white/10">
-                <img src="/atlas-logo.png" alt="Atlas Logo" className="h-7 w-7 sm:h-8 sm:w-8 object-contain" />
+                <img src={theme === 'dark' ? '/atlas-logo-light.png' : '/atlas-logo.png'} alt="Atlas Logo" className="h-7 w-7 sm:h-8 sm:w-8 object-contain" />
               </div>
               <div className="hidden sm:flex flex-col min-w-0">
                 <span className="text-base sm:text-lg font-bold tracking-tight gradient-text leading-tight truncate">
@@ -59,7 +61,7 @@ export default function Landing() {
           <div className="max-w-4xl mx-auto space-y-12">
           <div className="text-center space-y-6">
             <div className="flex justify-center mb-4">
-              <img src="/atlas-logo.png" alt="Plastic Surgery Atlas" className="w-24 h-24 object-contain drop-shadow-lg" />
+              <img src={theme === 'dark' ? '/atlas-logo-light.png' : '/atlas-logo.png'} alt="Plastic Surgery Atlas" className="w-24 h-24 object-contain drop-shadow-lg" />
             </div>
             <h2 className="text-5xl font-bold gradient-text leading-tight">
               Plastic Surgery Atlas

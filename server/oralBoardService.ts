@@ -50,9 +50,20 @@ export async function sendMessage(threadId: string, userMessage: string): Promis
       assistant_id: assistantId
     });
 
-    // Check run status
+    // Check run status (failed, cancelled, expired, incomplete, requires_action, etc.)
     if (run.status !== 'completed') {
-      throw new Error(`Run failed with status: ${run.status}`);
+      const lastError = run.last_error;
+      const detail = lastError
+        ? `${lastError.code}: ${lastError.message}`
+        : run.incomplete_details
+          ? `incomplete: ${run.incomplete_details.reason ?? 'unknown'}`
+          : 'no API error details';
+      console.error('Oral board assistant run finished unsuccessfully:', {
+        status: run.status,
+        detail,
+        assistantId,
+      });
+      throw new Error(`Run ended with status "${run.status}" — ${detail}`);
     }
 
     // Get messages from thread
@@ -70,6 +81,9 @@ export async function sendMessage(threadId: string, userMessage: string): Promis
     return (lastAssistantMessage.content[0] as any).text;
   } catch (error) {
     console.error('Failed to send message:', error);
+    if (error instanceof Error) {
+      throw error;
+    }
     throw new Error('Failed to process message');
   }
 }

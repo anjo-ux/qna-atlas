@@ -2040,9 +2040,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const response = await sendMessage(threadId, message);
       res.json({ response });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error processing chat message:', error);
-      res.status(500).json({ message: 'Failed to process message.' });
+      const clientMessage =
+        process.env.NODE_ENV !== 'production' && error?.message
+          ? error.message
+          : 'Failed to process message.';
+      res.status(500).json({ message: clientMessage });
     }
   });
 

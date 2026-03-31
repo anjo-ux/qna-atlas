@@ -210,7 +210,7 @@ export default function Login() {
               data-testid="button-home"
             >
               <div className="logo-glass flex items-center justify-center p-1.5 flex-shrink-0 ring-1 ring-black/5 dark:ring-white/10">
-                <img src={atlasLogo} alt="Atlas Logo" className="h-7 w-7 sm:h-8 sm:w-8 object-contain" />
+                <img src={isDark ? '/atlas-logo-light.png' : atlasLogo} alt="Atlas Logo" className="h-7 w-7 sm:h-8 sm:w-8 object-contain" />
               </div>
               <div className="hidden sm:flex flex-col min-w-0">
                 <span className="text-base sm:text-lg font-bold tracking-tight gradient-text leading-tight truncate">
@@ -244,7 +244,7 @@ export default function Login() {
           <Card variant="glass" className="w-full max-w-md glow-primary">
             <CardHeader className="space-y-2">
               <div className="flex justify-center mb-4">
-                <img src={atlasLogo} alt="Atlas Logo" className="w-16 h-16 object-contain" />
+                <img src={isDark ? '/atlas-logo-light.png' : atlasLogo} alt="Atlas Logo" className="w-16 h-16 object-contain" />
               </div>
               <CardTitle className="text-center text-2xl gradient-text">
                 {isSignUp ? 'Create Account' : 'Sign In'}
