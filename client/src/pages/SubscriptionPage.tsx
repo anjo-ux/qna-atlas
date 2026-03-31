@@ -6,6 +6,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { useState } from 'react';
 import { SubscriptionTransactionHistoryDialog } from '@/components/SubscriptionTransactionHistoryDialog';
 import { useTheme } from '@/hooks/useTheme';
+import atlasLogo from '@assets/atlas_1764093111680.png';
+import atlasLogoLight from '@assets/logo_light_1774918799268.png';
 
 export type SubscriptionPageProps = {
   /**
@@ -54,7 +56,7 @@ export default function SubscriptionPage({ onSubscriptionUnlocked }: Subscriptio
               </Button>
               <div className="flex items-center gap-3 min-w-0 px-4 py-1.5 rounded-xl">
                 <div className="logo-glass flex items-center justify-center p-1.5 flex-shrink-0 ring-1 ring-black/5 dark:ring-white/10">
-                  <img src={theme === 'dark' ? '/atlas-logo-light.png' : '/atlas-logo.png'} alt="Atlas Logo" className="h-7 w-7 sm:h-8 sm:w-8 object-contain" />
+                  <img src={theme === 'dark' ? atlasLogoLight : atlasLogo} alt="Atlas Logo" className="h-7 w-7 sm:h-8 sm:w-8 object-contain" />
                 </div>
                 <div className="hidden sm:flex flex-col min-w-0">
                   <span className="text-base sm:text-lg font-bold tracking-tight gradient-text leading-tight truncate">Atlas</span>
