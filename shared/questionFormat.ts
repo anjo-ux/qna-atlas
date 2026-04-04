@@ -20,6 +20,49 @@ function toChoiceLetter(captured: string): string {
   return upper;
 }
 
+function indexOfFirstChoiceLine(lines: string[]): number {
+  for (let i = 0; i < lines.length; i++) {
+    const m = lines[i].match(CHOICE_LINE_REGEX);
+    if (m && (m[2]?.trim() || m[4]?.trim())) {
+      const letter = toChoiceLetter(m[1] || m[3] || "");
+      const text = (m[2] || m[4] || "").trim();
+      if (letter && text && /^[A-F]$/.test(letter)) return i;
+    }
+  }
+  return -1;
+}
+
+/**
+ * Narrative part of the question before answer choices (not including option lines).
+ * Used for content filtering (e.g. keywords that should not appear in the stem).
+ */
+export function extractQuestionStem(questionText: string): string {
+  const q = (questionText || "").trim();
+  if (!q) return "";
+  const lines = q.split("\n");
+  const choiceIdx = indexOfFirstChoiceLine(lines);
+  if (choiceIdx >= 0) {
+    return lines.slice(0, choiceIdx).join("\n").trim();
+  }
+  const questionMarkers = ["?", ":", "."];
+  let lastMarkerIndex = -1;
+  for (const marker of questionMarkers) {
+    const index = q.lastIndexOf(marker);
+    if (index > lastMarkerIndex) lastMarkerIndex = index;
+  }
+  if (lastMarkerIndex === -1) {
+    const m = q.match(/^([\s\S]*?)(?=\s+[A-Fa-f1-6]\s*[.)]\s*\S)/);
+    return (m ? m[1] : q).trim();
+  }
+  const afterMarker = q.substring(lastMarkerIndex + 1);
+  const choiceMatches = Array.from(afterMarker.matchAll(/([A-Fa-f1-6])\s*[.)]\s*/g));
+  if (choiceMatches.length >= 2) {
+    const firstIdx = choiceMatches[0].index!;
+    return q.substring(0, lastMarkerIndex + 1 + firstIdx).trim();
+  }
+  return q.substring(0, lastMarkerIndex + 1).trim();
+}
+
 function extractChoices(questionText: string): { count: number } {
   const lines = questionText.split("\n");
   let choicesOnSeparateLines = false;
@@ -120,9 +163,13 @@ const GENERATED_DISALLOWED_KEYWORDS = ["picture", "pictured", "photo"];
 
 /**
  * Additional content rules for source === 'generated' questions.
- * Fails if question contains image-related keywords (picture, pictured, photo).
+ * Fails if the stem contains "radiographic", or the full text contains image-related keywords (picture, pictured, photo).
  */
 export function contentRulesForGenerated(questionText: string): { pass: boolean; reason?: string } {
+  const stem = extractQuestionStem(questionText).toLowerCase();
+  if (stem.includes("radiographic")) {
+    return { pass: false, reason: 'Generated question stem must not contain "radiographic".' };
+  }
   const q = (questionText || "").toLowerCase();
   for (const keyword of GENERATED_DISALLOWED_KEYWORDS) {
     if (q.includes(keyword)) {

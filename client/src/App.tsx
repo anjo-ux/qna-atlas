@@ -72,7 +72,7 @@ function isAdminPath(path: string): boolean {
 }
 
 function Router() {
-  const [location] = useLocation();
+  const [location, setLocation] = useLocation();
   const { isAuthenticated, isLoading } = useAuth();
   // Use actual URL as source of truth so admin page never disappears from reactive state quirks (only when feature enabled)
   const pathname =
@@ -121,7 +121,7 @@ function Router() {
             {() => <SpacedRepetitionPage onBack={() => window.history.back()} />}
           </Route>
           <Route path="/oral-board">
-            {() => <OralBoardSimulator onBack={() => window.history.back()} />}
+            {() => <OralBoardSimulator onBack={() => setLocation('/')} />}
           </Route>
           <Route component={NotFound} />
         </>

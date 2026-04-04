@@ -5,7 +5,11 @@ import { setupAuth, isAuthenticated } from "./customAuth";
 import { sanitizeUser } from "./authUtils";
 import { createTesterRedirectToken, verifyTesterRedirectToken, ATLAS_TRAINER_CALLBACK_URL } from "./testerToken";
 import { insertTestSessionSchema, updateTestSessionSchema, insertQuestionResponseSchema, insertQuestionSchema } from "@shared/schemas";
-import { validateQuestionFormat, contentRulesForGenerated } from "@shared/questionFormat";
+import {
+  validateQuestionFormat,
+  contentRulesForGenerated,
+  extractQuestionStem,
+} from "@shared/questionFormat";
 import { subsectionOrder, subsectionTitles } from "@shared/questionImport";
 import type { User, SubscriptionTransaction } from "@shared/schema";
 import { userHasAdminForeverAccess } from "./adminGrantedAccess";
@@ -324,6 +328,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const question = await storage.getQuestion(id);
       if (!question) {
         return res.status(404).json({ message: "Question not found." });
+      }
+      if (
+        visible &&
+        extractQuestionStem(question.question).toLowerCase().includes("radiographic")
+      ) {
+        return res.status(400).json({
+          message: 'Cannot make this question visible: stem contains "radiographic".',
+        });
       }
       const updated = await storage.updateQuestionVisibility(id, visible);
       if (!updated) {
@@ -2013,32 +2025,118 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Oral Board Simulator routes
-  const { initializeThread, sendMessage, validateThreadExists } = await import('./oralBoardService');
+  // Oral Board Simulator routes (sessions + messages persisted per user)
+  const { createOpenAIThread, sendMessage, sendMessageWithStream } = await import('./oralBoardService');
 
-  app.post('/api/oral-board/init', isAuthenticated, async (req: any, res) => {
+  app.get('/api/oral-board/sessions', isAuthenticated, async (req: any, res) => {
     try {
-      const threadId = await initializeThread();
-      res.json({ threadId });
+      const userId = req.user.id;
+      const sessions = await storage.listOralBoardSessionsForUser(userId);
+      res.json({ sessions });
     } catch (error) {
-      console.error('Error initializing oral board thread:', error);
-      res.status(500).json({ message: 'Failed to initialize oral board session.' });
+      console.error('Error listing oral board sessions:', error);
+      res.status(500).json({ message: 'Failed to load sessions.' });
+    }
+  });
+
+  app.post('/api/oral-board/sessions', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const openaiThreadId = await createOpenAIThread();
+      const row = await storage.createOralBoardSession(userId, openaiThreadId);
+      const sessions = await storage.listOralBoardSessionsForUser(userId);
+      const meta = sessions.find((s) => s.id === row.id);
+      res.json({
+        id: row.id,
+        openaiThreadId: row.openaiThreadId,
+        title: meta?.title ?? 'Session 1',
+        sessionNumber: meta?.sessionNumber ?? 1,
+        messageCount: meta?.messageCount ?? 0,
+      });
+    } catch (error) {
+      console.error('Error creating oral board session:', error);
+      res.status(500).json({ message: 'Failed to create session.' });
+    }
+  });
+
+  app.get('/api/oral-board/sessions/:sessionId/messages', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const { sessionId } = req.params;
+      const session = await storage.getOralBoardSessionForUser(userId, sessionId);
+      if (!session) {
+        return res.status(404).json({ message: 'Session not found.' });
+      }
+      const messages = await storage.listOralBoardMessagesForUser(userId, sessionId);
+      res.json({ messages });
+    } catch (error) {
+      console.error('Error loading oral board messages:', error);
+      res.status(500).json({ message: 'Failed to load messages.' });
+    }
+  });
+
+  app.delete('/api/oral-board/sessions/:sessionId', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const { sessionId } = req.params;
+      const ok = await storage.deleteOralBoardSessionForUser(userId, sessionId);
+      if (!ok) return res.status(404).json({ message: 'Session not found.' });
+      res.json({ ok: true });
+    } catch (error) {
+      console.error('Error deleting oral board session:', error);
+      res.status(500).json({ message: 'Failed to delete session.' });
     }
   });
 
   app.post('/api/oral-board/chat', isAuthenticated, async (req: any, res) => {
+    const userId = req.user.id;
+    const { sessionId, message, stream: wantStream } = req.body;
+
+    if (!sessionId || !message) {
+      return res.status(400).json({ message: 'Missing sessionId or message.' });
+    }
+
+    const session = await storage.getOralBoardSessionForUser(userId, sessionId);
+    if (!session) {
+      return res.status(401).json({ message: 'Invalid session.' });
+    }
+    const threadId = session.openaiThreadId;
+
+    if (wantStream) {
+      res.setHeader('Content-Type', 'text/event-stream; charset=utf-8');
+      res.setHeader('Cache-Control', 'no-cache, no-transform');
+      res.setHeader('Connection', 'keep-alive');
+      res.setHeader('X-Accel-Buffering', 'no');
+      if (typeof (res as any).flushHeaders === 'function') {
+        (res as any).flushHeaders();
+      }
+
+      const writeSse = (obj: object) => {
+        res.write(`data: ${JSON.stringify(obj)}\n\n`);
+      };
+
+      try {
+        await storage.addOralBoardMessage(sessionId, userId, 'user', message);
+        const fullText = await sendMessageWithStream(threadId, message, (chunk) =>
+          writeSse({ t: chunk })
+        );
+        await storage.addOralBoardMessage(sessionId, userId, 'assistant', fullText);
+        writeSse({ done: true });
+      } catch (error: any) {
+        console.error('Error processing oral board chat stream:', error);
+        const clientMessage =
+          process.env.NODE_ENV !== 'production' && error?.message
+            ? error.message
+            : 'Failed to process message.';
+        writeSse({ error: clientMessage });
+      }
+      return res.end();
+    }
+
     try {
-      const { threadId, message } = req.body;
-
-      if (!threadId || !message) {
-        return res.status(400).json({ message: 'Missing threadId or message.' });
-      }
-
-      if (!validateThreadExists(threadId)) {
-        return res.status(401).json({ message: 'Invalid thread ID.' });
-      }
-
+      await storage.addOralBoardMessage(sessionId, userId, 'user', message);
       const response = await sendMessage(threadId, message);
+      await storage.addOralBoardMessage(sessionId, userId, 'assistant', response);
       res.json({ response });
     } catch (error: any) {
       console.error('Error processing chat message:', error);

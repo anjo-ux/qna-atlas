@@ -1,22 +1,78 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ChevronLeft, Send, Loader2, Plus, Trash2, Menu, X, Check } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { Card } from '@/components/ui/card';
+import { OralBoardAssistantContent } from '@/components/OralBoardMessageContent';
 
 interface Message {
   id: string;
   role: 'user' | 'assistant';
   content: string;
   timestamp: Date;
+  /** True while assistant tokens are still arriving from the server */
+  streaming?: boolean;
+}
+
+async function consumeOralBoardChatStream(
+  sessionId: string,
+  message: string,
+  onDelta: (chunk: string) => void,
+  signal?: AbortSignal
+): Promise<void> {
+  const res = await fetch('/api/oral-board/chat', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Accept: 'text/event-stream' },
+    credentials: 'include',
+    body: JSON.stringify({ sessionId, message, stream: true }),
+    signal,
+  });
+
+  if (!res.ok) {
+    let msg = res.statusText;
+    try {
+      const j = await res.json();
+      if (j?.message) msg = j.message;
+    } catch {
+      /* non-JSON error body */
+    }
+    throw new Error(msg);
+  }
+
+  const reader = res.body?.getReader();
+  if (!reader) throw new Error('No response body');
+
+  const decoder = new TextDecoder();
+  let buffer = '';
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    for (;;) {
+      const boundary = buffer.indexOf('\n\n');
+      if (boundary === -1) break;
+      const block = buffer.slice(0, boundary);
+      buffer = buffer.slice(boundary + 2);
+      const line = block.split('\n').find((l) => l.startsWith('data: '));
+      if (!line) continue;
+      let payload: { t?: string; done?: boolean; error?: string };
+      try {
+        payload = JSON.parse(line.slice(6));
+      } catch {
+        continue;
+      }
+      if (payload.error) throw new Error(payload.error);
+      if (payload.done) return;
+      if (payload.t != null && payload.t.length > 0) onDelta(payload.t);
+    }
+  }
 }
 
 interface Conversation {
   id: string;
   title: string;
   createdAt: Date;
-  showSetupMenu?: boolean;
 }
 
 interface SessionSetup {
@@ -59,14 +115,14 @@ function OralBoardSidebarPanel({
           data-testid="button-new-conversation"
         >
           <Plus className="h-4 w-4" />
-          New Chat
+          New Session
         </Button>
       </div>
 
       <div className="flex-1 overflow-y-auto space-y-1 p-2 min-h-0">
         {conversations.length === 0 ? (
           <div className="text-xs text-muted-foreground text-center py-4">
-            No Conversations Yet
+            No Sessions Yet
           </div>
         ) : (
           conversations.map((conv) => (
@@ -105,16 +161,17 @@ function OralBoardSidebarPanel({
 }
 
 export default function OralBoardSimulator({ onBack }: { onBack: () => void }) {
-  const { user } = useAuth();
+  useAuth();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [currentConversationId, setCurrentConversationId] = useState<string>('');
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [threadId, setThreadId] = useState<string>('');
+  const [bootLoading, setBootLoading] = useState(true);
+  const [loadingSessionMessages, setLoadingSessionMessages] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  
+
   const [sessionSetup, setSessionSetup] = useState<SessionSetup>({
     specialty: 'Plastic Surgery',
     level: 'Fellow',
@@ -123,39 +180,90 @@ export default function OralBoardSimulator({ onBack }: { onBack: () => void }) {
     difficultyCurve: 'Adaptive',
     numCases: 6,
     scoring: true,
-    hinting: 'Off'
+    hinting: 'Off',
   });
 
-  // Initialize first thread on mount
-  useEffect(() => {
-    const initializeFirstThread = async () => {
-      try {
-        const res = await fetch('/api/oral-board/init', { method: 'POST' });
-        const data = await res.json();
-        if (data.threadId) {
-          setThreadId(data.threadId);
-          
-          // Create first conversation
-          const conversationId = Date.now().toString();
-          const newConversation: Conversation = {
-            id: conversationId,
-            title: 'New Conversation',
-            createdAt: new Date(),
-            showSetupMenu: true
-          };
-          
-          setConversations([newConversation]);
-          setCurrentConversationId(conversationId);
-          
-          // Show setup menu - no messages yet
-          setMessages([]);
-        }
-      } catch (error) {
-        console.error('Failed to initialize thread:', error);
-      }
-    };
-    initializeFirstThread();
+  const fetchSessionsList = useCallback(async (): Promise<Conversation[]> => {
+    const res = await fetch('/api/oral-board/sessions', { credentials: 'include' });
+    if (!res.ok) return [];
+    const data = await res.json();
+    return (data.sessions || []).map(
+      (s: { id: string; title: string; createdAt: string }) => ({
+        id: s.id,
+        title: s.title,
+        createdAt: new Date(s.createdAt),
+      })
+    );
   }, []);
+
+  const loadMessagesForSession = useCallback(
+    async (sessionId: string, opts?: { silent?: boolean }) => {
+      const silent = Boolean(opts?.silent);
+      if (!silent) {
+        setLoadingSessionMessages(true);
+        setMessages([]);
+      }
+      try {
+        const res = await fetch(`/api/oral-board/sessions/${sessionId}/messages`, {
+          credentials: 'include',
+        });
+        if (!res.ok) throw new Error('Failed to load messages');
+        const data = await res.json();
+        const mapped: Message[] = (data.messages || []).map(
+          (m: { id: string; role: string; content: string; createdAt: string }) => ({
+            id: m.id,
+            role: m.role as 'user' | 'assistant',
+            content: m.content,
+            timestamp: new Date(m.createdAt),
+          })
+        );
+        setMessages(mapped);
+      } catch (error) {
+        console.error('Failed to load session messages:', error);
+        if (!silent) setMessages([]);
+      } finally {
+        if (!silent) setLoadingSessionMessages(false);
+      }
+    },
+    []
+  );
+
+  const refreshSessions = useCallback(async () => {
+    const list = await fetchSessionsList();
+    setConversations(list);
+    return list;
+  }, [fetchSessionsList]);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        let list = await fetchSessionsList();
+        if (cancelled) return;
+        if (list.length === 0) {
+          const createRes = await fetch('/api/oral-board/sessions', {
+            method: 'POST',
+            credentials: 'include',
+          });
+          if (!createRes.ok) throw new Error('Failed to create session');
+          if (cancelled) return;
+          list = await fetchSessionsList();
+        }
+        if (cancelled) return;
+        setConversations(list);
+        const pick = list[0]?.id ?? '';
+        setCurrentConversationId(pick);
+        if (pick) await loadMessagesForSession(pick);
+      } catch (error) {
+        console.error('Failed to bootstrap oral board:', error);
+      } finally {
+        if (!cancelled) setBootLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [fetchSessionsList, loadMessagesForSession]);
 
   // Auto-scroll to bottom
   useEffect(() => {
@@ -173,7 +281,14 @@ export default function OralBoardSimulator({ onBack }: { onBack: () => void }) {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  const selectConversation = async (id: string) => {
+    if (!id || id === currentConversationId) return;
+    setCurrentConversationId(id);
+    await loadMessagesForSession(id);
+  };
+
   const handleStartSession = async () => {
+    if (!currentConversationId) return;
     // Format the setup as a message
     const setupMessage = `Specialty/subspecialty: ${sessionSetup.specialty}
 Level: ${sessionSetup.level}
@@ -194,54 +309,52 @@ Hinting: ${sessionSetup.hinting}`;
     setMessages([userMessage]);
     setIsLoading(true);
 
-    // Hide setup menu
-    setConversations(prev =>
-      prev.map(conv =>
-        conv.id === currentConversationId ? { ...conv, showSetupMenu: false } : conv
-      )
-    );
+    const assistantId = (Date.now() + 1).toString();
+    setMessages(prev => [
+      ...prev,
+      {
+        id: assistantId,
+        role: 'assistant',
+        content: '',
+        timestamp: new Date(),
+        streaming: true,
+      },
+    ]);
 
     try {
-      const res = await fetch('/api/oral-board/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          threadId,
-          message: userMessage.content
-        })
+      await consumeOralBoardChatStream(currentConversationId, userMessage.content, (chunk) => {
+        setMessages(prev =>
+          prev.map(m => (m.id === assistantId ? { ...m, content: m.content + chunk } : m))
+        );
       });
 
-      const data = await res.json();
-      if (data.response) {
-        const responseText = typeof data.response === 'string' ? data.response : data.response.value || '';
-        const assistantMessage: Message = {
-          id: (Date.now() + 1).toString(),
-          role: 'assistant',
-          content: responseText,
-          timestamp: new Date()
-        };
-        setMessages(prev => [...prev, assistantMessage]);
+      setMessages(prev =>
+        prev.map(m => (m.id === assistantId ? { ...m, streaming: false } : m))
+      );
 
-        // Update conversation title
-        if (currentConversationId) {
-          setConversations(prev =>
-            prev.map(conv =>
-              conv.id === currentConversationId && conv.title === 'New Conversation'
-                ? { ...conv, title: sessionSetup.specialty + ' - ' + sessionSetup.mode }
-                : conv
-            )
-          );
-        }
-      }
+      void refreshSessions();
+      await loadMessagesForSession(currentConversationId, { silent: true });
     } catch (error) {
       console.error('Failed to start session:', error);
+      setMessages(prev =>
+        prev.map(m =>
+          m.id === assistantId
+            ? {
+                ...m,
+                content:
+                  'Sorry — something went wrong loading the session. Please try starting again or send a message.',
+                streaming: false,
+              }
+            : m
+        )
+      );
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleSendMessage = async () => {
-    if (!input.trim() || !threadId || isLoading) return;
+    if (!input.trim() || !currentConversationId || isLoading) return;
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -254,41 +367,45 @@ Hinting: ${sessionSetup.hinting}`;
     setInput('');
     setIsLoading(true);
 
+    const assistantId = (Date.now() + 1).toString();
+    setMessages(prev => [
+      ...prev,
+      {
+        id: assistantId,
+        role: 'assistant',
+        content: '',
+        timestamp: new Date(),
+        streaming: true,
+      },
+    ]);
+
     try {
-      const res = await fetch('/api/oral-board/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          threadId,
-          message: userMessage.content
-        })
+      await consumeOralBoardChatStream(currentConversationId, userMessage.content, (chunk) => {
+        setMessages(prev =>
+          prev.map(m => (m.id === assistantId ? { ...m, content: m.content + chunk } : m))
+        );
       });
 
-      const data = await res.json();
-      if (data.response) {
-        // Extract text from response object (OpenAI Assistants API returns {value, annotations})
-        const responseText = typeof data.response === 'string' ? data.response : data.response.value || '';
-        const assistantMessage: Message = {
-          id: (Date.now() + 1).toString(),
-          role: 'assistant',
-          content: responseText,
-          timestamp: new Date()
-        };
-        setMessages(prev => [...prev, assistantMessage]);
+      setMessages(prev =>
+        prev.map(m => (m.id === assistantId ? { ...m, streaming: false } : m))
+      );
 
-        // Update conversation title if it's still "New Conversation"
-        if (currentConversationId) {
-          setConversations(prev =>
-            prev.map(conv =>
-              conv.id === currentConversationId && conv.title === 'New Conversation'
-                ? { ...conv, title: userMessage.content.substring(0, 50) + '...' }
-                : conv
-            )
-          );
-        }
-      }
+      void refreshSessions();
+      await loadMessagesForSession(currentConversationId, { silent: true });
     } catch (error) {
       console.error('Failed to send message:', error);
+      setMessages(prev =>
+        prev.map(m =>
+          m.id === assistantId
+            ? {
+                ...m,
+                content:
+                  'Sorry — something went wrong. Please try again.',
+                streaming: false,
+              }
+            : m
+        )
+      );
     } finally {
       setIsLoading(false);
     }
@@ -296,54 +413,78 @@ Hinting: ${sessionSetup.hinting}`;
 
   const handleNewConversation = async () => {
     try {
-      const res = await fetch('/api/oral-board/init', { method: 'POST' });
-      const data = await res.json();
-      if (data.threadId) {
-        setThreadId(data.threadId);
-        
-        const conversationId = Date.now().toString();
-        const newConversation: Conversation = {
-          id: conversationId,
-          title: 'New Conversation',
-          createdAt: new Date(),
-          showSetupMenu: true
-        };
-        
-        setConversations(prev => [newConversation, ...prev]);
-        setCurrentConversationId(conversationId);
-        
-        // Reset setup to defaults
-        setSessionSetup({
-          specialty: 'Plastic Surgery',
-          level: 'Fellow',
-          mode: 'Oral Boards',
-          focusAreas: 'All',
-          difficultyCurve: 'Adaptive',
-          numCases: 6,
-          scoring: true,
-          hinting: 'Off'
-        });
-        
-        setMessages([]);
+      const res = await fetch('/api/oral-board/sessions', {
+        method: 'POST',
+        credentials: 'include',
+      });
+      if (!res.ok) throw new Error('Failed to create session');
+      const created = await res.json();
+      const list = await fetchSessionsList();
+      setConversations(list);
+      const pick = list.find((c) => c.id === created.id)?.id ?? list[0]?.id;
+      if (pick) {
+        setCurrentConversationId(pick);
+        await loadMessagesForSession(pick);
       }
+      setSessionSetup({
+        specialty: 'Plastic Surgery',
+        level: 'Fellow',
+        mode: 'Oral Boards',
+        focusAreas: 'All',
+        difficultyCurve: 'Adaptive',
+        numCases: 6,
+        scoring: true,
+        hinting: 'Off',
+      });
     } catch (error) {
-      console.error('Failed to create new conversation:', error);
+      console.error('Failed to create new session:', error);
     }
   };
 
-  const handleDeleteConversation = (id: string) => {
-    const updatedConversations = conversations.filter(conv => conv.id !== id);
-    setConversations(updatedConversations);
-    
-    if (currentConversationId === id) {
-      if (updatedConversations.length > 0) {
-        setCurrentConversationId(updatedConversations[0].id);
-      } else {
-        handleNewConversation();
+  const handleDeleteConversation = async (id: string) => {
+    try {
+      const res = await fetch(`/api/oral-board/sessions/${id}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      });
+      if (!res.ok) return;
+    } catch (error) {
+      console.error('Failed to delete session:', error);
+      return;
+    }
+
+    const list = await fetchSessionsList();
+    setConversations(list);
+
+    if (currentConversationId !== id) return;
+
+    if (list.length > 0) {
+      const nextId = list[0].id;
+      setCurrentConversationId(nextId);
+      await loadMessagesForSession(nextId);
+    } else {
+      const createRes = await fetch('/api/oral-board/sessions', {
+        method: 'POST',
+        credentials: 'include',
+      });
+      if (!createRes.ok) {
+        setCurrentConversationId('');
+        setMessages([]);
+        return;
       }
-      setMessages([]);
+      const created = await createRes.json();
+      const list2 = await fetchSessionsList();
+      setConversations(list2);
+      setCurrentConversationId(created.id);
+      await loadMessagesForSession(created.id);
     }
   };
+
+  const showSetupUi =
+    !bootLoading &&
+    !loadingSessionMessages &&
+    messages.length === 0 &&
+    Boolean(currentConversationId);
 
   return (
     <div className="h-screen w-full flex bg-gradient-to-br from-purple-50 via-lavender-50 to-pink-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-900">
@@ -352,9 +493,13 @@ Hinting: ${sessionSetup.hinting}`;
         <OralBoardSidebarPanel
           conversations={conversations}
           currentConversationId={currentConversationId}
-          onSelectConversation={setCurrentConversationId}
+          onSelectConversation={(id) => {
+            void selectConversation(id);
+          }}
           onNewChat={handleNewConversation}
-          onDeleteConversation={handleDeleteConversation}
+          onDeleteConversation={(id) => {
+            void handleDeleteConversation(id);
+          }}
         />
       </div>
 
@@ -411,7 +556,7 @@ Hinting: ${sessionSetup.hinting}`;
               >
                 <div className="flex items-center justify-between gap-2 px-3 py-2.5 border-b border-border/50 shrink-0 bg-white/80 dark:bg-slate-900/80">
                   <h2 id="oral-board-sidebar-title" className="text-sm font-semibold truncate">
-                    Conversations
+                    Sessions
                   </h2>
                   <Button
                     type="button"
@@ -428,9 +573,13 @@ Hinting: ${sessionSetup.hinting}`;
                 <OralBoardSidebarPanel
                   conversations={conversations}
                   currentConversationId={currentConversationId}
-                  onSelectConversation={setCurrentConversationId}
+                  onSelectConversation={(id) => {
+                    void selectConversation(id);
+                  }}
                   onNewChat={handleNewConversation}
-                  onDeleteConversation={handleDeleteConversation}
+                  onDeleteConversation={(id) => {
+                    void handleDeleteConversation(id);
+                  }}
                   onAfterInteraction={() => setIsSidebarOpen(false)}
                 />
               </div>
@@ -439,7 +588,14 @@ Hinting: ${sessionSetup.hinting}`;
 
           {/* Messages Container or Setup Menu */}
           <div className="flex-1 overflow-y-auto scrollbar-hide p-4 flex flex-col justify-center min-h-0">
-          {conversations.find(c => c.id === currentConversationId)?.showSetupMenu ? (
+          {bootLoading || loadingSessionMessages ? (
+            <div className="flex flex-1 flex-col items-center justify-center py-16 min-h-[12rem]">
+              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+              <p className="text-sm text-muted-foreground mt-3">
+                {bootLoading ? 'Loading sessions…' : 'Loading messages…'}
+              </p>
+            </div>
+          ) : showSetupUi ? (
             // Setup Menu - Full Width
             <div className="w-full">
               <Card className="p-4 bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border-white/20 dark:border-slate-700/20">
@@ -618,36 +774,68 @@ Hinting: ${sessionSetup.hinting}`;
           ) : (
             // Chat Messages
             <>
-              {messages.map((message) => (
-                <div
-                  key={message.id}
-                  className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'} space-y-4`}
-                  data-testid={`message-${message.role}-${message.id}`}
-                >
+              {messages.map((message, msgIndex) => {
+                const assistantIndexBefore = messages
+                  .slice(0, msgIndex)
+                  .filter((m) => m.role === 'assistant').length;
+
+                return (
                   <div
-                    className={`max-w-xl px-4 py-3 rounded-lg ${
-                      message.role === 'user'
-                        ? 'bg-primary text-primary-foreground rounded-br-none'
-                        : 'bg-white/60 dark:bg-slate-800/60 text-foreground rounded-bl-none backdrop-blur-sm border border-white/20 dark:border-slate-700/20'
-                    }`}
+                    key={message.id}
+                    className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'} space-y-4`}
+                    data-testid={`message-${message.role}-${message.id}`}
                   >
-                    <p className="text-sm leading-relaxed whitespace-pre-wrap">
-                      {message.content}
-                    </p>
-                    <span className="text-xs opacity-70 mt-1 block">
-                      {message.timestamp.toLocaleTimeString([], {
-                        hour: '2-digit',
-                        minute: '2-digit'
-                      })}
-                    </span>
+                    <div
+                      className={`${
+                        message.role === 'user' ? 'max-w-xl' : 'max-w-2xl'
+                      } px-4 py-3 rounded-lg ${
+                        message.role === 'user'
+                          ? 'bg-primary text-primary-foreground rounded-br-none'
+                          : 'bg-white/60 dark:bg-slate-800/60 text-foreground rounded-bl-none backdrop-blur-sm border border-white/20 dark:border-slate-700/20'
+                      }`}
+                    >
+                      {message.role === 'assistant' ? (
+                        <div className="text-sm">
+                          {message.streaming ? (
+                            message.content.length === 0 ? (
+                              <span className="flex items-center gap-2 text-muted-foreground">
+                                <Loader2 className="h-4 w-4 animate-spin shrink-0" />
+                                Thinking…
+                              </span>
+                            ) : (
+                              <div className="leading-relaxed">
+                                <p className="whitespace-pre-wrap text-foreground/90 m-0">{message.content}</p>
+                                <span
+                                  className="inline-block w-0.5 h-4 ml-0.5 align-text-bottom bg-primary animate-pulse rounded-sm"
+                                  aria-hidden
+                                />
+                              </div>
+                            )
+                          ) : (
+                            <OralBoardAssistantContent
+                              content={message.content}
+                              variant={assistantIndexBefore === 0 ? 'initial' : 'followUp'}
+                            />
+                          )}
+                        </div>
+                      ) : (
+                        <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
+                      )}
+                      <span className="text-xs opacity-70 mt-1 block">
+                        {message.timestamp.toLocaleTimeString([], {
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })}
+                      </span>
+                    </div>
                   </div>
-                </div>
-              ))}
-              {isLoading && (
+                );
+              })}
+              {isLoading && !messages.some((m) => m.streaming) && (
                 <div className="flex justify-start">
                   <div className="bg-white/60 dark:bg-slate-800/60 text-foreground px-4 py-3 rounded-lg rounded-bl-none backdrop-blur-sm border border-white/20 dark:border-slate-700/20 flex items-center gap-2">
                     <Loader2 className="h-4 w-4 animate-spin" />
-                    <span className="text-sm">Thinking...</span>
+                    <span className="text-sm">Thinking…</span>
                   </div>
                 </div>
               )}
@@ -657,7 +845,7 @@ Hinting: ${sessionSetup.hinting}`;
           </div>
 
           {/* Input Area - Only show when not in setup menu */}
-          {!conversations.find(c => c.id === currentConversationId)?.showSetupMenu && (
+          {!bootLoading && !loadingSessionMessages && !showSetupUi && (
             <div className="p-6 border-t border-border/50 bg-white/40 dark:bg-slate-900/40 backdrop-blur-md shrink-0">
               <div className="flex gap-2 max-w-4xl mx-auto">
                 <Input

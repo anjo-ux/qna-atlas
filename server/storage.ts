@@ -13,6 +13,8 @@ import {
   institutionalCodes,
   userInstitutionalCodeRedemptions,
   questionReports,
+  oralBoardSessions,
+  oralBoardMessages,
   sections,
   subsections,
   questions,
@@ -37,7 +39,10 @@ import {
   type InsertSubscriptionTransaction,
   type QuestionReport,
   type InsertQuestionReport,
+  type OralBoardSession,
+  type OralBoardMessage,
 } from "@shared/schema";
+import { extractQuestionStem } from "@shared/questionFormat";
 import { db, pool } from "./db";
 import { eq, and, asc, desc, lte, sql, count, inArray } from "drizzle-orm";
 
@@ -187,6 +192,29 @@ export interface IStorage {
   countQuestionReportsForQuestion(questionId: string): Promise<number>;
   /** If question exists, set visible=false and reported=true (idempotent). */
   hideQuestionDueToReports(questionId: string): Promise<boolean>;
+
+  // Oral board simulator (persisted sessions + messages)
+  createOralBoardSession(userId: string, openaiThreadId: string): Promise<OralBoardSession>;
+  listOralBoardSessionsForUser(userId: string): Promise<
+    {
+      id: string;
+      openaiThreadId: string;
+      createdAt: Date | null;
+      updatedAt: Date | null;
+      sessionNumber: number;
+      title: string;
+      messageCount: number;
+    }[]
+  >;
+  getOralBoardSessionForUser(userId: string, sessionId: string): Promise<OralBoardSession | undefined>;
+  addOralBoardMessage(
+    sessionId: string,
+    userId: string,
+    role: "user" | "assistant",
+    content: string
+  ): Promise<OralBoardMessage>;
+  listOralBoardMessagesForUser(userId: string, sessionId: string): Promise<OralBoardMessage[]>;
+  deleteOralBoardSessionForUser(userId: string, sessionId: string): Promise<boolean>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -703,6 +731,7 @@ export class DatabaseStorage implements IStorage {
     for (const q of questionRows) {
       // Only include visible questions (hide picture-based etc.)
       if (q.visible === false) continue;
+      if (extractQuestionStem(q.question).toLowerCase().includes("radiographic")) continue;
       const list = bySub.get(q.subsectionId) ?? [];
       list.push(q);
       bySub.set(q.subsectionId, list);
@@ -755,6 +784,100 @@ export class DatabaseStorage implements IStorage {
       .where(eq(questions.id, questionId))
       .returning({ id: questions.id });
     return !!updated;
+  }
+
+  async createOralBoardSession(userId: string, openaiThreadId: string): Promise<OralBoardSession> {
+    const [row] = await db
+      .insert(oralBoardSessions)
+      .values({ userId, openaiThreadId })
+      .returning();
+    if (!row) throw new Error("Failed to create oral board session");
+    return row;
+  }
+
+  async listOralBoardSessionsForUser(userId: string) {
+    const sessionsByCreated = await db
+      .select()
+      .from(oralBoardSessions)
+      .where(eq(oralBoardSessions.userId, userId))
+      .orderBy(asc(oralBoardSessions.createdAt));
+    if (sessionsByCreated.length === 0) return [];
+
+    const numberById = new Map(sessionsByCreated.map((s, i) => [s.id, i + 1]));
+    const ids = sessionsByCreated.map((s) => s.id);
+
+    const countsRows = await db
+      .select({ sessionId: oralBoardMessages.sessionId, n: count() })
+      .from(oralBoardMessages)
+      .where(inArray(oralBoardMessages.sessionId, ids))
+      .groupBy(oralBoardMessages.sessionId);
+    const countMap = new Map(countsRows.map((r) => [r.sessionId, Number(r.n)]));
+
+    const recent = await db
+      .select()
+      .from(oralBoardSessions)
+      .where(eq(oralBoardSessions.userId, userId))
+      .orderBy(desc(oralBoardSessions.updatedAt));
+
+    return recent.map((s) => ({
+      id: s.id,
+      openaiThreadId: s.openaiThreadId,
+      createdAt: s.createdAt,
+      updatedAt: s.updatedAt,
+      sessionNumber: numberById.get(s.id)!,
+      title: `Session ${numberById.get(s.id)}`,
+      messageCount: countMap.get(s.id) ?? 0,
+    }));
+  }
+
+  async getOralBoardSessionForUser(userId: string, sessionId: string) {
+    const [row] = await db
+      .select()
+      .from(oralBoardSessions)
+      .where(and(eq(oralBoardSessions.id, sessionId), eq(oralBoardSessions.userId, userId)));
+    return row;
+  }
+
+  async addOralBoardMessage(
+    sessionId: string,
+    userId: string,
+    role: "user" | "assistant",
+    content: string
+  ): Promise<OralBoardMessage> {
+    const session = await this.getOralBoardSessionForUser(userId, sessionId);
+    if (!session) throw new Error("Oral board session not found");
+
+    const [msg] = await db
+      .insert(oralBoardMessages)
+      .values({ sessionId, role, content })
+      .returning();
+    if (!msg) throw new Error("Failed to save oral board message");
+
+    await db
+      .update(oralBoardSessions)
+      .set({ updatedAt: new Date() })
+      .where(eq(oralBoardSessions.id, sessionId));
+
+    return msg;
+  }
+
+  async listOralBoardMessagesForUser(userId: string, sessionId: string): Promise<OralBoardMessage[]> {
+    const session = await this.getOralBoardSessionForUser(userId, sessionId);
+    if (!session) return [];
+
+    return db
+      .select()
+      .from(oralBoardMessages)
+      .where(eq(oralBoardMessages.sessionId, sessionId))
+      .orderBy(asc(oralBoardMessages.createdAt));
+  }
+
+  async deleteOralBoardSessionForUser(userId: string, sessionId: string): Promise<boolean> {
+    const deleted = await db
+      .delete(oralBoardSessions)
+      .where(and(eq(oralBoardSessions.id, sessionId), eq(oralBoardSessions.userId, userId)))
+      .returning({ id: oralBoardSessions.id });
+    return deleted.length > 0;
   }
 
   async createQuestion(data: {

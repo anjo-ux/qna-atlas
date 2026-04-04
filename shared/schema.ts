@@ -326,3 +326,37 @@ export const questionReports = pgTable("question_reports", {
 
 export type QuestionReport = typeof questionReports.$inferSelect;
 export type InsertQuestionReport = typeof questionReports.$inferInsert;
+
+/** Oral board simulator: one row per saved chat session (OpenAI thread + UI "Session N"). */
+export const oralBoardSessions = pgTable(
+  "oral_board_sessions",
+  {
+    id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+    userId: varchar("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    openaiThreadId: varchar("openai_thread_id").notNull().unique(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  },
+  (table) => [index("idx_oral_board_sessions_user_id").on(table.userId)]
+);
+
+export const oralBoardMessages = pgTable(
+  "oral_board_messages",
+  {
+    id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+    sessionId: varchar("session_id")
+      .notNull()
+      .references(() => oralBoardSessions.id, { onDelete: "cascade" }),
+    role: varchar("role", { length: 20 }).notNull(),
+    content: text("content").notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [index("idx_oral_board_messages_session_id").on(table.sessionId)]
+);
+
+export type OralBoardSession = typeof oralBoardSessions.$inferSelect;
+export type InsertOralBoardSession = typeof oralBoardSessions.$inferInsert;
+export type OralBoardMessage = typeof oralBoardMessages.$inferSelect;
+export type InsertOralBoardMessage = typeof oralBoardMessages.$inferInsert;
