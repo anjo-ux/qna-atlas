@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useLayoutEffect, useRef, useCallback, useMemo } from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import ReactMarkdown from 'react-markdown';
 import { HighlightToolbar } from '@/components/HighlightToolbar';
@@ -40,11 +40,31 @@ export function ReferenceTextPanel({
     updateNotePosition,
     getHighlightsForSection,
     getNotesForSection,
+    highlights,
   } = useHighlights();
 
   const [isEraserMode, setIsEraserMode] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
+
+  const referenceContentFingerprint = useMemo(
+    () => sections.map((s) => `${s.sectionId}\0${s.subsectionId}\0${s.content}`).join('\f'),
+    [sections]
+  );
+
+  const panelReferenceHighlights = useMemo(
+    () =>
+      highlights.filter(
+        (h) =>
+          h.location === 'reference' &&
+          sections.some(
+            (s) => s.sectionId === h.sectionId && s.subsectionId === h.subsectionId
+          )
+      ),
+    [highlights, sections]
+  );
+
+  useTextHighlight(contentRef, panelReferenceHighlights, referenceContentFingerprint, isEraserMode);
 
   // Scroll to selected section when it changes
   useEffect(() => {
@@ -77,70 +97,80 @@ export function ReferenceTextPanel({
     }, 50);
   }, [selectedSectionId, selectedSubsectionId]);
 
-  // Setup global eraser click handler
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!isEraserMode) return;
+    const root = contentRef.current;
+    if (!root) return;
 
-    const handleDocumentClick = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-      if (target.tagName === 'MARK' && target.hasAttribute('data-highlight-id')) {
-        e.preventDefault();
-        e.stopPropagation();
-        const highlightId = target.getAttribute('data-highlight-id');
-        if (highlightId) {
-          removeHighlight(highlightId);
-        }
-      }
+    const onPointerUpCapture = (e: PointerEvent) => {
+      if (e.pointerType === 'mouse' && e.button !== 0) return;
+      const target = e.target as HTMLElement | null;
+      if (!target || !root.contains(target)) return;
+      const mark = target.closest('mark[data-highlight-id]');
+      if (!mark || !root.contains(mark)) return;
+      e.preventDefault();
+      e.stopPropagation();
+      const highlightId = mark.getAttribute('data-highlight-id');
+      if (highlightId) removeHighlight(highlightId);
     };
 
-    document.addEventListener('click', handleDocumentClick, true);
-    return () => {
-      document.removeEventListener('click', handleDocumentClick, true);
-    };
+    root.addEventListener('pointerup', onPointerUpCapture, true);
+    return () => root.removeEventListener('pointerup', onPointerUpCapture, true);
   }, [isEraserMode, removeHighlight]);
 
-  const handleTextSelection = () => {
-    // Don't allow highlighting when in eraser mode
+  const flushTextHighlightSelection = useCallback(() => {
     if (isEraserMode) {
       window.getSelection()?.removeAllRanges();
       return;
     }
 
     const selection = window.getSelection();
-    if (!selection || selection.isCollapsed) return;
+    if (!selection || selection.rangeCount === 0 || selection.isCollapsed) return;
 
-    const selectedText = selection.toString().trim();
-    if (!selectedText || selectedText.length < 2) return;
+    const container = contentRef.current;
+    if (!container) return;
 
-    // Get section from the closest section div
-    const sectionDiv = (selection.anchorNode as Node)?.parentElement?.closest('[data-section-id]') as HTMLElement;
-    if (!sectionDiv) return;
+    const range = selection.getRangeAt(0);
+    if (!container.contains(range.commonAncestorContainer)) return;
+
+    const raw = selection.toString();
+    if (raw.trim().length < 2) return;
+
+    const sectionDiv = (selection.anchorNode as Node)?.parentElement?.closest(
+      '[data-section-id]'
+    ) as HTMLElement | null;
+    if (!sectionDiv || !container.contains(sectionDiv)) return;
 
     const sectionId = sectionDiv.getAttribute('data-section-id');
     const subsectionId = sectionDiv.getAttribute('data-subsection-id');
     if (!sectionId || !subsectionId) return;
 
-    // Get the full text content to calculate proper offsets
-    const container = document.querySelector('[data-reference-content]');
-    if (!container) return;
-
-    const fullText = container.textContent || '';
-    const selectedIndex = fullText.indexOf(selectedText);
-    
-    if (selectedIndex === -1) return;
+    const pre = document.createRange();
+    pre.selectNodeContents(container);
+    pre.setEnd(range.startContainer, range.startOffset);
+    const startOffset = pre.toString().length;
+    const endOffset = startOffset + raw.length;
 
     addHighlight({
-      text: selectedText,
+      text: raw.trim(),
       color: activeColor,
       sectionId,
       subsectionId,
       location: 'reference',
-      startOffset: selectedIndex,
-      endOffset: selectedIndex + selectedText.length,
+      startOffset,
+      endOffset,
     });
 
     selection.removeAllRanges();
-  };
+  }, [isEraserMode, addHighlight, activeColor]);
+
+  const handlePointerUp = useCallback(
+    (e: React.PointerEvent) => {
+      if (e.pointerType === 'mouse' && e.button !== 0) return;
+      requestAnimationFrame(() => flushTextHighlightSelection());
+    },
+    [flushTextHighlightSelection]
+  );
 
   const handleAddNote = () => {
     if (!selectedSectionId || !selectedSubsectionId) return;
@@ -190,9 +220,9 @@ export function ReferenceTextPanel({
         <div ref={scrollAreaRef} className="h-full">
         <div 
           ref={contentRef}
-          className={cn("p-6 prose prose-sm dark:prose-invert max-w-none", isEraserMode && "eraser-mode")}
+          className={cn("p-6 prose prose-sm dark:prose-invert max-w-none touch-manipulation", isEraserMode && "eraser-mode")}
           data-reference-content
-          onMouseUp={handleTextSelection}
+          onPointerUp={handlePointerUp}
         >
           {sections.map((section) => {
             const sectionHighlights = getHighlightsForSection(section.sectionId, section.subsectionId, 'reference');

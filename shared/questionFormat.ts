@@ -63,7 +63,13 @@ export function extractQuestionStem(questionText: string): string {
   return q.substring(0, lastMarkerIndex + 1).trim();
 }
 
-function extractChoices(questionText: string): { count: number } {
+const SEE_IMAGE_IN_CHOICE_RE = /see\s+image/i;
+
+/**
+ * Returns each MCQ option's visible text (same parsing as extractChoices).
+ * Empty if choices could not be parsed.
+ */
+function choiceTextsFromQuestion(questionText: string): string[] {
   const lines = questionText.split("\n");
   let choicesOnSeparateLines = false;
   for (const line of lines) {
@@ -73,17 +79,17 @@ function extractChoices(questionText: string): { count: number } {
       break;
     }
   }
+  const texts: string[] = [];
   if (choicesOnSeparateLines) {
-    let count = 0;
     for (const line of lines) {
       const m = line.match(CHOICE_LINE_REGEX);
       if (m) {
         const letter = toChoiceLetter(m[1] || m[3] || "");
         const text = (m[2] || m[4] || "").trim();
-        if (letter && text && /^[A-F]$/.test(letter)) count++;
+        if (letter && text && /^[A-F]$/.test(letter)) texts.push(text);
       }
     }
-    return { count };
+    return texts;
   }
   const questionMarkers = ["?", ":", "."];
   let lastMarkerIndex = -1;
@@ -91,22 +97,43 @@ function extractChoices(questionText: string): { count: number } {
     const index = questionText.lastIndexOf(marker);
     if (index > lastMarkerIndex) lastMarkerIndex = index;
   }
-  if (lastMarkerIndex === -1) return { count: 0 };
+  if (lastMarkerIndex === -1) return [];
   const afterMarker = questionText.substring(lastMarkerIndex + 1);
   const choiceMatches = Array.from(afterMarker.matchAll(/([A-Fa-f1-6])\s*[.)]\s*/g));
-  if (choiceMatches.length >= 2 && choiceMatches.length <= 6) {
-    let count = 0;
-    for (let i = 0; i < choiceMatches.length; i++) {
-      const letter = toChoiceLetter(choiceMatches[i][1]);
-      if (!/^[A-F]$/.test(letter)) continue;
-      const startIndex = choiceMatches[i].index! + choiceMatches[i][0].length;
-      const endIndex = i < choiceMatches.length - 1 ? choiceMatches[i + 1].index! : afterMarker.length;
-      const text = afterMarker.substring(startIndex, endIndex).trim();
-      if (text) count++;
-    }
-    return { count };
+  if (choiceMatches.length < 2 || choiceMatches.length > 6) return [];
+  for (let i = 0; i < choiceMatches.length; i++) {
+    const letter = toChoiceLetter(choiceMatches[i][1]);
+    if (!/^[A-F]$/.test(letter)) continue;
+    const startIndex = choiceMatches[i].index! + choiceMatches[i][0].length;
+    const endIndex = i < choiceMatches.length - 1 ? choiceMatches[i + 1].index! : afterMarker.length;
+    const text = afterMarker.substring(startIndex, endIndex).trim();
+    if (text) texts.push(text);
   }
-  return { count: 0 };
+  return texts;
+}
+
+/**
+ * True when any parsed MCQ option text references an image (e.g. "(see image above)").
+ * Used to hide image-dependent items from the bank.
+ */
+export function questionMcqChoicesReferenceSeeImage(questionText: string): boolean {
+  for (const t of choiceTextsFromQuestion(questionText)) {
+    if (SEE_IMAGE_IN_CHOICE_RE.test(t)) return true;
+  }
+  return false;
+}
+
+function extractChoices(questionText: string): { count: number } {
+  return { count: choiceTextsFromQuestion(questionText).length };
+}
+
+/**
+ * Collapse a leading "X)" line into the following explanation so markdown renders
+ * as one paragraph (avoids a large gap when the source uses blank lines after the letter).
+ */
+export function normalizeAnswerExplanationForDisplay(answer: string): string {
+  const a = answer ?? "";
+  return a.replace(/^\s*([A-F])\)\s*(?:\r?\n\s*)+/i, (_, letter: string) => `${letter.toUpperCase()}) `);
 }
 
 function extractCorrectAnswer(answer: string): string | null {

@@ -781,8 +781,8 @@ export default function Index() {
               </div>
             </div>
           ) : (
-            <div className="flex-1 flex flex-col min-h-0 overflow-y-auto scrollbar-hide">
-              <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 min-h-0">
+            <div className="flex-1 flex flex-col min-h-0 overflow-y-auto overflow-x-hidden scrollbar-hide">
+              <div className="container mx-auto min-w-0 max-w-full px-4 sm:px-6 lg:px-8 py-8 flex-1 min-h-0">
                 <div className="space-y-4">
                   <div className="space-y-4 mb-6">
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">

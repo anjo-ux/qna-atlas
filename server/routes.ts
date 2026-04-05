@@ -9,6 +9,7 @@ import {
   validateQuestionFormat,
   contentRulesForGenerated,
   extractQuestionStem,
+  questionMcqChoicesReferenceSeeImage,
 } from "@shared/questionFormat";
 import { subsectionOrder, subsectionTitles } from "@shared/questionImport";
 import type { User, SubscriptionTransaction } from "@shared/schema";
@@ -335,6 +336,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       ) {
         return res.status(400).json({
           message: 'Cannot make this question visible: stem contains "radiographic".',
+        });
+      }
+      if (visible && questionMcqChoicesReferenceSeeImage(question.question)) {
+        return res.status(400).json({
+          message:
+            'Cannot make this question visible: an answer choice references an image (e.g. "see image").',
         });
       }
       const updated = await storage.updateQuestionVisibility(id, visible);

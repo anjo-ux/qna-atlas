@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useLayoutEffect } from 'react';
 import { Highlight } from './useHighlights';
 
 const HIGHLIGHT_COLORS: Record<string, string> = {
@@ -11,49 +11,41 @@ const HIGHLIGHT_COLORS: Record<string, string> = {
 export function useTextHighlight(
   containerRef: React.RefObject<HTMLElement>,
   highlights: Highlight[],
-  content: string
+  content: string,
+  /** When this changes (e.g. eraser mode), re-apply marks after React may have reset the DOM. */
+  domSyncKey?: unknown
 ) {
-  const previousHighlights = useRef<string>('');
-
-  useEffect(() => {
-    const highlightsKey = JSON.stringify(highlights.map(h => h.id));
-    if (previousHighlights.current === highlightsKey) return;
-    previousHighlights.current = highlightsKey;
-
+  useLayoutEffect(() => {
     const container = containerRef.current;
     if (!container) return;
 
-    // Remove all existing highlight marks
     const existingMarks = container.querySelectorAll('mark[data-highlight-id]');
-    existingMarks.forEach(mark => {
+    existingMarks.forEach((mark) => {
       const text = document.createTextNode(mark.textContent || '');
       mark.parentNode?.replaceChild(text, mark);
     });
 
-    // Normalize text nodes
     container.normalize();
 
     if (highlights.length === 0) return;
 
-    // Helper function to get fresh text nodes each time we need them
     const getTextNodes = () => {
       const textNodes: { node: Text; startOffset: number }[] = [];
       let currentOffset = 0;
 
-      const walker = document.createTreeWalker(
-        container,
-        NodeFilter.SHOW_TEXT,
-        {
-          acceptNode: (node) => {
-            // Skip text inside script, style, or existing mark tags
-            const parent = node.parentElement;
-            if (parent?.tagName === 'SCRIPT' || parent?.tagName === 'STYLE' || parent?.tagName === 'MARK') {
-              return NodeFilter.FILTER_REJECT;
-            }
-            return NodeFilter.FILTER_ACCEPT;
+      const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, {
+        acceptNode: (node) => {
+          const parent = node.parentElement;
+          if (
+            parent?.tagName === 'SCRIPT' ||
+            parent?.tagName === 'STYLE' ||
+            parent?.tagName === 'MARK'
+          ) {
+            return NodeFilter.FILTER_REJECT;
           }
-        }
-      );
+          return NodeFilter.FILTER_ACCEPT;
+        },
+      });
 
       let node: Node | null;
       while ((node = walker.nextNode())) {
@@ -69,21 +61,16 @@ export function useTextHighlight(
       return textNodes;
     };
 
-    // Apply highlights in reverse order to maintain correct offsets
     const sortedHighlights = [...highlights].sort((a, b) => b.startOffset - a.startOffset);
 
-    sortedHighlights.forEach(highlight => {
-      // Get fresh text nodes for each highlight to ensure we're working with current DOM state
+    sortedHighlights.forEach((highlight) => {
       const textNodes = getTextNodes();
-      
-      // Find the text node(s) containing this highlight
+
       for (const { node: textNode, startOffset: nodeStart } of textNodes) {
-        // Check if node is still in the DOM
         if (!container.contains(textNode)) continue;
-        
+
         const nodeEnd = nodeStart + (textNode.textContent?.length || 0);
 
-        // Check if this highlight overlaps with this text node
         if (highlight.startOffset < nodeEnd && highlight.endOffset > nodeStart) {
           const localStart = Math.max(0, highlight.startOffset - nodeStart);
           const localEnd = Math.min(textNode.textContent?.length || 0, highlight.endOffset - nodeStart);
@@ -95,10 +82,9 @@ export function useTextHighlight(
 
             const mark = document.createElement('mark');
             mark.textContent = highlightedText;
-            mark.className = `${HIGHLIGHT_COLORS[highlight.color]} px-1 rounded cursor-pointer transition-all hover:opacity-80`;
+            mark.className = `${HIGHLIGHT_COLORS[highlight.color] ?? HIGHLIGHT_COLORS.yellow} highlight-mark cursor-pointer`;
             mark.setAttribute('data-highlight-id', highlight.id);
-            mark.title = 'Click to erase or double-click to remove';
-            mark.style.pointerEvents = 'auto';
+            mark.title = 'Tap to remove this highlight (eraser mode)';
 
             const parent = textNode.parentNode;
             if (!parent) continue;
@@ -114,5 +100,5 @@ export function useTextHighlight(
         }
       }
     });
-  }, [highlights, content, containerRef]);
+  }, [highlights, content, containerRef, domSyncKey]);
 }

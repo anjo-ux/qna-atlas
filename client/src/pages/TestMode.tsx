@@ -10,7 +10,7 @@ import { QuestionCard } from '@/components/QuestionCard';
 import { TestHistory } from '@/components/TestHistory';
 import { TestModeWizard } from '@/components/TestModeWizard';
 import { DetailedTestResults } from '@/components/DetailedTestResults';
-import { ArrowLeft, ChevronDown, ChevronUp, ChevronRight, ChevronLeft, ChevronRight as ChevronRightIcon, Check, X, Circle, Maximize2, Minimize2, ChevronDown as ChevronDownIcon, Flag } from 'lucide-react';
+import { ArrowLeft, ChevronDown, ChevronUp, ChevronRight, ChevronLeft, ChevronRight as ChevronRightIcon, Check, X, Circle, ChevronDown as ChevronDownIcon, Flag } from 'lucide-react';
 import { useQuestionStats, QuestionResponse } from '@/hooks/useQuestionStats';
 import { useTestSessions, TestSession } from '@/hooks/useTestSessions';
 import { useBookmarks } from '@/hooks/useBookmarks';
@@ -49,7 +49,6 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
   const [currentSession, setCurrentSession] = useState<TestSession | null>(null);
   const [showTestWizard, setShowTestWizard] = useState(false);
   const [showQuestionPanel, setShowQuestionPanel] = useState(false);
-  const [isFullscreen, setIsFullscreen] = useState(false);
   const [isReviewMode, setIsReviewMode] = useState(false);
   const [resumeTestsToShow, setResumeTestsToShow] = useState(2);
   const [completedTestsToShow, setCompletedTestsToShow] = useState(5);
@@ -1039,7 +1038,6 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
         )}
         <div className="flex-1 flex flex-col md:flex-row min-h-0 overflow-hidden">
         {/* Question Panel - Top on mobile, Right on desktop */}
-        {!isFullscreen && (
         <div className={cn(
           "md:flex md:flex-col md:w-32 md:border-r md:border-border md:bg-muted/30 md:overflow-visible md:flex-shrink-0 md:h-screen",
           "flex flex-col border-b border-border bg-muted/30 w-full flex-shrink-0",
@@ -1079,10 +1077,6 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
                       data-testid={`button-question-${index + 1}`}
                       onClick={() => {
                         handleQuestionNavigation(index);
-                        // Auto-close on mobile after selection
-                        if (window.innerWidth < 768) {
-                          setShowQuestionPanel(false);
-                        }
                       }}
                       className={cn(
                         "h-8 md:h-10 rounded flex items-center justify-center text-xs font-semibold transition-all w-full",
@@ -1120,10 +1114,9 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
             </div>
           </div>
         </div>
-        )}
 
         {/* Main Content */}
-        <div className={cn("flex flex-col overflow-hidden min-w-0", isFullscreen ? "w-full" : "flex-1 flex-grow")}>
+        <div className="flex flex-col overflow-hidden min-w-0 flex-1 flex-grow">
           <div className="w-full p-3 md:p-4 border-b border-border bg-accent/5 flex-shrink-0">
             <div className="w-full flex items-center justify-between gap-3">
               <div className="flex-1 min-w-0">
@@ -1140,15 +1133,6 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
                   className={flaggedQuestions.has(currentQuestion.id) ? "text-red-500" : ""}
                 >
                   <Flag className={cn("h-4 w-4", flaggedQuestions.has(currentQuestion.id) && "fill-red-500")} />
-                </Button>
-                <Button 
-                  size="icon"
-                  variant="ghost"
-                  onClick={() => setIsFullscreen(!isFullscreen)}
-                  data-testid="button-fullscreen-toggle"
-                  title={isFullscreen ? "Exit fullscreen" : "Fullscreen"}
-                >
-                  {isFullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
                 </Button>
                 <Button 
                   size="icon"
@@ -1206,9 +1190,41 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
                 <span className="hidden sm:inline">Previous</span>
               </Button>
               
-              <div className="text-xs sm:text-sm text-muted-foreground text-center">
+              <button
+                type="button"
+                className={cn(
+                  "text-xs sm:text-sm text-center font-inherit",
+                  "max-md:cursor-pointer max-md:touch-manipulation",
+                  "max-md:inline-flex max-md:items-center max-md:justify-center max-md:gap-1.5",
+                  "max-md:py-2 max-md:pl-4 max-md:pr-3 max-md:min-h-10 max-md:rounded-full",
+                  "max-md:border max-md:border-border/80",
+                  "max-md:bg-gradient-to-b max-md:from-background max-md:to-muted/45",
+                  "md:bg-transparent md:bg-none",
+                  "max-md:text-foreground max-md:font-semibold max-md:tabular-nums",
+                  /* Raised “bevel”: soft drop shadow + top inner highlight */
+                  "max-md:shadow-[0_2px_6px_rgba(0,0,0,0.08),0_1px_2px_rgba(0,0,0,0.06),inset_0_1px_0_0_rgba(255,255,255,0.92)]",
+                  "dark:max-md:shadow-[0_2px_10px_rgba(0,0,0,0.45),inset_0_1px_0_0_rgba(255,255,255,0.14)]",
+                  "max-md:active:shadow-[inset_0_2px_4px_rgba(0,0,0,0.12),inset_0_-1px_0_0_rgba(255,255,255,0.06)]",
+                  "max-md:active:translate-y-px max-md:active:from-muted/50 max-md:active:to-muted/70",
+                  "max-md:focus-visible:outline-none max-md:focus-visible:ring-2 max-md:focus-visible:ring-primary/40 max-md:focus-visible:ring-offset-2 max-md:focus-visible:ring-offset-accent/5",
+                  showQuestionPanel &&
+                    "max-md:border-primary/40 max-md:from-primary/12 max-md:to-primary/6 max-md:shadow-[0_2px_8px_rgba(0,0,0,0.06),inset_0_1px_0_0_rgba(255,255,255,0.85)]",
+                  showQuestionPanel &&
+                    "dark:max-md:shadow-[0_2px_12px_rgba(0,0,0,0.35),inset_0_1px_0_0_rgba(255,255,255,0.12)]",
+                  "md:pointer-events-none md:inline md:border-0 md:p-0 md:min-h-0 md:shadow-none md:font-normal md:text-muted-foreground"
+                )}
+                onClick={() => setShowQuestionPanel((open) => !open)}
+                aria-expanded={showQuestionPanel}
+                aria-label={showQuestionPanel ? "Hide question list" : "Show all questions"}
+                data-testid="button-toggle-questions-from-progress"
+              >
                 Question {currentQuestionIndex + 1} / {testQuestions.length}
-              </div>
+                {showQuestionPanel ? (
+                  <ChevronUp className="hidden max-md:block h-4 w-4 shrink-0 opacity-70 text-muted-foreground" aria-hidden />
+                ) : (
+                  <ChevronDown className="hidden max-md:block h-4 w-4 shrink-0 opacity-70 text-muted-foreground" aria-hidden />
+                )}
+              </button>
 
               <Button
                 data-testid="button-next-question"

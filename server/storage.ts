@@ -42,7 +42,7 @@ import {
   type OralBoardSession,
   type OralBoardMessage,
 } from "@shared/schema";
-import { extractQuestionStem } from "@shared/questionFormat";
+import { extractQuestionStem, questionMcqChoicesReferenceSeeImage } from "@shared/questionFormat";
 import { db, pool } from "./db";
 import { eq, and, asc, desc, lte, sql, count, inArray } from "drizzle-orm";
 
@@ -732,6 +732,7 @@ export class DatabaseStorage implements IStorage {
       // Only include visible questions (hide picture-based etc.)
       if (q.visible === false) continue;
       if (extractQuestionStem(q.question).toLowerCase().includes("radiographic")) continue;
+      if (questionMcqChoicesReferenceSeeImage(q.question)) continue;
       const list = bySub.get(q.subsectionId) ?? [];
       list.push(q);
       bySub.set(q.subsectionId, list);

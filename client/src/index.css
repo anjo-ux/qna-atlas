@@ -8,9 +8,14 @@ All colors MUST be HSL.
 
 /* Content Protection: Prevent copying, printing, and screenshots */
 html, body {
-  height: 100vh;
-  width: 100vw;
+  /* Use % / dvh — 100vw includes scrollbar width and causes a 1px–16px horizontal
+     overflow strip (often looks like a white line on the right). */
+  min-height: 100dvh;
+  min-height: 100vh; /* fallback where dvh unsupported */
+  width: 100%;
+  max-width: 100%;
   overflow: hidden;
+  overflow-x: clip;
   -webkit-user-select: text;
   -webkit-touch-callout: none;
   -webkit-user-select: text;
@@ -76,12 +81,29 @@ html, body {
     user-select: none;
   }
   
+  /* User highlights: no transitions (avoids layout “morph”), clean line breaks */
+  mark.highlight-mark,
+  mark[data-highlight-id] {
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
+    padding: 0 0.06em;
+    margin: 0 -0.06em;
+    border-radius: 0.125rem;
+  }
+
   .eraser-mode mark {
     cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M19 2H9l-7 7v10c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-6 18H5V9h8v11zm7-11h-2v9h2v-9z" fill="currentColor"/></svg>') 12 12, auto !important;
   }
-  
+
   .eraser-mode * {
     user-select: none;
+  }
+
+  /* Marks must stay visible and hit-testable in eraser mode (override universal rule above). */
+  .eraser-mode mark.highlight-mark,
+  .eraser-mode mark[data-highlight-id] {
+    user-select: text;
+    -webkit-user-select: text;
   }
 
   :root {

@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Check, X, Sparkles } from "lucide-react";
 import ReactMarkdown from "react-markdown";
+import { normalizeAnswerExplanationForDisplay } from "@shared/questionFormat";
 
 const ADMIN_CODE_KEY = "adminCode";
 
@@ -278,7 +279,7 @@ export default function AdminGeneratedQuestions() {
                               ),
                             }}
                           >
-                            {q?.answer ?? ""}
+                            {normalizeAnswerExplanationForDisplay(q?.answer ?? "")}
                           </ReactMarkdown>
                         </div>
                       </div>

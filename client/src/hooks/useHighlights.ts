@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { queryClient, apiRequest } from '@/lib/queryClient';
 import type { Highlight as DBHighlight, User } from '@shared/schema';
@@ -31,6 +31,37 @@ export interface Note {
 
 const HIGHLIGHTS_KEY = 'psite-highlights';
 const NOTES_KEY = 'psite-notes';
+
+function mapServerHighlight(h: DBHighlight): Highlight {
+  return {
+    id: h.id,
+    text: h.text,
+    color: h.color as HighlightColor,
+    sectionId: h.sectionId,
+    subsectionId: h.subsectionId,
+    location: h.location as 'reference' | 'question',
+    questionId: h.questionId || undefined,
+    startOffset: h.startOffset,
+    endOffset: h.endOffset,
+  };
+}
+
+/** Pending local rows (optimistic) until the server list includes the same range. */
+function mergeServerAndPending(serverMapped: Highlight[], localHighlights: Highlight[]): Highlight[] {
+  const pending = localHighlights.filter((l) => {
+    if (!l.id.startsWith('hl-')) return false;
+    return !serverMapped.some(
+      (s) =>
+        s.sectionId === l.sectionId &&
+        s.subsectionId === l.subsectionId &&
+        s.location === l.location &&
+        (s.location === 'question' ? s.questionId === l.questionId : true) &&
+        s.startOffset === l.startOffset &&
+        s.endOffset === l.endOffset
+    );
+  });
+  return [...serverMapped, ...pending];
+}
 
 export function useHighlights() {
   const [localHighlights, setLocalHighlights] = useState<Highlight[]>([]);
@@ -198,19 +229,12 @@ export function useHighlights() {
     }
   }, [isAuthenticated, isLoadingHighlights, isError, serverHighlights, syncMutation]);
 
-  const highlights: Highlight[] = (isAuthenticated && serverHighlights.length > 0)
-    ? serverHighlights.map(h => ({
-        id: h.id,
-        text: h.text,
-        color: h.color as HighlightColor,
-        sectionId: h.sectionId,
-        subsectionId: h.subsectionId,
-        location: h.location as 'reference' | 'question',
-        questionId: h.questionId || undefined,
-        startOffset: h.startOffset,
-        endOffset: h.endOffset,
-      }))
-    : localHighlights;
+  const highlights: Highlight[] = useMemo(() => {
+    if (!isAuthenticated || serverHighlights.length === 0) {
+      return localHighlights;
+    }
+    return mergeServerAndPending(serverHighlights.map(mapServerHighlight), localHighlights);
+  }, [isAuthenticated, serverHighlights, localHighlights]);
 
   const saveHighlightsToLocal = useCallback((newHighlights: Highlight[]) => {
     setLocalHighlights(newHighlights);
@@ -227,21 +251,12 @@ export function useHighlights() {
       ...highlight,
       id: `hl-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
     };
-    
-    const currentHighlights = (isAuthenticated && serverHighlights.length > 0)
-      ? serverHighlights.map(h => ({
-          id: h.id,
-          text: h.text,
-          color: h.color as HighlightColor,
-          sectionId: h.sectionId,
-          subsectionId: h.subsectionId,
-          location: h.location as 'reference' | 'question',
-          questionId: h.questionId || undefined,
-          startOffset: h.startOffset,
-          endOffset: h.endOffset,
-        }))
-      : localHighlights;
-    
+
+    const currentHighlights =
+      !isAuthenticated || serverHighlights.length === 0
+        ? localHighlights
+        : mergeServerAndPending(serverHighlights.map(mapServerHighlight), localHighlights);
+
     saveHighlightsToLocal([...currentHighlights, newHighlight]);
     if (isAuthenticated) {
       createHighlightMutation.mutate(highlight);
@@ -250,20 +265,11 @@ export function useHighlights() {
   }, [isAuthenticated, localHighlights, serverHighlights, saveHighlightsToLocal, createHighlightMutation]);
 
   const removeHighlight = useCallback((id: string) => {
-    const currentHighlights = (isAuthenticated && serverHighlights.length > 0)
-      ? serverHighlights.map(h => ({
-          id: h.id,
-          text: h.text,
-          color: h.color as HighlightColor,
-          sectionId: h.sectionId,
-          subsectionId: h.subsectionId,
-          location: h.location as 'reference' | 'question',
-          questionId: h.questionId || undefined,
-          startOffset: h.startOffset,
-          endOffset: h.endOffset,
-        }))
-      : localHighlights;
-    
+    const currentHighlights =
+      !isAuthenticated || serverHighlights.length === 0
+        ? localHighlights
+        : mergeServerAndPending(serverHighlights.map(mapServerHighlight), localHighlights);
+
     saveHighlightsToLocal(currentHighlights.filter(h => h.id !== id));
     saveNotes(notes.filter(n => n.highlightId !== id));
     
@@ -273,20 +279,11 @@ export function useHighlights() {
   }, [isAuthenticated, localHighlights, serverHighlights, notes, saveHighlightsToLocal, saveNotes, deleteHighlightMutation]);
 
   const batchRemoveHighlights = useCallback((ids: string[]) => {
-    const currentHighlights = (isAuthenticated && serverHighlights.length > 0)
-      ? serverHighlights.map(h => ({
-          id: h.id,
-          text: h.text,
-          color: h.color as HighlightColor,
-          sectionId: h.sectionId,
-          subsectionId: h.subsectionId,
-          location: h.location as 'reference' | 'question',
-          questionId: h.questionId || undefined,
-          startOffset: h.startOffset,
-          endOffset: h.endOffset,
-        }))
-      : localHighlights;
-    
+    const currentHighlights =
+      !isAuthenticated || serverHighlights.length === 0
+        ? localHighlights
+        : mergeServerAndPending(serverHighlights.map(mapServerHighlight), localHighlights);
+
     const newHighlights = currentHighlights.filter(h => !ids.includes(h.id));
     saveHighlightsToLocal(newHighlights);
     saveNotes(notes.filter(n => !ids.includes(n.highlightId || '')));

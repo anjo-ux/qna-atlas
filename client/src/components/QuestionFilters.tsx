@@ -31,9 +31,9 @@ export function QuestionFilters({
   unansweredCount,
 }: QuestionFiltersProps) {
   return (
-    <div className="flex flex-wrap items-center gap-2">
-      {/* Filter Toggle */}
-      <div className="flex items-center gap-1 bg-accent/5 rounded-lg p-1">
+    <div className="flex w-full min-w-0 max-w-full flex-wrap items-center gap-2">
+      {/* Filter Toggle — wrap on narrow widths so e.g. Unanswered drops to the next line */}
+      <div className="flex w-full max-w-full min-w-0 flex-wrap items-center gap-1 bg-accent/5 rounded-lg p-1 sm:w-auto">
         <Button
           variant={filterMode === 'all' ? 'default' : 'ghost'}
           size="sm"

@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import ReactMarkdown from 'react-markdown';
 import { toast } from 'sonner';
+import { normalizeAnswerExplanationForDisplay } from '@shared/questionFormat';
 
 interface SpacedRepetitionProps {
   onBack: () => void;
@@ -322,7 +323,7 @@ export function SpacedRepetitionPage({ onBack }: SpacedRepetitionProps) {
                         <span className="flex items-center gap-2">
                           <XCircle className="h-4 w-4" /> Incorrect
                           {correctAnswer && (
-                            <span className="font-normal"> — correct: {correctAnswer}</span>
+                            <span className="font-normal"> — Correct: {correctAnswer}</span>
                           )}
                         </span>
                       )}
@@ -338,13 +339,13 @@ export function SpacedRepetitionPage({ onBack }: SpacedRepetitionProps) {
                           p: ({ node, ...props }) => <p className="whitespace-pre-wrap my-1" {...props} />,
                         }}
                       >
-                        {current.question?.answer ?? ''}
+                        {normalizeAnswerExplanationForDisplay(current.question?.answer ?? '')}
                       </ReactMarkdown>
                     </div>
                   </div>
 
                   <div className="pt-4 border-t border-border">
-                    <p className="text-sm font-medium text-foreground mb-3">How confident were you?</p>
+                    <p className="text-sm font-medium text-foreground mb-3">How Confident Were You?</p>
                     <div className="grid grid-cols-3 gap-2">
                       {[0, 1, 2, 3, 4, 5].map((q) => (
                         <Button
@@ -361,7 +362,7 @@ export function SpacedRepetitionPage({ onBack }: SpacedRepetitionProps) {
                       ))}
                     </div>
                     <p className="text-xs text-muted-foreground mt-2">
-                      0 = complete blackout, 3 = vague recall, 5 = perfect
+                      Complete Blackout, Vague Recall, Perfect
                     </p>
                   </div>
                 </div>
@@ -373,7 +374,7 @@ export function SpacedRepetitionPage({ onBack }: SpacedRepetitionProps) {
                   className="mt-4 self-start"
                   data-testid="button-flip-back"
                 >
-                  <RotateCcw className="h-4 w-4 mr-1" /> Flip back
+                  <RotateCcw className="h-4 w-4 mr-1" /> Flip Back
                 </Button>
               </Card>
             )}

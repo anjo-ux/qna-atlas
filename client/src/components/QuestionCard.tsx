@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef, useEffect } from 'react';
+import { useState, useMemo, useRef, useEffect, useLayoutEffect, useCallback } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -15,6 +15,7 @@ import { AlertCircle, Bookmark } from 'lucide-react';
 import { queryClient } from '@/lib/queryClient';
 import ReactMarkdown from 'react-markdown';
 import { ReportQuestionDialog } from '@/components/ReportQuestionDialog';
+import { normalizeAnswerExplanationForDisplay } from '@shared/questionFormat';
 
 interface QuestionCardProps {
   question: Question;
@@ -155,28 +156,28 @@ export function QuestionCard({
 
   // Apply highlights to question text
   const questionContent = parsed.text + '\n' + parsed.choices.map(c => `${c.letter}. ${c.text}`).join('\n');
-  useTextHighlight(questionRef, highlights, questionContent);
+  useTextHighlight(questionRef, highlights, questionContent, isEraserMode);
 
-  // Setup global eraser click handler
-  useEffect(() => {
+  // Eraser: pointerup in capture on the question container (click alone is unreliable on touch; `closest` hits the owning mark).
+  useLayoutEffect(() => {
     if (!isEraserMode) return;
+    const root = questionRef.current;
+    if (!root) return;
 
-    const handleDocumentClick = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-      if (target.tagName === 'MARK' && target.hasAttribute('data-highlight-id')) {
-        e.preventDefault();
-        e.stopPropagation();
-        const highlightId = target.getAttribute('data-highlight-id');
-        if (highlightId) {
-          removeHighlight(highlightId);
-        }
-      }
+    const onPointerUpCapture = (e: PointerEvent) => {
+      if (e.pointerType === 'mouse' && e.button !== 0) return;
+      const target = e.target as HTMLElement | null;
+      if (!target || !root.contains(target)) return;
+      const mark = target.closest('mark[data-highlight-id]');
+      if (!mark || !root.contains(mark)) return;
+      e.preventDefault();
+      e.stopPropagation();
+      const highlightId = mark.getAttribute('data-highlight-id');
+      if (highlightId) removeHighlight(highlightId);
     };
 
-    document.addEventListener('click', handleDocumentClick, true);
-    return () => {
-      document.removeEventListener('click', handleDocumentClick, true);
-    };
+    root.addEventListener('pointerup', onPointerUpCapture, true);
+    return () => root.removeEventListener('pointerup', onPointerUpCapture, true);
   }, [isEraserMode, removeHighlight]);
 
   const correctAnswer = useMemo(() => {
@@ -247,38 +248,58 @@ export function QuestionCard({
   };
 
 
-  const handleTextSelection = () => {
-    // Don't allow highlighting when in eraser mode
+  const flushTextHighlightSelection = useCallback(() => {
     if (isEraserMode) {
       window.getSelection()?.removeAllRanges();
       return;
     }
 
     const selection = window.getSelection();
-    if (!selection || selection.isCollapsed) return;
+    if (!selection || selection.rangeCount === 0 || selection.isCollapsed) return;
 
-    const selectedText = selection.toString().trim();
-    if (!selectedText || selectedText.length < 2) return;
+    const container = questionRef.current;
+    if (!container) return;
 
-    // Get the full question text to calculate proper offsets
-    const questionText = parsed.text + ' ' + parsed.choices.map(c => c.letter + '. ' + c.text).join(' ');
-    const selectedIndex = questionText.indexOf(selectedText);
-    
-    if (selectedIndex === -1) return;
+    const range = selection.getRangeAt(0);
+    if (!container.contains(range.commonAncestorContainer)) return;
+
+    const raw = selection.toString();
+    if (raw.trim().length < 2) return;
+
+    const pre = document.createRange();
+    pre.selectNodeContents(container);
+    pre.setEnd(range.startContainer, range.startOffset);
+    const startOffset = pre.toString().length;
+    const endOffset = startOffset + raw.length;
 
     addHighlight({
-      text: selectedText,
+      text: raw.trim(),
       color: activeColor,
       sectionId,
       subsectionId,
       location: 'question',
       questionId: question.id,
-      startOffset: selectedIndex,
-      endOffset: selectedIndex + selectedText.length,
+      startOffset,
+      endOffset,
     });
 
     selection.removeAllRanges();
-  };
+  }, [
+    isEraserMode,
+    addHighlight,
+    activeColor,
+    sectionId,
+    subsectionId,
+    question.id,
+  ]);
+
+  const handlePointerUp = useCallback(
+    (e: React.PointerEvent) => {
+      if (e.pointerType === 'mouse' && e.button !== 0) return;
+      requestAnimationFrame(() => flushTextHighlightSelection());
+    },
+    [flushTextHighlightSelection]
+  );
 
   const handleAddNote = () => {
     addNote({
@@ -304,16 +325,8 @@ export function QuestionCard({
       )}
     >
       <div className="p-4 md:p-6 space-y-3 md:space-y-4">
-        <div className="flex items-center justify-between">
-          <HighlightToolbar
-            activeColor={activeColor}
-            onColorChange={setActiveColor}
-            onAddNote={handleAddNote}
-            onClearHighlights={handleClearHighlights}
-            isEraserMode={isEraserMode}
-            onEraserToggle={() => setIsEraserMode(!isEraserMode)}
-          />
-          <div className="flex items-center gap-1">
+        <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between md:gap-3">
+          <div className="flex items-center justify-end gap-1 shrink-0 md:order-2">
             <Button
               size="icon"
               variant="ghost"
@@ -358,6 +371,29 @@ export function QuestionCard({
               <Bookmark className={cn("h-5 w-5", questionIsBookmarked && "fill-accent")} />
             </Button>
           </div>
+          <div className="min-w-0 w-full md:flex-1 md:order-1">
+            <div className="hidden md:block">
+              <HighlightToolbar
+                activeColor={activeColor}
+                onColorChange={setActiveColor}
+                onAddNote={handleAddNote}
+                onClearHighlights={handleClearHighlights}
+                isEraserMode={isEraserMode}
+                onEraserToggle={() => setIsEraserMode(!isEraserMode)}
+              />
+            </div>
+            <div className="md:hidden">
+              <HighlightToolbar
+                activeColor={activeColor}
+                onColorChange={setActiveColor}
+                onAddNote={handleAddNote}
+                onClearHighlights={handleClearHighlights}
+                isEraserMode={isEraserMode}
+                onEraserToggle={() => setIsEraserMode(!isEraserMode)}
+                isCompressed
+              />
+            </div>
+          </div>
         </div>
         <ReportQuestionDialog
           open={reportDialogOpen}
@@ -369,7 +405,11 @@ export function QuestionCard({
           <div className="flex-shrink-0 w-7 h-7 md:w-8 md:h-8 rounded-full bg-primary/10 flex items-center justify-center">
             <span className="text-xs md:text-sm font-semibold text-primary">{index + 1}</span>
           </div>
-          <div className={cn("flex-1 min-w-0", isEraserMode && "eraser-mode")} ref={questionRef} onMouseUp={handleTextSelection}>
+          <div
+            className={cn("flex-1 min-w-0 touch-manipulation", isEraserMode && "eraser-mode")}
+            ref={questionRef}
+            onPointerUp={handlePointerUp}
+          >
             <div className="text-sm md:text-base leading-relaxed text-foreground mb-3 md:mb-4">
               <ReactMarkdown
                 skipHtml
@@ -431,30 +471,32 @@ export function QuestionCard({
                         <Label
                           htmlFor={`${question.id}-${choice.letter}`}
                           className={cn(
-                            "flex-1 cursor-pointer font-normal",
+                            "flex-1 cursor-pointer font-normal flex flex-col items-start gap-1 sm:flex-row sm:items-start sm:gap-0",
                             showExplanation && "cursor-default",
                             isCrossedOut && "line-through text-muted-foreground"
                           )}
                         >
-                          <span className="font-semibold">{choice.letter}.</span>{' '}
-                          <ReactMarkdown
-                            skipHtml
-                            components={{
-                              p: ({ node, children, ...props }) => <span {...props}>{children}</span>,
-                            }}
-                          >
-                            {choice.text}
-                          </ReactMarkdown>
+                          <span className="min-w-0">
+                            <span className="font-semibold">{choice.letter}.</span>{' '}
+                            <ReactMarkdown
+                              skipHtml
+                              components={{
+                                p: ({ node, children, ...props }) => <span {...props}>{children}</span>,
+                              }}
+                            >
+                              {choice.text}
+                            </ReactMarkdown>
+                          </span>
                           {showResult && isThisChoice && (
                             <span className={cn(
-                              "ml-2 text-xs font-semibold",
+                              "text-xs font-semibold shrink-0 sm:ml-2",
                               isCorrect ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"
                             )}>
                               {isCorrect ? "✓ Correct" : "✗ Incorrect"}
                             </span>
                           )}
                           {showResult && isCorrectChoice && !isCorrect && (
-                            <span className="ml-2 text-xs font-semibold text-green-600 dark:text-green-400">
+                            <span className="text-xs font-semibold shrink-0 text-green-600 dark:text-green-400 sm:ml-2">
                               ✓ Correct Answer
                             </span>
                           )}
@@ -498,7 +540,7 @@ export function QuestionCard({
                         p: ({ node, ...props }) => <p className="whitespace-pre-wrap my-1" {...props} />,
                       }}
                     >
-                      {question.answer}
+                      {normalizeAnswerExplanationForDisplay(question.answer)}
                     </ReactMarkdown>
                   </div>
                 </div>
