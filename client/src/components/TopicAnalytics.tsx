@@ -1,11 +1,19 @@
 import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { useTopicAnalytics } from '@/hooks/useTopicAnalytics';
+import { useSections } from '@/hooks/useSections';
+import { getSectionTitle } from '@/utils/sectionDisplay';
 import { cn } from '@/lib/utils';
+import { useMemo } from 'react';
 import { TrendingUp, TrendingDown, Zap } from 'lucide-react';
 
 export function TopicAnalytics() {
   const { topics, isLoading, overallStats, weakestTopics, strongestTopics } = useTopicAnalytics();
+  const { sections } = useSections();
+  const sectionLabel = useMemo(
+    () => (sectionId: string) => getSectionTitle(sections, sectionId),
+    [sections],
+  );
 
   if (isLoading) {
     return (
@@ -56,7 +64,7 @@ export function TopicAnalytics() {
           {topics.map(topic => (
             <div key={topic.sectionId} className="space-y-2">
               <div className="flex items-center justify-between">
-                <p className="text-sm font-medium">{topic.sectionId}</p>
+                <p className="text-sm font-medium">{sectionLabel(topic.sectionId)}</p>
                 <span className={cn(
                   "text-xs font-semibold px-2 py-1 rounded-full",
                   topic.accuracy >= 80 ? "bg-success/20 text-success" :
@@ -85,7 +93,7 @@ export function TopicAnalytics() {
           <div className="space-y-2">
             {weakestTopics.map(topic => (
               <div key={topic.sectionId} className="flex items-center justify-between p-2 rounded bg-destructive/5">
-                <span className="text-sm">{topic.sectionId}</span>
+                <span className="text-sm">{sectionLabel(topic.sectionId)}</span>
                 <span className="text-xs font-bold text-destructive">{topic.accuracy}%</span>
               </div>
             ))}
@@ -103,7 +111,7 @@ export function TopicAnalytics() {
           <div className="space-y-2">
             {strongestTopics.map(topic => (
               <div key={topic.sectionId} className="flex items-center justify-between p-2 rounded bg-success/5">
-                <span className="text-sm">{topic.sectionId}</span>
+                <span className="text-sm">{sectionLabel(topic.sectionId)}</span>
                 <span className="text-xs font-bold text-success">{topic.accuracy}%</span>
               </div>
             ))}

@@ -130,10 +130,24 @@ function extractChoices(questionText: string): { count: number } {
 /**
  * Collapse a leading "X)" line into the following explanation so markdown renders
  * as one paragraph (avoids a large gap when the source uses blank lines after the letter).
+ * Wraps "X) Correct Answer …:" (and "Option X is correct:") in markdown **bold** for display.
  */
 export function normalizeAnswerExplanationForDisplay(answer: string): string {
-  const a = answer ?? "";
-  return a.replace(/^\s*([A-F])\)\s*(?:\r?\n\s*)+/i, (_, letter: string) => `${letter.toUpperCase()}) `);
+  let a = answer ?? "";
+  a = a.replace(/^\s*([A-F])\)\s*(?:\r?\n\s*)+/i, (_, letter: string) => `${letter.toUpperCase()}) `);
+  a = a.replace(
+    /^\s*(Option\s+[A-F]\s+is\s+correct:)\s*(?:\r?\n\s*)+/i,
+    (_, prefix: string) => `**${prefix.trim()}** `
+  );
+  // "A) Correct Answer (A):" or "A) Correct Answer:" → bold entire prefix through the colon
+  a = a.replace(
+    /^(\s*)([A-F])\)(\s+)(Correct Answer(?:\s*\([A-F]\))?\s*:)(\s*)/i,
+    (_, sp, letter, sp2, label, trail) => {
+      const L = String(letter).toUpperCase();
+      return `${sp}**${L})${sp2}${label.trimEnd()}**${trail || " "}`;
+    }
+  );
+  return a;
 }
 
 function extractCorrectAnswer(answer: string): string | null {

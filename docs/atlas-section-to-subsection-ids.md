@@ -160,14 +160,14 @@ Or define a small mapping from your section names to Atlas section ids, then loo
 | wrist-forearm-injuries | Wrist & Forearm Injuries |
 | hand-tumors | Hand Tumors |
 | hand-inflammation-infections | Hand Inflammation & Infections |
-| congenital-pediatric-hand | Congenital and Pediatric Hand |
+| congenital-pediatric-hand | Congenital & Pediatric Hand |
 | lower-extremity | Lower Extremity |
 | cleft-lip-palate | Cleft Lip & Palate |
 | facial-fractures | Facial Fractures |
 | facial-paralysis | Facial Paralysis |
 | ear-reconstruction | Ear Reconstruction |
 | mandible-dental-orthognathic | Mandible, Dental, & Orthognathic |
-| head-neck-tumors | Head and Neck Tumors |
+| head-neck-tumors | Head & Neck Tumors |
 | congenital-syndromes | Congenital Syndromes |
 | breast-augmentation | Breast Augmentation |
 | breast-reduction-mastopexy | Breast Reduction & Mastopexy |

@@ -115,10 +115,10 @@ function Router() {
           <Route path="/subscribe" component={SubscriptionPage} />
           <Route path="/" component={Index} />
           <Route path="/bookmarks">
-            {() => <BookmarksPage onBack={() => window.history.back()} />}
+            {() => <BookmarksPage onBack={() => setLocation('/')} />}
           </Route>
           <Route path="/spaced-repetition">
-            {() => <SpacedRepetitionPage onBack={() => window.history.back()} />}
+            {() => <SpacedRepetitionPage onBack={() => setLocation('/')} />}
           </Route>
           <Route path="/oral-board">
             {() => <OralBoardSimulator onBack={() => setLocation('/')} />}

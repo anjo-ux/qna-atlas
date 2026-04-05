@@ -43,6 +43,7 @@ import {
   type OralBoardMessage,
 } from "@shared/schema";
 import { extractQuestionStem, questionMcqChoicesReferenceSeeImage } from "@shared/questionFormat";
+import { subsectionTitles } from "@shared/questionImport";
 import { db, pool } from "./db";
 import { eq, and, asc, desc, lte, sql, count, inArray } from "drizzle-orm";
 
@@ -746,7 +747,7 @@ export class DatabaseStorage implements IStorage {
     return sectionRows.map((sec) => {
       const subs = (bySec.get(sec.id) ?? []).map((sub) => ({
         id: sub.id,
-        title: sub.title,
+        title: subsectionTitles[sub.id] ?? sub.title,
         questions: (bySub.get(sub.id) ?? []).map((q) => ({
           id: q.id,
           question: q.question,

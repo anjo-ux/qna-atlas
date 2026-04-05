@@ -5,6 +5,7 @@ import { Label } from '@/components/ui/label';
 import { ArrowLeft, Mail, CreditCard, BookOpen, TrendingUp, Target, Save, ChevronRight, ChevronLeft, Check, ChevronsUpDown, Award, ExternalLink } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { ThemeToggle } from '@/components/ThemeToggle';
 import { QuestionBreakdownCharts } from '@/components/QuestionBreakdownCharts';
 import { SubscriptionManager } from '@/components/SubscriptionManager';
 import { MobileSubscriptionWidget } from '@/components/MobileSubscriptionWidget';
@@ -171,12 +172,17 @@ export function Settings({ onBack, subscription }: SettingsProps) {
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden min-w-0">
-      <div className="p-4 sm:p-6 border-b border-border flex-shrink-0">
-        <div className="flex items-center gap-3 min-w-0">
-          <Button variant="ghost" size="icon" onClick={onBack} className="flex-shrink-0">
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <h1 className="text-2xl sm:text-3xl font-bold text-foreground truncate">Settings</h1>
+      <div className="flex-shrink-0 border-b border-border p-4 sm:p-6">
+        <div className="flex min-w-0 items-center justify-between gap-3">
+          <div className="flex min-w-0 items-center gap-3">
+            <Button variant="ghost" size="icon" onClick={onBack} className="flex-shrink-0">
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <h1 className="truncate text-2xl font-bold text-foreground sm:text-3xl">Settings</h1>
+          </div>
+          <div className="flex shrink-0 items-center">
+            <ThemeToggle />
+          </div>
         </div>
       </div>
 
@@ -335,6 +341,34 @@ export function Settings({ onBack, subscription }: SettingsProps) {
                 </div>
               </Card>
 
+              {/* Percentile Rank Section */}
+              <Card className="p-6 bg-gradient-to-br from-purple-500/10 to-blue-500/10 border-purple-500/20">
+                <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+                  <Award className="h-5 w-5 text-purple-500" />
+                  Percentile Rank
+                </h2>
+                {percentileLoading ? (
+                  <div className="text-sm text-muted-foreground">Loading rank...</div>
+                ) : percentile !== null ? (
+                  <div className="flex items-center gap-6">
+                    <div className="flex flex-col items-center">
+                      <div className="text-5xl font-bold text-purple-500">{percentile}</div>
+                      <p className="text-xs text-muted-foreground mt-1">Percentile</p>
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm text-foreground">
+                        You're in the <span className="font-semibold text-purple-500">{percentile}th percentile</span> among all users based on your accuracy percentage.
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-2">
+                        100th percentile is the highest score.
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-sm text-muted-foreground">Not enough data yet. Answer more questions to see your rank.</div>
+                )}
+              </Card>
+
               {/* Statistics Section */}
               <Card className="p-6 bg-gradient-to-br from-chart-1/10 to-chart-2/10 border-chart-1/20 min-w-0 overflow-hidden">
                 <h2 className="text-lg font-semibold text-foreground mb-4">Learning Statistics</h2>
@@ -393,34 +427,6 @@ export function Settings({ onBack, subscription }: SettingsProps) {
                 </h2>
                 <QuestionBreakdownCharts />
               </div>
-
-              {/* Percentile Rank Section */}
-              <Card className="p-6 bg-gradient-to-br from-purple-500/10 to-blue-500/10 border-purple-500/20">
-                <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
-                  <Award className="h-5 w-5 text-purple-500" />
-                  Percentile Rank
-                </h2>
-                {percentileLoading ? (
-                  <div className="text-sm text-muted-foreground">Loading rank...</div>
-                ) : percentile !== null ? (
-                  <div className="flex items-center gap-6">
-                    <div className="flex flex-col items-center">
-                      <div className="text-5xl font-bold text-purple-500">{percentile}</div>
-                      <p className="text-xs text-muted-foreground mt-1">Percentile</p>
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-sm text-foreground">
-                        You're in the <span className="font-semibold text-purple-500">{percentile}th percentile</span> among all users based on your accuracy percentage.
-                      </p>
-                      <p className="text-xs text-muted-foreground mt-2">
-                        100th percentile is the highest score.
-                      </p>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="text-sm text-muted-foreground">Not enough data yet. Answer more questions to see your rank.</div>
-                )}
-              </Card>
 
               {/* Mobile Subscription Section */}
               <MobileSubscriptionWidget />

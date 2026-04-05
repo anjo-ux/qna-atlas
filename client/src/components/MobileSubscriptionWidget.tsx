@@ -22,6 +22,10 @@ import {
 } from '@/components/ui/alert-dialog';
 import { SubscriptionPlans } from '@/components/SubscriptionPlans';
 import { SubscriptionTransactionHistoryDialog } from '@/components/SubscriptionTransactionHistoryDialog';
+import {
+  SUBSCRIPTION_CANCEL_BUTTON_CLASS,
+  SUBSCRIPTION_CHANGE_PLAN_BUTTON_CLASS,
+} from '@/components/subscriptionActionButtonClasses';
 import { cn } from '@/lib/utils';
 
 const PAID_PERSONAL_PLANS = ['monthly', '6-month', '1-year'] as const;
@@ -263,8 +267,8 @@ export function MobileSubscriptionWidget() {
         <div className="space-y-2 pt-2 min-w-0">
           <Dialog open={isChangingPlan} onOpenChange={setIsChangingPlan}>
             <DialogTrigger asChild>
-              <Button 
-                className="w-full"
+              <Button
+                className={cn('w-full', SUBSCRIPTION_CHANGE_PLAN_BUTTON_CLASS)}
                 data-testid="button-mobile-upgrade-plan"
               >
                 {isTrialOrExpired ? 'Upgrade Plan' : 'Change Plan'}
@@ -279,7 +283,10 @@ export function MobileSubscriptionWidget() {
             <>
               <Button
                 variant="outline"
-                className="w-full text-destructive hover:text-destructive"
+                className={cn(
+                  'w-full text-destructive hover:text-destructive dark:hover:text-rose-50',
+                  SUBSCRIPTION_CANCEL_BUTTON_CLASS,
+                )}
                 onClick={() => setCancelDialogOpen(true)}
                 disabled={cancelSubscriptionMutation.isPending}
                 data-testid="button-mobile-cancel"

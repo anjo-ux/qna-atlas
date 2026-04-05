@@ -657,7 +657,7 @@ export default function Index() {
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                 <Input
                   type="text"
-                  placeholder={isMobileLayout ? "Search" : "Search all questions and explanations..."}
+                  placeholder={isMobileLayout ? "Search" : "Search All Questions, Notes, Explanations"}
                   value={searchQuery}
                   onChange={(e) => handleSearchChange(e.target.value)}
                   onFocus={() => {
@@ -699,11 +699,11 @@ export default function Index() {
 
       {/* Bottom Section - Sidebar + Main Content */}
       <div className="flex flex-1 overflow-hidden">
-        {/* "All Content" spine: tap/click toggles nav (overlay on mobile, inline sidebar on desktop) */}
+        {/* "All Content" spine: desktop (lg+) only; mobile uses header Menu next to search */}
         <button
           type="button"
           onClick={() => setIsNavOpen((open) => !open)}
-          className="flex-shrink-0 rounded-none border-r border-border h-full flex flex-col items-center justify-center px-1.5 bg-muted/20 hover:bg-accent/40 active:bg-accent/50 transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+          className="hidden lg:flex flex-shrink-0 rounded-none border-r border-border h-full flex-col items-center justify-center px-1.5 bg-muted/20 hover:bg-accent/40 active:bg-accent/50 transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
           aria-expanded={isNavOpen}
           aria-controls="study-navigation-panel"
           title={isNavOpen ? 'Hide all content menu' : 'Show all content menu'}

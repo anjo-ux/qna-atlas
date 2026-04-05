@@ -11,7 +11,17 @@ import { HighlightToolbar } from '@/components/HighlightToolbar';
 import { StickyNote } from '@/components/StickyNote';
 import { useTextHighlight } from '@/hooks/useTextHighlight';
 import { QuestionResponse } from '@/hooks/useQuestionStats';
-import { AlertCircle, Bookmark } from 'lucide-react';
+import {
+  AlertCircle,
+  Bookmark,
+  Check,
+  ChevronDown,
+  ChevronUp,
+  CircleCheck,
+  CircleX,
+  Lightbulb,
+  X,
+} from 'lucide-react';
 import { queryClient } from '@/lib/queryClient';
 import ReactMarkdown from 'react-markdown';
 import { ReportQuestionDialog } from '@/components/ReportQuestionDialog';
@@ -51,6 +61,7 @@ export function QuestionCard({
     savedResponse?.selectedAnswer?.trim().toUpperCase() || null
   );
   const [showExplanation, setShowExplanation] = useState(!!savedResponse);
+  const [explanationExpanded, setExplanationExpanded] = useState(true);
   const [isEraserMode, setIsEraserMode] = useState(false);
   const [crossedOutChoices, setCrossedOutChoices] = useState<Set<string>>(new Set());
   const [reportDialogOpen, setReportDialogOpen] = useState(false);
@@ -200,9 +211,11 @@ export function QuestionCard({
       const normalized = savedResponse.selectedAnswer?.trim().toUpperCase();
       setSelectedAnswer(normalized || null);
       setShowExplanation(true);
+      setExplanationExpanded(true);
     } else {
       setSelectedAnswer(null);
       setShowExplanation(false);
+      setExplanationExpanded(true);
     }
   }, [savedResponse, question.id]);
 
@@ -210,6 +223,7 @@ export function QuestionCard({
     if (selectedAnswer && !showExplanation && correctAnswer) {
       const correct = selectedAnswer === correctAnswer;
       setShowExplanation(true);
+      setExplanationExpanded(true);
       onAnswerSubmit(question.id, selectedAnswer, correctAnswer, correct);
     }
   };
@@ -230,6 +244,7 @@ export function QuestionCard({
       const correct = normalized === correctAnswer;
       onAnswerSubmit(question.id, normalized, correctAnswer || '', correct);
       setShowExplanation(true);
+      setExplanationExpanded(true);
     }
   };
 
@@ -325,53 +340,61 @@ export function QuestionCard({
       )}
     >
       <div className="p-4 md:p-6 space-y-3 md:space-y-4">
-        <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between md:gap-3">
-          <div className="flex items-center justify-end gap-1 shrink-0 md:order-2">
-            <Button
-              size="icon"
-              variant="ghost"
-              onClick={() => setReportDialogOpen(true)}
-              data-testid={`button-report-${question.id}`}
-              className="flex-shrink-0 transition-colors"
-              title="Report question"
+        <div className="flex flex-col gap-2 md:gap-3">
+          <div className="flex items-center justify-between gap-3">
+            <div
+              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/10 md:h-8 md:w-8"
+              aria-label={`Question ${index + 1}`}
             >
-              <AlertCircle className="h-5 w-5" />
-            </Button>
-            <Button
-              size="icon"
-              variant="ghost"
-              onClick={() => {
-                console.log('[QuestionCard] Bookmark button clicked for question:', {
-                  id: question.id,
-                  sectionId,
-                  subsectionId,
-                });
-                (async () => {
-                  try {
-                    console.log('[QuestionCard] Bookmark button handler: attempting to toggle bookmark');
-                    await toggleBookmark(question.id, sectionId, subsectionId);
-                    console.log('[QuestionCard] Bookmark toggle completed successfully');
-                    // Force a fresh fetch of bookmarks to ensure all views update
-                    console.log('[QuestionCard] Force refetching bookmarks...');
-                    await queryClient.refetchQueries({ queryKey: ['/api/bookmarks'] });
-                    console.log('[QuestionCard] Bookmarks refetch completed');
-                  } catch (error) {
-                    console.error('[QuestionCard] Bookmark toggle error:', error);
-                  }
-                })();
-              }}
-              disabled={isBookmarkPending}
-              data-testid={`button-bookmark-${question.id}`}
-              className={cn(
-                "flex-shrink-0 transition-colors",
-                questionIsBookmarked && "text-accent"
-              )}
-              title="Bookmark"
-            >
-              <Bookmark className={cn("h-5 w-5", questionIsBookmarked && "fill-accent")} />
-            </Button>
+              <span className="text-xs font-semibold text-primary md:text-sm">{index + 1}</span>
+            </div>
+            <div className="flex shrink-0 items-center justify-end gap-1">
+              <Button
+                size="icon"
+                variant="ghost"
+                onClick={() => setReportDialogOpen(true)}
+                data-testid={`button-report-${question.id}`}
+                className="flex-shrink-0 transition-colors"
+                title="Report question"
+              >
+                <AlertCircle className="h-5 w-5" />
+              </Button>
+              <Button
+                size="icon"
+                variant="ghost"
+                onClick={() => {
+                  console.log('[QuestionCard] Bookmark button clicked for question:', {
+                    id: question.id,
+                    sectionId,
+                    subsectionId,
+                  });
+                  (async () => {
+                    try {
+                      console.log('[QuestionCard] Bookmark button handler: attempting to toggle bookmark');
+                      await toggleBookmark(question.id, sectionId, subsectionId);
+                      console.log('[QuestionCard] Bookmark toggle completed successfully');
+                      // Force a fresh fetch of bookmarks to ensure all views update
+                      console.log('[QuestionCard] Force refetching bookmarks...');
+                      await queryClient.refetchQueries({ queryKey: ['/api/bookmarks'] });
+                      console.log('[QuestionCard] Bookmarks refetch completed');
+                    } catch (error) {
+                      console.error('[QuestionCard] Bookmark toggle error:', error);
+                    }
+                  })();
+                }}
+                disabled={isBookmarkPending}
+                data-testid={`button-bookmark-${question.id}`}
+                className={cn(
+                  "flex-shrink-0 transition-colors",
+                  questionIsBookmarked && "text-accent"
+                )}
+                title="Bookmark"
+              >
+                <Bookmark className={cn("h-5 w-5", questionIsBookmarked && "fill-accent")} />
+              </Button>
+            </div>
           </div>
-          <div className="min-w-0 w-full md:flex-1 md:order-1">
+          <div className="min-w-0 w-full">
             <div className="hidden md:block">
               <HighlightToolbar
                 activeColor={activeColor}
@@ -401,15 +424,11 @@ export function QuestionCard({
           questionId={question.id}
         />
         
-        <div className="flex items-start gap-3 md:gap-4">
-          <div className="flex-shrink-0 w-7 h-7 md:w-8 md:h-8 rounded-full bg-primary/10 flex items-center justify-center">
-            <span className="text-xs md:text-sm font-semibold text-primary">{index + 1}</span>
-          </div>
-          <div
-            className={cn("flex-1 min-w-0 touch-manipulation", isEraserMode && "eraser-mode")}
-            ref={questionRef}
-            onPointerUp={handlePointerUp}
-          >
+        <div
+          className={cn("min-w-0 w-full touch-manipulation", isEraserMode && "eraser-mode")}
+          ref={questionRef}
+          onPointerUp={handlePointerUp}
+        >
             <div className="text-sm md:text-base leading-relaxed text-foreground mb-3 md:mb-4">
               <ReactMarkdown
                 skipHtml
@@ -423,61 +442,72 @@ export function QuestionCard({
             
             {parsed.choices.length > 0 && (
               <RadioGroup value={selectedAnswer || ''} onValueChange={handleAnswerChange} className="w-full">
-                <div className="w-full space-y-2">
+                <div className="w-full space-y-2.5">
                   {parsed.choices.map((choice) => {
-                    const showResult = selectedAnswer && showExplanation;
+                    const showResult = Boolean(selectedAnswer && showExplanation);
                     const isThisChoice = choice.letter === selectedAnswer;
-                    const isCorrectChoice = choice.letter === correctAnswer;
-                    
-                    let choiceClassName = "w-full flex items-start space-x-2 md:space-x-3 p-2 md:p-3 rounded-lg border transition-colors text-sm md:text-base";
-                    
-                    if (showResult && isThisChoice) {
-                      // Highlight selected answer
-                      if (isCorrect) {
-                        choiceClassName += " bg-green-500/20 border-green-500/50";
-                      } else {
-                        choiceClassName += " bg-red-500/20 border-red-500/50";
-                      }
-                    } else if (showResult && isCorrectChoice && !isCorrect) {
-                      // Also highlight the correct answer when wrong answer is selected
-                      choiceClassName += " bg-green-500/10 border-green-500/30";
-                    } else if (!showResult) {
-                      choiceClassName += " hover:bg-accent/5";
-                    }
-                    
+                    const isCorrectChoice = Boolean(correctAnswer && choice.letter === correctAnswer);
+
+                    const showRedRow = showResult && isThisChoice && isCorrect === false;
+                    const showGreenRow = showResult && isCorrectChoice;
+
+                    const isSelectedPending = !showResult && selectedAnswer === choice.letter;
                     const isCrossedOut = crossedOutChoices.has(choice.letter);
                     const canSelect = !showExplanation;
 
                     return (
                       <div
                         key={choice.letter}
-                        role="button"
-                        tabIndex={canSelect ? 0 : undefined}
+                        data-testid={`choice-${question.id}-${choice.letter}`}
+                        onContextMenu={(e) => handleChoiceRightClick(e, choice.letter)}
                         className={cn(
-                          choiceClassName,
-                          canSelect ? "cursor-pointer" : "cursor-context-menu",
+                          "w-full rounded-xl border-2 transition-colors overflow-hidden",
+                          !showResult && !isSelectedPending && "border-border bg-background hover:bg-accent/[0.04]",
+                          !showResult && isSelectedPending && "border-primary bg-primary/5 shadow-sm",
+                          showRedRow && "border-red-500 bg-red-50 dark:border-red-500 dark:bg-red-950/35",
+                          showGreenRow && "border-green-600 bg-green-50 dark:border-green-600 dark:bg-green-950/30",
+                          showResult && !showRedRow && !showGreenRow && "border-border bg-background",
                           isCrossedOut && "opacity-50"
                         )}
-                        onClick={canSelect ? () => handleAnswerChange(choice.letter) : undefined}
-                        onKeyDown={canSelect ? (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleAnswerChange(choice.letter); } } : undefined}
-                        onContextMenu={(e) => handleChoiceRightClick(e, choice.letter)}
-                        data-testid={`choice-${question.id}-${choice.letter}`}
                       >
-                        <RadioGroupItem 
-                          value={choice.letter} 
+                        <RadioGroupItem
+                          value={choice.letter}
                           id={`${question.id}-${choice.letter}`}
                           disabled={showExplanation}
+                          className="sr-only"
                         />
                         <Label
                           htmlFor={`${question.id}-${choice.letter}`}
                           className={cn(
-                            "flex-1 cursor-pointer font-normal flex flex-col items-start gap-1 sm:flex-row sm:items-start sm:gap-0",
-                            showExplanation && "cursor-default",
-                            isCrossedOut && "line-through text-muted-foreground"
+                            "flex items-center gap-2.5 md:gap-3 w-full min-h-[2.75rem] md:min-h-12 p-2.5 md:px-3.5 md:py-3",
+                            canSelect ? "cursor-pointer" : "cursor-default"
                           )}
                         >
-                          <span className="min-w-0">
-                            <span className="font-semibold">{choice.letter}.</span>{' '}
+                          <span
+                            className={cn(
+                              "flex h-7 w-7 md:h-8 md:w-8 shrink-0 rounded-full items-center justify-center text-xs md:text-sm font-bold leading-none",
+                              !showResult && !isSelectedPending &&
+                                "border-2 border-muted-foreground/25 text-foreground bg-background",
+                              !showResult && isSelectedPending && "bg-primary text-primary-foreground border-0",
+                              showRedRow && "bg-red-500 text-white shadow-sm",
+                              showGreenRow && "bg-green-600 text-white shadow-sm",
+                              showResult &&
+                                !showRedRow &&
+                                !showGreenRow &&
+                                "border-2 border-muted-foreground/20 text-muted-foreground bg-muted/50"
+                            )}
+                            aria-hidden
+                          >
+                            {choice.letter}
+                          </span>
+                          <div
+                            className={cn(
+                              "flex-1 min-w-0 text-sm md:text-base leading-snug",
+                              showGreenRow && "text-green-800 dark:text-green-200 font-medium",
+                              showRedRow && "text-foreground",
+                              isCrossedOut && "line-through text-muted-foreground"
+                            )}
+                          >
                             <ReactMarkdown
                               skipHtml
                               components={{
@@ -486,19 +516,20 @@ export function QuestionCard({
                             >
                               {choice.text}
                             </ReactMarkdown>
-                          </span>
-                          {showResult && isThisChoice && (
-                            <span className={cn(
-                              "text-xs font-semibold shrink-0 sm:ml-2",
-                              isCorrect ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"
-                            )}>
-                              {isCorrect ? "✓ Correct" : "✗ Incorrect"}
-                            </span>
+                          </div>
+                          {showRedRow && (
+                            <CircleX
+                              className="h-5 w-5 shrink-0 text-red-500/90 dark:text-red-400/85"
+                              strokeWidth={1.35}
+                              aria-label="Incorrect"
+                            />
                           )}
-                          {showResult && isCorrectChoice && !isCorrect && (
-                            <span className="text-xs font-semibold shrink-0 text-green-600 dark:text-green-400 sm:ml-2">
-                              ✓ Correct Answer
-                            </span>
+                          {showGreenRow && (
+                            <CircleCheck
+                              className="h-5 w-5 shrink-0 text-green-600/90 dark:text-green-500/85"
+                              strokeWidth={1.35}
+                              aria-label="Correct"
+                            />
                           )}
                         </Label>
                       </div>
@@ -518,36 +549,91 @@ export function QuestionCard({
                 Show Answer
               </Button>
             )}
+        </div>
 
-            {showExplanation && (
-              <div className="mt-4 pt-4 border-t border-border animate-in slide-in-from-top-2 duration-300">
-                {isCorrect !== null && (
-                  <div className={cn(
-                    "mb-4 p-3 rounded-lg border-l-4 font-semibold",
-                    isCorrect 
-                      ? "bg-green-500/10 border-green-500 text-green-700 dark:text-green-300"
-                      : "bg-red-500/10 border-red-500 text-red-700 dark:text-red-300"
-                  )}>
-                    {isCorrect ? "✓ Correct!" : "✗ Incorrect"}
-                  </div>
-                )}
-                <div className="bg-accent/5 border-l-4 border-accent rounded-r-lg p-4">
-                  <p className="text-sm font-semibold text-accent mb-2">Answer & Explanation</p>
-                  <div className="text-sm leading-relaxed text-foreground/90">
-                    <ReactMarkdown
-                      skipHtml
-                      components={{
-                        p: ({ node, ...props }) => <p className="whitespace-pre-wrap my-1" {...props} />,
-                      }}
+        {showExplanation && (
+          <div
+            className="-mx-4 md:-mx-6 mt-4 border-t border-border animate-in slide-in-from-top-2 duration-300"
+            data-testid="question-explanation-panel"
+          >
+            <div className="flex flex-wrap items-center justify-between gap-2 bg-background px-4 py-3 md:px-6 border-b border-border">
+              <div className="flex min-w-0 flex-wrap items-center gap-2">
+                {isCorrect === true && (
+                  <>
+                    <span
+                      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-green-600 text-white shadow-sm"
+                      aria-hidden
                     >
-                      {normalizeAnswerExplanationForDisplay(question.answer)}
-                    </ReactMarkdown>
+                      <Check className="h-5 w-5" strokeWidth={2.75} />
+                    </span>
+                    <span className="text-sm font-semibold text-green-700 dark:text-green-300">Correct</span>
+                  </>
+                )}
+                {isCorrect === false && (
+                  <>
+                    <span
+                      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-red-500 text-white shadow-sm"
+                      aria-hidden
+                    >
+                      <X className="h-5 w-5" strokeWidth={2.75} />
+                    </span>
+                    <span className="text-sm font-semibold text-red-700 dark:text-red-300">Incorrect</span>
+                    {correctAnswer && (
+                      <span className="text-sm font-normal text-red-700/90 dark:text-red-300/90">
+                        — Correct: {correctAnswer}
+                      </span>
+                    )}
+                  </>
+                )}
+                {isCorrect === null && (
+                  <span className="text-sm font-medium text-muted-foreground">Answer</span>
+                )}
+              </div>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="h-8 shrink-0 gap-1.5 text-foreground"
+                onClick={() => setExplanationExpanded((e) => !e)}
+                data-testid="button-toggle-explanation"
+                aria-expanded={explanationExpanded}
+              >
+                {explanationExpanded ? 'Hide Explanation' : 'Show Explanation'}
+                {explanationExpanded ? (
+                  <ChevronUp className="h-4 w-4" aria-hidden />
+                ) : (
+                  <ChevronDown className="h-4 w-4" aria-hidden />
+                )}
+              </Button>
+            </div>
+
+            {explanationExpanded && (
+              <div className="bg-muted/40 px-4 py-4 md:px-6">
+                <div className="mb-3 flex items-center gap-2">
+                  <div
+                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-amber-100 text-amber-700 dark:bg-amber-950/60 dark:text-amber-400"
+                    aria-hidden
+                  >
+                    <Lightbulb className="h-4 w-4" />
                   </div>
+                  <p className="text-sm font-semibold text-foreground">Explanation</p>
+                </div>
+                <div className="text-sm leading-relaxed text-muted-foreground">
+                  <ReactMarkdown
+                    skipHtml
+                    components={{
+                      p: ({ node, ...props }) => (
+                        <p className="whitespace-pre-wrap [&:not(:first-child)]:mt-2" {...props} />
+                      ),
+                    }}
+                  >
+                    {normalizeAnswerExplanationForDisplay(question.answer)}
+                  </ReactMarkdown>
                 </div>
               </div>
             )}
           </div>
-        </div>
+        )}
       </div>
       
       {notes.map(note => (
