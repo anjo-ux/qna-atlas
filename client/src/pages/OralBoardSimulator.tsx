@@ -4,7 +4,11 @@ import { Input } from '@/components/ui/input';
 import { ChevronLeft, Send, Loader2, Plus, Trash2, Menu, X, Check } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { Card } from '@/components/ui/card';
-import { OralBoardAssistantContent } from '@/components/OralBoardMessageContent';
+import {
+  OralBoardAssistantContent,
+  normalizeCommandHelpHeaders,
+  stripStreamingMarkdownDecorators,
+} from '@/components/OralBoardMessageContent';
 
 interface Message {
   id: string;
@@ -880,7 +884,11 @@ Hinting: ${sessionSetup.hinting}`;
                               </span>
                             ) : (
                               <div className="leading-relaxed">
-                                <p className="whitespace-pre-wrap text-foreground/90 m-0">{message.content}</p>
+                                <p className="whitespace-pre-wrap text-foreground/90 m-0">
+                                  {stripStreamingMarkdownDecorators(
+                                    normalizeCommandHelpHeaders(message.content)
+                                  )}
+                                </p>
                                 <span
                                   className="inline-block w-0.5 h-4 ml-0.5 align-text-bottom bg-primary animate-pulse rounded-sm"
                                   aria-hidden
@@ -925,7 +933,7 @@ Hinting: ${sessionSetup.hinting}`;
             <div className="p-6 border-t border-border/50 bg-white/40 dark:bg-slate-900/40 backdrop-blur-md shrink-0">
               <div className="flex gap-2 max-w-4xl mx-auto">
                 <Input
-                  placeholder="Ask about plastic surgery concepts, techniques, or clinical scenarios..."
+                  placeholder="Enter Response"
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyPress={(e) => {
