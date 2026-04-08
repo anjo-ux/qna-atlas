@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, startTransition } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ChevronLeft, Send, Loader2, Plus, Trash2, Menu, X, Check } from 'lucide-react';
@@ -172,6 +172,46 @@ export default function OralBoardSimulator({ onBack }: { onBack: () => void }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  /** Coalesce SSE token updates to one React commit per animation frame (avoids main-thread thrash). */
+  const streamBufRef = useRef('');
+  const streamTargetIdRef = useRef<string | null>(null);
+  const streamFlushRafRef = useRef<number | null>(null);
+
+  const flushStreamToState = useCallback(() => {
+    streamFlushRafRef.current = null;
+    const id = streamTargetIdRef.current;
+    if (!id) return;
+    const text = streamBufRef.current;
+    setMessages((prev) =>
+      prev.map((m) => (m.id === id ? { ...m, content: text } : m))
+    );
+  }, []);
+
+  const prepareStreamAccumulation = useCallback((assistantId: string) => {
+    if (streamFlushRafRef.current != null) {
+      cancelAnimationFrame(streamFlushRafRef.current);
+      streamFlushRafRef.current = null;
+    }
+    streamBufRef.current = '';
+    streamTargetIdRef.current = assistantId;
+  }, []);
+
+  const appendStreamChunk = useCallback(
+    (chunk: string) => {
+      streamBufRef.current += chunk;
+      if (streamFlushRafRef.current != null) return;
+      streamFlushRafRef.current = requestAnimationFrame(flushStreamToState);
+    },
+    [flushStreamToState]
+  );
+
+  const cancelPendingStreamFlush = useCallback(() => {
+    if (streamFlushRafRef.current != null) {
+      cancelAnimationFrame(streamFlushRafRef.current);
+      streamFlushRafRef.current = null;
+    }
+  }, []);
+
   const [sessionSetup, setSessionSetup] = useState<SessionSetup>({
     specialty: 'Plastic Surgery',
     level: 'Fellow',
@@ -265,9 +305,25 @@ export default function OralBoardSimulator({ onBack }: { onBack: () => void }) {
     };
   }, [fetchSessionsList, loadMessagesForSession]);
 
-  // Auto-scroll to bottom
+  // Auto-scroll: coalesce to one rAF; smooth scroll fights itself if fired on every streamed token.
+  const scrollRafRef = useRef<number | null>(null);
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (scrollRafRef.current != null) {
+      cancelAnimationFrame(scrollRafRef.current);
+    }
+    scrollRafRef.current = requestAnimationFrame(() => {
+      scrollRafRef.current = null;
+      const el = messagesEndRef.current;
+      if (!el) return;
+      const streaming = messages.some((m) => m.streaming);
+      el.scrollIntoView({ behavior: streaming ? 'auto' : 'smooth', block: 'end' });
+    });
+    return () => {
+      if (scrollRafRef.current != null) {
+        cancelAnimationFrame(scrollRafRef.current);
+        scrollRafRef.current = null;
+      }
+    };
   }, [messages]);
 
   // Set sidebar default open state based on screen size
@@ -321,23 +377,33 @@ Hinting: ${sessionSetup.hinting}`;
       },
     ]);
 
-    try {
-      await consumeOralBoardChatStream(currentConversationId, userMessage.content, (chunk) => {
-        setMessages(prev =>
-          prev.map(m => (m.id === assistantId ? { ...m, content: m.content + chunk } : m))
-        );
-      });
+    prepareStreamAccumulation(assistantId);
 
-      setMessages(prev =>
-        prev.map(m => (m.id === assistantId ? { ...m, streaming: false } : m))
+    try {
+      await consumeOralBoardChatStream(currentConversationId, userMessage.content, appendStreamChunk);
+
+      cancelPendingStreamFlush();
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === assistantId
+            ? { ...m, content: streamBufRef.current, streaming: false }
+            : m
+        )
       );
+      streamBufRef.current = '';
+      streamTargetIdRef.current = null;
 
       void refreshSessions();
-      await loadMessagesForSession(currentConversationId, { silent: true });
+      startTransition(() => {
+        void loadMessagesForSession(currentConversationId, { silent: true });
+      });
     } catch (error) {
       console.error('Failed to start session:', error);
-      setMessages(prev =>
-        prev.map(m =>
+      cancelPendingStreamFlush();
+      streamBufRef.current = '';
+      streamTargetIdRef.current = null;
+      setMessages((prev) =>
+        prev.map((m) =>
           m.id === assistantId
             ? {
                 ...m,
@@ -379,23 +445,33 @@ Hinting: ${sessionSetup.hinting}`;
       },
     ]);
 
-    try {
-      await consumeOralBoardChatStream(currentConversationId, userMessage.content, (chunk) => {
-        setMessages(prev =>
-          prev.map(m => (m.id === assistantId ? { ...m, content: m.content + chunk } : m))
-        );
-      });
+    prepareStreamAccumulation(assistantId);
 
-      setMessages(prev =>
-        prev.map(m => (m.id === assistantId ? { ...m, streaming: false } : m))
+    try {
+      await consumeOralBoardChatStream(currentConversationId, userMessage.content, appendStreamChunk);
+
+      cancelPendingStreamFlush();
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === assistantId
+            ? { ...m, content: streamBufRef.current, streaming: false }
+            : m
+        )
       );
+      streamBufRef.current = '';
+      streamTargetIdRef.current = null;
 
       void refreshSessions();
-      await loadMessagesForSession(currentConversationId, { silent: true });
+      startTransition(() => {
+        void loadMessagesForSession(currentConversationId, { silent: true });
+      });
     } catch (error) {
       console.error('Failed to send message:', error);
-      setMessages(prev =>
-        prev.map(m =>
+      cancelPendingStreamFlush();
+      streamBufRef.current = '';
+      streamTargetIdRef.current = null;
+      setMessages((prev) =>
+        prev.map((m) =>
           m.id === assistantId
             ? {
                 ...m,
