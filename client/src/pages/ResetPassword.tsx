@@ -119,7 +119,7 @@ export default function ResetPassword() {
                     <Lock className="w-10 h-10 text-primary" />
                   </div>
                 </div>
-                <CardTitle className="text-center text-2xl gradient-text">Set a new password</CardTitle>
+                <CardTitle className="text-center text-2xl gradient-text">Create New Password</CardTitle>
                 <CardDescription className="text-center">
                   Choose a new password for your account. This link can only be used once.
                 </CardDescription>
@@ -129,14 +129,14 @@ export default function ResetPassword() {
                   <p className="text-sm text-muted-foreground text-center">
                     This reset link is invalid or incomplete.{' '}
                     <a href="/login" className="text-primary underline underline-offset-2">
-                      Back to sign in
+                      Login Instead!
                     </a>
                   </p>
                 ) : (
                   <form onSubmit={handleSubmit} className="space-y-4">
                     <div className="space-y-2">
                       <label htmlFor="new-password" className="text-sm font-medium">
-                        New password
+                        New Password
                       </label>
                       <Input
                         id="new-password"
@@ -152,7 +152,7 @@ export default function ResetPassword() {
                     </div>
                     <div className="space-y-2">
                       <label htmlFor="confirm-password" className="text-sm font-medium">
-                        Confirm password
+                        Confirm Password
                       </label>
                       <Input
                         id="confirm-password"
@@ -171,7 +171,7 @@ export default function ResetPassword() {
                     </Button>
                     <p className="text-center text-sm text-muted-foreground">
                       <a href="/login" className="text-primary underline underline-offset-2">
-                        Sign in instead
+                        Sign In Instead
                       </a>
                     </p>
                   </form>
