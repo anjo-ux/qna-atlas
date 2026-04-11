@@ -39,9 +39,10 @@ export default function SubscriptionPage({ onSubscriptionUnlocked }: Subscriptio
   };
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden">
-      {/* Same header as main app (glass-nav) */}
-      <header className="glass-nav w-full sticky top-0 z-50 rounded-b-2xl shrink-0">
+    <div
+      className="flex h-[100dvh] max-h-[100dvh] w-full flex-col overflow-y-auto overflow-x-hidden overscroll-y-contain touch-pan-y [-webkit-overflow-scrolling:touch]"
+    >
+      <header className="glass-nav sticky top-0 z-50 w-full shrink-0 rounded-b-2xl">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-3 pb-2">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-3 sm:gap-4">
@@ -91,7 +92,7 @@ export default function SubscriptionPage({ onSubscriptionUnlocked }: Subscriptio
         </div>
       </header>
 
-      <main className="flex-1 flex flex-col items-center justify-center overflow-auto p-4 sm:p-6 lg:p-8">
+      <div className="flex w-full flex-col items-center px-4 pb-[max(2.5rem,env(safe-area-inset-bottom,0px))] pt-6 sm:px-6 sm:pb-12 sm:pt-8 lg:px-8">
         <SubscriptionPlans
           open={true}
           asDialog={false}
@@ -99,7 +100,7 @@ export default function SubscriptionPage({ onSubscriptionUnlocked }: Subscriptio
           embeddedInPage={true}
           onAccessGranted={handleAccessGranted}
         />
-      </main>
+      </div>
       <SubscriptionTransactionHistoryDialog
         open={transactionHistoryOpen}
         onOpenChange={setTransactionHistoryOpen}

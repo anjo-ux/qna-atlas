@@ -1,6 +1,6 @@
 import * as fs from "fs";
 import * as path from "path";
-import * as XLSX from "xlsx";
+import ExcelJS from "exceljs";
 import { sql } from "drizzle-orm";
 import { db } from "../db";
 import { sections, subsections, questions } from "@shared/schema";
@@ -9,11 +9,53 @@ import { stripHtml, categorizeQuestion, sectionOrder, subsectionTitles, subsecti
 const DEFAULT_PATH = "client/public/data/questions.xlsx";
 const ROW_OFFSET = 12;
 
-function parseExcel(filePath: string) {
+function cellToString(cell: ExcelJS.Cell): string {
+  try {
+    const t = cell.text;
+    if (t != null && String(t).length > 0) return String(t);
+  } catch {
+    // cell.text can throw for some malformed cells
+  }
+  const v = cell.value;
+  if (v === null || v === undefined) return "";
+  if (typeof v === "string") return v;
+  if (typeof v === "number" || typeof v === "boolean") return String(v);
+  if (v instanceof Date) return v.toISOString();
+  if (typeof v === "object" && "richText" in v && Array.isArray((v as { richText: { text: string }[] }).richText)) {
+    return (v as { richText: { text: string }[] }).richText.map((p) => p.text).join("");
+  }
+  if (typeof v === "object" && "text" in v && typeof (v as { text: unknown }).text === "string") {
+    return (v as { text: string }).text;
+  }
+  if (typeof v === "object" && "result" in v) {
+    const r = (v as { result: unknown }).result;
+    if (r !== null && r !== undefined && typeof r !== "object") return String(r);
+  }
+  return "";
+}
+
+async function parseExcel(filePath: string) {
   const buf = fs.readFileSync(filePath);
-  const wb = XLSX.read(buf, { type: "buffer" });
-  const ws = wb.Sheets[wb.SheetNames[0]];
-  const data = XLSX.utils.sheet_to_json(ws, { header: 1 }) as string[][];
+  const wb = new ExcelJS.Workbook();
+  await wb.xlsx.load(buf);
+  const ws = wb.worksheets[0];
+  if (!ws) {
+    throw new Error("Workbook has no worksheets");
+  }
+
+  const data: string[][] = [];
+  ws.eachRow({ includeEmpty: true }, (row) => {
+    let maxCol = 6;
+    row.eachCell({ includeEmpty: true }, (_cell, colNumber) => {
+      if (colNumber > maxCol) maxCol = colNumber;
+    });
+    const cells: string[] = [];
+    for (let c = 1; c <= maxCol; c++) {
+      cells.push(cellToString(row.getCell(c)));
+    }
+    data.push(cells);
+  });
+
   const out: Array<{ id: string; question: string; answer: string; sectionId: string; subsectionId: string; tags: string[] }> = [];
   for (let i = ROW_OFFSET; i < data.length; i++) {
     const row = data[i];
@@ -52,7 +94,7 @@ async function main() {
     process.exit(1);
   }
   console.log("Importing from", importPath);
-  const rows = parseExcel(importPath);
+  const rows = await parseExcel(importPath);
   console.log("Parsed", rows.length, "questions");
   await ensureSectionsAndSubsections();
   for (const r of rows) {

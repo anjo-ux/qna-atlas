@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Check, Eye } from "lucide-react";
 import { useState } from "react";
 import { PreviewWizard } from "@/components/PreviewWizard";
+import { SalePromoBanner } from "@/components/SalePromoBanner";
 import { useTheme } from "@/hooks/useTheme";
 import atlasLogo from '@assets/atlas_1764093111680.png';
 import atlasLogoLight from '@assets/logo_light_1774918799268.png';
@@ -30,7 +31,9 @@ export default function Landing() {
         }}
       />
 
-      <header className="glass-nav w-full sticky top-0 z-50 rounded-b-2xl flex-shrink-0">
+      <div className="sticky top-0 z-50 flex w-full flex-shrink-0 flex-col">
+        <SalePromoBanner claimAction="signup" />
+        <header className="glass-nav w-full rounded-b-2xl flex-shrink-0">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-3 pb-2">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3 min-w-0 px-4 py-1.5 rounded-xl">
@@ -57,6 +60,7 @@ export default function Landing() {
           </div>
         </div>
       </header>
+      </div>
 
       <main className="flex-1 overflow-y-auto flex flex-col">
         <div className="container mx-auto px-4 py-16">

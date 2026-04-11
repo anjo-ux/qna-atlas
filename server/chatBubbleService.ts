@@ -1,8 +1,17 @@
 import OpenAI from 'openai';
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_CHATBUBBLE_API_KEY,
-});
+let openaiClient: OpenAI | null = null;
+
+function getOpenAI(): OpenAI {
+  const apiKey = process.env.OPENAI_CHATBUBBLE_API_KEY;
+  if (!apiKey) {
+    throw new Error('OPENAI_CHATBUBBLE_API_KEY environment variable is not set');
+  }
+  if (!openaiClient) {
+    openaiClient = new OpenAI({ apiKey });
+  }
+  return openaiClient;
+}
 
 interface AssistantThread {
   id: string;
@@ -14,7 +23,7 @@ const threads = new Map<string, AssistantThread>();
 
 export async function initializeThread(): Promise<string> {
   try {
-    const thread = await openai.beta.threads.create();
+    const thread = await getOpenAI().beta.threads.create();
     threads.set(thread.id, {
       id: thread.id,
       createdAt: new Date()
@@ -34,7 +43,7 @@ export async function sendMessage(threadId: string, userMessage: string): Promis
     }
 
     // Add message to thread
-    await openai.beta.threads.messages.create(threadId, {
+    await getOpenAI().beta.threads.messages.create(threadId, {
       role: 'user',
       content: userMessage
     });
@@ -46,7 +55,7 @@ export async function sendMessage(threadId: string, userMessage: string): Promis
     }
 
     // Run assistant
-    const run = await openai.beta.threads.runs.createAndPoll(threadId, {
+    const run = await getOpenAI().beta.threads.runs.createAndPoll(threadId, {
       assistant_id: assistantId
     });
 
@@ -56,7 +65,7 @@ export async function sendMessage(threadId: string, userMessage: string): Promis
     }
 
     // Get messages from thread
-    const messages = await openai.beta.threads.messages.list(threadId);
+    const messages = await getOpenAI().beta.threads.messages.list(threadId);
 
     // Find the last assistant message
     const lastAssistantMessage = messages.data.find(

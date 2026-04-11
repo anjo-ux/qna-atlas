@@ -68,6 +68,27 @@ export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
 export type LoginConnection = typeof loginConnections.$inferSelect;
 
+/** Single-use password reset tokens (only SHA-256 hashes stored; plaintext token exists only in the email link). */
+export const passwordResetTokens = pgTable(
+  "password_reset_tokens",
+  {
+    id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+    userId: varchar("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    tokenHash: varchar("token_hash", { length: 64 }).notNull(),
+    expiresAt: timestamp("expires_at").notNull(),
+    createdAt: timestamp("created_at").defaultNow(),
+  },
+  (table) => [
+    uniqueIndex("uidx_password_reset_tokens_hash").on(table.tokenHash),
+    index("idx_password_reset_tokens_user_id").on(table.userId),
+  ],
+);
+
+export type PasswordResetToken = typeof passwordResetTokens.$inferSelect;
+export type InsertPasswordResetToken = typeof passwordResetTokens.$inferInsert;
+
 // Test Sessions table - tracks user's test progress
 export const testSessions = pgTable("test_sessions", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),

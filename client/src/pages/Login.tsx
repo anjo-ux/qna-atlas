@@ -137,7 +137,7 @@ export default function Login() {
         return;
       }
 
-      toast.success('Password retrieval email sent! Check your inbox.');
+      toast.success('If that account exists, you will receive an email with a link to reset your password.');
       setShowForgotPassword(false);
       setForgotPasswordEmail('');
     } catch (error) {

@@ -1546,7 +1546,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       /**
        * Show institutional plan/price when a code grants access, unless the user row shows a real ongoing
-       * personal subscription/trial (avoids stale completed transactions forcing "1-Year $450" + broken days).
+       * personal subscription/trial (avoids stale completed transactions forcing a wrong plan label + broken days).
        */
       if (hasInstitutional && !userHasCoherentPersonalPaidRow(user, now)) {
         const daysRemaining = institutionalExpiresAt

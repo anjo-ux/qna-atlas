@@ -85,67 +85,91 @@ app.use((req, res, next) => {
     serveStatic(app);
   }
 
-  const desiredPort = Number(process.env.PORT) || 5000;
-  const maxAttempts = 10;
-
-  function tryListen(port: number, attempt: number) {
-    server.listen(port, "0.0.0.0", () => {
-      log(`Server running on port ${port}`);
-      const sgKey = process.env.SENDGRID_API_KEY;
-      const sgFrom = process.env.SENDGRID_FROM_EMAIL;
-      log(`SendGrid: SENDGRID_API_KEY=${sgKey ? "set" : "NOT SET"}, SENDGRID_FROM_EMAIL=${sgFrom ? "set" : "not set"}`);
-      if (!sgKey) {
-        log("Forgot-password emails will not be sent. Add SENDGRID_API_KEY to your environment (e.g. Replit Secrets) and restart the server.");
-      }
-      const stripeKey = process.env.STRIPE_SECRET_KEY;
-      const stripeWebhook = process.env.STRIPE_WEBHOOK_SECRET;
-      log(`Stripe: STRIPE_SECRET_KEY=${stripeKey ? "set" : "NOT SET"}, STRIPE_WEBHOOK_SECRET=${stripeWebhook ? "set" : "NOT SET"}`);
-      if (!stripeKey) {
-        log("Subscription checkout will not work. Add STRIPE_SECRET_KEY and configure Stripe webhook (STRIPE_WEBHOOK_SECRET) for production.");
-      }
-      const stripeReconcileIntervalMs = Number(process.env.STRIPE_RECONCILIATION_INTERVAL_MS) || 3 * 24 * 60 * 60 * 1000;
-      if (stripeReconcileIntervalMs > 0) {
-        import("./stripe").then(({ reconcileStripeSubscriptions }) => {
-          const run = () => {
-            reconcileStripeSubscriptions()
-              .then((r) =>
-                log(
-                  `[stripeReconciliation] scanned=${r.scanned} updatedUsers=${r.updatedUsers} createdTransactions=${r.createdTransactions} errors=${r.errors}`
-                )
+  function onServerListening(port: number) {
+    log(`Server running on port ${port}`);
+    const sgKey = process.env.SENDGRID_API_KEY;
+    const sgFrom = process.env.SENDGRID_FROM_EMAIL;
+    log(`SendGrid: SENDGRID_API_KEY=${sgKey ? "set" : "NOT SET"}, SENDGRID_FROM_EMAIL=${sgFrom ? "set" : "not set"}`);
+    if (!sgKey) {
+      log("Forgot-password emails will not be sent. Add SENDGRID_API_KEY to your environment (e.g. Replit Secrets) and restart the server.");
+    }
+    const stripeKey = process.env.STRIPE_SECRET_KEY;
+    const stripeWebhook = process.env.STRIPE_WEBHOOK_SECRET;
+    log(`Stripe: STRIPE_SECRET_KEY=${stripeKey ? "set" : "NOT SET"}, STRIPE_WEBHOOK_SECRET=${stripeWebhook ? "set" : "NOT SET"}`);
+    if (!stripeKey) {
+      log("Subscription checkout will not work. Add STRIPE_SECRET_KEY and configure Stripe webhook (STRIPE_WEBHOOK_SECRET) for production.");
+    }
+    const stripeReconcileIntervalMs = Number(process.env.STRIPE_RECONCILIATION_INTERVAL_MS) || 3 * 24 * 60 * 60 * 1000;
+    if (stripeReconcileIntervalMs > 0) {
+      import("./stripe").then(({ reconcileStripeSubscriptions }) => {
+        const run = () => {
+          reconcileStripeSubscriptions()
+            .then((r) =>
+              log(
+                `[stripeReconciliation] scanned=${r.scanned} updatedUsers=${r.updatedUsers} createdTransactions=${r.createdTransactions} errors=${r.errors}`
               )
-              .catch((e) => log(`[stripeReconciliation] error: ${e}`));
-          };
-          run(); // run once immediately at startup
-          setInterval(run, stripeReconcileIntervalMs);
-          log(`[stripeReconciliation] scheduled every ${stripeReconcileIntervalMs}ms`);
-        });
-      }
+            )
+            .catch((e) => log(`[stripeReconciliation] error: ${e}`));
+        };
+        run(); // run once immediately at startup
+        setInterval(run, stripeReconcileIntervalMs);
+        log(`[stripeReconciliation] scheduled every ${stripeReconcileIntervalMs}ms`);
+      });
+    }
 
-      // Scheduled AI question generation (per docs/questions_db_migration_plan.md requirement 3)
-      const genEnabled = process.env.QUESTION_GENERATION_ENABLED === "true";
-      const genIntervalMs = Number(process.env.QUESTION_GENERATION_INTERVAL_MS) || 86400000; // default 24h
-      if (genEnabled && genIntervalMs > 0) {
-        import("./jobs/questionGenerationJob").then(({ runQuestionGenerationJob }) => {
-          const run = () => {
-            runQuestionGenerationJob()
-              .then((r) => log(`[questionGenerationJob] created=${r.created} total=${r.total} skipped=${r.skipped}`))
-              .catch((e) => log(`[questionGenerationJob] error: ${e}`));
-          };
-          run(); // run once after startup
-          setInterval(run, genIntervalMs);
-          log(`[questionGenerationJob] scheduled every ${genIntervalMs}ms`);
-        });
-      }
-    });
-    server.once("error", (err: NodeJS.ErrnoException) => {
-      if (err.code === "EADDRINUSE" && attempt < maxAttempts) {
-        log(`Port ${port} in use, trying ${port + 1}...`);
-        tryListen(port + 1, attempt + 1);
-      } else {
-        throw err;
-      }
-    });
+    // Scheduled AI question generation (per docs/questions_db_migration_plan.md requirement 3)
+    const genEnabled = process.env.QUESTION_GENERATION_ENABLED === "true";
+    const genIntervalMs = Number(process.env.QUESTION_GENERATION_INTERVAL_MS) || 86400000; // default 24h
+    if (genEnabled && genIntervalMs > 0) {
+      import("./jobs/questionGenerationJob").then(({ runQuestionGenerationJob }) => {
+        const run = () => {
+          runQuestionGenerationJob()
+            .then((r) => log(`[questionGenerationJob] created=${r.created} total=${r.total} skipped=${r.skipped}`))
+            .catch((e) => log(`[questionGenerationJob] error: ${e}`));
+        };
+        run(); // run once after startup
+        setInterval(run, genIntervalMs);
+        log(`[questionGenerationJob] scheduled every ${genIntervalMs}ms`);
+      });
+    }
   }
 
-  tryListen(desiredPort, 0);
+  const rawPort = process.env.PORT;
+  const hasHostedPort = rawPort !== undefined && rawPort !== "";
+  const desiredPort = hasHostedPort ? Number(rawPort) : 5000;
+  if (hasHostedPort && (!Number.isFinite(desiredPort) || desiredPort < 1 || desiredPort > 65535)) {
+    log(`Invalid PORT="${rawPort}". Set PORT to a number between 1 and 65535.`);
+    process.exit(1);
+  }
+
+  /**
+   * Replit / Render / Fly only expose the port in PORT. If 5000 is busy we must not bind to 5001+ —
+   * that looks "running" locally but is unreachable from the web.
+   */
+  if (hasHostedPort) {
+    server.listen(desiredPort, "0.0.0.0", () => onServerListening(desiredPort));
+    server.once("error", (err: NodeJS.ErrnoException) => {
+      if (err.code === "EADDRINUSE") {
+        log(
+          `Port ${desiredPort} (PORT) is already in use. Only PORT is exposed on this host — stop duplicate dev servers or workflows, then restart.`
+        );
+        process.exit(1);
+      }
+      throw err;
+    });
+  } else {
+    const maxAttempts = 10;
+    function tryListen(port: number, attempt: number) {
+      server.listen(port, "0.0.0.0", () => onServerListening(port));
+      server.once("error", (err: NodeJS.ErrnoException) => {
+        if (err.code === "EADDRINUSE" && attempt < maxAttempts) {
+          log(`Port ${port} in use, trying ${port + 1}...`);
+          tryListen(port + 1, attempt + 1);
+        } else {
+          throw err;
+        }
+      });
+    }
+    tryListen(desiredPort, 0);
+  }
 })();

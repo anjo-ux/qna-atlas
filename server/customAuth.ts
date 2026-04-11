@@ -1,3 +1,4 @@
+import { createHash, randomBytes } from 'crypto';
 import bcrypt from 'bcrypt';
 import session from 'express-session';
 import rateLimit from 'express-rate-limit';
@@ -52,38 +53,48 @@ export async function verifyPassword(
   return bcrypt.compare(password, hash);
 }
 
-function generateTemporaryPassword(): string {
-  // Generate a 12-character temporary password
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$';
-  let password = '';
-  for (let i = 0; i < 12; i++) {
-    password += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return password;
+const DEFAULT_PASSWORD_RESET_TEMPLATE_ID = 'd-c1a8296876d045eb8ca21c193f321224';
+
+function hashPasswordResetToken(plainToken: string): string {
+  return createHash('sha256').update(plainToken, 'utf8').digest('hex');
 }
 
-async function sendPasswordEmail(email: string, password: string): Promise<void> {
+function generatePasswordResetPlainToken(): string {
+  return randomBytes(32).toString('base64url');
+}
+
+function appBaseUrl(): string {
+  return (process.env.APP_URL || 'https://prs-atlas.com').replace(/\/$/, '');
+}
+
+/**
+ * Sends only a reset link — never the user's password. Update the SendGrid dynamic template to use
+ * {{{resetUrl}}} (and optionally {{{loginUrl}}}); do not pass passwords to SendGrid.
+ */
+async function sendPasswordResetEmail(email: string, resetUrl: string): Promise<void> {
   const apiKey = process.env.SENDGRID_API_KEY;
   const fromEmail = process.env.SENDGRID_FROM_EMAIL || 'noreply@prs-atlas.com';
 
   if (!apiKey) {
-    console.warn('[Forgot password] SENDGRID_API_KEY is not set — no email will be sent. Recipient:', email);
+    console.warn('[Forgot password] SENDGRID_API_KEY is not set — no email will be sent.');
     return;
   }
 
+  const base = appBaseUrl();
+  const templateId =
+    process.env.SENDGRID_PASSWORD_RESET_TEMPLATE_ID || DEFAULT_PASSWORD_RESET_TEMPLATE_ID;
+
   try {
     sgMail.setApiKey(apiKey);
-    console.log('[Forgot password] Sending via SendGrid to', email, 'from', fromEmail);
     await sgMail.send({
       to: email,
       from: fromEmail,
-      templateId: 'd-c1a8296876d045eb8ca21c193f321224',
+      templateId,
       dynamicTemplateData: {
-        temporaryPassword: password,
-        loginUrl: process.env.APP_URL || 'https://prs-atlas.com',
+        resetUrl,
+        loginUrl: `${base}/login`,
       },
     });
-    console.log('[Forgot password] SendGrid accepted the request for', email);
   } catch (error: unknown) {
     const err = error as { response?: { body?: unknown; statusCode?: number } };
     console.error('[Forgot password] SendGrid error:', err);
@@ -93,6 +104,7 @@ async function sendPasswordEmail(email: string, password: string): Promise<void>
     if (err.response?.statusCode) {
       console.error('[Forgot password] SendGrid status code:', err.response.statusCode);
     }
+    throw error;
   }
 }
 
@@ -160,18 +172,30 @@ export async function setupAuth(app: Express) {
         return res.json({ message: 'If an account exists with that email, a password recovery email has been sent.' });
       }
 
-      // Generate temporary password
-      const temporaryPassword = generateTemporaryPassword();
-      const tempPasswordHash = await hashPassword(temporaryPassword);
+      if (!user.passwordHash) {
+        return res.json({ message: 'If an account exists with that email, a password recovery email has been sent.' });
+      }
 
-      // Update user with temporary password and set flag
-      await storage.updateUserPassword(user.id, tempPasswordHash, true);
+      if (!process.env.SENDGRID_API_KEY) {
+        console.warn('[Forgot password] SENDGRID_API_KEY is not set — reset email will not be sent.');
+        return res.json({ message: 'If an account exists with that email, a password recovery email has been sent.' });
+      }
 
-      // Send email with temporary password
+      const plainToken = generatePasswordResetPlainToken();
+      const tokenHash = hashPasswordResetToken(plainToken);
+      const ttlMs = Number(process.env.PASSWORD_RESET_TOKEN_TTL_MS) || 60 * 60 * 1000;
+      const expiresAt = new Date(Date.now() + ttlMs);
+
+      await storage.deletePasswordResetTokensForUser(user.id);
+      await storage.createPasswordResetToken(user.id, tokenHash, expiresAt);
+
+      const resetUrl = `${appBaseUrl()}/reset-password?token=${encodeURIComponent(plainToken)}`;
+
       try {
-        await sendPasswordEmail(email, temporaryPassword);
+        await sendPasswordResetEmail(email, resetUrl);
       } catch (err) {
-        console.error('Failed to send password email:', err);
+        console.error('Failed to send password reset email:', err);
+        await storage.deletePasswordResetTokensForUser(user.id);
       }
 
       return res.json({ message: 'If an account exists with that email, a password recovery email has been sent.' });
@@ -219,6 +243,48 @@ export async function setupAuth(app: Express) {
     } catch (error) {
       console.error('Login Error:', error);
       res.status(500).json({ message: 'Login Failed.' });
+    }
+  });
+
+  // Complete password reset using the link from email (no session required)
+  app.post('/api/auth/complete-password-reset', authRateLimiter, async (req, res) => {
+    try {
+      const { token, newPassword, confirmPassword } = req.body;
+
+      if (!token || typeof token !== 'string' || token.length > 512) {
+        return res.status(400).json({ message: 'Invalid or expired reset link.' });
+      }
+
+      if (!newPassword || !confirmPassword) {
+        return res.status(400).json({ message: 'New password and confirmation required.' });
+      }
+
+      if (newPassword !== confirmPassword) {
+        return res.status(400).json({ message: 'Passwords do not match.' });
+      }
+
+      if (newPassword.length < 8) {
+        return res.status(400).json({ message: 'Password must be at least eight characters in length.' });
+      }
+      if (newPassword.length > 128) {
+        return res.status(400).json({ message: 'Password must be at most 128 characters.' });
+      }
+
+      const tokenHash = hashPasswordResetToken(token);
+      const userId = await storage.takePasswordResetToken(tokenHash);
+      if (!userId) {
+        return res.status(400).json({
+          message: 'Invalid or expired reset link. Request a new one from the login page.',
+        });
+      }
+
+      const passwordHash = await hashPassword(newPassword);
+      await storage.updateUserPassword(userId, passwordHash, false);
+
+      res.json({ success: true, message: 'Password reset successfully. You can sign in now.' });
+    } catch (error) {
+      console.error('Complete password reset error:', error);
+      res.status(500).json({ message: 'Failed to reset password.' });
     }
   });
 

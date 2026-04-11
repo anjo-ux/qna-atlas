@@ -44,6 +44,78 @@ export function isStripeConfigured(): boolean {
   return !!stripe;
 }
 
+function getYearlyPaymentLinkPrefillEnv(): string {
+  return process.env.STRIPE_YEARLY_PAYMENT_LINK_PREFILLED_PROMO_CODE?.trim() ?? "";
+}
+
+function isYearlySubscriptionPlan(plan: { name: string; durationMonths: number }): boolean {
+  return plan.name === "1-year" || plan.durationMonths === 12;
+}
+
+/**
+ * Resolves STRIPE_YEARLY_PAYMENT_LINK_PREFILLED_PROMO_CODE to a value Stripe accepts on Payment Link URLs
+ * (`prefilled_promo_code` must be the customer-facing promotion code; coupon IDs often differ).
+ * Also builds Checkout Session `discounts` when API checkout is used instead of a Payment Link.
+ *
+ * @see https://docs.stripe.com/payment-links/customize — prefilled_promo_code; alphanumeric only; promotion codes must be enabled on the link.
+ */
+async function resolveYearlyPrefillFromStripe(
+  client: Stripe,
+  rawFromEnv: string
+): Promise<{ urlPrefillCode: string | null; sessionDiscounts: Stripe.Checkout.SessionCreateParams.Discount[] | undefined }> {
+  if (!rawFromEnv) return { urlPrefillCode: null, sessionDiscounts: undefined };
+
+  try {
+    const byCode = await client.promotionCodes.list({ code: rawFromEnv, limit: 1, active: true });
+    const pc = byCode.data[0];
+    if (pc?.id) {
+      return {
+        urlPrefillCode: (pc.code ?? rawFromEnv).trim(),
+        sessionDiscounts: [{ promotion_code: pc.id }],
+      };
+    }
+  } catch {
+    // continue to coupon-based lookup
+  }
+
+  try {
+    const byCoupon = await client.promotionCodes.list({ coupon: rawFromEnv, limit: 1, active: true });
+    const pc = byCoupon.data[0];
+    if (pc?.id && pc.code) {
+      return {
+        urlPrefillCode: pc.code.trim(),
+        sessionDiscounts: [{ promotion_code: pc.id }],
+      };
+    }
+  } catch {
+    // continue
+  }
+
+  try {
+    await client.coupons.retrieve(rawFromEnv);
+    return {
+      urlPrefillCode: null,
+      sessionDiscounts: [{ coupon: rawFromEnv }],
+    };
+  } catch {
+    return {
+      urlPrefillCode: rawFromEnv,
+      sessionDiscounts: undefined,
+    };
+  }
+}
+
+function paymentLinkUrlWithPrefilledPromo(url: string, prefilledCode: string | null): string {
+  if (!prefilledCode) return url;
+  try {
+    const u = new URL(url);
+    u.searchParams.set("prefilled_promo_code", prefilledCode);
+    return u.toString();
+  } catch {
+    return url;
+  }
+}
+
 /**
  * Create a Stripe Checkout Session for a one-time subscription plan purchase.
  * Returns the session URL to redirect the user to Stripe Checkout.
@@ -73,10 +145,19 @@ export async function createCheckoutSession(params: {
   };
   const introOk = params.introTrialEligible !== false;
 
+  const yearlyPrefillEnv = getYearlyPaymentLinkPrefillEnv();
+  let yearlyPrefill: Awaited<ReturnType<typeof resolveYearlyPrefillFromStripe>> | null = null;
+  if (yearlyPrefillEnv && isYearlySubscriptionPlan(plan)) {
+    yearlyPrefill = await resolveYearlyPrefillFromStripe(stripe, yearlyPrefillEnv);
+  }
+
   if (!introOk) {
     const noTrialUrl = planRow.stripePaymentLinkUrlNoTrial?.trim();
     if (noTrialUrl) {
-      return { sessionId: "", url: noTrialUrl };
+      return {
+        sessionId: "",
+        url: paymentLinkUrlWithPrefilledPromo(noTrialUrl, yearlyPrefill?.urlPrefillCode ?? null),
+      };
     }
     return {
       error:
@@ -87,7 +168,10 @@ export async function createCheckoutSession(params: {
   // Prefer Payment Link URL (with free trial); Stripe redirects to success_url with session_id
   const paymentLinkUrl = planRow.stripePaymentLinkUrl?.trim();
   if (paymentLinkUrl) {
-    return { sessionId: "", url: paymentLinkUrl };
+    return {
+      sessionId: "",
+      url: paymentLinkUrlWithPrefilledPromo(paymentLinkUrl, yearlyPrefill?.urlPrefillCode ?? null),
+    };
   }
 
   // Fallback: create session with product/price (one-time payment)
@@ -117,7 +201,7 @@ export async function createCheckoutSession(params: {
           quantity: 1,
         };
 
-  const session = await stripe.checkout.sessions.create({
+  const sessionParams: Stripe.Checkout.SessionCreateParams = {
     mode: "payment",
     payment_method_types: ["card"],
     line_items: [lineItem],
@@ -129,7 +213,12 @@ export async function createCheckoutSession(params: {
       userId: params.userId,
       planId: params.planId,
     },
-  });
+  };
+  if (yearlyPrefill?.sessionDiscounts?.length) {
+    sessionParams.discounts = yearlyPrefill.sessionDiscounts;
+  }
+
+  const session = await stripe.checkout.sessions.create(sessionParams);
 
   const url = session.url ?? null;
   if (!url) {

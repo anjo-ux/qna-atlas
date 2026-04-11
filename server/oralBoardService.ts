@@ -1,13 +1,22 @@
 import OpenAI from 'openai';
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_ASSISTANT_API_KEY,
-});
+let openaiClient: OpenAI | null = null;
+
+function getOpenAI(): OpenAI {
+  const apiKey = process.env.OPENAI_ASSISTANT_API_KEY;
+  if (!apiKey) {
+    throw new Error('OPENAI_ASSISTANT_API_KEY environment variable is not set');
+  }
+  if (!openaiClient) {
+    openaiClient = new OpenAI({ apiKey });
+  }
+  return openaiClient;
+}
 
 /** Create a new OpenAI thread for an oral board session (persist row in storage separately). */
 export async function createOpenAIThread(): Promise<string> {
   try {
-    const thread = await openai.beta.threads.create();
+    const thread = await getOpenAI().beta.threads.create();
     return thread.id;
   } catch (error) {
     console.error('Failed to create OpenAI thread:', error);
@@ -24,7 +33,7 @@ export async function sendMessageWithStream(
   userMessage: string,
   onTextDelta: (chunk: string) => void
 ): Promise<string> {
-  await openai.beta.threads.messages.create(threadId, {
+  await getOpenAI().beta.threads.messages.create(threadId, {
     role: 'user',
     content: userMessage,
   });
@@ -34,7 +43,7 @@ export async function sendMessageWithStream(
     throw new Error('OPENAI_ASSISTANT_ID environment variable not set');
   }
 
-  const runStream = openai.beta.threads.runs.stream(threadId, {
+  const runStream = getOpenAI().beta.threads.runs.stream(threadId, {
     assistant_id: assistantId,
   });
 

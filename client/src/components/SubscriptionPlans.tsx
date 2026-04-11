@@ -11,7 +11,8 @@ import {
   DialogTitle,
   DialogClose,
 } from '@/components/ui/dialog';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
+import { FOCUS_YEARLY_PLAN_EVENT } from '@/components/SalePromoBanner';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { X } from 'lucide-react';
@@ -25,7 +26,21 @@ interface Plan {
   priceUSD: number;
 }
 
-const PLAN_DISPLAY: Record<string, { title: string; shortLabel: string; price: string; billing: string; discount?: string; bestDeal?: boolean }> = {
+const PLAN_DISPLAY: Record<
+  string,
+  {
+    title: string;
+    shortLabel: string;
+    price: string;
+    billing: string;
+    discount?: string;
+    bestDeal?: boolean;
+    /** Strikethrough “was” price when showing a sale */
+    originalPrice?: string;
+    /** Tab + detail corner badge */
+    sale?: boolean;
+  }
+> = {
   monthly: {
     title: 'Monthly Subscription',
     shortLabel: 'Monthly',
@@ -42,10 +57,11 @@ const PLAN_DISPLAY: Record<string, { title: string; shortLabel: string; price: s
   '1-year': {
     title: '1-Year Plan',
     shortLabel: '1 Year',
-    price: '$450',
+    price: '$270',
+    originalPrice: '$450',
     billing: 'Billed Yearly',
-    discount: '25% Discount',
-    bestDeal: true,
+    discount: 'Sale',
+    sale: true,
   },
 };
 
@@ -64,6 +80,8 @@ function getPlanDisplay(plan: Plan) {
     billing: plan.durationMonths === 12 ? 'Billed Yearly' : plan.durationMonths === 6 ? 'Billed Twice Per Year' : 'Billed Monthly',
     discount: undefined as string | undefined,
     bestDeal: false,
+    originalPrice: undefined as string | undefined,
+    sale: false,
   };
   return PLAN_DISPLAY[plan.name] ?? fallback;
 }
@@ -91,6 +109,19 @@ export function SubscriptionPlans({ open = true, onOpenChange, asDialog = true, 
   });
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [institutionalCode, setInstitutionalCode] = useState('');
+
+  useEffect(() => {
+    if (!embeddedInPage) return;
+    const onFocusYearly = () => setSelectedIndex(2);
+    window.addEventListener(FOCUS_YEARLY_PLAN_EVENT, onFocusYearly);
+    if (typeof window !== 'undefined' && window.location.hash === '#yearly') {
+      setSelectedIndex(2);
+      window.requestAnimationFrame(() => {
+        document.getElementById('subscription-plans')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    }
+    return () => window.removeEventListener(FOCUS_YEARLY_PLAN_EVENT, onFocusYearly);
+  }, [embeddedInPage]);
 
   // When API fails or returns empty, show fallback so "Choose a plan below" still displays all options
   const displayPlans = plans.length > 0 ? plans : FALLBACK_PLANS;
@@ -219,6 +250,27 @@ export function SubscriptionPlans({ open = true, onOpenChange, asDialog = true, 
             : 'Unlock full access with a subscription.'}
         </p>
 
+        {isPage && (
+          <div
+            className={cn(
+              'mb-6 flex flex-col items-center justify-center gap-2 rounded-2xl border-2 border-rose-500/70',
+              'bg-gradient-to-r from-rose-500/20 via-amber-500/15 to-rose-600/20 px-4 py-4 shadow-lg',
+              'ring-2 ring-rose-400/30 dark:border-rose-400/60 dark:from-rose-950/50 dark:via-amber-950/40 dark:to-rose-950/50 dark:ring-rose-500/25'
+            )}
+          >
+            <span className="max-w-[min(100%,20rem)] text-center rounded-full bg-gradient-to-r from-rose-600 to-red-600 px-3 py-1.5 text-[11px] font-bold leading-tight tracking-tight text-white shadow-md sm:px-4 sm:text-sm sm:leading-snug">
+              Post-In-Service Sale
+            </span>
+            <p className="text-center text-base font-bold text-foreground sm:text-lg">
+              <span className="text-muted-foreground line-through decoration-2 decoration-rose-500/70">$450</span>
+              <span className="mx-2 text-muted-foreground font-semibold">→</span>
+              <span className="text-2xl font-black text-rose-600 dark:text-rose-400 sm:text-3xl">$270</span>
+              <span className="ml-2 text-sm font-semibold text-rose-800 dark:text-rose-200">First Year</span>
+            </p>
+            <p className="text-center text-sm font-semibold text-rose-900 dark:text-rose-100">Limited-Time 40% Discount</p>
+          </div>
+        )}
+
         {(plansError || (plans.length === 0 && !plansLoading)) && (
           <div className={cn('mb-4 rounded-lg border border-amber-500/50 bg-amber-500/10 px-4 py-3 text-sm text-amber-800 dark:text-amber-200', isPage && 'border-amber-600/40')}>
             <p className="font-medium">Plans couldn&apos;t be loaded.</p>
@@ -230,7 +282,12 @@ export function SubscriptionPlans({ open = true, onOpenChange, asDialog = true, 
 
         {plansLoading ? (
           <>
-            <div className={cn('overflow-x-auto overscroll-x-contain -mx-1 px-1 sm:mx-0 sm:px-0', !isPage && 'pb-1')}>
+            <div
+              className={cn(
+                'overflow-x-auto overscroll-x-contain overscroll-y-auto [touch-action:pan-x_pan-y] -mx-1 px-1 sm:mx-0 sm:px-0',
+                !isPage && 'pb-1'
+              )}
+            >
               <div className={cn('relative grid grid-cols-4 gap-1 rounded-xl p-1.5 mb-5 min-w-[280px] overflow-hidden', selectorBgClass)}>
                 {[1, 2, 3, 4].map((i) => (
                   <Skeleton key={i} className={cn('h-14 rounded-lg', skeletonClass)} />
@@ -247,7 +304,12 @@ export function SubscriptionPlans({ open = true, onOpenChange, asDialog = true, 
           </>
         ) : (
           <>
-            <div className={cn('overflow-x-auto overscroll-x-contain -mx-1 px-1 sm:mx-0 sm:px-0', !isPage && 'pb-1')}>
+            <div
+              className={cn(
+                'overflow-x-auto overscroll-x-contain overscroll-y-auto [touch-action:pan-x_pan-y] -mx-1 px-1 sm:mx-0 sm:px-0',
+                !isPage && 'pb-1'
+              )}
+            >
               <div className={cn('relative grid grid-cols-4 gap-1 rounded-xl p-1.5 mb-5 min-w-[280px] overflow-hidden', selectorBgClass)}>
                 <div
                   aria-hidden
@@ -268,12 +330,25 @@ export function SubscriptionPlans({ open = true, onOpenChange, asDialog = true, 
                     className={cn(
                       'relative z-10 col-span-1 min-w-0 rounded-lg py-3 px-1 flex flex-col items-center justify-center gap-0.5',
                       'text-xs font-medium transition-colors',
-                      isSelected ? optionSelectedClass : optionClass
+                      isSelected ? optionSelectedClass : optionClass,
+                      display.sale && isPage && 'ring-2 ring-rose-400 ring-offset-2 ring-offset-background dark:ring-offset-background'
                     )}
                   >
                     <span className="block text-center leading-tight">{display.shortLabel}</span>
                     <span className="block font-bold text-sm">{display.price}</span>
-                    {display.bestDeal && (
+                    {display.sale && (
+                      <span
+                        className={cn(
+                          'mt-1 inline-block font-bold uppercase text-white shadow-md',
+                          isPage
+                            ? 'rounded-md bg-gradient-to-r from-rose-600 to-red-600 px-2 py-1 text-[10px] tracking-wider ring-2 ring-rose-300/90 sm:text-[11px]'
+                            : 'rounded px-1.5 py-0.5 bg-amber-500/90 text-[10px] font-semibold text-amber-950'
+                        )}
+                      >
+                        Sale
+                      </span>
+                    )}
+                    {display.bestDeal && !display.sale && (
                       <span className="mt-1 inline-block rounded px-1.5 py-0.5 bg-emerald-500/90 text-[10px] font-semibold text-emerald-950">
                         Best Deal
                       </span>
@@ -322,8 +397,7 @@ export function SubscriptionPlans({ open = true, onOpenChange, asDialog = true, 
                     </>
                   ) : (
                       <p className={cn('text-sm mt-1', contentMutedClass)}>
-                      Enter your institution code (provided by your program director) to unlock the platform. The
-                      same code may be shared with many people; you can only use a given code once on your account.
+                      Enter your institution code (provided by your program director or administrator) to unlock the platform.
                     </p>
                   )}
                   <Input
@@ -338,7 +412,10 @@ export function SubscriptionPlans({ open = true, onOpenChange, asDialog = true, 
                   <Button
                     onClick={handleUnlockInstitutional}
                     disabled={institutionalMutation.isPending || !institutionalCode.trim()}
-                    className="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow-md"
+                    className={cn(
+                      'w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow-md',
+                      isPage && 'mb-14 max-sm:mb-20 sm:mb-16'
+                    )}
                     size="lg"
                     data-testid="button-unlock-institutional"
                   >
@@ -347,16 +424,25 @@ export function SubscriptionPlans({ open = true, onOpenChange, asDialog = true, 
                 </div>
               ) : selectedPlan ? (
                 <>
-                  <div className={cn('p-4', contentBoxClass)}>
+                  <div
+                    className={cn(
+                      'p-4',
+                      contentBoxClass,
+                      getPlanDisplay(selectedPlan).sale &&
+                        isPage &&
+                        'rounded-2xl border-2 border-rose-500/80 bg-gradient-to-br from-rose-500/[0.12] via-amber-500/[0.08] to-rose-600/[0.12] shadow-lg ring-1 ring-rose-400/35 dark:border-rose-400/55 dark:from-rose-950/40 dark:via-amber-950/30 dark:to-rose-950/40'
+                    )}
+                  >
                     {(() => {
                       const display = getPlanDisplay(selectedPlan);
                       const billingStarts = new Date();
                       billingStarts.setDate(billingStarts.getDate() + 7);
                       const billingStartsStr = billingStarts.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+                      const salePage = Boolean(display.sale && isPage);
                       return (
                         <div className="flex items-start justify-between gap-3">
                           <div>
-                            <h3 className={cn('font-semibold', contentTitleClass)}>{display.title}</h3>
+                            <h3 className={cn('font-semibold', contentTitleClass, salePage && 'text-lg sm:text-xl')}>{display.title}</h3>
                             {introTrialEligible ? (
                               <p className="text-xs text-emerald-600 dark:text-emerald-400 mt-1 font-medium">Includes 7-Day Free Trial</p>
                             ) : (
@@ -364,8 +450,43 @@ export function SubscriptionPlans({ open = true, onOpenChange, asDialog = true, 
                                 No free trial — your account already used its trial or had a prior subscription.
                               </p>
                             )}
-                            <p className={cn('text-2xl font-bold mt-1', contentTitleClass)}>{display.price}</p>
-                            {display.discount && <span className="inline-block mt-1 text-xs text-emerald-600 dark:text-emerald-400">{display.discount}</span>}
+                            <div className={cn('mt-1', salePage && 'mt-2')}>
+                              {display.originalPrice && (
+                                <p
+                                  className={cn(
+                                    'line-through opacity-80',
+                                    salePage ? 'text-lg font-semibold text-muted-foreground decoration-2 decoration-rose-500/60' : 'text-sm',
+                                    !salePage && contentMutedClass
+                                  )}
+                                >
+                                  {display.originalPrice}
+                                </p>
+                              )}
+                              <p
+                                className={
+                                  salePage
+                                    ? 'text-3xl font-bold text-rose-600 dark:text-rose-400 sm:text-4xl'
+                                    : cn('text-2xl font-bold', contentTitleClass)
+                                }
+                              >
+                                {display.price}
+                              </p>
+                            </div>
+                            {display.discount && (
+                              <span
+                                className={cn(
+                                  'mt-1 inline-block font-semibold',
+                                  display.sale
+                                    ? salePage
+                                      ? 'rounded-lg bg-gradient-to-r from-rose-600 to-red-600 px-3 py-1.5 text-sm font-black uppercase tracking-wide text-white shadow-md'
+                                      : 'text-xs text-amber-700 dark:text-amber-300'
+                                    : 'text-xs text-emerald-600 dark:text-emerald-400'
+                                )}
+                              >
+                                {display.discount}
+                                {salePage && ' — 40% off'}
+                              </span>
+                            )}
                             <p className={cn('text-sm mt-1', contentMutedClass)}>{display.billing}</p>
                             {introTrialEligible ? (
                               <p className={cn('text-sm mt-0.5', contentMutedClass)}>Billing Begins {billingStartsStr}</p>
@@ -374,8 +495,29 @@ export function SubscriptionPlans({ open = true, onOpenChange, asDialog = true, 
                             )}
                             <p className={cn('text-sm mt-1', contentDimClass)}>Cancel Anytime</p>
                           </div>
-                          {display.bestDeal && (
-                            <span className="inline-flex items-center px-2.5 py-1 rounded-md bg-emerald-500 text-emerald-950 text-xs font-semibold shrink-0 shadow-sm">Best Deal</span>
+                          {display.sale && (
+                            <span
+                              className={cn(
+                                'inline-flex shrink-0 items-center font-black uppercase tracking-wide text-white shadow-md',
+                                salePage
+                                  ? 'rounded-xl bg-gradient-to-br from-rose-600 to-red-700 px-3 py-2 text-sm ring-2 ring-rose-300/80 sm:flex-col sm:px-3 sm:py-2.5'
+                                  : 'rounded-md bg-amber-500 px-2.5 py-1 text-xs text-amber-950'
+                              )}
+                            >
+                              {salePage ? (
+                                <>
+                                  <span className="text-[10px] leading-tight opacity-95">Save</span>
+                                  <span className="text-base leading-none sm:text-lg">$180</span>
+                                </>
+                              ) : (
+                                'Sale'
+                              )}
+                            </span>
+                          )}
+                          {display.bestDeal && !display.sale && (
+                            <span className="inline-flex items-center px-2.5 py-1 rounded-md bg-emerald-500 text-emerald-950 text-xs font-semibold shrink-0 shadow-sm">
+                              Best Deal
+                            </span>
                           )}
                         </div>
                       );
@@ -383,7 +525,10 @@ export function SubscriptionPlans({ open = true, onOpenChange, asDialog = true, 
                   </div>
                   <Button
                     onClick={handleSubscribe}
-                    className="w-full mt-6 bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow-md"
+                    className={cn(
+                      'w-full mt-6 bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow-md',
+                      isPage && 'mb-14 max-sm:mb-20 sm:mb-16'
+                    )}
                     size="lg"
                     data-testid={`button-subscribe-${selectedPlan.name}`}
                   >
@@ -399,7 +544,9 @@ export function SubscriptionPlans({ open = true, onOpenChange, asDialog = true, 
   );
 
   const popupContent = embeddedInPage ? (
-    <div className="relative w-full">{innerContent}</div>
+    <div id="subscription-plans" className="relative w-full scroll-mt-24 sm:scroll-mt-28">
+      {innerContent}
+    </div>
   ) : (
     <Card
       className={cn(
@@ -448,7 +595,12 @@ export function SubscriptionPlans({ open = true, onOpenChange, asDialog = true, 
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[60vh] p-4">
+    <div
+      className={cn(
+        'flex w-full flex-col items-center p-4',
+        embeddedInPage ? 'justify-start' : 'min-h-[60vh] justify-center'
+      )}
+    >
       <div className="w-full max-w-lg">{popupContent}</div>
     </div>
   );

@@ -1,6 +1,7 @@
 import bcrypt from "bcrypt";
 import {
   users,
+  passwordResetTokens,
   testSessions,
   questionResponses,
   loginConnections,
@@ -67,6 +68,14 @@ export interface IStorage {
   upsertUser(user: UpsertUser): Promise<User>;
   updateUserProfile(id: string, updates: Partial<UpsertUser>): Promise<User>;
   updateUserPassword(id: string, passwordHash: string, needsReset: boolean): Promise<User>;
+  deletePasswordResetTokensForUser(userId: string): Promise<void>;
+  createPasswordResetToken(
+    userId: string,
+    tokenHash: string,
+    expiresAt: Date,
+  ): Promise<void>;
+  /** Atomically validate, delete token, and return user id if valid and not expired. */
+  takePasswordResetToken(tokenHash: string): Promise<string | undefined>;
 
   // Test Session operations
   createTestSession(session: InsertTestSession): Promise<TestSession>;
@@ -270,6 +279,38 @@ export class DatabaseStorage implements IStorage {
       .where(eq(users.id, userId))
       .returning();
     return user;
+  }
+
+  async deletePasswordResetTokensForUser(userId: string): Promise<void> {
+    await db.delete(passwordResetTokens).where(eq(passwordResetTokens.userId, userId));
+  }
+
+  async createPasswordResetToken(
+    userId: string,
+    tokenHash: string,
+    expiresAt: Date,
+  ): Promise<void> {
+    await db.insert(passwordResetTokens).values({
+      userId,
+      tokenHash,
+      expiresAt,
+    });
+  }
+
+  async takePasswordResetToken(tokenHash: string): Promise<string | undefined> {
+    const now = new Date();
+    const [row] = await db
+      .select()
+      .from(passwordResetTokens)
+      .where(eq(passwordResetTokens.tokenHash, tokenHash));
+    if (!row) {
+      return undefined;
+    }
+    await db.delete(passwordResetTokens).where(eq(passwordResetTokens.id, row.id));
+    if (row.expiresAt < now) {
+      return undefined;
+    }
+    return row.userId;
   }
 
   async updateUserTester(userId: string, tester: boolean): Promise<User> {
@@ -1050,7 +1091,7 @@ export class DatabaseStorage implements IStorage {
     await this.ensureInstitutionalAccessRedemptionConsistencyMigration();
   }
 
-  /** Ensures the three subscription plans (monthly $50, 6-month $270, 1-year $450) exist and are up to date. */
+  /** Ensures the three subscription plans (monthly $50, 6-month $270, 1-year $450 list) exist and are up to date. */
   async ensureSubscriptionPlansSync(): Promise<void> {
     await this.ensureSubscriptionTrialMigrations();
     const targetPlans = [
@@ -1087,7 +1128,15 @@ export class DatabaseStorage implements IStorage {
     }
     const threeMonth = await db.select().from(subscriptionPlans).where(eq(subscriptionPlans.name, '3-month'));
     if (threeMonth.length > 0) {
-      await db.update(subscriptionPlans).set({ name: '1-year', durationMonths: 12, priceUSD: 45000, stripeProductId: 'prod_U14X6csDhWjhrk' }).where(eq(subscriptionPlans.name, '3-month'));
+      await db
+        .update(subscriptionPlans)
+        .set({
+          name: '1-year',
+          durationMonths: 12,
+          priceUSD: 45000,
+          stripeProductId: 'prod_U14X6csDhWjhrk',
+        })
+        .where(eq(subscriptionPlans.name, '3-month'));
     }
     const sixMonth = await db.select().from(subscriptionPlans).where(eq(subscriptionPlans.name, '6-month'));
     if (sixMonth.length > 0) {

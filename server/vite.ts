@@ -1,8 +1,10 @@
 import express, { type Express } from "express";
 import fs from "fs";
 import path from "path";
-import { createServer as createViteServer, type ViteDevServer } from "vite";
 import type { Server } from "http";
+
+// Load Vite only when setupVite runs — avoids eager `import "vite"` (and tsx resolving its
+// internal chunks) on production `npm start` or with an incomplete install.
 
 export function log(message: string) {
   const formattedTime = new Date().toLocaleTimeString("en-US", {
@@ -16,6 +18,7 @@ export function log(message: string) {
 }
 
 export async function setupVite(app: Express, server: Server) {
+  const { createServer: createViteServer } = await import("vite");
   const vite = await createViteServer({
     server: {
       middlewareMode: true,

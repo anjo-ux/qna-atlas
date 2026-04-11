@@ -13,6 +13,7 @@ import PreviewMode from "./pages/PreviewMode";
 import NotFound from "./pages/NotFound";
 import Landing from "./pages/Landing";
 import Login from "./pages/Login";
+import ResetPassword from "./pages/ResetPassword";
 import { BookmarksPage } from "./pages/Bookmarks";
 import { SpacedRepetitionPage } from "./pages/SpacedRepetition";
 import OralBoardSimulator from "./pages/OralBoardSimulator";
@@ -71,6 +72,11 @@ function isAdminPath(path: string): boolean {
   );
 }
 
+function normalizeAppPath(p: string): string {
+  if (p.length > 1 && p.endsWith("/")) return p.slice(0, -1);
+  return p || "/";
+}
+
 function Router() {
   const [location, setLocation] = useLocation();
   const { isAuthenticated, isLoading } = useAuth();
@@ -81,7 +87,11 @@ function Router() {
     ENABLE_ADMIN_GENERATED_QUESTIONS_UI &&
     (isAdminPath(pathname) || isAdminPath(location));
 
-  if (!isAdminPage && isLoading) {
+  const publicWhileAuthLoading = ["/login", "/signup", "/reset-password"].includes(
+    normalizeAppPath(pathname),
+  );
+
+  if (!isAdminPage && isLoading && !publicWhileAuthLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center space-y-4">
@@ -108,6 +118,7 @@ function Router() {
       <Route path="/preview" component={PreviewMode} />
       <Route path="/login" component={Login} />
       <Route path="/signup" component={Login} />
+      <Route path="/reset-password" component={ResetPassword} />
       {!isAuthenticated ? (
         <Route component={Landing} />
       ) : (
