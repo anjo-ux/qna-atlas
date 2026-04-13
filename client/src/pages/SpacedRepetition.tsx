@@ -218,7 +218,7 @@ export function SpacedRepetitionPage({ onBack }: SpacedRepetitionProps) {
   };
 
   return (
-    <div className="h-screen w-screen overflow-hidden flex flex-col bg-gradient-to-br from-purple-400/20 via-lavender-300/20 to-pink-300/20">
+    <div className="flex h-full min-h-0 w-full flex-col overflow-hidden bg-gradient-to-br from-purple-400/20 via-lavender-300/20 to-pink-300/20">
       <div className="p-4 md:p-6 border-b border-border/40 backdrop-blur-sm shrink-0">
         <div className="mb-4 flex flex-nowrap items-center justify-between gap-2 sm:gap-4">
           <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">

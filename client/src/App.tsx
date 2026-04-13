@@ -93,7 +93,7 @@ function Router() {
 
   if (!isAdminPage && isLoading && !publicWhileAuthLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex h-full w-full min-h-0 items-center justify-center">
         <div className="text-center space-y-4">
           <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto" />
           <p className="text-muted-foreground">Loading...</p>
@@ -143,7 +143,7 @@ function Router() {
 
 function AppContent() {
   return (
-    <div className="h-screen w-screen overflow-hidden">
+    <div className="h-full min-h-0 w-full overflow-hidden">
       <Router />
     </div>
   );

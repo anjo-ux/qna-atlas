@@ -567,7 +567,7 @@ Hinting: ${sessionSetup.hinting}`;
     Boolean(currentConversationId);
 
   return (
-    <div className="h-screen w-full flex bg-gradient-to-br from-purple-50 via-lavender-50 to-pink-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-900">
+    <div className="flex h-full min-h-0 w-full bg-gradient-to-br from-purple-50 via-lavender-50 to-pink-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-900">
       {/* Desktop: left sidebar (chat history) */}
       <div className="hidden lg:flex lg:w-64 lg:shrink-0 flex-col border-r border-border bg-white/30 dark:bg-slate-900/30 backdrop-blur-sm overflow-hidden">
         <OralBoardSidebarPanel

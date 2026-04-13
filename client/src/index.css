@@ -27,6 +27,16 @@ html, body {
   print-color-adjust: exact !important;
 }
 
+/* Space above mobile browser chrome (Safari/Chrome bottom bar); safe-area covers home indicator. */
+:root {
+  --app-mobile-browser-bottom: 0px;
+}
+@media (max-width: 767px) {
+  :root {
+    --app-mobile-browser-bottom: calc(env(safe-area-inset-bottom, 0px) + 2.75rem);
+  }
+}
+
 /* Allow text selection but prevent copying via CSS */
 * {
   -webkit-user-select: text;
@@ -263,6 +273,7 @@ html, body {
   }
 
   #root {
+    min-height: 100dvh;
     min-height: 100vh;
     background: inherit;
   }

@@ -450,7 +450,7 @@ export default function Index() {
 
   if (screenMode === 'test') {
     return (
-      <div className="flex w-full h-screen overflow-hidden">
+      <div className="flex h-full min-h-0 w-full overflow-hidden">
         <TestMode 
           sections={sections} 
           onBack={() => {
@@ -465,7 +465,7 @@ export default function Index() {
 
   if (screenMode === 'settings') {
     return (
-      <div className="flex h-screen overflow-hidden">
+      <div className="flex h-full min-h-0 overflow-hidden">
         <SettingsPage 
           onBack={() => setScreenMode('study')}
           subscription={subscription}
@@ -478,7 +478,7 @@ export default function Index() {
     const { getPreviewQuestions } = require('@/utils/previewQuestions');
     const previewQuestions = getPreviewQuestions(sections);
     return (
-      <div className="flex w-full h-screen overflow-hidden">
+      <div className="flex h-full min-h-0 w-full overflow-hidden">
         <TestMode 
           sections={sections}
           previewQuestions={previewQuestions}
@@ -490,7 +490,7 @@ export default function Index() {
   }
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden">
+    <div className="flex h-full min-h-0 flex-col overflow-hidden">
       <PreviewWizard
         open={showPreviewWizard}
         onClose={() => setShowPreviewWizard(false)}

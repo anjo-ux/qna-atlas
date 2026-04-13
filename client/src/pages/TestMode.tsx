@@ -1022,7 +1022,7 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
     const currentQuestion = testQuestions[currentQuestionIndex];
     
     return (
-      <div className="flex flex-col h-screen w-full overflow-hidden">
+      <div className="flex h-full min-h-0 w-full flex-col overflow-hidden">
         {/* Preview: Create Account banner */}
         {isPreview && (
           <div className="w-full flex-shrink-0 bg-primary text-primary-foreground px-4 py-2 flex items-center justify-center gap-2 text-sm">
@@ -1039,7 +1039,7 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
         <div className="flex-1 flex flex-col md:flex-row min-h-0 overflow-hidden">
         {/* Question Panel - Top on mobile, Right on desktop */}
         <div className={cn(
-          "md:flex md:flex-col md:w-32 md:border-r md:border-border md:bg-muted/30 md:overflow-visible md:flex-shrink-0 md:h-screen",
+          "md:flex md:flex-col md:w-32 md:border-r md:border-border md:bg-muted/30 md:overflow-visible md:flex-shrink-0 md:h-full",
           "flex flex-col border-b border-border bg-muted/30 w-full flex-shrink-0",
           !showQuestionPanel && "hidden md:flex",
           showQuestionPanel && "flex"
