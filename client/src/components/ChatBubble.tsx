@@ -97,15 +97,14 @@ export function ChatBubble() {
     <div
       className={cn(
         'fixed',
-        !isOpen &&
-          'right-6 z-40 max-md:bottom-[calc(1.5rem+var(--app-mobile-browser-bottom))] md:bottom-6',
+        !isOpen && 'bottom-6 right-6 z-40',
         isOpen && 'z-[100]',
         isOpen &&
           isExpanded &&
-          'max-md:inset-0 max-md:flex max-md:flex-col max-md:pb-[var(--app-mobile-browser-bottom)] md:bottom-6 md:right-6 md:left-auto md:top-auto',
+          'max-md:inset-0 max-md:flex max-md:flex-col max-md:pb-[env(safe-area-inset-bottom,0px)] md:bottom-6 md:right-6 md:left-auto md:top-auto',
         isOpen &&
           !isExpanded &&
-          'max-md:bottom-[calc(1.5rem+var(--app-mobile-browser-bottom))] max-md:left-1/2 max-md:right-auto max-md:w-[min(24rem,calc(100vw-1.5rem))] max-md:-translate-x-1/2 md:bottom-6 md:right-6 md:left-auto md:w-auto md:translate-x-0',
+          'max-md:bottom-6 max-md:left-1/2 max-md:right-auto max-md:w-[min(24rem,calc(100vw-1.5rem))] max-md:-translate-x-1/2 md:bottom-6 md:right-6 md:left-auto md:w-auto md:translate-x-0',
       )}
     >
       <style>{`

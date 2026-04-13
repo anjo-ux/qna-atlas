@@ -27,16 +27,6 @@ html, body {
   print-color-adjust: exact !important;
 }
 
-/* Slight lift above home indicator + overlapping mobile browser UI (keep small — dvh already helps). */
-:root {
-  --app-mobile-browser-bottom: 0px;
-}
-@media (max-width: 767px) {
-  :root {
-    --app-mobile-browser-bottom: calc(env(safe-area-inset-bottom, 0px) + 8px);
-  }
-}
-
 /* Allow text selection but prevent copying via CSS */
 * {
   -webkit-user-select: text;

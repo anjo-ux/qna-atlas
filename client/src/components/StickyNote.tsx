@@ -27,13 +27,23 @@ export function StickyNote({
   const [currentPosition, setCurrentPosition] = useState(position);
   const [isDragging, setIsDragging] = useState(false);
   const dragOffsetRef = useRef({ x: 0, y: 0 });
+  const activePointerIdRef = useRef<number | null>(null);
+  const isDraggingRef = useRef(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
+
+  isDraggingRef.current = isDragging;
+
+  useEffect(() => {
+    if (isDraggingRef.current) return;
+    setCurrentPosition(position);
+  }, [position.x, position.y]);
 
   useEffect(() => {
     if (!isDragging) return;
 
     const handlePointerMove = (e: PointerEvent) => {
+      if (e.pointerId !== activePointerIdRef.current) return;
       e.preventDefault();
       setCurrentPosition({
         x: e.clientX - dragOffsetRef.current.x,
@@ -41,7 +51,9 @@ export function StickyNote({
       });
     };
 
-    const handlePointerEnd = () => {
+    const handlePointerEnd = (e: PointerEvent) => {
+      if (e.pointerId !== activePointerIdRef.current) return;
+      activePointerIdRef.current = null;
       setCurrentPosition((pos) => {
         onPositionChange?.(id, pos);
         return pos;
@@ -56,6 +68,7 @@ export function StickyNote({
       window.removeEventListener('pointermove', handlePointerMove);
       window.removeEventListener('pointerup', handlePointerEnd);
       window.removeEventListener('pointercancel', handlePointerEnd);
+      activePointerIdRef.current = null;
     };
   }, [isDragging, id, onPositionChange]);
 
@@ -63,18 +76,13 @@ export function StickyNote({
     if (e.pointerType === 'mouse' && e.button !== 0) return;
     e.preventDefault();
     e.stopPropagation();
+    activePointerIdRef.current = e.pointerId;
     dragOffsetRef.current = {
       x: e.clientX - currentPosition.x,
       y: e.clientY - currentPosition.y,
     };
     setIsDragging(true);
   };
-
-  useEffect(() => {
-    if (!isDragging) {
-      setCurrentPosition(position);
-    }
-  }, [position, isDragging]);
 
   useEffect(() => {
     if (isEditing && textareaRef.current) {
