@@ -26,47 +26,55 @@ export function StickyNote({
   const [localContent, setLocalContent] = useState(content);
   const [currentPosition, setCurrentPosition] = useState(position);
   const [isDragging, setIsDragging] = useState(false);
-  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const dragOffsetRef = useRef({ x: 0, y: 0 });
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
 
-  const handleMouseDown = (e: React.MouseEvent) => {
-    if ((e.target as HTMLElement).closest('.drag-handle')) {
-      setIsDragging(true);
-      setDragOffset({
-        x: e.pageX - currentPosition.x,
-        y: e.pageY - currentPosition.y,
+  useEffect(() => {
+    if (!isDragging) return;
+
+    const handlePointerMove = (e: PointerEvent) => {
+      e.preventDefault();
+      setCurrentPosition({
+        x: e.clientX - dragOffsetRef.current.x,
+        y: e.clientY - dragOffsetRef.current.y,
       });
-    }
+    };
+
+    const handlePointerEnd = () => {
+      setCurrentPosition((pos) => {
+        onPositionChange?.(id, pos);
+        return pos;
+      });
+      setIsDragging(false);
+    };
+
+    window.addEventListener('pointermove', handlePointerMove, { passive: false });
+    window.addEventListener('pointerup', handlePointerEnd);
+    window.addEventListener('pointercancel', handlePointerEnd);
+    return () => {
+      window.removeEventListener('pointermove', handlePointerMove);
+      window.removeEventListener('pointerup', handlePointerEnd);
+      window.removeEventListener('pointercancel', handlePointerEnd);
+    };
+  }, [isDragging, id, onPositionChange]);
+
+  const handleDragHandlePointerDown = (e: React.PointerEvent) => {
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    e.preventDefault();
+    e.stopPropagation();
+    dragOffsetRef.current = {
+      x: e.clientX - currentPosition.x,
+      y: e.clientY - currentPosition.y,
+    };
+    setIsDragging(true);
   };
 
   useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      if (isDragging) {
-        const newPosition = {
-          x: e.pageX - dragOffset.x,
-          y: e.pageY - dragOffset.y,
-        };
-        setCurrentPosition(newPosition);
-      }
-    };
-
-    const handleMouseUp = () => {
-      if (isDragging) {
-        onPositionChange?.(id, currentPosition);
-        setIsDragging(false);
-      }
-    };
-
-    if (isDragging) {
-      document.addEventListener('mousemove', handleMouseMove);
-      document.addEventListener('mouseup', handleMouseUp);
-      return () => {
-        document.removeEventListener('mousemove', handleMouseMove);
-        document.removeEventListener('mouseup', handleMouseUp);
-      };
+    if (!isDragging) {
+      setCurrentPosition(position);
     }
-  }, [isDragging, dragOffset, currentPosition, id, onPositionChange]);
+  }, [position, isDragging]);
 
   useEffect(() => {
     if (isEditing && textareaRef.current) {
@@ -104,12 +112,14 @@ export function StickyNote({
         isDragging && "shadow-2xl opacity-95"
       )}
       style={{ left: `${currentPosition.x}px`, top: `${currentPosition.y}px` }}
-      onMouseDown={handleMouseDown}
     >
       <div className="p-3 space-y-2">
         <div className="flex items-center justify-between">
-          <div className="drag-handle flex items-center gap-1 text-muted-foreground cursor-grab active:cursor-grabbing hover:text-foreground">
-            <Grip className="h-4 w-4" />
+          <div
+            className="drag-handle flex touch-none select-none items-center gap-1 text-muted-foreground cursor-grab active:cursor-grabbing hover:text-foreground"
+            onPointerDown={handleDragHandlePointerDown}
+          >
+            <Grip className="h-4 w-4 pointer-events-none" />
           </div>
           <Button
             variant="ghost"
