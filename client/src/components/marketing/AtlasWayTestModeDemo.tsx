@@ -247,7 +247,7 @@ export function AtlasWayTestModeDemo({ compact = false }: AtlasWayTestModeDemoPr
               <div className="min-w-0">
                 <h3 className="truncate text-lg font-bold md:text-xl">Test Mode</h3>
                 <p className="text-xs text-muted-foreground md:text-sm">
-                  Question {index + 1} of {DEMO_QUESTIONS.length} · {q.topic}
+                  Question {index + 1} / {DEMO_QUESTIONS.length} · {q.topic}
                 </p>
               </div>
               <div className="flex flex-shrink-0 items-center gap-1 md:gap-2">
