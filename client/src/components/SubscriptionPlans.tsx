@@ -18,73 +18,13 @@ import { toast } from 'sonner';
 import { X } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { Skeleton } from '@/components/ui/skeleton';
+import {
+  FALLBACK_PLANS,
+  getPlanDisplay,
+  type SubscriptionPlanLike,
+} from '@/data/subscriptionPlanDisplay';
 
-interface Plan {
-  id: string;
-  name: string;
-  durationMonths: number;
-  priceUSD: number;
-}
-
-const PLAN_DISPLAY: Record<
-  string,
-  {
-    title: string;
-    shortLabel: string;
-    price: string;
-    billing: string;
-    discount?: string;
-    bestDeal?: boolean;
-    /** Strikethrough “was” price when showing a sale */
-    originalPrice?: string;
-    /** Tab + detail corner badge */
-    sale?: boolean;
-  }
-> = {
-  monthly: {
-    title: 'Monthly Subscription',
-    shortLabel: 'Monthly',
-    price: '$50',
-    billing: 'Billed Monthly',
-  },
-  '6-month': {
-    title: '6-Month Plan',
-    shortLabel: '6 Months',
-    price: '$270',
-    billing: 'Billed Twice Per Year',
-    discount: '10% Discount',
-  },
-  '1-year': {
-    title: '1-Year Plan',
-    shortLabel: '1 Year',
-    price: '$270',
-    originalPrice: '$450',
-    billing: 'Billed Yearly',
-    discount: 'Sale',
-    sale: true,
-  },
-};
-
-/** Fallback when API returns no plans so the subscribe page still shows "Choose a plan below" with all options. */
-const FALLBACK_PLANS: Plan[] = [
-  { id: '', name: 'monthly', durationMonths: 1, priceUSD: 5000 },
-  { id: '', name: '6-month', durationMonths: 6, priceUSD: 27000 },
-  { id: '', name: '1-year', durationMonths: 12, priceUSD: 45000 },
-];
-
-function getPlanDisplay(plan: Plan) {
-  const fallback = {
-    title: plan.durationMonths === 1 ? 'Monthly' : `${plan.durationMonths}-Month Plan`,
-    shortLabel: plan.durationMonths === 12 ? '1 Year' : plan.durationMonths === 6 ? '6 Months' : 'Monthly',
-    price: `$${(plan.priceUSD / 100).toFixed(0)}`,
-    billing: plan.durationMonths === 12 ? 'Billed Yearly' : plan.durationMonths === 6 ? 'Billed Twice Per Year' : 'Billed Monthly',
-    discount: undefined as string | undefined,
-    bestDeal: false,
-    originalPrice: undefined as string | undefined,
-    sale: false,
-  };
-  return PLAN_DISPLAY[plan.name] ?? fallback;
-}
+type Plan = SubscriptionPlanLike;
 
 
 interface SubscriptionPlansProps {
@@ -246,7 +186,7 @@ export function SubscriptionPlans({ open = true, onOpenChange, asDialog = true, 
           {noPlanOverlay
             ? introTrialEligible
               ? 'Choose a plan below or use your institution code to get started.'
-              : 'Choose a plan below. Your free trial was already used on this account — you will be charged when you subscribe. You can also use an institution code.'
+              : 'Choose a plan below. Your free trial was already used on this account, and you will be charged when you subscribe. You can also use an institution code.'
             : 'Unlock full access with a subscription.'}
         </p>
 
@@ -391,7 +331,7 @@ export function SubscriptionPlans({ open = true, onOpenChange, asDialog = true, 
                         )}
                         role="note"
                       >
-                        The same code can be shared with many people. On your account, each code works only once—you
+                        The same code can be shared with many people. On your account, each code works only once. You
                         can enter a <strong>different</strong> code if your program issues one.
                       </p>
                     </>
@@ -447,7 +387,7 @@ export function SubscriptionPlans({ open = true, onOpenChange, asDialog = true, 
                               <p className="text-xs text-emerald-600 dark:text-emerald-400 mt-1 font-medium">Includes 7-Day Free Trial</p>
                             ) : (
                               <p className={cn('text-xs mt-1 font-medium', isPage ? 'text-amber-900 dark:text-amber-100' : 'text-amber-200')}>
-                                No free trial — your account already used its trial or had a prior subscription.
+                                No free trial. Your account already used its trial or had a prior subscription.
                               </p>
                             )}
                             <div className={cn('mt-1', salePage && 'mt-2')}>
@@ -484,7 +424,7 @@ export function SubscriptionPlans({ open = true, onOpenChange, asDialog = true, 
                                 )}
                               >
                                 {display.discount}
-                                {salePage && ' — 40% off'}
+                                {salePage && ' (40% off)'}
                               </span>
                             )}
                             <p className={cn('text-sm mt-1', contentMutedClass)}>{display.billing}</p>
@@ -584,7 +524,7 @@ export function SubscriptionPlans({ open = true, onOpenChange, asDialog = true, 
               {noPlanOverlay
                 ? introTrialEligible
                   ? 'Choose a plan to start your free trial.'
-                  : 'Subscribe without a trial — you will be charged at checkout. Institution codes still work as before.'
+                  : 'Subscribe without a trial. You will be charged at checkout. Institution codes still work as before.'
                 : 'Unlock full access with a subscription or institutional code.'}
             </DialogDescription>
           </DialogHeader>

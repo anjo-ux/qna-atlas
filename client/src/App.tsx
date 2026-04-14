@@ -12,6 +12,11 @@ import Index from "./pages/Index";
 import PreviewMode from "./pages/PreviewMode";
 import NotFound from "./pages/NotFound";
 import Landing from "./pages/Landing";
+import AboutUs from "./pages/AboutUs";
+import AtlasWay from "./pages/AtlasWay";
+import ContactPage from "./pages/ContactPage";
+import PricingPage from "./pages/PricingPage";
+import OralBoardsCoachPage from "./pages/OralBoardsCoachPage";
 import Login from "./pages/Login";
 import ResetPassword from "./pages/ResetPassword";
 import { BookmarksPage } from "./pages/Bookmarks";
@@ -77,6 +82,22 @@ function normalizeAppPath(p: string): string {
   return p || "/";
 }
 
+/** Public routes that should render immediately (no auth-loading spinner) for SEO and UX. */
+function isPublicPathWithoutAuthGate(p: string): boolean {
+  const n = normalizeAppPath(p);
+  return (
+    n === "/login" ||
+    n === "/signup" ||
+    n === "/reset-password" ||
+    n === "/about" ||
+    n === "/the-atlas-way" ||
+    n === "/contact" ||
+    n === "/pricing" ||
+    n === "/oral-boards-coach" ||
+    n === "/preview"
+  );
+}
+
 function Router() {
   const [location, setLocation] = useLocation();
   const { isAuthenticated, isLoading } = useAuth();
@@ -87,9 +108,7 @@ function Router() {
     ENABLE_ADMIN_GENERATED_QUESTIONS_UI &&
     (isAdminPath(pathname) || isAdminPath(location));
 
-  const publicWhileAuthLoading = ["/login", "/signup", "/reset-password"].includes(
-    normalizeAppPath(pathname),
-  );
+  const publicWhileAuthLoading = isPublicPathWithoutAuthGate(pathname);
 
   if (!isAdminPage && isLoading && !publicWhileAuthLoading) {
     return (
@@ -119,6 +138,11 @@ function Router() {
       <Route path="/login" component={Login} />
       <Route path="/signup" component={Login} />
       <Route path="/reset-password" component={ResetPassword} />
+      <Route path="/about" component={AboutUs} />
+      <Route path="/the-atlas-way" component={AtlasWay} />
+      <Route path="/contact" component={ContactPage} />
+      <Route path="/pricing" component={PricingPage} />
+      <Route path="/oral-boards-coach" component={OralBoardsCoachPage} />
       {!isAuthenticated ? (
         <Route component={Landing} />
       ) : (

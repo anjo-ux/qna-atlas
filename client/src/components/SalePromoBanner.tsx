@@ -4,8 +4,8 @@ export const FOCUS_YEARLY_PLAN_EVENT = 'atlas:focus-yearly-plan';
 
 type SalePromoBannerProps = {
   /**
-   * `signup` — logged-out home: go to sign-up.
-   * `focus-yearly` — subscription page: scroll to plans and select 1-year.
+   * `signup` sends logged-out visitors to sign-up.
+   * `focus-yearly` scrolls the subscription page to plans and selects the 1-year option.
    */
   claimAction: 'signup' | 'focus-yearly';
   className?: string;
