@@ -268,6 +268,7 @@ export default function Login() {
                     <Input
                       id="firstName"
                       type="text"
+                      autoComplete="given-name"
                       placeholder="First"
                       value={firstName}
                       onChange={(e) => setFirstName(e.target.value)}
@@ -283,6 +284,7 @@ export default function Login() {
                     <Input
                       id="lastName"
                       type="text"
+                      autoComplete="family-name"
                       placeholder="Last"
                       value={lastName}
                       onChange={(e) => setLastName(e.target.value)}
@@ -301,6 +303,7 @@ export default function Login() {
                 <Input
                   id="email"
                   type="email"
+                  autoComplete="email"
                   placeholder="you@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -317,7 +320,8 @@ export default function Login() {
                 <Input
                   id="password"
                   type="password"
-                  placeholder={isSignUp ? 'Enter Password' : 'Enter Password'}
+                  autoComplete={isSignUp ? 'new-password' : 'current-password'}
+                  placeholder="Enter Password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   disabled={isLoading}
@@ -336,6 +340,7 @@ export default function Login() {
                     <Input
                       id="confirmPassword"
                       type="password"
+                      autoComplete="new-password"
                       placeholder="Confirm Password"
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}

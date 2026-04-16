@@ -2,6 +2,7 @@ import express, { type Express } from "express";
 import fs from "fs";
 import path from "path";
 import type { Server } from "http";
+import { injectSpaIndexHtml } from "./seoPublic";
 
 // Load Vite only when setupVite runs — avoids eager `import "vite"` (and tsx resolving its
 // internal chunks) on production `npm start` or with an incomplete install.
@@ -39,6 +40,7 @@ export async function setupVite(app: Express, server: Server) {
       );
       let template = fs.readFileSync(clientTemplate, "utf-8");
       template = await vite.transformIndexHtml(url, template);
+      template = injectSpaIndexHtml(template, url);
 
       res.status(200).set({ "Content-Type": "text/html" }).end(template);
     } catch (e) {
@@ -59,7 +61,10 @@ export function serveStatic(app: Express) {
 
   app.use(express.static(distPath));
 
-  app.use("*", (_req, res) => {
-    res.sendFile(path.resolve(distPath, "index.html"));
+  app.use("*", (req, res) => {
+    const indexPath = path.resolve(distPath, "index.html");
+    const raw = fs.readFileSync(indexPath, "utf-8");
+    const html = injectSpaIndexHtml(raw, req.originalUrl || "/");
+    res.status(200).type("html").send(html);
   });
 }

@@ -1,8 +1,10 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import { canonicalHostRedirect, registerSeoPublicRoutes } from "./seoPublic";
 
 const app = express();
+app.use(canonicalHostRedirect);
 // Limit body size to mitigate DoS via large payloads
 const BODY_LIMIT = '100kb';
 
@@ -70,6 +72,7 @@ app.use((req, res, next) => {
 
 (async () => {
   const server = await registerRoutes(app);
+  registerSeoPublicRoutes(app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;

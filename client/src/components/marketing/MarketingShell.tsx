@@ -47,8 +47,23 @@ export function MarketingShell({
   const path = pathname.replace(/\/$/, "") || "/";
 
   return (
-    <div className="flex h-full min-h-0 flex-col overflow-hidden">
-      <div className="static flex w-full flex-shrink-0 flex-col sm:sticky sm:top-0 sm:z-50">
+    <div
+      className={cn(
+        "flex min-h-0 flex-col",
+        "h-full",
+        /* Mobile and small tablet: one scroll column so promo + nav scroll away and free vertical space */
+        "max-lg:overflow-y-auto max-lg:overflow-x-hidden max-lg:[-webkit-overflow-scrolling:touch]",
+        /* Large screens: nav stays at top while only main column scrolls */
+        "lg:h-full lg:overflow-hidden",
+      )}
+    >
+      <div
+        className={cn(
+          "flex w-full flex-shrink-0 flex-col",
+          "max-lg:static max-lg:z-auto",
+          "lg:sticky lg:top-0 lg:z-50",
+        )}
+      >
         {showPromoBanner ? <SalePromoBanner claimAction="signup" /> : null}
         <header className="glass-nav w-full flex-shrink-0 rounded-b-2xl border-b border-border/40">
           <div className="container mx-auto px-4 py-2.5 sm:px-6 lg:px-8">
@@ -156,7 +171,13 @@ export function MarketingShell({
           </div>
         </header>
       </div>
-      <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-y-contain [-webkit-overflow-scrolling:touch]">
+      <div
+        className={cn(
+          "min-h-0 flex-1 overflow-x-hidden",
+          "max-lg:flex-none max-lg:overflow-y-visible",
+          "lg:min-h-0 lg:flex-1 lg:overflow-y-auto lg:overscroll-y-contain lg:[-webkit-overflow-scrolling:touch]",
+        )}
+      >
         {children}
         <footer className="border-t bg-muted/30 py-8">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
