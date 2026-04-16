@@ -42,7 +42,7 @@ export default function SubscriptionPage({ onSubscriptionUnlocked }: Subscriptio
     <div
       className="flex h-[100dvh] max-h-[100dvh] w-full flex-col overflow-y-auto overflow-x-hidden overscroll-y-contain touch-pan-y [-webkit-overflow-scrolling:touch]"
     >
-      <header className="glass-nav sticky top-0 z-50 w-full shrink-0 rounded-b-2xl">
+      <header className="glass-nav static w-full shrink-0 rounded-b-2xl sm:sticky sm:top-0 sm:z-50">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-3 pb-2">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-3 sm:gap-4">

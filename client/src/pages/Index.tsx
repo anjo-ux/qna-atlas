@@ -501,7 +501,7 @@ export default function Index() {
       />
 
       {/* Header - Full Width (liquid glass) */}
-      <header className="glass-nav w-full sticky top-0 z-50 rounded-b-2xl">
+      <header className="glass-nav w-full static rounded-b-2xl sm:sticky sm:top-0 sm:z-50">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-3 pb-2">
             {/* Top Row: Home, Title, Actions */}
             <div className="flex flex-nowrap items-center gap-2 sm:gap-4 min-w-0">

@@ -73,7 +73,7 @@ export default function ResetPassword() {
   return (
     <div className={`flex flex-col h-full ${isDark ? 'dark' : ''}`}>
       <div className="flex flex-col h-full bg-gradient-to-br from-blue-50 via-cyan-50 to-purple-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
-        <header className="glass-nav w-full sticky top-0 z-50 rounded-b-2xl flex-shrink-0">
+        <header className="glass-nav w-full static flex-shrink-0 rounded-b-2xl sm:sticky sm:top-0 sm:z-50">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-3 pb-2">
             <div className="flex items-center justify-between">
               <button
