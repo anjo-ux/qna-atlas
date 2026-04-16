@@ -1,4 +1,3 @@
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -74,7 +73,13 @@ export function LandingTopicStudyPreview({ className }: { className?: string }) 
           {totalSubs} Subsections In The Full Bank
         </p>
       </div>
-      <ScrollArea className="h-64 sm:h-72">
+      <div
+        className={cn(
+          "h-64 overflow-y-auto overflow-x-hidden overscroll-y-contain sm:h-72",
+          /* Radix ScrollArea always paints a track; native scroll hides chrome on phones/tablets */
+          "max-lg:[-ms-overflow-style:none] max-lg:[scrollbar-width:none] max-lg:[&::-webkit-scrollbar]:hidden",
+        )}
+      >
         <div className="space-y-5 p-4">
           {PREVIEW_SECTIONS.map((section) => (
             <div key={section.title} className="space-y-1.5">
@@ -102,7 +107,7 @@ export function LandingTopicStudyPreview({ className }: { className?: string }) 
             </div>
           ))}
         </div>
-      </ScrollArea>
+      </div>
     </div>
   );
 }
