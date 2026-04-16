@@ -34,6 +34,8 @@ export const users = pgTable("users", {
   avatarIcon: varchar("avatar_icon").default('smile'),
   themePreference: varchar("theme_preference").default('light'), // 'light' or 'dark'
   institutionalAffiliation: varchar("institutional_affiliation"), // Profile only: user's registered/display affiliation (settings, signup)
+  /** Signup-only; internal analytics. Not returned on SanitizedUser. */
+  trainingLevel: varchar("training_level"),
   institutionalAccessAffiliation: varchar("institutional_access_affiliation"), // Display name from last code redeem; access requires redemption row + future expires_at
   institutionalAccessExpiresAt: timestamp("institutional_access_expires_at"), // End of code-granted access; must be in the future (with a redemption) to unlock
   /** Legacy timestamp; redemption limits use `user_institutional_code_redemptions` (per code per account). */
@@ -100,6 +102,9 @@ export const testSessions = pgTable("test_sessions", {
   questions: jsonb("questions").notNull(), // Store the full Question objects for resume
   currentQuestionIndex: integer("current_question_index").notNull().default(0),
   flaggedQuestionIds: jsonb("flagged_question_ids").$type<string[]>().default([]).notNull(), // Store IDs of flagged questions
+  /** When true, the test uses a countdown; remaining seconds are stored for pause/resume. */
+  timerEnabled: boolean("timer_enabled").notNull().default(false),
+  timerRemainingSeconds: integer("timer_remaining_seconds"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
   completedAt: timestamp("completed_at"),

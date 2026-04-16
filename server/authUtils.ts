@@ -1,6 +1,9 @@
 import type { User } from "@shared/schema";
 
-export type SanitizedUser = Omit<User, "passwordHash"> & { passwordHash?: never };
+export type SanitizedUser = Omit<User, "passwordHash" | "trainingLevel"> & {
+  passwordHash?: never;
+  trainingLevel?: never;
+};
 
 /**
  * Strip sensitive fields from user for API responses and session storage.
@@ -8,6 +11,6 @@ export type SanitizedUser = Omit<User, "passwordHash"> & { passwordHash?: never 
  */
 export function sanitizeUser(user: User | null | undefined): SanitizedUser | null {
   if (!user) return null;
-  const { passwordHash: _, ...rest } = user;
+  const { passwordHash: _, trainingLevel: __, ...rest } = user;
   return rest as SanitizedUser;
 }

@@ -52,6 +52,16 @@ const ROUTE_META: Record<string, RouteMeta> = {
     description:
       "Deep dive into Atlas Review’s Oral Boards Coach with configurable plastic surgery oral board practice, conversational sessions, streaming responses, scoring and hinting controls, session history, and how it complements multiple-choice prep for certification-style study.",
   },
+  "/terms": {
+    title: "Terms Of Use | Plastic Surgery Atlas Review",
+    description:
+      "Terms Of Use for Atlas Review by PRS Atlas, LLC: subscriptions, accounts, acceptable use, content protection, limitations of liability, and governing law for https://prs-atlas.com.",
+  },
+  "/privacy": {
+    title: "Privacy Policy | Plastic Surgery Atlas Review",
+    description:
+      "How PRS Atlas, LLC collects, uses, and shares data for Atlas Review (https://prs-atlas.com). California rights and requests at support@prsatlas.com.",
+  },
 };
 
 function normalizePathname(urlPath: string): string {
@@ -102,6 +112,8 @@ const SITEMAP_PATHS = [
   "/contact",
   "/pricing",
   "/oral-boards-coach",
+  "/terms",
+  "/privacy",
 ] as const;
 
 function buildSitemapXml(base: string): string {
@@ -186,6 +198,9 @@ export function registerSeoPublicRoutes(app: Express): void {
 
   app.get("/sitemap.xml", (_req, res) => {
     const base = getCanonicalOrigin() || "https://prs-atlas.com";
-    res.type("application/xml").send(buildSitemapXml(base));
+    res
+      .status(200)
+      .setHeader("Content-Type", "application/xml; charset=utf-8")
+      .send(buildSitemapXml(base));
   });
 }

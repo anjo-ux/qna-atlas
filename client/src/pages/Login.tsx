@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
-import { useLocation } from 'wouter';
+import { Link, useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -24,11 +24,19 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import atlasLogo from '@assets/atlas_1764093111680.png';
 import atlasLogoLight from '@assets/logo_light_1774918799268.png';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { getUniversityOptions } from '@/data/universities';
+import { TRAINING_LEVEL_OPTIONS } from '@shared/trainingLevels';
 
 export default function Login() {
   const [location] = useLocation();
@@ -41,6 +49,7 @@ export default function Login() {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [institution, setInstitution] = useState('');
+  const [trainingLevel, setTrainingLevel] = useState('');
   const [openCombobox, setOpenCombobox] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [showForgotPassword, setShowForgotPassword] = useState(false);
@@ -64,12 +73,25 @@ export default function Login() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSignUp && !trainingLevel) {
+      toast.error('Please select your training level.');
+      return;
+    }
+
     setIsLoading(true);
 
     try {
       const endpoint = isSignUp ? '/api/auth/register' : '/api/auth/login';
       const payload = isSignUp
-        ? { email, password, confirmPassword, firstName, lastName, institutionalAffiliation: institution }
+        ? {
+            email,
+            password,
+            confirmPassword,
+            firstName,
+            lastName,
+            institutionalAffiliation: institution,
+            trainingLevel,
+          }
         : { email, password };
 
       const response = await fetch(endpoint, {
@@ -351,6 +373,33 @@ export default function Login() {
                   </div>
 
                   <div className="space-y-2">
+                    <label htmlFor="training-level" className="text-sm font-medium">
+                      Training Level
+                    </label>
+                    <Select
+                      value={trainingLevel || undefined}
+                      onValueChange={setTrainingLevel}
+                      disabled={isLoading}
+                      required
+                    >
+                      <SelectTrigger
+                        id="training-level"
+                        className="w-full"
+                        data-testid="select-training-level"
+                      >
+                        <SelectValue placeholder="Select Training Level" />
+                      </SelectTrigger>
+                      <SelectContent position="popper">
+                        {TRAINING_LEVEL_OPTIONS.map((opt) => (
+                          <SelectItem key={opt} value={opt}>
+                            {opt}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
                     <label className="text-sm font-medium">Institution</label>
                     <Popover open={openCombobox} onOpenChange={setOpenCombobox}>
                       <PopoverTrigger asChild>
@@ -403,6 +452,18 @@ export default function Login() {
                       </PopoverContent>
                     </Popover>
                   </div>
+
+                  <p className="text-center text-xs leading-relaxed text-muted-foreground">
+                    By signing up, you agree to our{' '}
+                    <Link href="/terms" className="font-medium text-primary underline-offset-2 hover:underline">
+                      Terms
+                    </Link>{' '}
+                    and our{' '}
+                    <Link href="/privacy" className="font-medium text-primary underline-offset-2 hover:underline">
+                      Privacy
+                    </Link>{' '}
+                    policies.
+                  </p>
                 </>
               )}
 
@@ -429,6 +490,8 @@ export default function Login() {
                       setConfirmPassword('');
                       setFirstName('');
                       setLastName('');
+                      setInstitution('');
+                      setTrainingLevel('');
                     }}
                     className="text-primary hover:underline font-medium"
                     data-testid="button-toggle-auth"

@@ -5,6 +5,7 @@ import rateLimit from 'express-rate-limit';
 import sgMail from '@sendgrid/mail';
 import type { Express, RequestHandler } from 'express';
 import connectPg from 'connect-pg-simple';
+import { isAllowedTrainingLevel } from "@shared/trainingLevels";
 import { storage } from './storage';
 import { sanitizeUser } from './authUtils';
 
@@ -327,7 +328,8 @@ export async function setupAuth(app: Express) {
   // Register route
   app.post('/api/auth/register', authRateLimiter, async (req, res) => {
     try {
-      const { email, password, confirmPassword, firstName, lastName, institutionalAffiliation } = req.body;
+      const { email, password, confirmPassword, firstName, lastName, institutionalAffiliation, trainingLevel } =
+        req.body;
 
       // Validation
       if (!email || !password || !confirmPassword || !firstName || !lastName) {
@@ -360,6 +362,10 @@ export async function setupAuth(app: Express) {
         return res.status(400).json({ message: 'Institutional affiliation must be at most 255 characters.' });
       }
 
+      if (typeof trainingLevel !== 'string' || !isAllowedTrainingLevel(trainingLevel)) {
+        return res.status(400).json({ message: 'Please select a valid training level.' });
+      }
+
       // Check email validity
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(email)) {
@@ -381,6 +387,7 @@ export async function setupAuth(app: Express) {
         firstName,
         lastName,
         institutionalAffiliation: institutionalAffiliation || '',
+        trainingLevel,
         subscriptionStatus: 'expired',
         trialEndsAt: null,
       });

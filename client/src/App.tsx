@@ -17,6 +17,8 @@ import AtlasWay from "./pages/AtlasWay";
 import ContactPage from "./pages/ContactPage";
 import PricingPage from "./pages/PricingPage";
 import OralBoardsCoachPage from "./pages/OralBoardsCoachPage";
+import TermsOfUsePage from "./pages/TermsOfUsePage";
+import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
 import Login from "./pages/Login";
 import ResetPassword from "./pages/ResetPassword";
 import { BookmarksPage } from "./pages/Bookmarks";
@@ -94,7 +96,9 @@ function isPublicPathWithoutAuthGate(p: string): boolean {
     n === "/contact" ||
     n === "/pricing" ||
     n === "/oral-boards-coach" ||
-    n === "/preview"
+    n === "/preview" ||
+    n === "/terms" ||
+    n === "/privacy"
   );
 }
 
@@ -143,6 +147,8 @@ function Router() {
       <Route path="/contact" component={ContactPage} />
       <Route path="/pricing" component={PricingPage} />
       <Route path="/oral-boards-coach" component={OralBoardsCoachPage} />
+      <Route path="/terms" component={TermsOfUsePage} />
+      <Route path="/privacy" component={PrivacyPolicyPage} />
       {!isAuthenticated ? (
         <Route component={Landing} />
       ) : (

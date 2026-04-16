@@ -2,7 +2,7 @@ import express, { type Express } from "express";
 import fs from "fs";
 import path from "path";
 import type { Server } from "http";
-import { injectSpaIndexHtml } from "./seoPublic";
+import { injectSpaIndexHtml, registerSeoPublicRoutes } from "./seoPublic";
 
 // Load Vite only when setupVite runs — avoids eager `import "vite"` (and tsx resolving its
 // internal chunks) on production `npm start` or with an incomplete install.
@@ -19,6 +19,7 @@ export function log(message: string) {
 }
 
 export async function setupVite(app: Express, server: Server) {
+  registerSeoPublicRoutes(app);
   const { createServer: createViteServer } = await import("vite");
   const vite = await createViteServer({
     server: {
@@ -58,6 +59,9 @@ export function serveStatic(app: Express) {
       `Could not find build directory: ${distPath}, make sure to build the client first`
     );
   }
+
+  /* Must run before express.static so /sitemap.xml is never answered with SPA index.html */
+  registerSeoPublicRoutes(app);
 
   app.use(express.static(distPath));
 

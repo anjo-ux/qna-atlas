@@ -1,4 +1,5 @@
 import { MarketingShell } from "@/components/marketing/MarketingShell";
+import { InstitutionalPricingCallout } from "@/components/marketing/InstitutionalPricingCallout";
 import { usePageSeo } from "@/lib/usePageSeo";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -192,6 +193,8 @@ export default function PricingPage() {
             the final source of truth for tax, currency, and any limited-time promotions at the moment
             you purchase.
           </p>
+
+          <InstitutionalPricingCallout className="mx-auto mt-12 max-w-4xl" />
 
           <section className="mx-auto mt-16 max-w-4xl" aria-labelledby="included-heading">
             <div className="mb-8 text-center">

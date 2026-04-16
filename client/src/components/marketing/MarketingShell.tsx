@@ -1,5 +1,6 @@
 import { type ReactNode } from "react";
 import { Link, useLocation } from "wouter";
+import { Instagram } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SalePromoBanner } from "@/components/SalePromoBanner";
 import { useTheme } from "@/hooks/useTheme";
@@ -17,11 +18,14 @@ const NAV = [
 ] as const;
 
 const FOOTER_LINKS = [
-  { href: "/", label: "Home" },
-  { href: "/about", label: "About" },
   { href: "/pricing", label: "Pricing" },
   { href: "/contact", label: "Contact" },
+  { href: "/terms", label: "Terms" },
+  { href: "/privacy", label: "Privacy" },
 ] as const;
+
+const INSTAGRAM_URL =
+  "https://www.instagram.com/prs_atlas?igsh=bDk1dmtld2Uzdnpt";
 
 function handleLogin() {
   window.location.href = "/login";
@@ -181,19 +185,33 @@ export function MarketingShell({
         {children}
         <footer className="border-t bg-muted/30 py-8">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex flex-col items-center justify-between gap-4 text-center sm:flex-row sm:text-left">
-              <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-2 text-sm text-muted-foreground sm:gap-x-4 md:gap-x-6">
+            <div className="flex flex-col items-center gap-4 text-center md:flex-row md:items-center md:justify-between md:gap-6 md:text-left">
+              <nav
+                className="flex flex-wrap items-center justify-center gap-x-2 gap-y-2 text-sm text-muted-foreground md:flex-nowrap md:justify-start md:gap-x-4 lg:gap-x-6"
+                aria-label="Footer"
+              >
                 {FOOTER_LINKS.map(({ href, label }) => (
                   <Link
                     key={href}
                     href={href}
-                    className="rounded-md px-2 py-1 transition-colors hover:bg-muted/60 hover:text-foreground sm:px-3"
+                    className="whitespace-nowrap rounded-md px-2 py-1 transition-colors hover:bg-muted/60 hover:text-foreground md:px-3"
                   >
                     {label}
                   </Link>
                 ))}
+              </nav>
+              <div className="flex shrink-0 justify-center">
+                <a
+                  href={INSTAGRAM_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Atlas Review on Instagram"
+                  className="inline-flex h-10 w-10 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                >
+                  <Instagram className="h-5 w-5" aria-hidden />
+                </a>
               </div>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-muted-foreground md:text-right">
                 Atlas Review © {new Date().getFullYear()} · Empowering Surgical Education
               </p>
             </div>

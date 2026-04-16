@@ -10,13 +10,24 @@ import { QuestionCard } from '@/components/QuestionCard';
 import { TestHistory } from '@/components/TestHistory';
 import { TestModeWizard } from '@/components/TestModeWizard';
 import { DetailedTestResults } from '@/components/DetailedTestResults';
-import { ArrowLeft, ChevronDown, ChevronUp, ChevronRight, ChevronLeft, ChevronRight as ChevronRightIcon, Check, X, Circle, ChevronDown as ChevronDownIcon, Flag } from 'lucide-react';
+import { ArrowLeft, ChevronDown, ChevronUp, ChevronRight, ChevronLeft, ChevronRight as ChevronRightIcon, Check, X, Circle, ChevronDown as ChevronDownIcon, Flag, Info } from 'lucide-react';
 import { useQuestionStats, QuestionResponse } from '@/hooks/useQuestionStats';
 import { useTestSessions, TestSession } from '@/hooks/useTestSessions';
 import { useBookmarks } from '@/hooks/useBookmarks';
 import { useAuth } from '@/hooks/useAuth';
 import { cn } from '@/lib/utils';
 import { queryClient } from '@/lib/queryClient';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+
+/** Allotted time per question on timed tests (1 minute 10 seconds). */
+const TEST_MODE_SECONDS_PER_QUESTION = 70;
+
+function formatCountdown(totalSeconds: number): string {
+  const s = Math.max(0, Math.floor(totalSeconds));
+  const m = Math.floor(s / 60);
+  const r = s % 60;
+  return `${m}:${r.toString().padStart(2, '0')}`;
+}
 
 interface TestModeProps {
   sections: Section[];
@@ -55,6 +66,11 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
   const [expandedResumeTests, setExpandedResumeTests] = useState(true);
   const [expandedCompletedTests, setExpandedCompletedTests] = useState(true);
   const hasResumedRef = useRef(false);
+  const finishTestInFlightRef = useRef(false);
+  const [timerEnabledForNewTest, setTimerEnabledForNewTest] = useState(false);
+  const [timedTestRemainingSeconds, setTimedTestRemainingSeconds] = useState<number | null>(null);
+  const timedTestRemainingRef = useRef<number | null>(null);
+  timedTestRemainingRef.current = timedTestRemainingSeconds;
 
   const { recordResponse, getIncorrectQuestionIds: getGlobalIncorrectIds, responses: globalResponses } = useQuestionStats();
   const { createSession, updateSession, completeSession, getInProgressSessions, getCompletedSessions, deleteSession, sessions, saveResponse, isSavingResponse } = useTestSessions();
@@ -271,18 +287,28 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
     // Shuffle and select random questions
     const shuffled = [...availableQuestions].sort(() => Math.random() - 0.5);
     const selected = shuffled.slice(0, Math.min(questionCount, shuffled.length));
-    
+    const questionCountForTimer = selected.length;
+    const timerTotalSeconds = questionCountForTimer * TEST_MODE_SECONDS_PER_QUESTION;
+
     // Create test session
     const session = await createSession(
       questionCount,
       Array.from(selectedSubsections),
       useAllQuestions,
-      selected
+      selected,
+      timerEnabledForNewTest && !isPreview
+        ? { enabled: true, totalSeconds: timerTotalSeconds }
+        : undefined
     );
-    
+
     setTestQuestions(selected);
     setCurrentQuestionIndex(0);
     setResponses({});
+    setTimedTestRemainingSeconds(
+      session.timerEnabled && session.timerRemainingSeconds != null
+        ? session.timerRemainingSeconds
+        : null
+    );
     setCurrentSession(session);
     setTestState('testing');
   };
@@ -300,7 +326,13 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
     setQuestionCountInput(String(count));
     setUseAllQuestions(session.useAllQuestions);
     setSelectedSubsections(new Set(session.selectedSectionIds));
-    
+
+    setTimedTestRemainingSeconds(
+      session.timerEnabled && session.timerRemainingSeconds != null
+        ? session.timerRemainingSeconds
+        : null
+    );
+
     setIsReviewMode(false);
     setTestState('testing');
   };
@@ -318,7 +350,9 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
     setQuestionCountInput(String(count));
     setUseAllQuestions(session.useAllQuestions);
     setSelectedSubsections(new Set(session.selectedSectionIds));
-    
+
+    setTimedTestRemainingSeconds(null);
+
     setIsReviewMode(true);
     setTestState('testing');
   };
@@ -381,7 +415,8 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
             // Update session with the fresh responses
             if (currentSession) {
               updateSession(currentSession.id, {
-                responses: updatedResponses
+                responses: updatedResponses,
+                ...timedSessionPatch(),
               });
             }
             
@@ -406,12 +441,21 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
     }
   };
 
+  const timedSessionPatch = () => {
+    if (!currentSession?.timerEnabled) return {};
+    const r = timedTestRemainingRef.current;
+    return r != null ? { timerRemainingSeconds: r } : {};
+  };
+
   const handleNextQuestion = () => {
     if (currentQuestionIndex < testQuestions.length - 1) {
       const newIndex = currentQuestionIndex + 1;
       setCurrentQuestionIndex(newIndex);
       if (currentSession) {
-        updateSession(currentSession.id, { currentQuestionIndex: newIndex });
+        updateSession(currentSession.id, {
+          currentQuestionIndex: newIndex,
+          ...timedSessionPatch(),
+        });
       }
     }
   };
@@ -421,7 +465,10 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
       const newIndex = currentQuestionIndex - 1;
       setCurrentQuestionIndex(newIndex);
       if (currentSession) {
-        updateSession(currentSession.id, { currentQuestionIndex: newIndex });
+        updateSession(currentSession.id, {
+          currentQuestionIndex: newIndex,
+          ...timedSessionPatch(),
+        });
       }
     }
   };
@@ -429,7 +476,10 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
   const handleQuestionNavigation = (index: number) => {
     setCurrentQuestionIndex(index);
     if (currentSession) {
-      updateSession(currentSession.id, { currentQuestionIndex: index });
+      updateSession(currentSession.id, {
+        currentQuestionIndex: index,
+        ...timedSessionPatch(),
+      });
     }
   };
 
@@ -444,11 +494,17 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
     
     // Auto-save flags to session
     if (currentSession) {
-      updateSession(currentSession.id, { flaggedQuestionIds: Array.from(newFlagged) });
+      updateSession(currentSession.id, {
+        flaggedQuestionIds: Array.from(newFlagged),
+        ...timedSessionPatch(),
+      });
     }
   };
 
   const handleFinishTest = async () => {
+    if (finishTestInFlightRef.current) return;
+    finishTestInFlightRef.current = true;
+    try {
     if (isPreview && !isAuthenticated) {
       window.location.href = '/api/auth';
       return;
@@ -497,11 +553,23 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
       }
       
       // Save flagged questions and mark session complete
-      updateSession(currentSession.id, { flaggedQuestionIds: Array.from(flaggedQuestions) });
+      updateSession(currentSession.id, {
+        flaggedQuestionIds: Array.from(flaggedQuestions),
+        ...(currentSession.timerEnabled && timedTestRemainingRef.current != null
+          ? { timerRemainingSeconds: 0 }
+          : {}),
+      });
       completeSession(currentSession.id);
     }
+    setTimedTestRemainingSeconds(null);
     setTestState('results');
+    } finally {
+      finishTestInFlightRef.current = false;
+    }
   };
+
+  const handleFinishTestRef = useRef(handleFinishTest);
+  handleFinishTestRef.current = handleFinishTest;
 
   const handleSaveAndExit = async () => {
     if (isPreview && !isAuthenticated) {
@@ -542,14 +610,46 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
     
     // Also update the session's current question index and flagged questions
     if (currentSession) {
-      updateSession(currentSession.id, { 
+      updateSession(currentSession.id, {
         currentQuestionIndex,
-        flaggedQuestionIds: Array.from(flaggedQuestions)
+        flaggedQuestionIds: Array.from(flaggedQuestions),
+        ...(currentSession.timerEnabled && timedTestRemainingRef.current != null
+          ? { timerRemainingSeconds: timedTestRemainingRef.current }
+          : {}),
       });
     }
-    
+
+    setTimedTestRemainingSeconds(null);
     setTestState('setup');
   };
+
+  useEffect(() => {
+    if (testState !== 'testing' || isReviewMode || isPreview || !currentSession?.timerEnabled) {
+      return;
+    }
+    const id = window.setInterval(() => {
+      setTimedTestRemainingSeconds((prev) => {
+        if (prev == null || prev <= 0) return prev;
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(id);
+  }, [testState, isReviewMode, isPreview, currentSession?.timerEnabled, currentSession?.id]);
+
+  useEffect(() => {
+    if (testState !== 'testing' || isReviewMode || isPreview || !currentSession?.timerEnabled) {
+      return;
+    }
+    if (timedTestRemainingSeconds !== 0) return;
+    void handleFinishTestRef.current();
+  }, [
+    testState,
+    isReviewMode,
+    isPreview,
+    currentSession?.timerEnabled,
+    currentSession?.id,
+    timedTestRemainingSeconds,
+  ]);
 
   const getQuestionStatus = (index: number) => {
     const question = testQuestions[index];
@@ -570,18 +670,28 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
     // Shuffle and select random questions
     const shuffled = [...availableQuestions].sort(() => Math.random() - 0.5);
     const selected = shuffled.slice(0, Math.min(questionCount, shuffled.length));
-    
+    const questionCountForTimer = selected.length;
+    const timerTotalSeconds = questionCountForTimer * TEST_MODE_SECONDS_PER_QUESTION;
+
     // Create test session
     const session = await createSession(
       questionCount,
       Array.from(selectedSubsections),
       useAllQuestions,
-      selected
+      selected,
+      timerEnabledForNewTest && !isPreview
+        ? { enabled: true, totalSeconds: timerTotalSeconds }
+        : undefined
     );
-    
+
     setTestQuestions(selected);
     setCurrentQuestionIndex(0);
     setResponses({});
+    setTimedTestRemainingSeconds(
+      session.timerEnabled && session.timerRemainingSeconds != null
+        ? session.timerRemainingSeconds
+        : null
+    );
     setCurrentSession(session);
     setTestState('testing');
   };
@@ -735,9 +845,14 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
 
                   return (
                     <Card className="p-4">
-                      <div className="flex items-center gap-3">
-                        <Label htmlFor="question-count" className="text-sm font-semibold whitespace-nowrap">Total Questions</Label>
-                        <div className="flex items-center gap-2">
+                      <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
+                        <div className="flex min-w-0 items-center gap-3">
+                          <Label
+                            htmlFor="question-count"
+                            className="shrink-0 text-sm font-semibold whitespace-nowrap"
+                          >
+                            Total Questions
+                          </Label>
                           <Input
                             id="question-count"
                             type="number"
@@ -758,15 +873,62 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
                                 setQuestionCountInput('1');
                               }
                             }}
-                            placeholder="Enter number"
-                            className={cn("w-24", hasError && "border-destructive bg-destructive/10")}
+                            placeholder="00"
+                            className={cn('w-24 shrink-0', hasError && 'border-destructive bg-destructive/10')}
                           />
-                          {hasError && (
-                            <span className="text-xs text-destructive whitespace-nowrap font-medium">
-                              {errorMessage}
-                            </span>
-                          )}
                         </div>
+                        {hasError && (
+                          <span className="text-xs font-medium text-destructive break-words sm:shrink-0 sm:whitespace-nowrap">
+                            {errorMessage}
+                          </span>
+                        )}
+                      </div>
+                    </Card>
+                  );
+                })()}
+
+                {!isPreview && (() => {
+                  const n = Math.min(questionCount, availableQuestions.length);
+                  const allotted = n * TEST_MODE_SECONDS_PER_QUESTION;
+                  return (
+                    <Card className="p-4">
+                      <div className="space-y-3">
+                        <div className="flex min-w-0 items-center justify-between gap-3">
+                          <div className="flex min-w-0 items-center gap-2">
+                            <span className="text-sm font-semibold text-foreground">Timer</span>
+                            <Popover>
+                              <PopoverTrigger asChild>
+                                <button
+                                  type="button"
+                                  className={cn(
+                                    'inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full touch-manipulation',
+                                    'border border-border/80 bg-muted/50 text-muted-foreground',
+                                    'transition-colors hover:bg-muted hover:text-foreground active:bg-muted/80',
+                                    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2'
+                                  )}
+                                  aria-label="About timed tests"
+                                >
+                                  <Info className="h-4 w-4" />
+                                </button>
+                              </PopoverTrigger>
+                              <PopoverContent className="max-w-xs text-sm leading-relaxed" align="start" side="bottom">
+                                When the timer is on, you have 1 minute 10 seconds per question. Pause saves your
+                                progress and stops the clock until you resume.
+                              </PopoverContent>
+                            </Popover>
+                          </div>
+                          <Switch
+                            checked={timerEnabledForNewTest}
+                            onCheckedChange={setTimerEnabledForNewTest}
+                            className="shrink-0"
+                            aria-label="Enable timed test"
+                          />
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          {timerEnabledForNewTest
+                            ? `Alloted Time: ${formatCountdown(allotted)} · ${n} Question${n === 1 ? '' : 's'} x 1:10`
+                            : 'No time limit. You can leave and resume anytime.'}
+                        </p>
                       </div>
                     </Card>
                   );
@@ -1020,7 +1182,33 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
 
   if (testState === 'testing') {
     const currentQuestion = testQuestions[currentQuestionIndex];
-    
+    const showTimedChrome = Boolean(
+      currentSession?.timerEnabled &&
+        timedTestRemainingSeconds != null &&
+        !isReviewMode &&
+        !isPreview
+    );
+
+    const renderTimedCountdown = (compact: boolean) => {
+      if (!showTimedChrome) return null;
+      return (
+        <span
+          className={cn(
+            'inline-flex flex-wrap items-baseline justify-center font-medium',
+            compact
+              ? 'gap-x-0.5 text-[0.844rem] leading-none'
+              : 'gap-x-1 text-lg leading-snug md:text-xl',
+            timedTestRemainingSeconds <= 60 ? 'text-destructive' : 'text-primary'
+          )}
+        >
+          <span className="font-sans">Time Remaining:&nbsp;</span>
+          <span className="font-mono font-semibold tabular-nums">
+            {formatCountdown(timedTestRemainingSeconds)}
+          </span>
+        </span>
+      );
+    };
+
     return (
       <div className="flex h-full min-h-0 w-full flex-col overflow-hidden">
         {/* Preview: Create Account banner */}
@@ -1117,13 +1305,44 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
 
         {/* Main Content */}
         <div className="flex flex-col overflow-hidden min-w-0 flex-1 flex-grow">
-          <div className="w-full p-3 md:p-4 border-b border-border bg-accent/5 flex-shrink-0">
-            <div className="w-full flex items-center justify-between gap-3">
-              <div className="flex-1 min-w-0">
+          <div
+            className={cn(
+              'flex w-full flex-shrink-0 flex-col border-b border-border bg-accent/5',
+              showTimedChrome && 'max-md:gap-2',
+              'p-3 md:p-4'
+            )}
+          >
+            <div
+              className={cn(
+                'flex w-full gap-2 md:gap-3',
+                showTimedChrome
+                  ? 'max-md:items-start max-md:justify-between md:items-center'
+                  : 'items-center justify-between'
+              )}
+            >
+              <div className={cn('min-w-0', showTimedChrome ? 'max-md:flex-1 md:flex-1 md:basis-0' : 'flex-1')}>
                 <h1 className="text-xl md:text-2xl font-bold truncate">Test Mode</h1>
-                <p className="text-xs md:text-sm text-muted-foreground">Question {currentQuestionIndex + 1} / {testQuestions.length}</p>
+                <p className="text-xs md:text-sm text-muted-foreground">
+                  Question {currentQuestionIndex + 1} / {testQuestions.length}
+                </p>
               </div>
-              <div className="flex items-center gap-1 md:gap-2 flex-shrink-0">
+              {showTimedChrome && (
+                <div
+                  role="timer"
+                  aria-live="polite"
+                  aria-atomic="true"
+                  aria-label={`Time remaining: ${formatCountdown(timedTestRemainingSeconds)}`}
+                  className="hidden shrink-0 px-1 text-center md:block"
+                >
+                  {renderTimedCountdown(false)}
+                </div>
+              )}
+              <div
+                className={cn(
+                  'flex min-w-0 items-center justify-end gap-1 md:gap-2',
+                  showTimedChrome ? 'max-md:shrink-0 md:flex-1 md:basis-0' : 'shrink-0'
+                )}
+              >
                 <Button 
                   size="icon"
                   variant="ghost"
@@ -1143,9 +1362,23 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
                 >
                   {showQuestionPanel ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                 </Button>
-                <Button data-testid="button-save-exit" onClick={handleSaveAndExit} variant="outline" size="sm">
-                  <span className="hidden md:inline">Save & Exit</span>
-                  <span className="md:hidden">Save</span>
+                <Button
+                  data-testid={showTimedChrome ? 'button-pause-exit' : 'button-save-exit'}
+                  onClick={handleSaveAndExit}
+                  variant="outline"
+                  size="sm"
+                >
+                  {showTimedChrome ? (
+                    <>
+                      <span className="hidden md:inline">Pause & Exit</span>
+                      <span className="md:hidden">Pause</span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="hidden md:inline">Save & Exit</span>
+                      <span className="md:hidden">Save</span>
+                    </>
+                  )}
                 </Button>
                 <Button data-testid="button-finish-test" onClick={handleFinishTest} variant="default" size="sm">
                   <span className="hidden md:inline">Finish Test</span>
@@ -1153,6 +1386,17 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
                 </Button>
               </div>
             </div>
+            {showTimedChrome && (
+              <div
+                role="timer"
+                aria-live="polite"
+                aria-atomic="true"
+                aria-label={`Time Remaining: ${formatCountdown(timedTestRemainingSeconds)}`}
+                className="flex items-center justify-center bg-primary/[0.07] px-2 py-2 text-center md:hidden dark:bg-primary/10"
+              >
+                {renderTimedCountdown(true)}
+              </div>
+            )}
           </div>
 
           <div className="flex-1 overflow-auto flex flex-col">

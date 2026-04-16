@@ -1,12 +1,13 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { MarketingShell } from "@/components/marketing/MarketingShell";
+import { InstitutionalPricingCallout } from "@/components/marketing/InstitutionalPricingCallout";
 import { LandingHomeSurface } from "@/components/marketing/LandingHomeSurface";
 import { LandingTopicStudyPreview } from "@/components/marketing/LandingTopicStudyPreview";
 import { AtlasWayTestModeDemo } from "@/components/marketing/AtlasWayTestModeDemo";
 import { OralBoardSetupInteractiveDemo } from "@/components/marketing/OralBoardSetupInteractiveDemo";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Check, Eye, BookOpen, Timer, Mic, ArrowRight, Sparkles } from "lucide-react";
+import { ArrowRight, BookOpen, Check, Eye, Mic, Sparkles, Timer } from "lucide-react";
 import { useState } from "react";
 import { Link } from "wouter";
 import { PreviewWizard } from "@/components/PreviewWizard";
@@ -280,6 +281,8 @@ export default function Landing() {
                 </CardContent>
               </Card>
             </div>
+
+            <InstitutionalPricingCallout />
 
             <Card className="border-secondary/30 bg-secondary/5">
               <CardHeader>

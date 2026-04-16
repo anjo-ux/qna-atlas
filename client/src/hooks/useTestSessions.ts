@@ -18,6 +18,8 @@ export interface TestSession {
   responses: Record<string, QuestionResponse>;
   currentQuestionIndex: number;
   flaggedQuestionIds?: string[];
+  timerEnabled?: boolean;
+  timerRemainingSeconds?: number | null;
 }
 
 // Local storage key for questions (since they come from Excel file)
@@ -44,6 +46,11 @@ export function useTestSessions() {
       responses: {},
       currentQuestionIndex: dbSession.currentQuestionIndex,
       flaggedQuestionIds: dbSession.flaggedQuestionIds || [],
+      timerEnabled: Boolean(dbSession.timerEnabled),
+      timerRemainingSeconds:
+        dbSession.timerRemainingSeconds === null || dbSession.timerRemainingSeconds === undefined
+          ? null
+          : dbSession.timerRemainingSeconds,
     };
   });
 
@@ -54,6 +61,8 @@ export function useTestSessions() {
       selectedSectionIds: string[];
       useAllQuestions: boolean;
       questions: Question[];
+      timerEnabled?: boolean;
+      timerRemainingSeconds?: number | null;
     }) => {
       // Create session in database with questions
       const response = await apiRequest('/api/test-sessions', {
@@ -64,6 +73,11 @@ export function useTestSessions() {
           useAllQuestions: data.useAllQuestions,
           questions: data.questions,
           currentQuestionIndex: 0,
+          timerEnabled: data.timerEnabled ?? false,
+          timerRemainingSeconds:
+            data.timerEnabled && data.timerRemainingSeconds != null
+              ? data.timerRemainingSeconds
+              : null,
         }),
       });
 
@@ -93,6 +107,12 @@ export function useTestSessions() {
       }
       if (updates.flaggedQuestionIds !== undefined) {
         dbUpdates.flaggedQuestionIds = updates.flaggedQuestionIds;
+      }
+      if (updates.timerEnabled !== undefined) {
+        dbUpdates.timerEnabled = updates.timerEnabled;
+      }
+      if (updates.timerRemainingSeconds !== undefined) {
+        dbUpdates.timerRemainingSeconds = updates.timerRemainingSeconds;
       }
 
       const response = await apiRequest(`/api/test-sessions/${sessionId}`, {
@@ -167,13 +187,20 @@ export function useTestSessions() {
       questionCount: number,
       selectedSectionIds: string[],
       useAllQuestions: boolean,
-      questions: Question[]
+      questions: Question[],
+      timer?: { enabled: boolean; totalSeconds: number }
     ) => {
+      const timerEnabled = Boolean(timer?.enabled);
+      const timerRemainingSeconds =
+        timerEnabled && timer && timer.totalSeconds > 0 ? timer.totalSeconds : null;
+
       const result = await createSessionMutation.mutateAsync({
         questionCount,
         selectedSectionIds,
         useAllQuestions,
         questions,
+        timerEnabled,
+        timerRemainingSeconds,
       });
       
       // Return the created session from the database
@@ -187,6 +214,11 @@ export function useTestSessions() {
         questions,
         responses: {},
         currentQuestionIndex: result.currentQuestionIndex,
+        timerEnabled: Boolean(result.timerEnabled),
+        timerRemainingSeconds:
+          result.timerRemainingSeconds === null || result.timerRemainingSeconds === undefined
+            ? null
+            : result.timerRemainingSeconds,
       };
     },
     updateSession: (sessionId: string, updates: Partial<TestSession>) => {
