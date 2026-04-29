@@ -42,7 +42,7 @@ export default function PricingPage() {
   usePageSeo({
     title: "Pricing & Plans | Plastic Surgery Atlas Review",
     description:
-      "Atlas Review pricing includes flexible monthly ($50), 6-month ($270), and annual plans with promotional savings plus institutional codes. Compare plans and unlock the full plastic surgery Q&A bank, mock exams, spaced repetition, and oral board practice.",
+      "Atlas Review pricing includes flexible monthly ($50), 6-month ($270), and annual plans plus institutional codes. Compare plans and unlock the full plastic surgery Q&A bank, mock exams, spaced repetition, and oral board practice.",
   });
 
   const checkoutHref = isAuthenticated ? "/subscribe" : "/signup";
@@ -66,27 +66,6 @@ export default function PricingPage() {
               practice environment.
             </p>
           </header>
-
-          <div className="mx-auto mb-6 max-w-2xl rounded-2xl border-2 border-rose-500/60 bg-gradient-to-r from-rose-500/15 via-amber-500/10 to-rose-600/15 px-4 py-4 text-center shadow-md ring-1 ring-rose-400/25 dark:border-rose-400/50 dark:from-rose-950/40 dark:via-amber-950/30 dark:to-rose-950/40">
-            <span className="inline-block rounded-full bg-gradient-to-r from-rose-600 to-red-600 px-3 py-1 text-xs font-bold tracking-wide text-white shadow-sm">
-              Post-In-Service Sale
-            </span>
-            <p className="mt-2 text-base font-semibold text-foreground sm:text-lg">
-              <span className="text-muted-foreground line-through decoration-2 decoration-rose-500/70">
-                $450
-              </span>
-              <span className="mx-2 text-muted-foreground">→</span>
-              <span className="text-2xl font-black text-rose-600 dark:text-rose-400 sm:text-3xl">
-                $270
-              </span>
-              <span className="ml-2 text-sm font-semibold text-rose-900 dark:text-rose-100">
-                First Year
-              </span>
-            </p>
-            <p className="text-sm font-medium text-rose-900 dark:text-rose-100">
-              Limited-Time Annual Pricing · See Yearly Plan Below
-            </p>
-          </div>
 
           <div className="mx-auto grid max-w-6xl gap-6 md:grid-cols-2 lg:grid-cols-4">
             {FALLBACK_PLANS.map((plan) => {

@@ -38,11 +38,8 @@ export const PLAN_DISPLAY: Record<
   "1-year": {
     title: "1-Year Plan",
     shortLabel: "1 Year",
-    price: "$270",
-    originalPrice: "$450",
+    price: "$450",
     billing: "Billed Yearly",
-    discount: "Sale",
-    sale: true,
   },
 };
 

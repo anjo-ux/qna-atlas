@@ -45,7 +45,7 @@ const ROUTE_META: Record<string, RouteMeta> = {
   "/pricing": {
     title: "Pricing & Plans | Plastic Surgery Atlas Review",
     description:
-      "Atlas Review pricing includes flexible monthly ($50), 6-month ($270), and annual plans with promotional savings plus institutional codes. Compare plans and unlock the full plastic surgery Q&A bank, mock exams, spaced repetition, and oral board practice.",
+      "Atlas Review pricing includes flexible monthly ($50), 6-month ($270), and annual plans plus institutional codes. Compare plans and unlock the full plastic surgery Q&A bank, mock exams, spaced repetition, and oral board practice.",
   },
   "/oral-boards-coach": {
     title: "Oral Boards Coach | Interactive Plastic Surgery Oral Exam Prep | Atlas Review",

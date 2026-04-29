@@ -190,27 +190,6 @@ export function SubscriptionPlans({ open = true, onOpenChange, asDialog = true, 
             : 'Unlock full access with a subscription.'}
         </p>
 
-        {isPage && (
-          <div
-            className={cn(
-              'mb-6 flex flex-col items-center justify-center gap-2 rounded-2xl border-2 border-rose-500/70',
-              'bg-gradient-to-r from-rose-500/20 via-amber-500/15 to-rose-600/20 px-4 py-4 shadow-lg',
-              'ring-2 ring-rose-400/30 dark:border-rose-400/60 dark:from-rose-950/50 dark:via-amber-950/40 dark:to-rose-950/50 dark:ring-rose-500/25'
-            )}
-          >
-            <span className="max-w-[min(100%,20rem)] text-center rounded-full bg-gradient-to-r from-rose-600 to-red-600 px-3 py-1.5 text-[11px] font-bold leading-tight tracking-tight text-white shadow-md sm:px-4 sm:text-sm sm:leading-snug">
-              Post-In-Service Sale
-            </span>
-            <p className="text-center text-base font-bold text-foreground sm:text-lg">
-              <span className="text-muted-foreground line-through decoration-2 decoration-rose-500/70">$450</span>
-              <span className="mx-2 text-muted-foreground font-semibold">→</span>
-              <span className="text-2xl font-black text-rose-600 dark:text-rose-400 sm:text-3xl">$270</span>
-              <span className="ml-2 text-sm font-semibold text-rose-800 dark:text-rose-200">First Year</span>
-            </p>
-            <p className="text-center text-sm font-semibold text-rose-900 dark:text-rose-100">Limited-Time 40% Discount</p>
-          </div>
-        )}
-
         {(plansError || (plans.length === 0 && !plansLoading)) && (
           <div className={cn('mb-4 rounded-lg border border-amber-500/50 bg-amber-500/10 px-4 py-3 text-sm text-amber-800 dark:text-amber-200', isPage && 'border-amber-600/40')}>
             <p className="font-medium">Plans couldn&apos;t be loaded.</p>

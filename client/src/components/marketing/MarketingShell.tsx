@@ -43,7 +43,7 @@ type MarketingShellProps = {
 
 export function MarketingShell({
   children,
-  showPromoBanner = true,
+  showPromoBanner = false,
 }: MarketingShellProps) {
   const { theme } = useTheme();
   const [pathname] = useLocation();
