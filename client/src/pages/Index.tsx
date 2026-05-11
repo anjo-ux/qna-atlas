@@ -91,6 +91,9 @@ export default function Index() {
   const questionRefsMap = useRef<Map<string, HTMLDivElement>>(new Map());
   // Track last answered question per subsection (key: "section-subsection"), persisted to localStorage
   const lastAnsweredQuestionMap = useRef<Map<string, string>>(new Map());
+  /** Main study column (question list); reset scroll when switching subsections via the section navigator. */
+  const studyMainScrollRef = useRef<HTMLDivElement>(null);
+  const scrollMainToTopFromNavigatorRef = useRef(false);
 
   // Load persisted last answered questions on mount
   useEffect(() => {
@@ -239,9 +242,19 @@ export default function Index() {
     questionRefsMap.current.clear();
   }, [selectedSection, selectedSubsection]);
 
-  // Auto-scroll to last answered question when subsection changes
+  // Auto-scroll to last answered question when subsection changes (unless user picked a subsection in the nav)
   useEffect(() => {
     if (!selectedSection || !selectedSubsection) return;
+
+    if (scrollMainToTopFromNavigatorRef.current) {
+      scrollMainToTopFromNavigatorRef.current = false;
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          studyMainScrollRef.current?.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+        });
+      });
+      return;
+    }
 
     const subsectionKey = `${selectedSection}-${selectedSubsection}`;
     const lastAnsweredId = lastAnsweredQuestionMap.current.get(subsectionKey);
@@ -345,7 +358,26 @@ export default function Index() {
     toast.success('All progress reset.');
   };
 
-  const handleNavigate = (sectionId: string, subsectionId: string) => {
+  const handleNavigate = (
+    sectionId: string,
+    subsectionId: string,
+    options?: { scrollMainToTop?: boolean },
+  ) => {
+    const selectionChanges =
+      selectedSection !== sectionId || selectedSubsection !== subsectionId;
+
+    if (options?.scrollMainToTop) {
+      if (selectionChanges) {
+        scrollMainToTopFromNavigatorRef.current = true;
+      } else {
+        queueMicrotask(() => {
+          requestAnimationFrame(() => {
+            studyMainScrollRef.current?.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+          });
+        });
+      }
+    }
+
     setSelectedSection(sectionId);
     setSelectedSubsection(subsectionId);
     setSearchQuery('');
@@ -727,7 +759,9 @@ export default function Index() {
               sections={sections}
               selectedSection={selectedSection}
               selectedSubsection={selectedSubsection}
-              onNavigate={handleNavigate}
+              onNavigate={(sectionId, subsectionId) =>
+                handleNavigate(sectionId, subsectionId, { scrollMainToTop: true })
+              }
               isOpen={isNavOpen}
               onClose={() => setIsNavOpen(false)}
             />
@@ -752,7 +786,9 @@ export default function Index() {
                 sections={sections}
                 selectedSection={selectedSection}
                 selectedSubsection={selectedSubsection}
-                onNavigate={handleNavigate}
+                onNavigate={(sectionId, subsectionId) =>
+                  handleNavigate(sectionId, subsectionId, { scrollMainToTop: true })
+                }
                 isOpen={isNavOpen}
                 onClose={() => setIsNavOpen(false)}
               />
@@ -781,7 +817,10 @@ export default function Index() {
               </div>
             </div>
           ) : (
-            <div className="flex-1 flex flex-col min-h-0 overflow-y-auto overflow-x-hidden scrollbar-hide">
+            <div
+              ref={studyMainScrollRef}
+              className="flex-1 flex flex-col min-h-0 overflow-y-auto overflow-x-hidden scrollbar-hide"
+            >
               <div className="container mx-auto min-w-0 max-w-full px-4 sm:px-6 lg:px-8 py-8 flex-1 min-h-0">
                 <div className="space-y-4">
                   <div className="space-y-4 mb-6">
