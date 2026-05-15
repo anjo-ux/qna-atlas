@@ -520,7 +520,7 @@ export default function Login() {
         {/* Footer */}
         <footer className="border-t py-6 bg-muted/30 flex-shrink-0">
           <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-            Atlas Review © {new Date().getFullYear()} • Empowering Surgical Education
+           Atlas Review ©  PRS Atlas, LLC © {new Date().getFullYear()} • Empowering Surgical Education
           </div>
         </footer>
       </div>

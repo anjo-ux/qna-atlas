@@ -40,6 +40,7 @@ export const PLAN_DISPLAY: Record<
     shortLabel: "1 Year",
     price: "$450",
     billing: "Billed Yearly",
+    discount: "25% Discount",
   },
 };
 
