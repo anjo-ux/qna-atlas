@@ -1,4 +1,13 @@
 User-agent: *
 Allow: /
+Disallow: /login
+Disallow: /signup
+Disallow: /reset-password
+Disallow: /subscribe
+Disallow: /bookmarks
+Disallow: /spaced-repetition
+Disallow: /oral-board
+Disallow: /admin
+Disallow: /api
 
 Sitemap: https://prs-atlas.com/sitemap.xml

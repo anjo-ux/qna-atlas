@@ -1,7 +1,11 @@
 import { useEffect } from "react";
 
-/** Sets document title and meta description for SPA SEO (no extra dependencies). */
-export function usePageSeo(opts: { title: string; description: string }) {
+/** Sets document title, meta description, and optional robots for SPA SEO. */
+export function usePageSeo(opts: {
+  title: string;
+  description: string;
+  robots?: "index, follow" | "noindex, nofollow";
+}) {
   useEffect(() => {
     document.title = opts.title;
     let meta = document.querySelector('meta[name="description"]');
@@ -11,5 +15,15 @@ export function usePageSeo(opts: { title: string; description: string }) {
       document.head.appendChild(meta);
     }
     meta.setAttribute("content", opts.description);
-  }, [opts.title, opts.description]);
+
+    if (opts.robots) {
+      let robots = document.querySelector('meta[name="robots"]');
+      if (!robots) {
+        robots = document.createElement("meta");
+        robots.setAttribute("name", "robots");
+        document.head.appendChild(robots);
+      }
+      robots.setAttribute("content", opts.robots);
+    }
+  }, [opts.title, opts.description, opts.robots]);
 }

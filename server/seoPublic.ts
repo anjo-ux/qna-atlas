@@ -1,15 +1,27 @@
 import type { Express, Request, Response, NextFunction } from "express";
-import fs from "fs";
-import path from "path";
 
 /**
  * Public site origin without trailing slash (e.g. https://prs-atlas.com).
  * Override in any environment with CANONICAL_PUBLIC_ORIGIN. In production, defaults to
  * https://prs-atlas.com so www→apex and HTML canonical work without extra config.
  */
+export function normalizePublicOrigin(origin: string): string {
+  const trimmed = origin.trim().replace(/\/$/, "");
+  if (!trimmed) return "";
+  try {
+    const u = new URL(trimmed.includes("://") ? trimmed : `https://${trimmed}`);
+    const host = u.hostname.toLowerCase();
+    const defaultPort = u.protocol === "https:" ? "443" : u.protocol === "http:" ? "80" : "";
+    if (!u.port || u.port === defaultPort) return `${u.protocol}//${host}`;
+    return `${u.protocol}//${host}:${u.port}`;
+  } catch {
+    return trimmed;
+  }
+}
+
 export function getCanonicalOrigin(): string {
-  const fromEnv = process.env.CANONICAL_PUBLIC_ORIGIN?.trim().replace(/\/$/, "");
-  if (fromEnv) return fromEnv;
+  const fromEnv = process.env.CANONICAL_PUBLIC_ORIGIN?.trim();
+  if (fromEnv) return normalizePublicOrigin(fromEnv);
   if (process.env.NODE_ENV === "production") return "https://prs-atlas.com";
   return "";
 }
@@ -64,28 +76,72 @@ const ROUTE_META: Record<string, RouteMeta> = {
   },
 };
 
+/** App/auth paths — noindex in HTML and Disallow in robots.txt (not in sitemap). */
+export const NON_INDEXABLE_PATH_PREFIXES = [
+  "/login",
+  "/signup",
+  "/reset-password",
+  "/subscribe",
+  "/bookmarks",
+  "/spaced-repetition",
+  "/oral-board",
+  "/admin",
+  "/api",
+] as const;
+
 function normalizePathname(urlPath: string): string {
   const p = urlPath.split("?")[0]?.split("#")[0] || "/";
   if (p === "/" || p === "") return "/";
   return p.endsWith("/") ? p.slice(0, -1) || "/" : p;
 }
 
+export function isMarketingIndexablePath(pathname: string): boolean {
+  return metaForPath(pathname) !== undefined;
+}
+
+export function isNonIndexableAppPath(pathname: string): boolean {
+  const p = normalizePathname(pathname);
+  return NON_INDEXABLE_PATH_PREFIXES.some(
+    (prefix) => p === prefix || p.startsWith(`${prefix}/`),
+  );
+}
+
 function metaForPath(pathname: string): RouteMeta | undefined {
   return ROUTE_META[normalizePathname(pathname)];
 }
 
+function buildRedirectUrl(pathWithQuery: string, origin: string): string {
+  const base = normalizePublicOrigin(origin);
+  return new URL(pathWithQuery || "/", `${base}/`).href;
+}
+
+function injectRobotsMeta(html: string, content: string): string {
+  const tag = `<meta name="robots" content="${escapeAttr(content)}" />`;
+  if (/<meta\s+name="robots"/i.test(html)) {
+    return html.replace(/<meta\s+name="robots"[^>]*>/i, tag);
+  }
+  return html.replace("</head>", `    ${tag}\n  </head>`);
+}
+
 /**
- * Injects per-route title, meta description, and canonical link into the SPA index.html shell.
+ * Injects per-route title, meta description, canonical, or noindex into the SPA index.html shell.
  */
 export function injectSpaIndexHtml(html: string, requestPathWithQuery: string): string {
   const canonical = getCanonicalOrigin();
   if (!canonical) return html;
 
   const pathname = normalizePathname(requestPathWithQuery);
-  const meta = metaForPath(pathname);
-  if (!meta) return html;
 
-  const canonicalUrl = new URL(pathname === "/" ? "/" : pathname, `${canonical}/`).href;
+  if (isNonIndexableAppPath(pathname)) {
+    return injectRobotsMeta(html, "noindex, nofollow");
+  }
+
+  const meta = metaForPath(pathname);
+  if (!meta) {
+    return injectRobotsMeta(html, "noindex, nofollow");
+  }
+
+  const canonicalUrl = buildRedirectUrl(pathname === "/" ? "/" : pathname, canonical);
   const titleEscaped = meta.title.replace(/</g, "");
   const descEscaped = escapeAttr(meta.description);
 
@@ -102,7 +158,7 @@ export function injectSpaIndexHtml(html: string, requestPathWithQuery: string): 
     out = out.replace("</head>", `    ${canonicalTag}\n  </head>`);
   }
 
-  return out;
+  return injectRobotsMeta(out, "index, follow");
 }
 
 const SITEMAP_PATHS = [
@@ -117,13 +173,18 @@ const SITEMAP_PATHS = [
 ] as const;
 
 function buildSitemapXml(base: string): string {
-  const origin = base.replace(/\/$/, "");
+  const origin = normalizePublicOrigin(base);
   const lastMod = new Date().toISOString().slice(0, 10);
   const urls = SITEMAP_PATHS.map(
     (p) =>
       `  <url>\n    <loc>${escapeAttr(`${origin}${p === "/" ? "/" : p}`)}</loc>\n    <lastmod>${lastMod}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>${p === "/" ? "1.0" : "0.8"}</priority>\n  </url>`,
   ).join("\n");
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>\n`;
+}
+
+function requestHostname(req: Request): string {
+  const rawHost = (req.headers["x-forwarded-host"] as string) || req.headers.host || "";
+  return rawHost.split(",")[0]?.trim().split(":")[0]?.toLowerCase() || "";
 }
 
 /**
@@ -144,7 +205,7 @@ export function canonicalHostRedirect(req: Request, res: Response, next: NextFun
   let canonicalHost: string;
   let needHttps: boolean;
   try {
-    const parsed = new URL(canonical.endsWith("/") ? canonical : `${canonical}/`);
+    const parsed = new URL(`${canonical}/`);
     canonicalHost = parsed.hostname.toLowerCase();
     needHttps = parsed.protocol === "https:";
   } catch {
@@ -152,28 +213,25 @@ export function canonicalHostRedirect(req: Request, res: Response, next: NextFun
     return;
   }
 
-  const rawHost = (req.headers["x-forwarded-host"] as string) || req.headers.host || "";
-  const host = rawHost.split(":")[0].toLowerCase();
+  const host = requestHostname(req);
   if (!host) {
     next();
     return;
   }
 
-  const forwardedProto = (req.headers["x-forwarded-proto"] as string)?.toLowerCase();
+  const forwardedProto = (req.headers["x-forwarded-proto"] as string)?.split(",")[0]?.trim().toLowerCase();
   const isTls =
     forwardedProto === "https" || (req.socket as { encrypted?: boolean }).encrypted === true;
 
   const pathWithQuery = req.originalUrl || "/";
 
   if (host === `www.${canonicalHost}`) {
-    const dest = new URL(pathWithQuery, `${canonical.replace(/\/$/, "")}/`).href;
-    res.redirect(301, dest);
+    res.redirect(301, buildRedirectUrl(pathWithQuery, canonical));
     return;
   }
 
   if (needHttps && !isTls && host === canonicalHost) {
-    const dest = new URL(pathWithQuery, `https://${canonicalHost}/`).href;
-    res.redirect(301, dest);
+    res.redirect(301, buildRedirectUrl(pathWithQuery, canonical));
     return;
   }
 
@@ -186,11 +244,13 @@ export function canonicalHostRedirect(req: Request, res: Response, next: NextFun
 export function registerSeoPublicRoutes(app: Express): void {
   app.get("/robots.txt", (_req, res) => {
     const base = getCanonicalOrigin() || "https://prs-atlas.com";
+    const disallow = NON_INDEXABLE_PATH_PREFIXES.map((p) => `Disallow: ${p}`).join("\n");
     const lines = [
       "User-agent: *",
       "Allow: /",
+      disallow,
       "",
-      `Sitemap: ${base.replace(/\/$/, "")}/sitemap.xml`,
+      `Sitemap: ${normalizePublicOrigin(base)}/sitemap.xml`,
       "",
     ];
     res.type("text/plain").send(lines.join("\n"));
