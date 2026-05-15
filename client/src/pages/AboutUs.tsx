@@ -6,11 +6,7 @@ import { Check, Target, Layers, BookOpen } from "lucide-react";
 import { Link } from "wouter";
 
 export default function AboutUs() {
-  usePageSeo({
-    title: "About Us | Plastic Surgery Atlas Review",
-    description:
-      "Learn the mission behind Atlas Review, a plastic surgery Q&A study platform with thousands of curated questions, structured topics, mock exams, spaced repetition, and oral board-style coaching for serious learners.",
-  });
+  usePageSeo("/about");
 
   return (
     <MarketingShell>

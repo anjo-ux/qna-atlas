@@ -8,7 +8,9 @@ import {
 } from "../seoPublic";
 
 const shell = `<!doctype html><html><head><title>Atlas Review</title>
-<meta name="description" content="generic" /></head><body></body></html>`;
+<meta name="description" content="generic" />
+<meta property="og:title" content="old" />
+</head><body></body></html>`;
 
 process.env.NODE_ENV = "production";
 delete process.env.CANONICAL_PUBLIC_ORIGIN;
@@ -17,9 +19,19 @@ assert.equal(normalizePublicOrigin("https://prs-atlas.com:443"), "https://prs-at
 assert.equal(getCanonicalOrigin(), "https://prs-atlas.com");
 
 const home = injectSpaIndexHtml(shell, "/");
-assert.match(home, /<title>Plastic Surgery Atlas Review/);
+assert.match(home, /<title>Plastic Surgery Board Prep/);
 assert.match(home, /rel="canonical" href="https:\/\/prs-atlas\.com\/"/);
 assert.match(home, /content="index, follow"/);
+assert.match(home, /name="keywords"/);
+assert.match(home, /id="atlas-structured-data"/);
+assert.doesNotMatch(home, /"FAQPage"/);
+
+const pricing = injectSpaIndexHtml(shell, "/pricing");
+assert.match(pricing, /"FAQPage"/);
+
+const preview = injectSpaIndexHtml(shell, "/preview");
+assert.match(preview, /rel="canonical" href="https:\/\/prs-atlas\.com\/preview"/);
+assert.match(preview, /Free Plastic Surgery Board Q&A Preview|Plastic Surgery Board Q&A Preview/);
 
 const login = injectSpaIndexHtml(shell, "/login");
 assert.match(login, /content="noindex, nofollow"/);

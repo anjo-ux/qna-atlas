@@ -74,11 +74,7 @@ const PILLARS: PillarConfig[] = [
 export default function AtlasWay() {
   const [activePillar, setActivePillar] = useState(0);
 
-  usePageSeo({
-    title: "The Atlas Way | How We Approach Plastic Surgery Exam Prep",
-    description:
-      "Discover the Atlas Way through a plastic surgery question bank, timed mock exams, and oral board coach. Try an embedded preview of Test Mode with navigator, flags, MCQ layout, and sample items, then see how structured study and exam-style UI reinforce each other.",
-  });
+  usePageSeo("/the-atlas-way");
 
   const onPillarKeyDown = (index: number, e: KeyboardEvent<HTMLDivElement>) => {
     if (e.key === "Enter" || e.key === " ") {

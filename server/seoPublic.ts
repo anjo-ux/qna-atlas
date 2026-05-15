@@ -1,4 +1,7 @@
 import type { Express, Request, Response, NextFunction } from "express";
+import type { PublicPageSeo } from "../shared/publicPageSeo";
+import { PUBLIC_PAGE_SEO, SITE_ORIGIN } from "../shared/publicPageSeo";
+import { getStructuredData } from "../shared/seoStructuredData";
 
 /**
  * Public site origin without trailing slash (e.g. https://prs-atlas.com).
@@ -30,52 +33,6 @@ function escapeAttr(text: string): string {
   return text.replace(/&/g, "&amp;").replace(/"/g, "&quot;");
 }
 
-type RouteMeta = { title: string; description: string };
-
-/** Paths that match public marketing pages (must stay aligned with usePageSeo on each page). */
-const ROUTE_META: Record<string, RouteMeta> = {
-  "/": {
-    title: "Plastic Surgery Atlas Review | Q&A Study Platform",
-    description:
-      "Master plastic surgery with Atlas Review. 2500+ curated questions, detailed explanations, spaced repetition, mock exams, and oral board-style practice for comprehensive training and board prep.",
-  },
-  "/about": {
-    title: "About Us | Plastic Surgery Atlas Review",
-    description:
-      "Learn the mission behind Atlas Review, a plastic surgery Q&A study platform with thousands of curated questions, structured topics, mock exams, spaced repetition, and oral board-style coaching for serious learners.",
-  },
-  "/the-atlas-way": {
-    title: "The Atlas Way | How We Approach Plastic Surgery Exam Prep",
-    description:
-      "Discover the Atlas Way through a plastic surgery question bank, timed mock exams, and oral board coach. Try an embedded preview of Test Mode with navigator, flags, MCQ layout, and sample items, then see how structured study and exam-style UI reinforce each other.",
-  },
-  "/contact": {
-    title: "Contact Us | Plastic Surgery Atlas Review",
-    description:
-      "Contact Atlas Review at hello@prs-atlas.com for account help, study tips, billing questions, and feedback. We answer plastic surgery trainees and board candidates as quickly as we can.",
-  },
-  "/pricing": {
-    title: "Pricing & Plans | Plastic Surgery Atlas Review",
-    description:
-      "Atlas Review pricing includes flexible monthly ($50), 6-month ($270), and annual plans plus institutional codes. Compare plans and unlock the full plastic surgery Q&A bank, mock exams, spaced repetition, and oral board practice.",
-  },
-  "/oral-boards-coach": {
-    title: "Oral Boards Coach | Interactive Plastic Surgery Oral Exam Prep | Atlas Review",
-    description:
-      "Deep dive into Atlas Review’s Oral Boards Coach with configurable plastic surgery oral board practice, conversational sessions, streaming responses, scoring and hinting controls, session history, and how it complements multiple-choice prep for certification-style study.",
-  },
-  "/terms": {
-    title: "Terms Of Use | Plastic Surgery Atlas Review",
-    description:
-      "Terms Of Use for Atlas Review by PRS Atlas, LLC: subscriptions, accounts, acceptable use, content protection, limitations of liability, and governing law for https://prs-atlas.com.",
-  },
-  "/privacy": {
-    title: "Privacy Policy | Plastic Surgery Atlas Review",
-    description:
-      "How PRS Atlas, LLC collects, uses, and shares data for Atlas Review (https://prs-atlas.com). California rights and requests at support@prsatlas.com.",
-  },
-};
-
 /** App/auth paths — noindex in HTML and Disallow in robots.txt (not in sitemap). */
 export const NON_INDEXABLE_PATH_PREFIXES = [
   "/login",
@@ -106,13 +63,70 @@ export function isNonIndexableAppPath(pathname: string): boolean {
   );
 }
 
-function metaForPath(pathname: string): RouteMeta | undefined {
-  return ROUTE_META[normalizePathname(pathname)];
+function metaForPath(pathname: string): PublicPageSeo | undefined {
+  return PUBLIC_PAGE_SEO[normalizePathname(pathname)];
 }
 
 function buildRedirectUrl(pathWithQuery: string, origin: string): string {
   const base = normalizePublicOrigin(origin);
   return new URL(pathWithQuery || "/", `${base}/`).href;
+}
+
+function setMetaName(html: string, name: string, content: string): string {
+  const tag = `<meta name="${escapeAttr(name)}" content="${escapeAttr(content)}" />`;
+  const re = new RegExp(`<meta\\s+name="${name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}"[^>]*>`, "i");
+  if (re.test(html)) return html.replace(re, tag);
+  return html.replace("</head>", `    ${tag}\n  </head>`);
+}
+
+function setMetaProperty(html: string, property: string, content: string): string {
+  const tag = `<meta property="${escapeAttr(property)}" content="${escapeAttr(content)}" />`;
+  const re = new RegExp(
+    `<meta\\s+property="${property.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}"[^>]*>`,
+    "i",
+  );
+  if (re.test(html)) return html.replace(re, tag);
+  return html.replace("</head>", `    ${tag}\n  </head>`);
+}
+
+function injectMarketingHeadTags(
+  html: string,
+  pathname: string,
+  meta: PublicPageSeo,
+  canonicalUrl: string,
+  origin: string,
+): string {
+  const ogTitle = meta.ogTitle ?? meta.title;
+  const ogDescription = meta.ogDescription ?? meta.description;
+  const normOrigin = normalizePublicOrigin(origin);
+  const ogImage = `${normOrigin}/atlas-logo.png`;
+
+  let out = setMetaName(html, "keywords", meta.keywords);
+  out = setMetaProperty(out, "og:title", ogTitle);
+  out = setMetaProperty(out, "og:description", ogDescription);
+  out = setMetaProperty(out, "og:url", canonicalUrl);
+  out = setMetaProperty(out, "og:type", "website");
+  out = setMetaProperty(out, "og:image", ogImage);
+  out = setMetaProperty(out, "og:site_name", "Atlas Review");
+  out = setMetaProperty(out, "og:locale", "en_US");
+
+  out = setMetaName(out, "twitter:card", "summary_large_image");
+  out = setMetaName(out, "twitter:title", ogTitle);
+  out = setMetaName(out, "twitter:description", ogDescription);
+  out = setMetaName(out, "twitter:image", ogImage);
+
+  const structured = getStructuredData(pathname, normOrigin);
+  if (structured) {
+    const raw = JSON.stringify(structured).replace(/</g, "\\u003c");
+    const script = `<script type="application/ld+json" id="atlas-structured-data">${raw}</script>`;
+    if (/<script[^>]*id="atlas-structured-data"/i.test(out)) {
+      out = out.replace(/<script[^>]*id="atlas-structured-data"[^>]*>[\s\S]*?<\/script>/i, script);
+    } else {
+      out = out.replace("</head>", `    ${script}\n  </head>`);
+    }
+  }
+
+  return out;
 }
 
 function injectRobotsMeta(html: string, content: string): string {
@@ -158,6 +172,8 @@ export function injectSpaIndexHtml(html: string, requestPathWithQuery: string): 
     out = out.replace("</head>", `    ${canonicalTag}\n  </head>`);
   }
 
+  out = injectMarketingHeadTags(out, pathname, meta, canonicalUrl, canonical || SITE_ORIGIN);
+
   return injectRobotsMeta(out, "index, follow");
 }
 
@@ -165,6 +181,7 @@ const SITEMAP_PATHS = [
   "/",
   "/about",
   "/the-atlas-way",
+  "/preview",
   "/contact",
   "/pricing",
   "/oral-boards-coach",
@@ -172,12 +189,24 @@ const SITEMAP_PATHS = [
   "/privacy",
 ] as const;
 
+function sitemapPriority(path: string): string {
+  if (path === "/") return "1.0";
+  if (path === "/preview") return "0.85";
+  if (path === "/terms" || path === "/privacy") return "0.5";
+  return "0.8";
+}
+
+function sitemapChangeFreq(path: string): string {
+  if (path === "/terms" || path === "/privacy") return "monthly";
+  return "weekly";
+}
+
 function buildSitemapXml(base: string): string {
   const origin = normalizePublicOrigin(base);
   const lastMod = new Date().toISOString().slice(0, 10);
   const urls = SITEMAP_PATHS.map(
     (p) =>
-      `  <url>\n    <loc>${escapeAttr(`${origin}${p === "/" ? "/" : p}`)}</loc>\n    <lastmod>${lastMod}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>${p === "/" ? "1.0" : "0.8"}</priority>\n  </url>`,
+      `  <url>\n    <loc>${escapeAttr(`${origin}${p === "/" ? "/" : p}`)}</loc>\n    <lastmod>${lastMod}</lastmod>\n    <changefreq>${sitemapChangeFreq(p)}</changefreq>\n    <priority>${sitemapPriority(p)}</priority>\n  </url>`,
   ).join("\n");
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>\n`;
 }

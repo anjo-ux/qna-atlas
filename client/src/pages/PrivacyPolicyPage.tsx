@@ -30,11 +30,7 @@ function Section({
 }
 
 export default function PrivacyPolicyPage() {
-  usePageSeo({
-    title: "Privacy Policy | Plastic Surgery Atlas Review",
-    description:
-      `How ${LEGAL_ENTITY} collects, uses, and shares information for ${SITE_NAME} (${SITE_URL}). California rights and contact: ${SUPPORT_EMAIL}.`,
-  });
+  usePageSeo("/privacy");
 
   return (
     <MarketingShell>

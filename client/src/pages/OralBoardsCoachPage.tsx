@@ -13,6 +13,7 @@ import {
   ShieldCheck,
   ChevronRight,
 } from "lucide-react";
+import { ORAL_BOARDS_MARKETING_FAQ } from "@shared/marketingFaqs";
 import { Link } from "wouter";
 
 const SESSION_CONTROLS = [
@@ -50,31 +51,8 @@ const SESSION_CONTROLS = [
   },
 ] as const;
 
-const FAQ_ITEMS = [
-  {
-    q: "Is The Oral Boards Coach The Same As Studying Multiple-Choice Questions?",
-    a: "No, and that is intentional. Multiple-choice work in Atlas trains recognition and speed. The Oral Boards Coach trains narration, prioritization, and the spoken structure examiners expect. Most high performers use both the bank and mock tests for breadth, and the oral coach for how they sound under follow-up questions.",
-  },
-  {
-    q: "Does The Coach Replace Reading Textbooks Or Attending Courses?",
-    a: "It complements them. You still need primary sources, operative experience, and program teaching. The coach gives you a private, repeatable place to rehearse how you present that knowledge, not a substitute for clinical training or official board materials.",
-  },
-  {
-    q: "Can I Save And Revisit Sessions?",
-    a: "Yes. Sessions appear in a sidebar so you can start fresh, return to an ongoing thread, or delete what you no longer need, similar to organizing study notes, but tied to full conversational runs.",
-  },
-  {
-    q: "What Does “Streaming” Mean In The Chat Experience?",
-    a: "Assistant replies arrive token by token so you can read along as the case unfolds, closer to a live exchange than waiting for a single block of text. It keeps momentum during long stems or multi-part examiner prompts.",
-  },
-] as const;
-
 export default function OralBoardsCoachPage() {
-  usePageSeo({
-    title: "Oral Boards Coach | Interactive Plastic Surgery Oral Exam Prep | Atlas Review",
-    description:
-      "Deep dive into Atlas Review’s Oral Boards Coach with configurable plastic surgery oral board practice, conversational sessions, streaming responses, scoring and hinting controls, session history, and how it complements multiple-choice prep for certification-style study.",
-  });
+  usePageSeo("/oral-boards-coach");
 
   return (
     <MarketingShell>
@@ -221,7 +199,7 @@ export default function OralBoardsCoachPage() {
               Frequently Asked Questions
             </h2>
             <div className="space-y-4">
-              {FAQ_ITEMS.map(({ q, a }) => (
+              {ORAL_BOARDS_MARKETING_FAQ.map(({ q, a }) => (
                 <Card key={q} variant="glass">
                   <CardHeader className="pb-2">
                     <CardTitle className="text-base font-semibold text-foreground">{q}</CardTitle>

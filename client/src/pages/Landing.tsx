@@ -36,11 +36,7 @@ export default function Landing() {
   const [showPreviewWizard, setShowPreviewWizard] = useState(false);
   const { theme } = useTheme();
 
-  usePageSeo({
-    title: "Plastic Surgery Atlas Review | Q&A Study Platform",
-    description:
-      "Master plastic surgery with Atlas Review. 2500+ curated questions, detailed explanations, spaced repetition, mock exams, and oral board-style practice for comprehensive training and board prep.",
-  });
+  usePageSeo("/");
 
   return (
     <MarketingShell>

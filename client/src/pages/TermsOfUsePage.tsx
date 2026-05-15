@@ -28,11 +28,7 @@ function Section({
 }
 
 export default function TermsOfUsePage() {
-  usePageSeo({
-    title: "Terms Of Use | Plastic Surgery Atlas Review",
-    description:
-      `Terms Of Use for ${SITE_NAME} by ${LEGAL_ENTITY}. Subscriptions, accounts, acceptable use, and limitations for ${SITE_URL}.`,
-  });
+  usePageSeo("/terms");
 
   return (
     <MarketingShell>

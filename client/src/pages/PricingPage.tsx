@@ -1,6 +1,7 @@
 import { MarketingShell } from "@/components/marketing/MarketingShell";
 import { InstitutionalPricingCallout } from "@/components/marketing/InstitutionalPricingCallout";
 import { usePageSeo } from "@/lib/usePageSeo";
+import { PRICING_MARKETING_FAQ } from "@shared/marketingFaqs";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/hooks/useAuth";
@@ -17,33 +18,10 @@ const INCLUDED_FEATURES = [
   "Progress Tracking By Section And Sub-Topic",
 ] as const;
 
-const PRICING_FAQ = [
-  {
-    q: "Do All Paid Plans Include The Same Features?",
-    a: "Yes. Monthly, 6-month, and annual access all unlock the same Atlas Review experience. The difference is how long you commit and the savings on longer terms.",
-  },
-  {
-    q: "Is There A Free Trial?",
-    a: "Eligible new accounts can start with a free trial when subscribing through checkout. If you already used a trial on your email, checkout will show paid terms clearly before you confirm.",
-  },
-  {
-    q: "What Is Institutional Access?",
-    a: "Programs can provision access with a code from your administrator. If your residency or fellowship partners with Atlas Review, enter your code after sign-up on the subscribe page.",
-  },
-  {
-    q: "Can I Switch Plans Later?",
-    a: "You can choose a new term when you renew or upgrade from your account flow. For billing questions, email hello@prs-atlas.com with the email on your account.",
-  },
-] as const;
-
 export default function PricingPage() {
   const { isAuthenticated, isLoading } = useAuth();
 
-  usePageSeo({
-    title: "Pricing & Plans | Plastic Surgery Atlas Review",
-    description:
-      "Atlas Review pricing includes flexible monthly ($50), 6-month ($270), and annual plans plus institutional codes. Compare plans and unlock the full plastic surgery Q&A bank, mock exams, spaced repetition, and oral board practice.",
-  });
+  usePageSeo("/pricing");
 
   const checkoutHref = isAuthenticated ? "/subscribe" : "/signup";
   const checkoutLabel = isAuthenticated ? "Go To Checkout" : "Create Account & Subscribe";
@@ -204,7 +182,7 @@ export default function PricingPage() {
               Pricing Questions
             </h2>
             <div className="space-y-4">
-              {PRICING_FAQ.map(({ q, a }) => (
+              {PRICING_MARKETING_FAQ.map(({ q, a }) => (
                 <Card key={q} variant="glass">
                   <CardHeader className="pb-2">
                     <CardTitle className="text-base font-semibold text-foreground">{q}</CardTitle>

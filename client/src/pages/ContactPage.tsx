@@ -9,11 +9,7 @@ const CONTACT_EMAIL = "hello@prs-atlas.com";
 const mailtoHref = `mailto:${CONTACT_EMAIL}?subject=Atlas%20Review%20inquiry`;
 
 export default function ContactPage() {
-  usePageSeo({
-    title: "Contact Us | Plastic Surgery Atlas Review",
-    description:
-      "Contact Atlas Review at hello@prs-atlas.com for account help, study tips, billing questions, and feedback. We answer plastic surgery trainees and board candidates as quickly as we can.",
-  });
+  usePageSeo("/contact");
 
   return (
     <MarketingShell>
