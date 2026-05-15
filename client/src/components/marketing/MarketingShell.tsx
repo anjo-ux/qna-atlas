@@ -212,7 +212,7 @@ export function MarketingShell({
                 </a>
               </div>
               <p className="text-sm text-muted-foreground md:text-right">
-                Atlas Review © {new Date().getFullYear()} · Empowering Surgical Education
+                {new Date().getFullYear()} Atlas Review © | PRS Atlas, LLC. All Rights Reserved.
               </p>
             </div>
           </div>
