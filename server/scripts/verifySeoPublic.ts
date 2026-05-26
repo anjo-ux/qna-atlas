@@ -5,6 +5,7 @@ import {
   isMarketingIndexablePath,
   isNonIndexableAppPath,
   normalizePublicOrigin,
+  stripDefaultPortFromUrl,
 } from "../seoPublic";
 
 const shell = `<!doctype html><html><head><title>Atlas Review</title>
@@ -16,6 +17,10 @@ process.env.NODE_ENV = "production";
 delete process.env.CANONICAL_PUBLIC_ORIGIN;
 
 assert.equal(normalizePublicOrigin("https://prs-atlas.com:443"), "https://prs-atlas.com");
+assert.equal(
+  stripDefaultPortFromUrl("https://prs-atlas.com:443/about"),
+  "https://prs-atlas.com/about",
+);
 assert.equal(getCanonicalOrigin(), "https://prs-atlas.com");
 
 const home = injectSpaIndexHtml(shell, "/");
@@ -24,6 +29,9 @@ assert.match(home, /rel="canonical" href="https:\/\/prs-atlas\.com\/"/);
 assert.match(home, /content="index, follow"/);
 assert.match(home, /name="keywords"/);
 assert.match(home, /id="atlas-structured-data"/);
+assert.match(home, /href="https:\/\/prs-atlas\.com\/favicon-48\.png"/);
+assert.match(home, /id="seo-crawler-nav"/);
+assert.match(home, /href="https:\/\/prs-atlas\.com\/pricing"/);
 assert.doesNotMatch(home, /"FAQPage"/);
 
 const pricing = injectSpaIndexHtml(shell, "/pricing");

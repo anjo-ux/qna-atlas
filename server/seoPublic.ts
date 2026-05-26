@@ -1,6 +1,7 @@
 import type { Express, Request, Response, NextFunction } from "express";
 import type { PublicPageSeo } from "../shared/publicPageSeo";
 import { PUBLIC_PAGE_SEO, SITE_ORIGIN } from "../shared/publicPageSeo";
+import { MARKETING_NAV_LINKS } from "../shared/seoCrawlerNav";
 import { getStructuredData } from "../shared/seoStructuredData";
 
 /**
@@ -67,9 +68,51 @@ function metaForPath(pathname: string): PublicPageSeo | undefined {
   return PUBLIC_PAGE_SEO[normalizePathname(pathname)];
 }
 
+/** Strip :443 / :80 so redirect targets match canonical URLs (avoids GSC redirect validation issues). */
+export function stripDefaultPortFromUrl(url: string): string {
+  return url.replace(/:443(?=\/|$)/, "").replace(/:80(?=\/|$)/, "");
+}
+
 function buildRedirectUrl(pathWithQuery: string, origin: string): string {
   const base = normalizePublicOrigin(origin);
-  return new URL(pathWithQuery || "/", `${base}/`).href;
+  const href = new URL(pathWithQuery || "/", `${base}/`).href;
+  return stripDefaultPortFromUrl(href);
+}
+
+function redirect301(res: Response, target: string): void {
+  res.redirect(301, stripDefaultPortFromUrl(target));
+}
+
+function injectAbsoluteFavicons(html: string, origin: string): string {
+  const base = normalizePublicOrigin(origin);
+  const iconBlock = [
+    `<link rel="icon" href="${base}/favicon.ico" sizes="any" />`,
+    `<link rel="icon" type="image/png" sizes="48x48" href="${base}/favicon-48.png" />`,
+    `<link rel="icon" type="image/png" sizes="192x192" href="${base}/favicon-192.png" />`,
+    `<link rel="apple-touch-icon" href="${base}/apple-touch-icon.png" />`,
+    `<link rel="manifest" href="${base}/site.webmanifest" />`,
+  ].join("\n    ");
+  let out = html.replace(/<link\s+rel="icon"[^>]*>\s*/gi, "");
+  out = out.replace(/<link\s+rel="apple-touch-icon"[^>]*>\s*/gi, "");
+  out = out.replace(/<link\s+rel="manifest"[^>]*>\s*/gi, "");
+  return out.replace("</head>", `    ${iconBlock}\n  </head>`);
+}
+
+function injectCrawlerSiteNav(html: string, origin: string): string {
+  const base = normalizePublicOrigin(origin);
+  const links = MARKETING_NAV_LINKS.map(({ href, label }) => {
+    const url = href === "/" ? `${base}/` : `${base}${href}`;
+    return `<a href="${escapeAttr(url)}">${label}</a>`;
+  }).join("\n      ");
+  const footer = `<footer id="seo-crawler-nav" aria-label="Site pages">
+    <nav>
+      ${links}
+    </nav>
+  </footer>`;
+  if (/<footer\s+id="seo-crawler-nav"/i.test(html)) {
+    return html.replace(/<footer\s+id="seo-crawler-nav"[\s\S]*?<\/footer>/i, footer);
+  }
+  return html.replace("</body>", `  ${footer}\n  </body>`);
 }
 
 function setMetaName(html: string, name: string, content: string): string {
@@ -173,21 +216,13 @@ export function injectSpaIndexHtml(html: string, requestPathWithQuery: string): 
   }
 
   out = injectMarketingHeadTags(out, pathname, meta, canonicalUrl, canonical || SITE_ORIGIN);
+  out = injectAbsoluteFavicons(out, canonical || SITE_ORIGIN);
+  out = injectCrawlerSiteNav(out, canonical || SITE_ORIGIN);
 
   return injectRobotsMeta(out, "index, follow");
 }
 
-const SITEMAP_PATHS = [
-  "/",
-  "/about",
-  "/the-atlas-way",
-  "/preview",
-  "/contact",
-  "/pricing",
-  "/oral-boards-coach",
-  "/terms",
-  "/privacy",
-] as const;
+const SITEMAP_PATHS = MARKETING_NAV_LINKS.map((l) => l.href);
 
 function sitemapPriority(path: string): string {
   if (path === "/") return "1.0";
@@ -255,12 +290,12 @@ export function canonicalHostRedirect(req: Request, res: Response, next: NextFun
   const pathWithQuery = req.originalUrl || "/";
 
   if (host === `www.${canonicalHost}`) {
-    res.redirect(301, buildRedirectUrl(pathWithQuery, canonical));
+    redirect301(res, buildRedirectUrl(pathWithQuery, canonical));
     return;
   }
 
   if (needHttps && !isTls && host === canonicalHost) {
-    res.redirect(301, buildRedirectUrl(pathWithQuery, canonical));
+    redirect301(res, buildRedirectUrl(pathWithQuery, canonical));
     return;
   }
 
@@ -277,6 +312,10 @@ export function registerSeoPublicRoutes(app: Express): void {
     const lines = [
       "User-agent: *",
       "Allow: /",
+      "Allow: /favicon.ico",
+      "Allow: /favicon-48.png",
+      "Allow: /favicon-192.png",
+      "Allow: /site.webmanifest",
       disallow,
       "",
       `Sitemap: ${normalizePublicOrigin(base)}/sitemap.xml`,
