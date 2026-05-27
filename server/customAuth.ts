@@ -289,7 +289,7 @@ export async function setupAuth(app: Express) {
     }
   });
 
-  // Change password route (used after login with temporary password)
+  // Change password route (settings, or after login with temporary password)
   app.post('/api/auth/change-password', async (req, res) => {
     try {
       const userId = (req as any).session?.userId;
@@ -297,10 +297,24 @@ export async function setupAuth(app: Express) {
         return res.status(401).json({ message: 'Unauthorized.' });
       }
 
-      const { newPassword, confirmPassword } = req.body;
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(401).json({ message: 'Unauthorized.' });
+      }
+
+      const { currentPassword, newPassword, confirmPassword } = req.body;
 
       if (!newPassword || !confirmPassword) {
         return res.status(400).json({ message: 'New password and confirmation required.' });
+      }
+
+      if (!user.passwordNeedsReset) {
+        if (!currentPassword) {
+          return res.status(400).json({ message: 'Current password is required.' });
+        }
+        if (!user.passwordHash || !(await verifyPassword(currentPassword, user.passwordHash))) {
+          return res.status(401).json({ message: 'Current password is incorrect.' });
+        }
       }
 
       if (newPassword !== confirmPassword) {

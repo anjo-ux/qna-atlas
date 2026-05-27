@@ -47,6 +47,9 @@ import { extractQuestionStem, questionMcqChoicesReferenceSeeImage } from "@share
 import { subsectionTitles } from "@shared/questionImport";
 import { db, pool } from "./db";
 import { eq, and, asc, desc, lte, sql, count, inArray } from "drizzle-orm";
+import {
+  SOCIALMEDIA_INSTITUTIONAL_CODE,
+} from "./institutionalAccess";
 
 const INSTITUTIONAL_CODE_SALT_ROUNDS = 10;
 let institutionalUserColumnsMigrationDone = false;
@@ -1465,12 +1468,35 @@ export class DatabaseStorage implements IStorage {
     await this.ensureSubscriptionResetMigration();
 
     const existing = await db.select().from(institutionalCodes).limit(1);
-    if (existing.length > 0) return;
+    if (existing.length === 0) {
+      const codeHash = await bcrypt.hash("1127", INSTITUTIONAL_CODE_SALT_ROUNDS);
+      await db.insert(institutionalCodes).values({
+        codeHash,
+        institutionName: "Emory University",
+        active: true,
+      });
+    }
 
-    const codeHash = await bcrypt.hash("1127", INSTITUTIONAL_CODE_SALT_ROUNDS);
+    await this.ensureBuiltinInstitutionalCode(
+      SOCIALMEDIA_INSTITUTIONAL_CODE,
+      "Social Media"
+    );
+  }
+
+  /** Idempotent: inserts a built-in code when no row matches the plaintext (case-sensitive hash). */
+  private async ensureBuiltinInstitutionalCode(
+    plaintext: string,
+    institutionName: string
+  ): Promise<void> {
+    const rows = await db.select().from(institutionalCodes);
+    for (const row of rows) {
+      const match = await bcrypt.compare(plaintext, row.codeHash);
+      if (match) return;
+    }
+    const codeHash = await bcrypt.hash(plaintext, INSTITUTIONAL_CODE_SALT_ROUNDS);
     await db.insert(institutionalCodes).values({
       codeHash,
-      institutionName: "Emory University",
+      institutionName,
       active: true,
     });
   }

@@ -2,7 +2,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ArrowLeft, Mail, CreditCard, BookOpen, TrendingUp, Target, Save, ChevronRight, ChevronLeft, Check, ChevronsUpDown, Award, ExternalLink } from 'lucide-react';
+import { ArrowLeft, Mail, CreditCard, BookOpen, TrendingUp, Target, Save, ChevronRight, ChevronLeft, Check, ChevronsUpDown, Award, ExternalLink, Lock } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ThemeToggle } from '@/components/ThemeToggle';
@@ -44,6 +44,10 @@ export function Settings({ onBack, subscription }: SettingsProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [percentile, setPercentile] = useState<number | null>(null);
   const [percentileLoading, setPercentileLoading] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
 
   const displaySubscription = subscription || { status: 'none', daysRemaining: 0 };
 
@@ -111,6 +115,57 @@ export function Settings({ onBack, subscription }: SettingsProps) {
   const getAvatarIcon = (iconId: string) => {
     const avatar = AVATAR_ICONS.find(a => a.id === iconId);
     return avatar ? avatar.icon : Smile;
+  };
+
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!currentPassword) {
+      toast.error('Please enter your current password.');
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      toast.error('New passwords do not match.');
+      return;
+    }
+
+    if (newPassword.length < 8) {
+      toast.error('Password must be at least 8 characters long.');
+      return;
+    }
+
+    setIsChangingPassword(true);
+
+    try {
+      const response = await fetch('/api/auth/change-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          currentPassword,
+          newPassword,
+          confirmPassword,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        const msg = data.message || 'Failed to change password.';
+        toast.error(msg.endsWith('.') || msg.endsWith('!') || msg.endsWith('?') ? msg : msg + '.');
+        return;
+      }
+
+      toast.success('Password changed successfully.');
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+    } catch (error) {
+      toast.error('An error occurred. Please try again.');
+      console.error('Change password error:', error);
+    } finally {
+      setIsChangingPassword(false);
+    }
   };
 
   const handleSave = async () => {
@@ -406,7 +461,7 @@ export function Settings({ onBack, subscription }: SettingsProps) {
                   Account
                 </h2>
 
-                <div className="space-y-4">
+                <div className="space-y-6">
                   <div>
                     <Label className="text-sm font-medium text-foreground">Email Address</Label>
                     <Input 
@@ -415,6 +470,72 @@ export function Settings({ onBack, subscription }: SettingsProps) {
                       className="mt-1"
                       readOnly
                     />
+                  </div>
+
+                  <div className="border-t border-border pt-6">
+                    <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
+                      <Lock className="h-4 w-4" />
+                      Change Password
+                    </h3>
+                    <form onSubmit={handleChangePassword} className="space-y-4">
+                      <div>
+                        <Label htmlFor="current-password" className="text-sm font-medium text-foreground">
+                          Current Password
+                        </Label>
+                        <Input
+                          id="current-password"
+                          type="password"
+                          autoComplete="current-password"
+                          value={currentPassword}
+                          onChange={(e) => setCurrentPassword(e.target.value)}
+                          disabled={isChangingPassword}
+                          className="mt-1"
+                          data-testid="input-current-password"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="new-password" className="text-sm font-medium text-foreground">
+                          New Password
+                        </Label>
+                        <Input
+                          id="new-password"
+                          type="password"
+                          autoComplete="new-password"
+                          value={newPassword}
+                          onChange={(e) => setNewPassword(e.target.value)}
+                          disabled={isChangingPassword}
+                          className="mt-1"
+                          data-testid="input-new-password"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="confirm-password" className="text-sm font-medium text-foreground">
+                          Confirm New Password
+                        </Label>
+                        <Input
+                          id="confirm-password"
+                          type="password"
+                          autoComplete="new-password"
+                          value={confirmPassword}
+                          onChange={(e) => setConfirmPassword(e.target.value)}
+                          disabled={isChangingPassword}
+                          className="mt-1"
+                          data-testid="input-confirm-password"
+                        />
+                      </div>
+                      <Button
+                        type="submit"
+                        disabled={
+                          isChangingPassword ||
+                          !currentPassword ||
+                          !newPassword ||
+                          !confirmPassword
+                        }
+                        data-testid="button-change-password"
+                      >
+                        {isChangingPassword ? 'Updating Password...' : 'Update Password'}
+                      </Button>
+                    </form>
                   </div>
                 </div>
               </Card>

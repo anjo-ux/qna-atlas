@@ -14,6 +14,11 @@ import {
 import { subsectionOrder, subsectionTitles } from "@shared/questionImport";
 import type { User, SubscriptionTransaction } from "@shared/schema";
 import { userHasAdminForeverAccess } from "./adminGrantedAccess";
+import {
+  institutionalAccessExpiresAtForRedemption,
+  institutionalDaysRemaining,
+  normalizeInstitutionalCodeForLookup,
+} from "./institutionalAccess";
 
 const ADMIN_CODE = process.env.ADMIN_CODE || "1127";
 
@@ -662,8 +667,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
        */
       if (hasInstitutionalAccess && isLocked) {
         const daysInst = institutionalExpiresAt
-          ? Math.max(0, Math.ceil((institutionalExpiresAt.getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
-          : -1;
+          ? institutionalDaysRemaining(institutionalExpiresAt)
+          : null;
         return res.json({
           status: "institutional",
           daysRemaining: daysInst,
@@ -1549,9 +1554,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
        * personal subscription/trial (avoids stale completed transactions forcing a wrong plan label + broken days).
        */
       if (hasInstitutional && !userHasCoherentPersonalPaidRow(user, now)) {
-        const daysRemaining = institutionalExpiresAt
-          ? Math.max(0, Math.ceil((institutionalExpiresAt.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)))
-          : null;
+        const daysRemaining = institutionalDaysRemaining(institutionalExpiresAt, now);
         const txs = await storage.getUserSubscriptionTransactions(userId);
         /** Match GET /api/subscription/transactions: synthetic institutional row + Stripe-backed rows only when filtering legacy rows. */
         const stripeBackedCount = txs.filter(
@@ -1926,7 +1929,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!raw) {
         return res.status(400).json({ message: "Code is required." });
       }
-      const resolved = await storage.resolveInstitutionalCode(raw);
+      const lookupCode = normalizeInstitutionalCodeForLookup(raw);
+      const resolved = await storage.resolveInstitutionalCode(lookupCode);
       if (resolved.type === "not_found") {
         return res.status(400).json({ message: "Invalid code." });
       }
@@ -1942,8 +1946,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             "You have already redeemed this code on your account. Use a different code or subscribe for personal access.",
         });
       }
-      const expiresAt = new Date();
-      expiresAt.setDate(expiresAt.getDate() + 365);
+      const expiresAt = institutionalAccessExpiresAtForRedemption(lookupCode);
       await storage.updateUserProfile(userId, {
         institutionalAccessAffiliation: resolved.institutionName,
         institutionalAccessExpiresAt: expiresAt,
