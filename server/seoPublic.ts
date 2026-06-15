@@ -85,10 +85,12 @@ function redirect301(res: Response, target: string): void {
 
 function injectAbsoluteFavicons(html: string, origin: string): string {
   const base = normalizePublicOrigin(origin);
+  // 48x48 PNG first — Google Search uses the homepage icon link; favicon.ico here is only 16/32px.
   const iconBlock = [
-    `<link rel="icon" href="${base}/favicon.ico" sizes="any" />`,
     `<link rel="icon" type="image/png" sizes="48x48" href="${base}/favicon-48.png" />`,
     `<link rel="icon" type="image/png" sizes="192x192" href="${base}/favicon-192.png" />`,
+    `<link rel="shortcut icon" href="${base}/favicon-48.png" />`,
+    `<link rel="icon" href="${base}/favicon.ico" sizes="32x32" />`,
     `<link rel="apple-touch-icon" href="${base}/apple-touch-icon.png" />`,
     `<link rel="manifest" href="${base}/site.webmanifest" />`,
   ].join("\n    ");
@@ -316,6 +318,12 @@ export function registerSeoPublicRoutes(app: Express): void {
       "Allow: /favicon-48.png",
       "Allow: /favicon-192.png",
       "Allow: /site.webmanifest",
+      "",
+      "User-agent: Googlebot-Image",
+      "Allow: /favicon.ico",
+      "Allow: /favicon-48.png",
+      "Allow: /favicon-192.png",
+      "",
       disallow,
       "",
       `Sitemap: ${normalizePublicOrigin(base)}/sitemap.xml`,
