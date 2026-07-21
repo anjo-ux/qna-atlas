@@ -29,7 +29,7 @@ assert.match(home, /rel="canonical" href="https:\/\/prs-atlas\.com\/"/);
 assert.match(home, /content="index, follow"/);
 assert.match(home, /name="keywords"/);
 assert.match(home, /id="atlas-structured-data"/);
-assert.match(home, /href="https:\/\/prs-atlas\.com\/favicon-48\.png"/);
+assert.match(home, /href="https:\/\/prs-atlas\.com\/favicon-48\.png\?v=/);
 assert.match(home, /id="seo-crawler-nav"/);
 assert.match(home, /href="https:\/\/prs-atlas\.com\/pricing"/);
 assert.doesNotMatch(home, /"FAQPage"/);

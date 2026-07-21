@@ -22,7 +22,7 @@ function organizationAndWebSite(meta: PublicPageSeo, origin: string): Record<str
       url: origin,
       logo: {
         "@type": "ImageObject",
-        url: `${origin}/favicon-192.png`,
+        url: `${origin}/favicon-192.png?v=20260721d`,
         width: 192,
         height: 192,
       },

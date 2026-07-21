@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <defs>
+    <!-- Same gradient as site logo: navy (BL) → bright cyan (TR) -->
+    <linearGradient id="mark" x1="280" y1="760" x2="760" y2="240" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#14316C"/>
+      <stop offset="42%" stop-color="#1E5AA8"/>
+      <stop offset="72%" stop-color="#2B81BD"/>
+      <stop offset="100%" stop-color="#52BAEC"/>
+    </linearGradient>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="22" result="b"/>
+      <feOffset dy="14" result="o"/>
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.35"/>
+      </feComponentTransfer>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <!-- Soft shadow under white disc -->
+  <circle cx="520" cy="528" r="430" fill="#0B1220" opacity="0.28" filter="url(#shadow)"/>
+  <!-- White disc -->
+  <circle cx="512" cy="512" r="430" fill="#FFFFFF"/>
+  <!-- Mark group: +10% larger than previous (was r=250 / globe 168) -->
+  <g transform="translate(512 500) scale(1.1) translate(-512 -500)">
+    <!-- Outer ring -->
+    <circle cx="512" cy="500" r="250" fill="none" stroke="url(#mark)" stroke-width="72"/>
+    <!-- Globe -->
+    <g stroke="url(#mark)" stroke-width="36" fill="none" stroke-linecap="round">
+      <circle cx="512" cy="500" r="168"/>
+      <path d="M512 332 C440 390 440 610 512 668"/>
+      <path d="M512 332 C584 390 584 610 512 668"/>
+      <path d="M344 500 H680"/>
+      <path d="M372 420 H652" stroke-width="28" opacity="0.9"/>
+      <path d="M372 580 H652" stroke-width="28" opacity="0.9"/>
+    </g>
+  </g>
+</svg>
