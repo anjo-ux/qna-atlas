@@ -1,6 +1,11 @@
-import { useEffect } from "react";
-import { getPublicPageSeo, SITE_ORIGIN } from "@shared/publicPageSeo";
+import { useEffect, useSyncExternalStore } from "react";
+import { getPublicPageSeo } from "@shared/publicPageSeo";
 import { getStructuredData } from "@shared/seoStructuredData";
+import { DEFAULT_SPECIALTY_ID, getSpecialty } from "@shared/specialties";
+import {
+  getMarketingSpecialtyId,
+  subscribeMarketingSpecialty,
+} from "@/lib/specialtyBootstrap";
 
 function upsertMetaName(name: string, content: string) {
   let el = document.querySelector(`meta[name="${name}"]`) as HTMLMetaElement | null;
@@ -36,15 +41,23 @@ function upsertCanonical(href: string) {
  * Syncs document head for marketing routes after SPA navigation (must match server injectSpaIndexHtml).
  */
 export function usePageSeo(marketingPath: string) {
+  const specialtyId = useSyncExternalStore(
+    subscribeMarketingSpecialty,
+    getMarketingSpecialtyId,
+    () => DEFAULT_SPECIALTY_ID,
+  );
+
   useEffect(() => {
-    const meta = getPublicPageSeo(marketingPath);
+    const specialty = getSpecialty(specialtyId);
+    const siteOrigin = specialty.canonicalOrigin;
+    const meta = getPublicPageSeo(marketingPath, specialty.id);
     if (!meta) return;
 
     const ogTitle = meta.ogTitle ?? meta.title;
     const ogDescription = meta.ogDescription ?? meta.description;
     const pathSeg = marketingPath === "/" ? "/" : marketingPath;
-    const canonicalUrl = new URL(pathSeg, `${SITE_ORIGIN}/`).href;
-    const ogImage = `${SITE_ORIGIN}/atlas-logo.png`;
+    const canonicalUrl = new URL(pathSeg, `${siteOrigin}/`).href;
+    const ogImage = `${siteOrigin}/atlas-logo.png`;
 
     document.title = meta.title;
     upsertMetaName("description", meta.description);
@@ -56,7 +69,7 @@ export function usePageSeo(marketingPath: string) {
     upsertMetaProperty("og:url", canonicalUrl);
     upsertMetaProperty("og:type", "website");
     upsertMetaProperty("og:image", ogImage);
-    upsertMetaProperty("og:site_name", "Atlas Review");
+    upsertMetaProperty("og:site_name", specialty.productName);
     upsertMetaProperty("og:locale", "en_US");
 
     upsertMetaName("twitter:card", "summary_large_image");
@@ -66,7 +79,7 @@ export function usePageSeo(marketingPath: string) {
 
     upsertCanonical(canonicalUrl);
 
-    const structured = getStructuredData(marketingPath, SITE_ORIGIN);
+    const structured = getStructuredData(marketingPath, siteOrigin, specialty.id);
     if (structured) {
       const raw = JSON.stringify(structured).replace(/</g, "\\u003c");
       let script = document.getElementById("atlas-structured-data");
@@ -78,5 +91,5 @@ export function usePageSeo(marketingPath: string) {
       }
       script.textContent = raw;
     }
-  }, [marketingPath]);
+  }, [marketingPath, specialtyId]);
 }

@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Send, MessageCircle, X, Loader2, Maximize2, Minimize2 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
+import { useSpecialty } from '@/hooks/useSpecialty';
 import { cn } from '@/lib/utils';
 
 interface Message {
@@ -20,6 +21,7 @@ export function ChatBubble() {
   const [isLoading, setIsLoading] = useState(false);
   const [threadId, setThreadId] = useState<string>('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const { specialty } = useSpecialty();
 
   // Initialize thread on first open
   useEffect(() => {
@@ -42,7 +44,7 @@ export function ChatBubble() {
         setMessages([{
           id: '0',
           role: 'assistant',
-          content: 'I can answer any plastic surgery questions you may have using only validated sources.',
+          content: `I can answer any ${specialty.specialtyName.toLowerCase()} questions you may have using only validated sources.`,
           timestamp: new Date()
         }]);
       }

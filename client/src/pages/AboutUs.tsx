@@ -4,9 +4,12 @@ import { MarketingShell } from "@/components/marketing/MarketingShell";
 import { usePageSeo } from "@/lib/usePageSeo";
 import { Check, Target, Layers, BookOpen } from "lucide-react";
 import { Link } from "wouter";
+import { useHostSpecialty } from "@/hooks/useSpecialty";
 
 export default function AboutUs() {
   usePageSeo("/about");
+  const specialty = useHostSpecialty();
+  const specialtyLower = specialty.specialtyName.toLowerCase();
 
   return (
     <MarketingShell>
@@ -14,13 +17,13 @@ export default function AboutUs() {
         <article className="container mx-auto max-w-3xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
           <header className="mb-10 space-y-4">
             <p className="text-sm font-medium tracking-tight text-muted-foreground">
-              Plastic Surgery Education
+              {specialty.specialtyName} Education
             </p>
-            <h1 className="text-4xl font-bold leading-tight tracking-tight gradient-text sm:text-5xl">
+            <h1 className="text-4xl font-bold leading-snug tracking-tight gradient-text sm:text-5xl">
               About Atlas Review
             </h1>
             <p className="text-lg leading-relaxed text-muted-foreground">
-              Atlas Review is a dedicated study companion for plastic surgeons and trainees who want
+              Atlas Review is a dedicated study companion for {specialty.specialtyName} trainees and surgeons who want
               depth, structure, and accountability, not scattered PDFs and endless browser tabs. We
               combine a large, organized question bank with active recall tools, mock testing, and
               oral board-style practice so you can study the way high-stakes exams actually reward.
@@ -33,7 +36,7 @@ export default function AboutUs() {
               Our Mission
             </h2>
             <p className="leading-relaxed text-muted-foreground">
-              We believe plastic surgery training deserves the same rigor in study design as it does
+              We believe {specialtyLower} training deserves the same rigor in study design as it does
               in the operating room. Our mission is to make comprehensive, subspecialty-spanning
               knowledge easier to build, retain, and stress-test, whether you are preparing for
               in-service exams, consolidating clinical knowledge between rotations, or sharpening
@@ -53,8 +56,8 @@ export default function AboutUs() {
             <ol className="list-decimal space-y-3 pl-5 leading-relaxed text-muted-foreground marker:font-semibold marker:text-foreground">
               <li>
                 <strong className="text-foreground">Choose Your Focus.</strong> Browse by section and
-                sub-topic, from core principles to hand, craniomaxillofacial, breast, cosmetic, and
-                comprehensive themes, so study time maps to your real weak areas.
+                sub-topic, from {specialty.marketing.subspecialtyExamples}, so study time maps to
+                your real weak areas.
               </li>
               <li>
                 <strong className="text-foreground">Answer Under Pressure.</strong> Work questions
@@ -87,7 +90,7 @@ export default function AboutUs() {
             </h2>
             <p className="leading-relaxed text-muted-foreground">
               A question bank is only as good as its coverage, consistency, and explanations. Atlas
-              Review is organized around a comprehensive plastic surgery curriculum, not a loose grab
+              Review is organized around a comprehensive {specialtyLower} curriculum, not a loose grab
               bag of trivia, so you can trust that time in the app maps to the breadth the field
               demands.
             </p>
@@ -96,8 +99,8 @@ export default function AboutUs() {
                 <CardHeader>
                   <CardTitle className="text-lg gradient-text">Scale With Structure</CardTitle>
                   <CardDescription>
-                    Thousands Of Items Curated Across Major Domains, Aligned To How Plastic Surgery
-                    Is Taught And Examined, Not Random One-Offs.
+                    Items Curated Across Major Domains, Aligned To How {specialty.specialtyName} Is
+                    Taught And Examined, Not Random One-Offs.
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-2 text-sm text-muted-foreground">

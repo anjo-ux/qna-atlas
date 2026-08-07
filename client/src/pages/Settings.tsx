@@ -9,6 +9,8 @@ import { ThemeToggle } from '@/components/ThemeToggle';
 import { QuestionBreakdownCharts } from '@/components/QuestionBreakdownCharts';
 import { SubscriptionManager } from '@/components/SubscriptionManager';
 import { MobileSubscriptionWidget } from '@/components/MobileSubscriptionWidget';
+import { SpecialtySwitcher } from '@/components/SpecialtySwitcher';
+import { useSpecialty } from '@/hooks/useSpecialty';
 import { useQuestionStats } from '@/hooks/useQuestionStats';
 import {
   Popover,
@@ -37,6 +39,7 @@ interface SettingsProps {
 
 export function Settings({ onBack, subscription }: SettingsProps) {
   const { user, logout } = useAuth();
+  const { specialty } = useSpecialty();
   const { getAllStats } = useQuestionStats();
   const overallStats = getAllStats();
   const [isSaving, setIsSaving] = useState(false);
@@ -246,6 +249,15 @@ export function Settings({ onBack, subscription }: SettingsProps) {
         <div className="flex-1 overflow-y-auto overflow-x-hidden min-w-0">
           <div className="p-4 sm:p-6">
             <div className="max-w-2xl mx-auto space-y-6 min-w-0">
+              {/* Question bank: always reachable here, including on narrow screens where the header switcher is hidden */}
+              <Card className="p-6">
+                <h2 className="text-lg font-semibold text-foreground mb-1">Question Bank</h2>
+                <p className="text-sm text-muted-foreground mb-4">
+                  You are studying {specialty.specialtyName}. Subscriptions are per question bank.
+                </p>
+                <SpecialtySwitcher />
+              </Card>
+
               {/* Profile Section */}
               <Card className="p-6">
                 <h2 className="text-lg font-semibold text-foreground mb-4">Profile Information</h2>

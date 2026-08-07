@@ -15,6 +15,13 @@
       "when": 1769800000000,
       "tag": "0001_add_questions_visible",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1775337600000,
+      "tag": "0016_multi_specialty",
+      "breakpoints": true
     }
   ]
 }

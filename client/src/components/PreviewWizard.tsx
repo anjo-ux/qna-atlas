@@ -3,6 +3,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Button } from '@/components/ui/button';
 import { ChevronRight, BookOpen, Target, TrendingUp, Lock } from 'lucide-react';
 import { Card } from '@/components/ui/card';
+import { useSpecialty } from '@/hooks/useSpecialty';
 
 interface PreviewWizardProps {
   open: boolean;
@@ -12,15 +13,17 @@ interface PreviewWizardProps {
 
 export function PreviewWizard({ open, onClose, onStart }: PreviewWizardProps) {
   const [step, setStep] = useState(0);
+  const { specialty } = useSpecialty();
+  const specialtyLower = specialty.specialtyName.toLowerCase();
 
   const steps = [
     {
       title: 'Atlas Review Welcome Wizard',
-      description: 'Your comprehensive plastic surgery knowledge platform.',
+      description: `Your comprehensive ${specialtyLower} knowledge platform.`,
       icon: BookOpen,
       content: (
         <div className="space-y-4">
-          <p className="text-foreground">Atlas Review helps you master plastic surgery concepts through interactive questions and comprehensive study materials.</p>
+          <p className="text-foreground">Atlas Review helps you master {specialtyLower} concepts through interactive questions and comprehensive study materials.</p>
           <p className="text-muted-foreground text-sm">This 20-question preview will show you how the platform works.</p>
         </div>
       ),

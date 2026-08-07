@@ -3,8 +3,10 @@ import { Link, useLocation } from "wouter";
 import { Instagram } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SalePromoBanner } from "@/components/SalePromoBanner";
+import { SpecialtySubheaderDropdown } from "@/components/SpecialtySubheaderDropdown";
 import { useTheme } from "@/hooks/useTheme";
 import { useAuth } from "@/hooks/useAuth";
+import { useHostSpecialty } from "@/hooks/useSpecialty";
 import { cn } from "@/lib/utils";
 import atlasLogo from "@assets/atlas_1764093111680.png";
 import atlasLogoLight from "@assets/logo_light_1774918799268.png";
@@ -23,9 +25,6 @@ const FOOTER_LINKS = [
   { href: "/terms", label: "Terms" },
   { href: "/privacy", label: "Privacy" },
 ] as const;
-
-const INSTAGRAM_URL =
-  "https://www.instagram.com/prs_atlas?igsh=bDk1dmtld2Uzdnpt";
 
 function handleLogin() {
   window.location.href = "/login";
@@ -48,6 +47,8 @@ export function MarketingShell({
   const { theme } = useTheme();
   const [pathname] = useLocation();
   const { isAuthenticated, isLoading } = useAuth();
+  /** Marketing surfaces follow the domain, not the logged-in q-bank. */
+  const specialty = useHostSpecialty();
   const path = pathname.replace(/\/$/, "") || "/";
 
   return (
@@ -73,26 +74,28 @@ export function MarketingShell({
           <div className="container mx-auto px-4 py-2.5 sm:px-6 lg:px-8">
             <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
               <div className="flex min-w-0 items-center justify-between gap-3 sm:justify-start">
-                <Link
-                  href="/"
-                  className="flex min-w-0 items-center gap-3 rounded-xl px-3 py-1.5 transition-opacity hover:opacity-90"
-                >
-                  <div className="logo-glass flex flex-shrink-0 items-center justify-center p-1.5 ring-1 ring-black/5 dark:ring-white/10">
+                <div className="flex min-w-0 items-center gap-3 rounded-xl px-3 py-1.5">
+                  <Link
+                    href="/"
+                    className="logo-glass flex flex-shrink-0 items-center justify-center p-1.5 ring-1 ring-black/5 dark:ring-white/10 transition-opacity hover:opacity-90"
+                    aria-label={`${specialty.productName} home`}
+                  >
                     <img
                       src={theme === "dark" ? atlasLogoLight : atlasLogo}
-                      alt="Atlas Review, plastic surgery study platform"
+                      alt={`Atlas Review, ${specialty.specialtyName.toLowerCase()} study platform`}
                       className="h-7 w-7 object-contain sm:h-8 sm:w-8"
                     />
-                  </div>
+                  </Link>
                   <div className="hidden min-w-0 flex-col sm:flex">
-                    <span className="gradient-text truncate text-base font-bold leading-tight tracking-tight sm:text-lg">
-                      Atlas
-                    </span>
-                    <span className="truncate text-xs font-medium tracking-tight text-muted-foreground">
-                      Review
-                    </span>
+                    <Link
+                      href="/"
+                      className="gradient-text truncate text-base font-bold leading-tight tracking-tight transition-opacity hover:opacity-90 sm:text-lg"
+                    >
+                      {specialty.productName}
+                    </Link>
+                    <SpecialtySubheaderDropdown />
                   </div>
-                </Link>
+                </div>
                 <div className="flex shrink-0 items-center gap-1.5 sm:hidden">
                   {isLoading ? (
                     <div className="h-9 w-24 animate-pulse rounded-md bg-muted" />
@@ -202,7 +205,7 @@ export function MarketingShell({
               </nav>
               <div className="flex shrink-0 justify-center">
                 <a
-                  href={INSTAGRAM_URL}
+                  href={specialty.instagramUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Atlas Review on Instagram"
@@ -212,7 +215,8 @@ export function MarketingShell({
                 </a>
               </div>
               <p className="text-sm text-muted-foreground md:text-right">
-                {new Date().getFullYear()} Atlas Review © | PRS Atlas, LLC. All Rights Reserved.
+                {new Date().getFullYear()} Atlas Review © | {specialty.legalEntity}. All Rights
+                Reserved.
               </p>
             </div>
           </div>

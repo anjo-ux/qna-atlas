@@ -19,8 +19,10 @@ import {
   sections,
   subsections,
   questions,
+  userSpecialtySubscriptions,
   type User,
   type UpsertUser,
+  type UserSpecialtySubscription,
   type TestSession,
   type InsertTestSession,
   type QuestionResponse,
@@ -45,6 +47,12 @@ import {
 } from "@shared/schema";
 import { extractQuestionStem, questionMcqChoicesReferenceSeeImage } from "@shared/questionFormat";
 import { subsectionTitles } from "@shared/questionImport";
+import {
+  DEFAULT_SPECIALTY_ID,
+  SPECIALTY_IDS,
+  getSpecialty,
+  type SpecialtyId,
+} from "@shared/specialties";
 import { db, pool } from "./db";
 import { eq, and, asc, desc, lte, sql, count, inArray } from "drizzle-orm";
 import {
@@ -56,6 +64,24 @@ let institutionalUserColumnsMigrationDone = false;
 let institutionalRedemptionConsistencyMigrationDone = false;
 let subscriptionResetDone = false;
 let userInstitutionalRedemptionsTableDone = false;
+let multiSpecialtyMigrationDone = false;
+
+/**
+ * Entitlement fields that exist on both `user_specialty_subscriptions` and (as the Plastic Surgery
+ * mirror) on `users`. Writing through `updateSpecialtyEntitlement` keeps the two in sync.
+ */
+export type SpecialtyEntitlementUpdate = Partial<{
+  subscriptionStatus: string;
+  subscriptionPlan: string | null;
+  trialEndsAt: Date | null;
+  subscriptionEndsAt: Date | null;
+  subscriptionCancelAtPeriodEnd: boolean;
+  subscriptionCanceledAt: Date | null;
+  stripeSubscriptionId: string | null;
+  subscriptionTrialUsed: boolean;
+  institutionalAccessAffiliation: string | null;
+  institutionalAccessExpiresAt: Date | null;
+}>;
 
 export type SectionDto = {
   id: string;
@@ -147,45 +173,95 @@ export interface IStorage {
     accuracy: number;
   }[]>;
 
+  // Specialty (multi q-bank) operations
+  /** The q-bank the user currently has selected. */
+  getActiveSpecialty(userId: string): Promise<SpecialtyId>;
+  setActiveSpecialty(userId: string, specialtyId: SpecialtyId): Promise<SpecialtyId>;
+  /** Entitlement row for one q-bank; created lazily as "expired" when missing. */
+  getSpecialtyEntitlement(userId: string, specialtyId: SpecialtyId): Promise<UserSpecialtySubscription>;
+  listSpecialtyEntitlements(userId: string): Promise<UserSpecialtySubscription[]>;
+  updateSpecialtyEntitlement(
+    userId: string,
+    specialtyId: SpecialtyId,
+    updates: SpecialtyEntitlementUpdate,
+  ): Promise<UserSpecialtySubscription>;
+  /**
+   * `User` with its entitlement columns replaced by the given specialty's row, so entitlement
+   * logic written against the legacy single-specialty shape stays correct per q-bank.
+   */
+  getUserWithSpecialtyEntitlement(
+    userId: string,
+    specialtyId: SpecialtyId,
+  ): Promise<User | undefined>;
+
   // Subscription operations
   warmupSubscriptionSchema(): Promise<void>;
-  initializeSubscriptionPlans(): Promise<SubscriptionPlan[]>;
-  getSubscriptionPlans(): Promise<SubscriptionPlan[]>;
+  initializeSubscriptionPlans(specialtyId?: SpecialtyId): Promise<SubscriptionPlan[]>;
+  getSubscriptionPlans(specialtyId?: SpecialtyId): Promise<SubscriptionPlan[]>;
+  /** Plan lookup by id across every specialty (checkout/webhooks resolve specialty from the plan). */
+  getSubscriptionPlanById(planId: string): Promise<SubscriptionPlan | undefined>;
   createSubscriptionTransaction(transaction: InsertSubscriptionTransaction): Promise<SubscriptionTransaction>;
-  getUserActiveSubscription(userId: string): Promise<SubscriptionTransaction | undefined>;
-  cancelUserSubscription(userId: string): Promise<void>;
-  getUserSubscriptionTransactions(userId: string): Promise<SubscriptionTransaction[]>;
+  getUserActiveSubscription(
+    userId: string,
+    specialtyId?: SpecialtyId,
+  ): Promise<SubscriptionTransaction | undefined>;
+  cancelUserSubscription(userId: string, specialtyId?: SpecialtyId): Promise<void>;
+  getUserSubscriptionTransactions(
+    userId: string,
+    specialtyId?: SpecialtyId,
+  ): Promise<SubscriptionTransaction[]>;
   /** Idempotent Stripe invoice handling (renewals). */
   getSubscriptionTransactionByStripeInvoiceId(invoiceId: string): Promise<SubscriptionTransaction | undefined>;
-  getUserByStripeSubscriptionId(stripeSubscriptionId: string): Promise<User | undefined>;
-  /** Users currently linked to Stripe subscriptions (for periodic reconciliation). */
-  getUsersWithStripeSubscriptions(): Promise<User[]>;
-  /** False if user already consumed intro trial (flag or any completed subscription purchase). */
-  getIntroTrialEligibility(userId: string): Promise<boolean>;
+  /** Entitlement row (user + specialty) that owns a Stripe subscription id. */
+  getEntitlementByStripeSubscriptionId(
+    stripeSubscriptionId: string,
+  ): Promise<UserSpecialtySubscription | undefined>;
+  /** Entitlements currently linked to Stripe subscriptions (for periodic reconciliation). */
+  getEntitlementsWithStripeSubscriptions(): Promise<UserSpecialtySubscription[]>;
+  /** False if user already consumed the intro trial for this q-bank. */
+  getIntroTrialEligibility(userId: string, specialtyId?: SpecialtyId): Promise<boolean>;
 
   // Institutional codes (hashed in DB; validate returns institution display name)
   ensureInstitutionalCodesSeed(): Promise<void>;
   validateInstitutionalCode(plainCode: string): Promise<string | null>;
-  /** Match plaintext to a code row; used for redeem (needs code id for per-code dedup). */
+  /** Match plaintext to a code row; used for redeem (needs code id + specialty for per-code dedup). */
   resolveInstitutionalCode(plainCode: string): Promise<
-    | { type: "ok"; institutionName: string; codeId: string }
+    | { type: "ok"; institutionName: string; codeId: string; specialtyId: SpecialtyId }
     | { type: "inactive" }
     | { type: "not_found" }
   >;
   getInstitutionalCodesAdmin(): Promise<
-    { id: string; institutionName: string; active: boolean; createdAt: Date | null }[]
+    {
+      id: string;
+      institutionName: string;
+      specialtyId: SpecialtyId;
+      active: boolean;
+      createdAt: Date | null;
+    }[]
   >;
-  createInstitutionalCodeAdmin(plainCode: string, institutionName: string): Promise<{ id: string }>;
+  createInstitutionalCodeAdmin(
+    plainCode: string,
+    institutionName: string,
+    specialtyId?: SpecialtyId,
+  ): Promise<{ id: string }>;
   setInstitutionalCodeActiveAdmin(id: string, active: boolean): Promise<boolean>;
   hasUserRedeemedInstitutionalCode(userId: string, institutionalCodeId: string): Promise<boolean>;
-  recordInstitutionalCodeRedemption(userId: string, institutionalCodeId: string): Promise<void>;
-  /** True if this account has redeemed at least one institutional code (access is still gated by expires_at). */
-  userHasAnyInstitutionalRedemption(userId: string): Promise<boolean>;
+  recordInstitutionalCodeRedemption(
+    userId: string,
+    institutionalCodeId: string,
+    specialtyId?: SpecialtyId,
+  ): Promise<void>;
+  /** True if this account has redeemed at least one institutional code for the q-bank. */
+  userHasAnyInstitutionalRedemption(userId: string, specialtyId?: SpecialtyId): Promise<boolean>;
   /**
    * If user has a code redemption row but no expiry (legacy), set 365 days from now.
    * Idempotent when expiry already set. Does nothing when there are no redemptions.
    */
-  ensureInstitutionalAccessExpiryWhenMissing(userId: string, userHint?: User | undefined): Promise<void>;
+  ensureInstitutionalAccessExpiryWhenMissing(
+    userId: string,
+    userHint?: User | undefined,
+    specialtyId?: SpecialtyId,
+  ): Promise<void>;
   /** When RUN_SUBSCRIPTION_RESET=true, reset all users to no subscription once. Call at startup. */
   runSubscriptionResetIfRequested(): Promise<void>;
 
@@ -197,7 +273,7 @@ export interface IStorage {
   getUserPercentileRank(userId: string): Promise<number | null>;
 
   // Question bank (sections API)
-  getSections(): Promise<SectionDto[]>;
+  getSections(specialtyId?: SpecialtyId): Promise<SectionDto[]>;
 
   // Question reports
   createQuestionReport(report: InsertQuestionReport): Promise<QuestionReport>;
@@ -237,6 +313,136 @@ export class DatabaseStorage implements IStorage {
   async getUser(id: string): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.id, id));
     return user;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Specialty (multi q-bank) operations
+  // ---------------------------------------------------------------------------
+
+  async getActiveSpecialty(userId: string): Promise<SpecialtyId> {
+    await this.ensureMultiSpecialtyMigration();
+    const [row] = await db
+      .select({ activeSpecialtyId: users.activeSpecialtyId })
+      .from(users)
+      .where(eq(users.id, userId));
+    return getSpecialty(row?.activeSpecialtyId).id;
+  }
+
+  async setActiveSpecialty(userId: string, specialtyId: SpecialtyId): Promise<SpecialtyId> {
+    await this.ensureMultiSpecialtyMigration();
+    const target = getSpecialty(specialtyId).id;
+    await db
+      .update(users)
+      .set({ activeSpecialtyId: target, updatedAt: new Date() })
+      .where(eq(users.id, userId));
+    /** Guarantee an entitlement row exists so the paywall has something to read. */
+    await this.getSpecialtyEntitlement(userId, target);
+    return target;
+  }
+
+  async getSpecialtyEntitlement(
+    userId: string,
+    specialtyId: SpecialtyId,
+  ): Promise<UserSpecialtySubscription> {
+    await this.ensureMultiSpecialtyMigration();
+    const target = getSpecialty(specialtyId).id;
+    const [existing] = await db
+      .select()
+      .from(userSpecialtySubscriptions)
+      .where(
+        and(
+          eq(userSpecialtySubscriptions.userId, userId),
+          eq(userSpecialtySubscriptions.specialtyId, target),
+        ),
+      )
+      .limit(1);
+    if (existing) return existing;
+
+    const [created] = await db
+      .insert(userSpecialtySubscriptions)
+      .values({ userId, specialtyId: target, subscriptionStatus: "expired" })
+      .onConflictDoNothing({
+        target: [userSpecialtySubscriptions.userId, userSpecialtySubscriptions.specialtyId],
+      })
+      .returning();
+    if (created) return created;
+
+    const [afterRace] = await db
+      .select()
+      .from(userSpecialtySubscriptions)
+      .where(
+        and(
+          eq(userSpecialtySubscriptions.userId, userId),
+          eq(userSpecialtySubscriptions.specialtyId, target),
+        ),
+      )
+      .limit(1);
+    if (!afterRace) throw new Error(`Failed to create entitlement row for ${userId}/${target}`);
+    return afterRace;
+  }
+
+  async listSpecialtyEntitlements(userId: string): Promise<UserSpecialtySubscription[]> {
+    await this.ensureMultiSpecialtyMigration();
+    for (const id of SPECIALTY_IDS) {
+      await this.getSpecialtyEntitlement(userId, id);
+    }
+    return db
+      .select()
+      .from(userSpecialtySubscriptions)
+      .where(eq(userSpecialtySubscriptions.userId, userId));
+  }
+
+  async updateSpecialtyEntitlement(
+    userId: string,
+    specialtyId: SpecialtyId,
+    updates: SpecialtyEntitlementUpdate,
+  ): Promise<UserSpecialtySubscription> {
+    const target = getSpecialty(specialtyId).id;
+    await this.getSpecialtyEntitlement(userId, target);
+
+    const [updated] = await db
+      .update(userSpecialtySubscriptions)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(
+        and(
+          eq(userSpecialtySubscriptions.userId, userId),
+          eq(userSpecialtySubscriptions.specialtyId, target),
+        ),
+      )
+      .returning();
+
+    /** Keep the legacy `users` columns as the Plastic Surgery mirror for untouched code paths. */
+    if (target === DEFAULT_SPECIALTY_ID) {
+      await db
+        .update(users)
+        .set({ ...updates, updatedAt: new Date() } as Partial<UpsertUser>)
+        .where(eq(users.id, userId));
+    }
+
+    if (!updated) throw new Error(`Failed to update entitlement for ${userId}/${target}`);
+    return updated;
+  }
+
+  async getUserWithSpecialtyEntitlement(
+    userId: string,
+    specialtyId: SpecialtyId,
+  ): Promise<User | undefined> {
+    const user = await this.getUser(userId);
+    if (!user) return undefined;
+    const entitlement = await this.getSpecialtyEntitlement(userId, specialtyId);
+    return {
+      ...user,
+      subscriptionStatus: entitlement.subscriptionStatus,
+      subscriptionPlan: entitlement.subscriptionPlan,
+      trialEndsAt: entitlement.trialEndsAt,
+      subscriptionEndsAt: entitlement.subscriptionEndsAt,
+      subscriptionCancelAtPeriodEnd: entitlement.subscriptionCancelAtPeriodEnd,
+      subscriptionCanceledAt: entitlement.subscriptionCanceledAt,
+      stripeSubscriptionId: entitlement.stripeSubscriptionId,
+      subscriptionTrialUsed: entitlement.subscriptionTrialUsed,
+      institutionalAccessAffiliation: entitlement.institutionalAccessAffiliation,
+      institutionalAccessExpiresAt: entitlement.institutionalAccessExpiresAt,
+    };
   }
 
   async getUserByEmail(email: string): Promise<User | undefined> {
@@ -768,8 +974,14 @@ export class DatabaseStorage implements IStorage {
     return updated;
   }
 
-  async getSections(): Promise<SectionDto[]> {
-    const sectionRows = await db.select().from(sections).orderBy(asc(sections.sortOrder));
+  async getSections(specialtyId: SpecialtyId = DEFAULT_SPECIALTY_ID): Promise<SectionDto[]> {
+    await this.ensureMultiSpecialtyMigration();
+    const sectionRows = await db
+      .select()
+      .from(sections)
+      .where(eq(sections.specialtyId, getSpecialty(specialtyId).id))
+      .orderBy(asc(sections.sortOrder));
+    if (sectionRows.length === 0) return [];
     const subsectionRows = await db.select().from(subsections).orderBy(asc(subsections.sortOrder));
     const questionRows = await db.select().from(questions);
     const bySub = new Map<string, typeof questionRows>();
@@ -1029,37 +1241,73 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Subscription operations
-  async initializeSubscriptionPlans(): Promise<SubscriptionPlan[]> {
+  async initializeSubscriptionPlans(
+    specialtyId: SpecialtyId = DEFAULT_SPECIALTY_ID,
+  ): Promise<SubscriptionPlan[]> {
     await this.ensureSubscriptionPlansSync();
-    return this.getSubscriptionPlans();
+    return this.getSubscriptionPlans(specialtyId);
   }
 
   /** Payment Link URLs (with free trial) – used when set; otherwise fallback to product/price. */
-  private static readonly PAYMENT_LINK_URLS: Record<string, string> = {
-    monthly: 'https://buy.stripe.com/28E14m4X6dd36H8f2pcV202',
-    '6-month': 'https://buy.stripe.com/7sYeVc0GQ7SJc1saM9cV201',
-    '1-year': 'https://buy.stripe.com/aFaaEW2OY3Ct6H88E1cV200',
+  private static readonly PAYMENT_LINK_URLS: Record<SpecialtyId, Record<string, string>> = {
+    prs: {
+      monthly: 'https://buy.stripe.com/28E14m4X6dd36H8f2pcV202',
+      '6-month': 'https://buy.stripe.com/7sYeVc0GQ7SJc1saM9cV201',
+      '1-year': 'https://buy.stripe.com/aFaaEW2OY3Ct6H88E1cV200',
+    },
+    /** Ortho Stripe products/links are created separately; fill via env until then. */
+    ortho: {},
   };
 
   /**
    * Payment Links without a free trial (same products/prices as above, no trial in Stripe Dashboard).
-   * Paste URLs here and/or set env: STRIPE_PAYMENT_LINK_MONTHLY_NO_TRIAL, _6_MONTH_, _1_YEAR_.
+   * Paste URLs here and/or set env, e.g. STRIPE_PAYMENT_LINK_MONTHLY_NO_TRIAL (PRS) and
+   * STRIPE_PAYMENT_LINK_ORTHO_MONTHLY_NO_TRIAL (Ortho).
    */
-  private static readonly PAYMENT_LINK_URLS_NO_TRIAL: Record<string, string> = {
-    monthly: 'https://buy.stripe.com/00w14m2OYb4VfdE5rPcV203',
-    '6-month': 'https://buy.stripe.com/14A8wO9dmb4V8PgbQdcV204',
-    '1-year': 'https://buy.stripe.com/14A8wOahq6OF3uWf2pcV205',
+  private static readonly PAYMENT_LINK_URLS_NO_TRIAL: Record<SpecialtyId, Record<string, string>> = {
+    prs: {
+      monthly: 'https://buy.stripe.com/00w14m2OYb4VfdE5rPcV203',
+      '6-month': 'https://buy.stripe.com/14A8wO9dmb4V8PgbQdcV204',
+      '1-year': 'https://buy.stripe.com/14A8wOahq6OF3uWf2pcV205',
+    },
+    ortho: {},
   };
 
-  private resolveNoTrialPaymentLink(planName: string): string {
-    const envMap: Record<string, string | undefined> = {
-      monthly: process.env.STRIPE_PAYMENT_LINK_MONTHLY_NO_TRIAL,
-      '6-month': process.env.STRIPE_PAYMENT_LINK_6_MONTH_NO_TRIAL,
-      '1-year': process.env.STRIPE_PAYMENT_LINK_1_YEAR_NO_TRIAL,
-    };
-    const fromEnv = envMap[planName]?.trim();
+  /** Stripe product ids per specialty. Ortho ids come from env until the products exist. */
+  private static readonly STRIPE_PRODUCT_IDS: Record<SpecialtyId, Record<string, string>> = {
+    prs: {
+      monthly: 'prod_U14VnZW3eRgkDL',
+      '6-month': 'prod_U14WP9DcWZEZWi',
+      '1-year': 'prod_U14X6csDhWjhrk',
+    },
+    ortho: {},
+  };
+
+  /** `STRIPE_PAYMENT_LINK_MONTHLY…` for PRS; `STRIPE_PAYMENT_LINK_ORTHO_MONTHLY…` for Ortho. */
+  private static envKey(specialtyId: SpecialtyId, planName: string, suffix: string): string {
+    const planKey = planName.toUpperCase().replace(/-/g, '_');
+    const specialtyKey = specialtyId === DEFAULT_SPECIALTY_ID ? '' : `${specialtyId.toUpperCase()}_`;
+    return `STRIPE_PAYMENT_LINK_${specialtyKey}${planKey}${suffix}`;
+  }
+
+  private resolveTrialPaymentLink(specialtyId: SpecialtyId, planName: string): string {
+    const fromEnv = process.env[DatabaseStorage.envKey(specialtyId, planName, '')]?.trim();
     if (fromEnv) return fromEnv;
-    return (DatabaseStorage.PAYMENT_LINK_URLS_NO_TRIAL[planName] ?? '').trim();
+    return (DatabaseStorage.PAYMENT_LINK_URLS[specialtyId]?.[planName] ?? '').trim();
+  }
+
+  private resolveNoTrialPaymentLink(specialtyId: SpecialtyId, planName: string): string {
+    const fromEnv = process.env[DatabaseStorage.envKey(specialtyId, planName, '_NO_TRIAL')]?.trim();
+    if (fromEnv) return fromEnv;
+    return (DatabaseStorage.PAYMENT_LINK_URLS_NO_TRIAL[specialtyId]?.[planName] ?? '').trim();
+  }
+
+  private resolveStripeProductId(specialtyId: SpecialtyId, planName: string): string | null {
+    const planKey = planName.toUpperCase().replace(/-/g, '_');
+    const specialtyKey = specialtyId === DEFAULT_SPECIALTY_ID ? '' : `${specialtyId.toUpperCase()}_`;
+    const fromEnv = process.env[`STRIPE_PRODUCT_${specialtyKey}${planKey}`]?.trim();
+    if (fromEnv) return fromEnv;
+    return DatabaseStorage.STRIPE_PRODUCT_IDS[specialtyId]?.[planName] ?? null;
   }
 
   /** Ensures DB columns for trial tracking and no-trial payment links exist (idempotent). */
@@ -1084,6 +1332,104 @@ export class DatabaseStorage implements IStorage {
     `);
   }
 
+  /**
+   * Multi-specialty columns + per-specialty entitlement table (drizzle/0016_multi_specialty.sql).
+   * Idempotent; every pre-existing row belongs to Plastic Surgery so defaults are the backfill.
+   */
+  private async ensureMultiSpecialtyMigration(): Promise<void> {
+    if (multiSpecialtyMigrationDone) return;
+    multiSpecialtyMigrationDone = true;
+
+    const columns: [string, string][] = [
+      ["users", "active_specialty_id"],
+      ["users", "signup_specialty_id"],
+      ["sections", "specialty_id"],
+      ["subscription_plans", "specialty_id"],
+      ["subscription_transactions", "specialty_id"],
+      ["institutional_codes", "specialty_id"],
+      ["user_institutional_code_redemptions", "specialty_id"],
+    ];
+    for (const [table, column] of columns) {
+      await pool.query(
+        `ALTER TABLE "${table}" ADD COLUMN IF NOT EXISTS "${column}" varchar(32) NOT NULL DEFAULT '${DEFAULT_SPECIALTY_ID}'`,
+      );
+    }
+
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS "user_specialty_subscriptions" (
+        "id" varchar PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+        "user_id" varchar NOT NULL REFERENCES "users"("id") ON DELETE CASCADE,
+        "specialty_id" varchar(32) NOT NULL,
+        "subscription_status" varchar NOT NULL DEFAULT 'expired',
+        "subscription_plan" varchar,
+        "trial_ends_at" timestamp,
+        "subscription_ends_at" timestamp,
+        "subscription_cancel_at_period_end" boolean NOT NULL DEFAULT false,
+        "subscription_canceled_at" timestamp,
+        "stripe_subscription_id" varchar,
+        "subscription_trial_used" boolean NOT NULL DEFAULT false,
+        "institutional_access_affiliation" varchar,
+        "institutional_access_expires_at" timestamp,
+        "created_at" timestamp DEFAULT now() NOT NULL,
+        "updated_at" timestamp DEFAULT now() NOT NULL
+      )
+    `);
+
+    const indexes = [
+      `CREATE UNIQUE INDEX IF NOT EXISTS "uidx_user_specialty_subscription" ON "user_specialty_subscriptions" ("user_id", "specialty_id")`,
+      `CREATE INDEX IF NOT EXISTS "idx_user_specialty_subscriptions_user_id" ON "user_specialty_subscriptions" ("user_id")`,
+      `CREATE INDEX IF NOT EXISTS "idx_user_specialty_subscriptions_stripe_sub" ON "user_specialty_subscriptions" ("stripe_subscription_id")`,
+      `CREATE INDEX IF NOT EXISTS "idx_sections_specialty_id" ON "sections" ("specialty_id")`,
+      `CREATE UNIQUE INDEX IF NOT EXISTS "uidx_subscription_plans_specialty_name" ON "subscription_plans" ("specialty_id", "name")`,
+      `CREATE INDEX IF NOT EXISTS "idx_subscription_transactions_user_specialty" ON "subscription_transactions" ("user_id", "specialty_id")`,
+      `CREATE INDEX IF NOT EXISTS "idx_user_institutional_redemptions_user_specialty" ON "user_institutional_code_redemptions" ("user_id", "specialty_id")`,
+    ];
+    for (const statement of indexes) {
+      try {
+        await pool.query(statement);
+      } catch (err) {
+        /** Duplicate plan names predating the unique index must not block startup. */
+        console.warn("[multiSpecialtyMigration] index skipped:", statement, err);
+      }
+    }
+
+    await pool.query(`
+      INSERT INTO "user_specialty_subscriptions" (
+        "user_id", "specialty_id", "subscription_status", "subscription_plan", "trial_ends_at",
+        "subscription_ends_at", "subscription_cancel_at_period_end", "subscription_canceled_at",
+        "stripe_subscription_id", "subscription_trial_used", "institutional_access_affiliation",
+        "institutional_access_expires_at"
+      )
+      SELECT
+        u."id", $1, COALESCE(u."subscription_status", 'expired'), u."subscription_plan",
+        u."trial_ends_at", u."subscription_ends_at",
+        COALESCE(u."subscription_cancel_at_period_end", false), u."subscription_canceled_at",
+        u."stripe_subscription_id", COALESCE(u."subscription_trial_used", false),
+        u."institutional_access_affiliation", u."institutional_access_expires_at"
+      FROM "users" u
+      ON CONFLICT ("user_id", "specialty_id") DO NOTHING
+    `, [DEFAULT_SPECIALTY_ID]);
+
+    /**
+     * Same rule as ensureInstitutionalAccessRedemptionConsistencyMigration, applied to entitlement
+     * rows created on an earlier boot: only a code redemption grants institutional access.
+     */
+    await pool.query(`
+      UPDATE "user_specialty_subscriptions" e
+      SET "institutional_access_affiliation" = NULL,
+          "institutional_access_expires_at" = NULL,
+          "updated_at" = now()
+      WHERE NOT EXISTS (
+        SELECT 1 FROM "user_institutional_code_redemptions" r
+        WHERE r.user_id = e.user_id AND r.specialty_id = e.specialty_id
+      )
+      AND (
+        (e.institutional_access_affiliation IS NOT NULL AND TRIM(e.institutional_access_affiliation) != '')
+        OR e.institutional_access_expires_at IS NOT NULL
+      )
+    `);
+  }
+
   /** Call once at server startup so user rows match schema before any getUser(). */
   async warmupSubscriptionSchema(): Promise<void> {
     await this.ensureSubscriptionTrialMigrations();
@@ -1092,97 +1438,110 @@ export class DatabaseStorage implements IStorage {
     await this.ensureInstitutionalCodeRedeemedAtMigration();
     await this.ensureUserInstitutionalRedemptionsTable();
     await this.ensureInstitutionalAccessRedemptionConsistencyMigration();
+    await this.ensureMultiSpecialtyMigration();
   }
 
-  /** Ensures the three subscription plans (monthly $50, 6-month $270, 1-year $450 list) exist and are up to date. */
+  /** List prices are identical across specialties; Stripe products/links are not. */
+  private static readonly PLAN_SHAPES = [
+    { name: 'monthly', durationMonths: 1, priceUSD: 5000 },
+    { name: '6-month', durationMonths: 6, priceUSD: 27000 },
+    { name: '1-year', durationMonths: 12, priceUSD: 45000 },
+  ] as const;
+
+  private static readonly PLAN_NAMES = DatabaseStorage.PLAN_SHAPES.map((p) => p.name);
+
+  /**
+   * Ensures the three plans (monthly $50, 6-month $270, 1-year $450 list) exist for every specialty.
+   * Legacy rows have no specialty column value other than the default, so they migrate in place.
+   */
   async ensureSubscriptionPlansSync(): Promise<void> {
     await this.ensureSubscriptionTrialMigrations();
-    const targetPlans = [
-      {
-        name: 'monthly' as const,
-        durationMonths: 1,
-        priceUSD: 5000,
-        stripeProductId: 'prod_U14VnZW3eRgkDL',
-        stripePaymentLinkUrl: DatabaseStorage.PAYMENT_LINK_URLS.monthly,
-        stripePaymentLinkUrlNoTrial: this.resolveNoTrialPaymentLink('monthly') || null,
-      },
-      {
-        name: '6-month' as const,
-        durationMonths: 6,
-        priceUSD: 27000,
-        stripeProductId: 'prod_U14WP9DcWZEZWi',
-        stripePaymentLinkUrl: DatabaseStorage.PAYMENT_LINK_URLS['6-month'],
-        stripePaymentLinkUrlNoTrial: this.resolveNoTrialPaymentLink('6-month') || null,
-      },
-      {
-        name: '1-year' as const,
-        durationMonths: 12,
-        priceUSD: 45000,
-        stripeProductId: 'prod_U14X6csDhWjhrk',
-        stripePaymentLinkUrl: DatabaseStorage.PAYMENT_LINK_URLS['1-year'],
-        stripePaymentLinkUrlNoTrial: this.resolveNoTrialPaymentLink('1-year') || null,
-      },
-    ];
+    await this.ensureMultiSpecialtyMigration();
 
-    // Migrate old plan names to new
-    const oneMonth = await db.select().from(subscriptionPlans).where(eq(subscriptionPlans.name, '1-month'));
-    if (oneMonth.length > 0) {
-      await db.update(subscriptionPlans).set({ name: 'monthly', durationMonths: 1, priceUSD: 5000, stripeProductId: 'prod_U14VnZW3eRgkDL' }).where(eq(subscriptionPlans.name, '1-month'));
-    }
-    const threeMonth = await db.select().from(subscriptionPlans).where(eq(subscriptionPlans.name, '3-month'));
-    if (threeMonth.length > 0) {
+    // Migrate old plan names to new (Plastic Surgery only — Ortho never had these).
+    const legacyRenames: { from: string; to: string; durationMonths: number; priceUSD: number }[] = [
+      { from: '1-month', to: 'monthly', durationMonths: 1, priceUSD: 5000 },
+      { from: '3-month', to: '1-year', durationMonths: 12, priceUSD: 45000 },
+    ];
+    for (const rename of legacyRenames) {
+      const rows = await db
+        .select()
+        .from(subscriptionPlans)
+        .where(
+          and(
+            eq(subscriptionPlans.name, rename.from),
+            eq(subscriptionPlans.specialtyId, DEFAULT_SPECIALTY_ID),
+          ),
+        );
+      if (rows.length === 0) continue;
       await db
         .update(subscriptionPlans)
         .set({
-          name: '1-year',
-          durationMonths: 12,
-          priceUSD: 45000,
-          stripeProductId: 'prod_U14X6csDhWjhrk',
+          name: rename.to,
+          durationMonths: rename.durationMonths,
+          priceUSD: rename.priceUSD,
+          stripeProductId: this.resolveStripeProductId(DEFAULT_SPECIALTY_ID, rename.to),
         })
-        .where(eq(subscriptionPlans.name, '3-month'));
-    }
-    const sixMonth = await db.select().from(subscriptionPlans).where(eq(subscriptionPlans.name, '6-month'));
-    if (sixMonth.length > 0) {
-      await db.update(subscriptionPlans).set({ priceUSD: 27000, stripeProductId: 'prod_U14WP9DcWZEZWi' }).where(eq(subscriptionPlans.name, '6-month'));
+        .where(
+          and(
+            eq(subscriptionPlans.name, rename.from),
+            eq(subscriptionPlans.specialtyId, DEFAULT_SPECIALTY_ID),
+          ),
+        );
     }
 
-    // Ensure each target plan exists and has correct Stripe product id and payment link URL
-    for (const p of targetPlans) {
-      const existing = await db.select().from(subscriptionPlans).where(eq(subscriptionPlans.name, p.name));
-      const updatesFull = {
-        durationMonths: p.durationMonths,
-        priceUSD: p.priceUSD,
-        stripeProductId: p.stripeProductId,
-        stripePaymentLinkUrl: p.stripePaymentLinkUrl,
-        stripePaymentLinkUrlNoTrial: p.stripePaymentLinkUrlNoTrial,
-      };
-      const updatesMinimal = { durationMonths: p.durationMonths, priceUSD: p.priceUSD, stripeProductId: p.stripeProductId };
-      if (existing.length === 0) {
-        try {
-          await db.insert(subscriptionPlans).values({ name: p.name, ...updatesFull });
-        } catch (err) {
-          await db.insert(subscriptionPlans).values({ name: p.name, ...updatesMinimal });
-        }
-      } else {
-        try {
-          await db.update(subscriptionPlans).set(updatesFull).where(eq(subscriptionPlans.name, p.name));
-        } catch (_) {
-          await db.update(subscriptionPlans).set(updatesMinimal).where(eq(subscriptionPlans.name, p.name));
+    for (const specialtyId of SPECIALTY_IDS) {
+      for (const shape of DatabaseStorage.PLAN_SHAPES) {
+        const desired = {
+          specialtyId,
+          durationMonths: shape.durationMonths,
+          priceUSD: shape.priceUSD,
+          stripeProductId: this.resolveStripeProductId(specialtyId, shape.name),
+          stripePaymentLinkUrl: this.resolveTrialPaymentLink(specialtyId, shape.name) || null,
+          stripePaymentLinkUrlNoTrial: this.resolveNoTrialPaymentLink(specialtyId, shape.name) || null,
+        };
+        const scope = and(
+          eq(subscriptionPlans.name, shape.name),
+          eq(subscriptionPlans.specialtyId, specialtyId),
+        );
+        const existing = await db.select().from(subscriptionPlans).where(scope);
+        if (existing.length === 0) {
+          await db.insert(subscriptionPlans).values({ name: shape.name, ...desired });
+        } else {
+          await db.update(subscriptionPlans).set(desired).where(scope);
         }
       }
     }
   }
 
-  async getSubscriptionPlans(): Promise<SubscriptionPlan[]> {
+  async getSubscriptionPlans(
+    specialtyId: SpecialtyId = DEFAULT_SPECIALTY_ID,
+  ): Promise<SubscriptionPlan[]> {
     await this.ensureSubscriptionPlansSync();
-    const all = await db.select().from(subscriptionPlans).orderBy(subscriptionPlans.durationMonths);
-    const want = ['monthly', '6-month', '1-year'];
+    const target = getSpecialty(specialtyId).id;
+    const all = await db
+      .select()
+      .from(subscriptionPlans)
+      .where(eq(subscriptionPlans.specialtyId, target))
+      .orderBy(subscriptionPlans.durationMonths);
     const seen = new Set<string>();
     return all.filter((p) => {
-      if (!want.includes(p.name) || seen.has(p.name)) return false;
+      if (!DatabaseStorage.PLAN_NAMES.includes(p.name as never) || seen.has(p.name)) return false;
       seen.add(p.name);
       return true;
     });
+  }
+
+  async getSubscriptionPlanById(planId: string): Promise<SubscriptionPlan | undefined> {
+    const id = planId?.trim();
+    if (!id) return undefined;
+    await this.ensureSubscriptionPlansSync();
+    const [row] = await db
+      .select()
+      .from(subscriptionPlans)
+      .where(eq(subscriptionPlans.id, id))
+      .limit(1);
+    return row;
   }
 
   async createSubscriptionTransaction(transaction: InsertSubscriptionTransaction): Promise<SubscriptionTransaction> {
@@ -1193,7 +1552,11 @@ export class DatabaseStorage implements IStorage {
     return created;
   }
 
-  async getUserActiveSubscription(userId: string): Promise<SubscriptionTransaction | undefined> {
+  async getUserActiveSubscription(
+    userId: string,
+    specialtyId: SpecialtyId = DEFAULT_SPECIALTY_ID,
+  ): Promise<SubscriptionTransaction | undefined> {
+    await this.ensureMultiSpecialtyMigration();
     const now = new Date();
     const active = await db
       .select()
@@ -1201,6 +1564,7 @@ export class DatabaseStorage implements IStorage {
       .where(
         and(
           eq(subscriptionTransactions.userId, userId),
+          eq(subscriptionTransactions.specialtyId, getSpecialty(specialtyId).id),
           eq(subscriptionTransactions.status, 'completed'),
           lte(subscriptionTransactions.startDate, now)
         )
@@ -1216,23 +1580,26 @@ export class DatabaseStorage implements IStorage {
    * - Active trial: cancel immediately (trial ends now; no conversion charge).
    * User content (responses, notes, bookmarks) is never deleted.
    */
-  async cancelUserSubscription(userId: string): Promise<void> {
-    const [user] = await db.select().from(users).where(eq(users.id, userId));
-    if (!user) return;
+  async cancelUserSubscription(
+    userId: string,
+    specialtyId: SpecialtyId = DEFAULT_SPECIALTY_ID,
+  ): Promise<void> {
+    const target = getSpecialty(specialtyId).id;
+    const entitlement = await this.getSpecialtyEntitlement(userId, target);
 
-    const activeTx = await this.getUserActiveSubscription(userId);
+    const activeTx = await this.getUserActiveSubscription(userId, target);
     const canceledNow = new Date();
 
-    const trialEndsAt = user.trialEndsAt ? new Date(user.trialEndsAt) : null;
+    const trialEndsAt = entitlement.trialEndsAt ? new Date(entitlement.trialEndsAt) : null;
     const inActiveTrial =
-      (user.subscriptionStatus || "").toLowerCase() === "trial" &&
+      (entitlement.subscriptionStatus || "").toLowerCase() === "trial" &&
       !!trialEndsAt &&
       trialEndsAt.getTime() > canceledNow.getTime();
 
     if (inActiveTrial) {
-      if (user.stripeSubscriptionId?.trim()) {
+      if (entitlement.stripeSubscriptionId?.trim()) {
         const { cancelStripeSubscriptionImmediately } = await import("./stripe");
-        await cancelStripeSubscriptionImmediately(user.stripeSubscriptionId.trim());
+        await cancelStripeSubscriptionImmediately(entitlement.stripeSubscriptionId.trim());
       }
 
       if (activeTx) {
@@ -1245,26 +1612,22 @@ export class DatabaseStorage implements IStorage {
           .where(eq(subscriptionTransactions.id, activeTx.id));
       }
 
-      await db
-        .update(users)
-        .set({
-          subscriptionStatus: "expired",
-          subscriptionPlan: null as any,
-          subscriptionEndsAt: null as any,
-          subscriptionCancelAtPeriodEnd: false,
-          subscriptionCanceledAt: canceledNow,
-          trialEndsAt: null as any,
-          stripeSubscriptionId: null as any,
-          subscriptionTrialUsed: true,
-          updatedAt: new Date(),
-        })
-        .where(eq(users.id, userId));
+      await this.updateSpecialtyEntitlement(userId, target, {
+        subscriptionStatus: "expired",
+        subscriptionPlan: null,
+        subscriptionEndsAt: null,
+        subscriptionCancelAtPeriodEnd: false,
+        subscriptionCanceledAt: canceledNow,
+        trialEndsAt: null,
+        stripeSubscriptionId: null,
+        subscriptionTrialUsed: true,
+      });
       return;
     }
 
-    if (user.stripeSubscriptionId?.trim()) {
+    if (entitlement.stripeSubscriptionId?.trim()) {
       const { cancelStripeSubscriptionAtPeriodEnd } = await import("./stripe");
-      await cancelStripeSubscriptionAtPeriodEnd(user.stripeSubscriptionId.trim());
+      await cancelStripeSubscriptionAtPeriodEnd(entitlement.stripeSubscriptionId.trim());
     }
 
     if (activeTx) {
@@ -1278,33 +1641,40 @@ export class DatabaseStorage implements IStorage {
     }
 
     const activeEnd = activeTx?.endDate ? new Date(activeTx.endDate) : null;
-    const userEnd = user.subscriptionEndsAt ? new Date(user.subscriptionEndsAt) : null;
+    const entitlementEnd = entitlement.subscriptionEndsAt
+      ? new Date(entitlement.subscriptionEndsAt)
+      : null;
     const periodEnd =
-      userEnd && activeEnd
-        ? userEnd.getTime() > activeEnd.getTime()
-          ? userEnd
+      entitlementEnd && activeEnd
+        ? entitlementEnd.getTime() > activeEnd.getTime()
+          ? entitlementEnd
           : activeEnd
-        : userEnd ?? activeEnd;
+        : entitlementEnd ?? activeEnd;
 
-    await db
-      .update(users)
-      .set({
-        subscriptionStatus: "active",
-        subscriptionEndsAt: periodEnd ?? user.subscriptionEndsAt ?? null,
-        subscriptionCancelAtPeriodEnd: true,
-        subscriptionCanceledAt: canceledNow,
-        trialEndsAt: null as any,
-        subscriptionTrialUsed: true,
-        updatedAt: new Date(),
-      })
-      .where(eq(users.id, userId));
+    await this.updateSpecialtyEntitlement(userId, target, {
+      subscriptionStatus: "active",
+      subscriptionEndsAt: periodEnd ?? entitlementEnd ?? null,
+      subscriptionCancelAtPeriodEnd: true,
+      subscriptionCanceledAt: canceledNow,
+      trialEndsAt: null,
+      subscriptionTrialUsed: true,
+    });
   }
 
-  async getUserSubscriptionTransactions(userId: string): Promise<SubscriptionTransaction[]> {
+  async getUserSubscriptionTransactions(
+    userId: string,
+    specialtyId: SpecialtyId = DEFAULT_SPECIALTY_ID,
+  ): Promise<SubscriptionTransaction[]> {
+    await this.ensureMultiSpecialtyMigration();
     return await db
       .select()
       .from(subscriptionTransactions)
-      .where(eq(subscriptionTransactions.userId, userId))
+      .where(
+        and(
+          eq(subscriptionTransactions.userId, userId),
+          eq(subscriptionTransactions.specialtyId, getSpecialty(specialtyId).id),
+        ),
+      )
       .orderBy(desc(subscriptionTransactions.createdAt));
   }
 
@@ -1321,28 +1691,42 @@ export class DatabaseStorage implements IStorage {
     return row;
   }
 
-  async getUserByStripeSubscriptionId(stripeSubscriptionId: string): Promise<User | undefined> {
+  async getEntitlementByStripeSubscriptionId(
+    stripeSubscriptionId: string,
+  ): Promise<UserSpecialtySubscription | undefined> {
     const sid = stripeSubscriptionId?.trim();
     if (!sid) return undefined;
-    const [u] = await db.select().from(users).where(eq(users.stripeSubscriptionId, sid)).limit(1);
-    return u;
+    await this.ensureMultiSpecialtyMigration();
+    const [row] = await db
+      .select()
+      .from(userSpecialtySubscriptions)
+      .where(eq(userSpecialtySubscriptions.stripeSubscriptionId, sid))
+      .limit(1);
+    return row;
   }
 
-  async getUsersWithStripeSubscriptions(): Promise<User[]> {
-    const rows = await db.select().from(users);
-    return rows.filter((u) => !!u.stripeSubscriptionId?.trim());
+  async getEntitlementsWithStripeSubscriptions(): Promise<UserSpecialtySubscription[]> {
+    await this.ensureMultiSpecialtyMigration();
+    const rows = await db.select().from(userSpecialtySubscriptions);
+    return rows.filter((row) => !!row.stripeSubscriptionId?.trim());
   }
 
-  async getIntroTrialEligibility(userId: string): Promise<boolean> {
+  async getIntroTrialEligibility(
+    userId: string,
+    specialtyId: SpecialtyId = DEFAULT_SPECIALTY_ID,
+  ): Promise<boolean> {
+    const target = getSpecialty(specialtyId).id;
     const user = await this.getUser(userId);
     if (!user) return false;
-    if (user.subscriptionTrialUsed) return false;
+    const entitlement = await this.getSpecialtyEntitlement(userId, target);
+    if (entitlement.subscriptionTrialUsed) return false;
     const [row] = await db
       .select({ id: subscriptionTransactions.id })
       .from(subscriptionTransactions)
       .where(
         and(
           eq(subscriptionTransactions.userId, userId),
+          eq(subscriptionTransactions.specialtyId, target),
           inArray(subscriptionTransactions.status, ["completed", "canceled"])
         )
       )
@@ -1506,7 +1890,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async resolveInstitutionalCode(plainCode: string): Promise<
-    | { type: "ok"; institutionName: string; codeId: string }
+    | { type: "ok"; institutionName: string; codeId: string; specialtyId: SpecialtyId }
     | { type: "inactive" }
     | { type: "not_found" }
   > {
@@ -1518,7 +1902,12 @@ export class DatabaseStorage implements IStorage {
       const match = await bcrypt.compare(trimmed, row.codeHash);
       if (match) {
         if (row.active === false) return { type: "inactive" };
-        return { type: "ok", institutionName: row.institutionName, codeId: row.id };
+        return {
+          type: "ok",
+          institutionName: row.institutionName,
+          codeId: row.id,
+          specialtyId: getSpecialty(row.specialtyId).id,
+        };
       }
     }
     return { type: "not_found" };
@@ -1530,13 +1919,20 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getInstitutionalCodesAdmin(): Promise<
-    { id: string; institutionName: string; active: boolean; createdAt: Date | null }[]
+    {
+      id: string;
+      institutionName: string;
+      specialtyId: SpecialtyId;
+      active: boolean;
+      createdAt: Date | null;
+    }[]
   > {
     await this.ensureInstitutionalCodesSeed();
     const rows = await db
       .select({
         id: institutionalCodes.id,
         institutionName: institutionalCodes.institutionName,
+        specialtyId: institutionalCodes.specialtyId,
         active: institutionalCodes.active,
         createdAt: institutionalCodes.createdAt,
       })
@@ -1545,12 +1941,17 @@ export class DatabaseStorage implements IStorage {
     return rows.map((r) => ({
       id: r.id,
       institutionName: r.institutionName,
+      specialtyId: getSpecialty(r.specialtyId).id,
       active: r.active !== false,
       createdAt: r.createdAt ?? null,
     }));
   }
 
-  async createInstitutionalCodeAdmin(plainCode: string, institutionName: string): Promise<{ id: string }> {
+  async createInstitutionalCodeAdmin(
+    plainCode: string,
+    institutionName: string,
+    specialtyId: SpecialtyId = DEFAULT_SPECIALTY_ID,
+  ): Promise<{ id: string }> {
     await this.ensureInstitutionalCodesSeed();
     const trimmed = plainCode.trim();
     const name = institutionName.trim();
@@ -1570,6 +1971,7 @@ export class DatabaseStorage implements IStorage {
       .values({
         codeHash,
         institutionName: name,
+        specialtyId: getSpecialty(specialtyId).id,
         active: true,
       })
       .returning({ id: institutionalCodes.id });
@@ -1602,33 +2004,52 @@ export class DatabaseStorage implements IStorage {
     return !!row;
   }
 
-  async recordInstitutionalCodeRedemption(userId: string, institutionalCodeId: string): Promise<void> {
+  async recordInstitutionalCodeRedemption(
+    userId: string,
+    institutionalCodeId: string,
+    specialtyId: SpecialtyId = DEFAULT_SPECIALTY_ID,
+  ): Promise<void> {
     await this.ensureUserInstitutionalRedemptionsTable();
+    await this.ensureMultiSpecialtyMigration();
     await db.insert(userInstitutionalCodeRedemptions).values({
       userId,
       institutionalCodeId,
+      specialtyId: getSpecialty(specialtyId).id,
     });
   }
 
-  async userHasAnyInstitutionalRedemption(userId: string): Promise<boolean> {
+  async userHasAnyInstitutionalRedemption(
+    userId: string,
+    specialtyId: SpecialtyId = DEFAULT_SPECIALTY_ID,
+  ): Promise<boolean> {
     await this.ensureUserInstitutionalRedemptionsTable();
+    await this.ensureMultiSpecialtyMigration();
     const [row] = await db
       .select({ id: userInstitutionalCodeRedemptions.id })
       .from(userInstitutionalCodeRedemptions)
-      .where(eq(userInstitutionalCodeRedemptions.userId, userId))
+      .where(
+        and(
+          eq(userInstitutionalCodeRedemptions.userId, userId),
+          eq(userInstitutionalCodeRedemptions.specialtyId, getSpecialty(specialtyId).id),
+        ),
+      )
       .limit(1);
     return !!row;
   }
 
-  async ensureInstitutionalAccessExpiryWhenMissing(userId: string, userHint?: User | undefined): Promise<void> {
-    const hasRedemption = await this.userHasAnyInstitutionalRedemption(userId);
+  async ensureInstitutionalAccessExpiryWhenMissing(
+    userId: string,
+    userHint?: User | undefined,
+    specialtyId: SpecialtyId = DEFAULT_SPECIALTY_ID,
+  ): Promise<void> {
+    const target = getSpecialty(specialtyId).id;
+    const hasRedemption = await this.userHasAnyInstitutionalRedemption(userId, target);
     if (!hasRedemption) return;
-    const u = userHint ?? (await this.getUser(userId));
-    if (!u) return;
-    if (u.institutionalAccessExpiresAt) return;
+    const entitlement = await this.getSpecialtyEntitlement(userId, target);
+    if (entitlement.institutionalAccessExpiresAt) return;
     const end = new Date();
     end.setDate(end.getDate() + 365);
-    await this.updateUserProfile(userId, { institutionalAccessExpiresAt: end });
+    await this.updateSpecialtyEntitlement(userId, target, { institutionalAccessExpiresAt: end });
   }
 
   // Theme preference operations

@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { useSections } from '@/hooks/useSections';
 import { useTheme } from '@/hooks/useTheme';
+import { useSpecialty } from '@/hooks/useSpecialty';
+import { SpecialtySwitcher } from '@/components/SpecialtySwitcher';
 import atlasLogo from '@assets/atlas_1764093111680.png';
 import atlasLogoLight from '@assets/logo_light_1774918799268.png';
 import { Section } from '@/types/question';
@@ -48,6 +50,7 @@ type TestModeState = { mode: 'new' } | { mode: 'resume'; sessionId: string };
 export default function Index() {
   const [, setLocation] = useLocation();
   const { theme } = useTheme();
+  const { specialty, activeSpecialty } = useSpecialty();
   const { sections, isLoading: sectionsLoading } = useSections();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSection, setSelectedSection] = useState<string | null>(null);
@@ -63,7 +66,7 @@ export default function Index() {
   const searchRef = useRef<HTMLDivElement>(null);
   const subscriptionSuccessIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const { data: subscription, isLoading: isCheckingSubscription, refetch: refetchSubscription } = useQuery({
-    queryKey: ['/api/subscription'],
+    queryKey: ['/api/subscription', activeSpecialty],
     queryFn: async () => {
       const res = await fetch('/api/subscription', {
         credentials: 'include',
@@ -81,6 +84,16 @@ export default function Index() {
       setScreenMode('study');
     }
   }, [subscription?.isLocked]);
+
+  // Reset study navigation when switching question banks so PRS section ids don't linger on Ortho.
+  useEffect(() => {
+    setSelectedSection(null);
+    setSelectedSubsection(null);
+    setSearchQuery('');
+    setShowSearchResults(false);
+    setScreenMode('study');
+    setTestModeState({ mode: 'new' });
+  }, [activeSpecialty]);
 
   const [showPreviewWizard, setShowPreviewWizard] = useState(false);
   const [isMobileLayout, setIsMobileLayout] = useState(window.innerWidth < 1024);
@@ -477,7 +490,13 @@ export default function Index() {
 
   // No active plan: show subscription UI at / (no redirect so URL stays / and sign-in doesn’t send user back to /subscribe)
   if (!isCheckingSubscription && subscription?.isLocked) {
-    return <SubscriptionPage onSubscriptionUnlocked={() => refetchSubscription()} />;
+    return (
+      <SubscriptionPage
+        onSubscriptionUnlocked={async () => {
+          await refetchSubscription();
+        }}
+      />
+    );
   }
 
   if (screenMode === 'test') {
@@ -581,10 +600,10 @@ export default function Index() {
                   </div>
                   <div className="hidden sm:flex flex-col min-w-0">
                     <span className="text-base sm:text-lg font-bold tracking-tight gradient-text leading-tight truncate">
-                      Atlas
+                      Atlas Review
                     </span>
-                    <span className="text-xs font-medium text-muted-foreground tracking-widest uppercase truncate">
-                      Review
+                    <span className="text-xs font-medium text-muted-foreground tracking-tight truncate">
+                      {specialty.specialtyName}
                     </span>
                   </div>
                 </div>
@@ -595,6 +614,8 @@ export default function Index() {
 
               {/* Right Section */}
               <div className="flex items-center gap-2 flex-wrap justify-end">
+                <SpecialtySwitcher className="hidden sm:inline-flex flex-shrink-0" />
+
                 {/* Settings Button */}
                 <Button
                   onClick={() => setScreenMode('settings')}

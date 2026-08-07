@@ -4,12 +4,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Mail, Clock, KeyRound, CreditCard, BookOpenCheck, LifeBuoy } from "lucide-react";
 import { Link } from "wouter";
-
-const CONTACT_EMAIL = "hello@prs-atlas.com";
-const mailtoHref = `mailto:${CONTACT_EMAIL}?subject=Atlas%20Review%20inquiry`;
+import { useHostSpecialty } from "@/hooks/useSpecialty";
 
 export default function ContactPage() {
   usePageSeo("/contact");
+  const { contactEmail: CONTACT_EMAIL } = useHostSpecialty();
+  const mailtoHref = `mailto:${CONTACT_EMAIL}?subject=Atlas%20Review%20inquiry`;
 
   return (
     <MarketingShell>
@@ -19,7 +19,7 @@ export default function ContactPage() {
             <p className="mb-2 text-sm font-medium tracking-tight text-muted-foreground">
               We Are Here To Help
             </p>
-            <h1 className="mb-4 text-4xl font-bold leading-tight tracking-tight gradient-text sm:text-5xl">
+            <h1 className="mb-4 text-4xl font-bold leading-snug tracking-tight gradient-text sm:text-5xl">
               Contact Us
             </h1>
             <p className="mx-auto max-w-2xl text-lg leading-relaxed text-muted-foreground sm:mx-0">

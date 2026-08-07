@@ -13,12 +13,20 @@ import {
 } from "@shared/questionFormat";
 import { subsectionOrder, subsectionTitles } from "@shared/questionImport";
 import type { User, SubscriptionTransaction } from "@shared/schema";
+import {
+  DEFAULT_SPECIALTY_ID,
+  SPECIALTY_LIST,
+  getSpecialty,
+  isSpecialtyId,
+  type SpecialtyId,
+} from "@shared/specialties";
 import { userHasAdminForeverAccess } from "./adminGrantedAccess";
 import {
   institutionalAccessExpiresAtForRedemption,
   institutionalDaysRemaining,
   normalizeInstitutionalCodeForLookup,
 } from "./institutionalAccess";
+import { getSpecialtyForHost, requestHostname } from "./seoPublic";
 
 const ADMIN_CODE = process.env.ADMIN_CODE || "1127";
 
@@ -108,22 +116,180 @@ function institutionalAccessPeriodActive(
 async function userIsInstitutionalPrimaryAccess(
   userId: string,
   user: User | undefined,
-  now: Date
+  now: Date,
+  specialtyId: SpecialtyId
 ): Promise<boolean> {
   if (!user) return false;
-  const hasRedemption = await storage.userHasAnyInstitutionalRedemption(userId);
+  const hasRedemption = await storage.userHasAnyInstitutionalRedemption(userId, specialtyId);
   if (!institutionalAccessPeriodActive(hasRedemption, user, now)) return false;
   return !userHasCoherentPersonalPaidRow(user, now);
 }
 
-async function loadUserForSubscription(userId: string): Promise<{
+/**
+ * Origin the browser is actually on, so Stripe returns the user to the domain they started from
+ * (prs-atlas.com vs ortho-atlas.com) instead of a single hardcoded origin.
+ */
+function requestOrigin(req: any): string | null {
+  const host = req.get?.("host");
+  if (!host) return null;
+  const forwardedProto = String(req.headers?.["x-forwarded-proto"] ?? "").split(",")[0].trim();
+  const proto = forwardedProto || req.protocol || "https";
+  return `${proto}://${host}`;
+}
+
+/**
+ * The q-bank a request applies to: an explicit `specialtyId` in the body/query when present,
+ * otherwise the user's active specialty, otherwise the request host's specialty.
+ */
+async function resolveRequestSpecialty(req: any): Promise<SpecialtyId> {
+  const requested = req.body?.specialtyId ?? req.query?.specialtyId;
+  if (isSpecialtyId(requested)) return requested;
+  const userId = req.session?.userId;
+  if (userId) {
+    const active = await storage.getActiveSpecialty(userId);
+    if (active) return active;
+  }
+  return getSpecialtyForHost(requestHostname(req));
+}
+
+/**
+ * Loads the user with its entitlement columns scoped to one q-bank, so the entitlement rules below
+ * (written against the legacy single-specialty user shape) stay correct per specialty.
+ */
+async function loadUserForSubscription(
+  userId: string,
+  specialtyId: SpecialtyId
+): Promise<{
   user: User | undefined;
   hasInstitutionalRedemption: boolean;
 }> {
-  const user = await storage.getUser(userId);
+  const user = await storage.getUserWithSpecialtyEntitlement(userId, specialtyId);
   if (!user) return { user: undefined, hasInstitutionalRedemption: false };
-  const hasInstitutionalRedemption = await storage.userHasAnyInstitutionalRedemption(userId);
+  const hasInstitutionalRedemption = await storage.userHasAnyInstitutionalRedemption(
+    userId,
+    specialtyId
+  );
   return { user, hasInstitutionalRedemption };
+}
+
+type SubscriptionState = {
+  status: string;
+  daysRemaining: number | null;
+  trialEndsAt: Date | null;
+  isLocked: boolean;
+  specialtyId: SpecialtyId;
+  subscriptionType?: string;
+};
+
+/**
+ * Access state for one (user, q-bank) pair. Also self-heals stale rows the same way the old
+ * single-specialty endpoint did (expired trials, cancel-at-period-end past its end date).
+ */
+async function computeSubscriptionState(
+  userId: string,
+  specialtyId: SpecialtyId
+): Promise<SubscriptionState> {
+  const { user, hasInstitutionalRedemption } = await loadUserForSubscription(userId, specialtyId);
+  if (!user) {
+    return { status: 'none', daysRemaining: 0, trialEndsAt: null, isLocked: false, specialtyId };
+  }
+
+  if (userHasAdminForeverAccess(user)) {
+    return { status: 'active', daysRemaining: null, trialEndsAt: null, isLocked: false, specialtyId };
+  }
+
+  const institutionalExpiresAt = user.institutionalAccessExpiresAt
+    ? new Date(user.institutionalAccessExpiresAt)
+    : null;
+  const institutionalExpired =
+    institutionalExpiresAt !== null && institutionalExpiresAt.getTime() <= Date.now();
+  /** Clear display name after natural expiry; keep expires_at so we never re-backfill access from redemption row alone. */
+  if (institutionalExpired && hasInstitutionalRedemption && user.institutionalAccessAffiliation?.trim()) {
+    await storage.updateSpecialtyEntitlement(userId, specialtyId, {
+      institutionalAccessAffiliation: null,
+    });
+  }
+  const hasInstitutionalAccess = institutionalAccessPeriodActive(
+    hasInstitutionalRedemption,
+    user,
+    new Date()
+  );
+
+  const now = new Date();
+  const trialEndsAt = user.trialEndsAt ? new Date(user.trialEndsAt) : null;
+  const subscriptionEndsAt = user.subscriptionEndsAt ? new Date(user.subscriptionEndsAt) : null;
+  const activeSubscription = await storage.getUserActiveSubscription(userId, specialtyId);
+  const activeEndDate = activeSubscription?.endDate ? new Date(activeSubscription.endDate) : null;
+  const cancelAtPeriodEnd = user.subscriptionCancelAtPeriodEnd === true;
+
+  let status = user.subscriptionStatus || 'trial';
+  let daysRemaining = 0;
+
+  const futureCandidates: Date[] = [];
+  if (subscriptionEndsAt && subscriptionEndsAt.getTime() > now.getTime()) futureCandidates.push(subscriptionEndsAt);
+  if (activeEndDate && activeEndDate.getTime() > now.getTime()) futureCandidates.push(activeEndDate);
+  const bestFutureEnd =
+    futureCandidates.length > 0
+      ? futureCandidates.reduce((a, b) => (a.getTime() > b.getTime() ? a : b))
+      : null;
+
+  // Dedicated cancellation flag controls "canceled but active until end date" semantics.
+  if (cancelAtPeriodEnd && bestFutureEnd) {
+    status = 'canceled';
+  } else if (cancelAtPeriodEnd && !bestFutureEnd) {
+    status = 'expired';
+    await storage.updateSpecialtyEntitlement(userId, specialtyId, {
+      subscriptionStatus: 'expired',
+      subscriptionCancelAtPeriodEnd: false,
+    });
+  }
+
+  if (status === 'canceled' && bestFutureEnd) {
+    daysRemaining = Math.max(0, Math.ceil((bestFutureEnd.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
+  } else if ((status === 'active' || status === 'trial') && bestFutureEnd) {
+    daysRemaining = Math.max(0, Math.ceil((bestFutureEnd.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
+  } else if (trialEndsAt) {
+    const diffTime = trialEndsAt.getTime() - now.getTime();
+    daysRemaining = Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
+
+    if (daysRemaining === 0 && status === 'trial') {
+      status = 'expired';
+      await storage.updateSpecialtyEntitlement(userId, specialtyId, {
+        subscriptionStatus: 'expired',
+      });
+    }
+  }
+
+  // Lock when expired or when on trial with no days left (e.g. new account with no plan). Canceled = access until end.
+  // Expiry/cancel only update subscription status; user data (progress, notes, bookmarks) is never deleted.
+  const isLocked =
+    status === 'expired' ||
+    (status === 'trial' && daysRemaining === 0) ||
+    (status === 'canceled' && (!bestFutureEnd || bestFutureEnd <= now));
+
+  /**
+   * Valid institutional access must unlock the app even when personal row still says "expired"
+   * (e.g. leftover Stripe ids, edge cases in personal-access detection).
+   */
+  if (hasInstitutionalAccess && isLocked) {
+    return {
+      status: 'institutional',
+      daysRemaining: institutionalExpiresAt
+        ? institutionalDaysRemaining(institutionalExpiresAt)
+        : null,
+      trialEndsAt: null,
+      isLocked: false,
+      specialtyId,
+      subscriptionType: 'Institutional Access',
+    };
+  }
+
+  return { status, daysRemaining, trialEndsAt, isLocked, specialtyId };
+}
+
+async function specialtyIsLocked(userId: string, specialtyId: SpecialtyId): Promise<boolean> {
+  const state = await computeSubscriptionState(userId, specialtyId);
+  return state.isLocked;
 }
 
 const QUESTION_IMPORT_API_KEY = process.env.QUESTION_IMPORT_API_KEY;
@@ -276,11 +442,70 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Public so unauthenticated users can load the preview test at /preview
   app.get('/api/sections', async (req: any, res) => {
     try {
-      const sections = await storage.getSections();
+      const specialtyId = await resolveRequestSpecialty(req);
+      const sections = await storage.getSections(specialtyId);
       res.json(sections);
     } catch (error) {
       console.error("Error fetching sections:", error);
       res.status(500).json({ message: "Failed to fetch sections." });
+    }
+  });
+
+  /**
+   * Specialty context for the client: which q-bank the host implies, which one is active, and
+   * whether each one is unlocked (drives the switcher and the themed paywall).
+   */
+  app.get('/api/specialty', async (req: any, res) => {
+    try {
+      res.set("Cache-Control", "no-store, no-cache, must-revalidate, private");
+      const hostSpecialty = getSpecialtyForHost(requestHostname(req));
+      const available = SPECIALTY_LIST.map((s) => ({
+        id: s.id,
+        specialtyName: s.specialtyName,
+        brandName: s.brandName,
+        shortName: s.shortName,
+      }));
+
+      const userId = req.session?.userId;
+      if (!userId) {
+        return res.json({
+          hostSpecialty,
+          activeSpecialty: hostSpecialty,
+          available,
+          entitlements: [],
+        });
+      }
+
+      const activeSpecialty = await storage.getActiveSpecialty(userId);
+      const entitlements = await Promise.all(
+        SPECIALTY_LIST.map(async (s) => ({
+          specialtyId: s.id,
+          isLocked: await specialtyIsLocked(userId, s.id),
+        }))
+      );
+
+      res.json({ hostSpecialty, activeSpecialty, available, entitlements });
+    } catch (error) {
+      console.error("Error resolving specialty context:", error);
+      res.status(500).json({ message: "Failed to resolve specialty." });
+    }
+  });
+
+  app.post('/api/specialty/active', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session?.userId;
+      const requested = req.body?.specialtyId;
+      if (!isSpecialtyId(requested)) {
+        return res.status(400).json({ message: "A valid specialtyId is required." });
+      }
+      const activeSpecialty = await storage.setActiveSpecialty(userId, requested);
+      res.json({
+        activeSpecialty,
+        isLocked: await specialtyIsLocked(userId, activeSpecialty),
+      });
+    } catch (error) {
+      console.error("Error switching specialty:", error);
+      res.status(500).json({ message: "Failed to switch question bank." });
     }
   });
 
@@ -416,9 +641,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!sanitized) {
         return res.json(null);
       }
-      const introTrialAvailable = await storage.getIntroTrialEligibility(userId);
+      // Intro trial is per specialty — use the q-bank the user is currently viewing.
+      const activeSpecialtyId = await storage.getActiveSpecialty(userId);
+      const introTrialAvailable = await storage.getIntroTrialEligibility(
+        userId,
+        activeSpecialtyId,
+      );
       const tester = sanitized.tester === true || userHasAdminForeverAccess(user);
-      res.json({ ...sanitized, tester, introTrialAvailable });
+      res.json({ ...sanitized, tester, introTrialAvailable, activeSpecialtyId });
     } catch (error) {
       console.error("Error fetching user:", error);
       res.status(500).json({ message: "Failed to fetch user." });
@@ -571,7 +801,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Check subscription status
+  // Check subscription status for the active (or requested) question bank
   app.get('/api/subscription', async (req: any, res) => {
     try {
       // Never cache: browsers/proxies were returning 304 + stale "expired" after institutional redeem.
@@ -583,107 +813,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!userId) {
         return res.json({ status: 'none', daysRemaining: 0, trialEndsAt: null, isLocked: false });
       }
-      
-      const { user, hasInstitutionalRedemption } = await loadUserForSubscription(userId);
-      if (!user) {
-        return res.json({ status: 'none', daysRemaining: 0, trialEndsAt: null, isLocked: false });
-      }
 
-      if (userHasAdminForeverAccess(user)) {
-        return res.json({
-          status: "active",
-          daysRemaining: null,
-          trialEndsAt: null,
-          isLocked: false,
-        });
-      }
-
-      const institutionalExpiresAt = user.institutionalAccessExpiresAt
-        ? new Date(user.institutionalAccessExpiresAt)
-        : null;
-      const institutionalExpired =
-        institutionalExpiresAt !== null && institutionalExpiresAt.getTime() <= Date.now();
-      /** Clear display name after natural expiry; keep expires_at so we never re-backfill access from redemption row alone. */
-      if (institutionalExpired && hasInstitutionalRedemption && user.institutionalAccessAffiliation?.trim()) {
-        await storage.updateUserProfile(userId, {
-          institutionalAccessAffiliation: null as any,
-        });
-      }
-      const hasInstitutionalAccess = institutionalAccessPeriodActive(hasInstitutionalRedemption, user, new Date());
-
-      const now = new Date();
-      const trialEndsAt = user.trialEndsAt ? new Date(user.trialEndsAt) : null;
-      const subscriptionEndsAt = user.subscriptionEndsAt ? new Date(user.subscriptionEndsAt) : null;
-      const activeSubscription = await storage.getUserActiveSubscription(userId);
-      const activeEndDate = activeSubscription?.endDate ? new Date(activeSubscription.endDate) : null;
-      const cancelAtPeriodEnd = user.subscriptionCancelAtPeriodEnd === true;
-
-      let status = user.subscriptionStatus || 'trial';
-      let daysRemaining = 0;
-
-      const futureCandidates: Date[] = [];
-      if (subscriptionEndsAt && subscriptionEndsAt.getTime() > now.getTime()) futureCandidates.push(subscriptionEndsAt);
-      if (activeEndDate && activeEndDate.getTime() > now.getTime()) futureCandidates.push(activeEndDate);
-      const bestFutureEnd =
-        futureCandidates.length > 0
-          ? futureCandidates.reduce((a, b) => (a.getTime() > b.getTime() ? a : b))
-          : null;
-
-      // Dedicated cancellation flag controls "canceled but active until end date" semantics.
-      if (cancelAtPeriodEnd && bestFutureEnd) {
-        status = 'canceled';
-      } else if (cancelAtPeriodEnd && !bestFutureEnd) {
-        status = 'expired';
-        await storage.updateUserProfile(user.id, {
-          subscriptionStatus: 'expired' as any,
-          subscriptionCancelAtPeriodEnd: false as any,
-        });
-      }
-
-      if (status === 'canceled' && bestFutureEnd) {
-        daysRemaining = Math.max(0, Math.ceil((bestFutureEnd.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
-      } else if ((status === 'active' || status === 'trial') && bestFutureEnd) {
-        daysRemaining = Math.max(0, Math.ceil((bestFutureEnd.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
-      } else if (trialEndsAt) {
-        const diffTime = trialEndsAt.getTime() - now.getTime();
-        daysRemaining = Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
-
-        if (daysRemaining === 0 && status === 'trial') {
-          status = 'expired';
-          await storage.updateUserProfile(user.id, { subscriptionStatus: 'expired' });
-        }
-      }
-
-      // Lock when expired or when on trial with no days left (e.g. new account with no plan). Canceled = access until end.
-      // Expiry/cancel only update subscription status; user data (progress, notes, bookmarks) is never deleted.
-      let isLocked =
-        status === 'expired' ||
-        (status === 'trial' && daysRemaining === 0) ||
-        (status === 'canceled' && (!bestFutureEnd || bestFutureEnd <= now));
-
-      /**
-       * Valid institutional access must unlock the app even when personal row still says "expired"
-       * (e.g. leftover Stripe ids, edge cases in personal-access detection).
-       */
-      if (hasInstitutionalAccess && isLocked) {
-        const daysInst = institutionalExpiresAt
-          ? institutionalDaysRemaining(institutionalExpiresAt)
-          : null;
-        return res.json({
-          status: "institutional",
-          daysRemaining: daysInst,
-          trialEndsAt: null,
-          isLocked: false,
-          subscriptionType: "Institutional Access",
-        });
-      }
-
-      res.json({
-        status,
-        daysRemaining,
-        trialEndsAt,
-        isLocked,
-      });
+      const specialtyId = await resolveRequestSpecialty(req);
+      res.json(await computeSubscriptionState(userId, specialtyId));
     } catch (error) {
       console.error('Error checking subscription:', error);
       res.json({ status: 'error', daysRemaining: 0, trialEndsAt: null, isLocked: false });
@@ -1455,8 +1587,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Subscription routes
   app.get('/api/subscription/plans', async (req: any, res) => {
     try {
+      const specialtyId = await resolveRequestSpecialty(req);
       await storage.initializeSubscriptionPlans();
-      const plans = await storage.getSubscriptionPlans();
+      const plans = await storage.getSubscriptionPlans(specialtyId);
       res.json(plans);
     } catch (error) {
       console.error("Error fetching subscription plans:", error);
@@ -1477,17 +1610,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (user && userHasAdminForeverAccess(user)) {
         return res.status(400).json({ message: "This account already has full access." });
       }
-      const introTrialEligible = await storage.getIntroTrialEligibility(userId);
+      const plan = await storage.getSubscriptionPlanById(planId.trim());
+      if (!plan) {
+        return res.status(400).json({ message: "Plan not found." });
+      }
+      const specialtyId = getSpecialty(plan.specialtyId).id;
+      const introTrialEligible = await storage.getIntroTrialEligibility(userId, specialtyId);
       const result = await createCheckoutSession({
         userId,
         userEmail: user?.email ?? null,
         planId: planId.trim(),
         introTrialEligible,
+        requestOrigin: requestOrigin(req),
       });
       if ("error" in result) {
         return res.status(400).json({ message: result.error });
       }
-      res.json({ sessionUrl: result.url });
+      res.json({ sessionUrl: result.url, specialtyId: result.specialtyId });
     } catch (error) {
       console.error("Error creating checkout session:", error);
       res.status(500).json({ message: "Failed to start checkout." });
@@ -1524,13 +1663,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/subscription/details', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.session?.userId;
-      const { user, hasInstitutionalRedemption } = await loadUserForSubscription(userId);
+      const specialtyId = await resolveRequestSpecialty(req);
+      const { user, hasInstitutionalRedemption } = await loadUserForSubscription(userId, specialtyId);
       if (!user) {
         return res.status(404).json({ message: "User not found." });
       }
 
       if (userHasAdminForeverAccess(user)) {
-        const transactions = await storage.getUserSubscriptionTransactions(userId);
+        const transactions = await storage.getUserSubscriptionTransactions(userId, specialtyId);
         return res.json({
           plan: "1-year",
           status: "active",
@@ -1546,7 +1686,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ? new Date(user.institutionalAccessExpiresAt)
         : null;
       const hasInstitutional = institutionalAccessPeriodActive(hasInstitutionalRedemption, user, new Date());
-      const activeSubscription = await storage.getUserActiveSubscription(userId);
+      const activeSubscription = await storage.getUserActiveSubscription(userId, specialtyId);
       const now = new Date();
 
       /**
@@ -1555,7 +1695,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
        */
       if (hasInstitutional && !userHasCoherentPersonalPaidRow(user, now)) {
         const daysRemaining = institutionalDaysRemaining(institutionalExpiresAt, now);
-        const txs = await storage.getUserSubscriptionTransactions(userId);
+        const txs = await storage.getUserSubscriptionTransactions(userId, specialtyId);
         /** Match GET /api/subscription/transactions: synthetic institutional row + Stripe-backed rows only when filtering legacy rows. */
         const stripeBackedCount = txs.filter(
           (t) => !!(t.stripePaymentIntentId?.trim() || t.stripeInvoiceId?.trim())
@@ -1572,8 +1712,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      const transactions = await storage.getUserSubscriptionTransactions(userId);
-      const plans = await storage.getSubscriptionPlans();
+      const transactions = await storage.getUserSubscriptionTransactions(userId, specialtyId);
+      const plans = await storage.getSubscriptionPlans(specialtyId);
 
       // Legacy plan names (DB may have old values): normalize for display and persist
       const LEGACY_PLAN_MAP: Record<string, string> = { '3-month': '1-year', '1-month': 'monthly' };
@@ -1581,7 +1721,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let planForDisplay = rawPlan;
       if (rawPlan && LEGACY_PLAN_MAP[rawPlan]) {
         planForDisplay = LEGACY_PLAN_MAP[rawPlan];
-        await storage.updateUserProfile(userId, { subscriptionPlan: planForDisplay as any });
+        await storage.updateSpecialtyEntitlement(userId, specialtyId, {
+          subscriptionPlan: planForDisplay,
+        });
       }
       // Prefer plan from latest active transaction (reflects actual purchase)
       if (activeSubscription?.planId) {
@@ -1589,7 +1731,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (txPlan) {
           planForDisplay = txPlan.name;
           if (rawPlan !== txPlan.name) {
-            await storage.updateUserProfile(userId, { subscriptionPlan: txPlan.name as any });
+            await storage.updateSpecialtyEntitlement(userId, specialtyId, {
+              subscriptionPlan: txPlan.name,
+            });
           }
         }
       }
@@ -1609,9 +1753,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         status = 'canceled';
       } else if (cancelAtPeriodEnd && !hasFutureAccess) {
         status = 'expired';
-        await storage.updateUserProfile(userId, {
-          subscriptionStatus: 'expired' as any,
-          subscriptionCancelAtPeriodEnd: false as any,
+        await storage.updateSpecialtyEntitlement(userId, specialtyId, {
+          subscriptionStatus: 'expired',
+          subscriptionCancelAtPeriodEnd: false,
         });
       }
 
@@ -1666,14 +1810,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/subscription/transactions", isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.session?.userId;
-      const { user, hasInstitutionalRedemption } = await loadUserForSubscription(userId);
+      const specialtyId = await resolveRequestSpecialty(req);
+      const { user, hasInstitutionalRedemption } = await loadUserForSubscription(userId, specialtyId);
       if (!user) {
         return res.json({ transactions: [] });
       }
 
       const now = new Date();
-      const txs = await storage.getUserSubscriptionTransactions(userId);
-      const plans = await storage.getSubscriptionPlans();
+      const txs = await storage.getUserSubscriptionTransactions(userId, specialtyId);
+      const plans = await storage.getSubscriptionPlans(specialtyId);
       const planNameById = new Map(plans.map((p) => [p.id, p.name]));
       const { getReceiptOrInvoiceUrlForTransaction } = await import("./stripe");
 
@@ -1798,10 +1943,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Plan ID required." });
       }
 
-      const plan = (await storage.getSubscriptionPlans()).find(p => p.id === planId);
+      const plan = await storage.getSubscriptionPlanById(planId);
       if (!plan) {
         return res.status(404).json({ message: "Plan not found." });
       }
+      const specialtyId = getSpecialty(plan.specialtyId).id;
 
       // Create transaction
       const startDate = new Date();
@@ -1811,19 +1957,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.createSubscriptionTransaction({
         userId,
         planId,
+        specialtyId,
         amount: plan.priceUSD,
         status: 'completed',
         startDate,
         endDate,
       });
 
-      // Update user subscription
-      await storage.updateUserProfile(userId, {
+      // Update the entitlement for the plan's q-bank only; the other bank is untouched.
+      await storage.updateSpecialtyEntitlement(userId, specialtyId, {
         subscriptionStatus: 'active',
-        subscriptionPlan: plan.name as any,
+        subscriptionPlan: plan.name,
         subscriptionEndsAt: endDate,
-        subscriptionCancelAtPeriodEnd: false as any,
-        subscriptionCanceledAt: null as any,
+        subscriptionCancelAtPeriodEnd: false,
+        subscriptionCanceledAt: null,
         subscriptionTrialUsed: true,
       });
 
@@ -1839,7 +1986,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/subscription/cancel', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.session?.userId;
-      const user = await storage.getUser(userId);
+      const specialtyId = await resolveRequestSpecialty(req);
+      const user = await storage.getUserWithSpecialtyEntitlement(userId, specialtyId);
       if (!user) {
         return res.status(404).json({ message: "User not found." });
       }
@@ -1858,16 +2006,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
        * Otherwise stale completed transactions make userHasPersonalSubscriptionAccess true, we run Stripe cancel,
        * return the wrong toast, and leave institutional fields intact — user keeps access.
        */
-      const hasRedemption = await storage.userHasAnyInstitutionalRedemption(userId);
+      const hasRedemption = await storage.userHasAnyInstitutionalRedemption(userId, specialtyId);
       const institutionalActive = institutionalAccessPeriodActive(hasRedemption, user, now);
-      if (institutionalActive || (await userIsInstitutionalPrimaryAccess(userId, user, now))) {
+      if (institutionalActive || (await userIsInstitutionalPrimaryAccess(userId, user, now, specialtyId))) {
         const trialEndsAt = user.trialEndsAt ? new Date(user.trialEndsAt) : null;
         const newStatus = trialEndsAt && trialEndsAt > now ? "trial" : "expired";
-        await storage.updateUserProfile(userId, {
-          institutionalAccessAffiliation: null as any,
+        await storage.updateSpecialtyEntitlement(userId, specialtyId, {
+          institutionalAccessAffiliation: null,
           /** Keep cancellation timestamp for transaction-history period end. */
-          institutionalAccessExpiresAt: now as any,
-          subscriptionStatus: newStatus as any,
+          institutionalAccessExpiresAt: now,
+          subscriptionStatus: newStatus,
         });
         return res.json({
           message:
@@ -1876,14 +2024,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      const activeTx = await storage.getUserActiveSubscription(userId);
+      const activeTx = await storage.getUserActiveSubscription(userId, specialtyId);
       if (userHasPersonalSubscriptionAccess(user, activeTx)) {
         const trialEndsAt = user.trialEndsAt ? new Date(user.trialEndsAt) : null;
         const inActiveTrial =
           (user.subscriptionStatus || "").toLowerCase() === "trial" &&
           !!trialEndsAt &&
           trialEndsAt.getTime() > now.getTime();
-        await storage.cancelUserSubscription(userId);
+        await storage.cancelUserSubscription(userId, specialtyId);
         return res.json({
           message: inActiveTrial
             ? "Your free trial was canceled immediately. You will not be charged."
@@ -1897,9 +2045,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (hasRedemption || hasInstitutionalFields) {
         const trialEndsAt = user.trialEndsAt ? new Date(user.trialEndsAt) : null;
         const newStatus = trialEndsAt && trialEndsAt > now ? "trial" : "expired";
-        await storage.updateUserProfile(userId, {
-          institutionalAccessAffiliation: null as any,
-          institutionalAccessExpiresAt: now as any,
+        await storage.updateSpecialtyEntitlement(userId, specialtyId, {
+          institutionalAccessAffiliation: null,
+          institutionalAccessExpiresAt: now,
           subscriptionStatus: newStatus,
         });
         return res.json({
@@ -1909,7 +2057,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      await storage.cancelUserSubscription(userId);
+      await storage.cancelUserSubscription(userId, specialtyId);
       res.json({
         message:
           "Your subscription will end on your current period end date. You won't be charged again for this plan.",
@@ -1947,12 +2095,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       const expiresAt = institutionalAccessExpiresAtForRedemption(lookupCode);
-      await storage.updateUserProfile(userId, {
+      /** A code unlocks exactly one q-bank, so redeeming also makes that bank the active one. */
+      await storage.updateSpecialtyEntitlement(userId, resolved.specialtyId, {
         institutionalAccessAffiliation: resolved.institutionName,
         institutionalAccessExpiresAt: expiresAt,
       });
-      await storage.recordInstitutionalCodeRedemption(userId, resolved.codeId);
-      res.json({ message: "Access Granted!" });
+      await storage.recordInstitutionalCodeRedemption(userId, resolved.codeId, resolved.specialtyId);
+      await storage.setActiveSpecialty(userId, resolved.specialtyId);
+      res.json({ message: "Access Granted!", specialtyId: resolved.specialtyId });
     } catch (error: any) {
       console.error("Error redeeming institutional code:", error);
       const message = process.env.NODE_ENV !== "production" && error?.message
@@ -1990,7 +2140,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!plaintext || !institutionName) {
         return res.status(400).json({ message: "plaintextCode and institutionName are required." });
       }
-      const { id } = await storage.createInstitutionalCodeAdmin(plaintext, institutionName);
+      const codeSpecialtyId = req.body?.specialtyId;
+      if (codeSpecialtyId != null && !isSpecialtyId(codeSpecialtyId)) {
+        return res.status(400).json({ message: "specialtyId must be one of: prs, ortho." });
+      }
+      /** A code unlocks exactly one q-bank; omitting specialtyId keeps the historical PRS behavior. */
+      const { id } = await storage.createInstitutionalCodeAdmin(
+        plaintext,
+        institutionName,
+        isSpecialtyId(codeSpecialtyId) ? codeSpecialtyId : DEFAULT_SPECIALTY_ID
+      );
       res.status(201).json({
         id,
         message:

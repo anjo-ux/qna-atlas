@@ -6,6 +6,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { useState } from 'react';
 import { SubscriptionTransactionHistoryDialog } from '@/components/SubscriptionTransactionHistoryDialog';
 import { useTheme } from '@/hooks/useTheme';
+import { useSpecialty } from '@/hooks/useSpecialty';
+import { SpecialtySwitcher } from '@/components/SpecialtySwitcher';
 import atlasLogo from '@assets/atlas_1764093111680.png';
 import atlasLogoLight from '@assets/logo_light_1774918799268.png';
 
@@ -26,6 +28,7 @@ export default function SubscriptionPage({ onSubscriptionUnlocked }: Subscriptio
   const [, setLocation] = useLocation();
   const { logout } = useAuth();
   const { theme } = useTheme();
+  const { specialty } = useSpecialty();
   const [transactionHistoryOpen, setTransactionHistoryOpen] = useState(false);
 
   const handleLogout = () => {
@@ -60,12 +63,17 @@ export default function SubscriptionPage({ onSubscriptionUnlocked }: Subscriptio
                   <img src={theme === 'dark' ? atlasLogoLight : atlasLogo} alt="Atlas Logo" className="h-7 w-7 sm:h-8 sm:w-8 object-contain" />
                 </div>
                 <div className="hidden sm:flex flex-col min-w-0">
-                  <span className="text-base sm:text-lg font-bold tracking-tight gradient-text leading-tight truncate">Atlas</span>
-                  <span className="text-xs font-medium text-muted-foreground tracking-widest uppercase truncate">Review</span>
+                  <span className="text-base sm:text-lg font-bold tracking-tight gradient-text leading-tight truncate">
+                    Atlas Review
+                  </span>
+                  <span className="text-xs font-medium text-muted-foreground tracking-tight truncate">
+                    {specialty.specialtyName}
+                  </span>
                 </div>
               </div>
             </div>
             <div className="flex-1" />
+            <SpecialtySwitcher className="flex-shrink-0" />
             <Button
               onClick={() => setTransactionHistoryOpen(true)}
               variant="outline"

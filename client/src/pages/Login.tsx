@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -37,6 +37,10 @@ import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { getUniversityOptions } from '@/data/universities';
 import { TRAINING_LEVEL_OPTIONS } from '@shared/trainingLevels';
+import { applySpecialtyToDocument, getMarketingSpecialtyId, switchMarketingSpecialty } from '@/lib/specialtyBootstrap';
+import { SPECIALTY_LIST, getSpecialty, type SpecialtyId } from '@shared/specialties';
+import { SpecialtySubheaderDropdown } from '@/components/SpecialtySubheaderDropdown';
+import { useHostSpecialty } from '@/hooks/useSpecialty';
 
 export default function Login() {
   const [location] = useLocation();
@@ -50,6 +54,8 @@ export default function Login() {
   const [lastName, setLastName] = useState('');
   const [institution, setInstitution] = useState('');
   const [trainingLevel, setTrainingLevel] = useState('');
+  /** Defaults to marketing specialty (domain or session override); changeable before the account is created. */
+  const [specialtyId, setSpecialtyId] = useState<SpecialtyId>(() => getMarketingSpecialtyId());
   const [openCombobox, setOpenCombobox] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [showForgotPassword, setShowForgotPassword] = useState(false);
@@ -59,10 +65,22 @@ export default function Login() {
   const [newPassword, setNewPassword] = useState('');
   const [confirmNewPassword, setConfirmNewPassword] = useState('');
   const [isChangePasswordLoading, setIsChangePasswordLoading] = useState(false);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const marketingSpecialty = useHostSpecialty();
 
   const universities = useMemo(() => {
     return getUniversityOptions().map(u => u.value);
   }, []);
+
+  /** Keep signup specialty in sync with the header / marketing specialty pill. */
+  useEffect(() => {
+    if (isSignUp) setSpecialtyId(marketingSpecialty.id);
+  }, [isSignUp, marketingSpecialty.id]);
+
+  /** Preview the chosen q-bank's palette immediately so the picker is visibly meaningful. */
+  useEffect(() => {
+    applySpecialtyToDocument(isSignUp ? specialtyId : marketingSpecialty.id);
+  }, [isSignUp, specialtyId, marketingSpecialty.id]);
 
   const filteredUniversities = useMemo(() => {
     if (!searchQuery) return universities;
@@ -91,6 +109,7 @@ export default function Login() {
             lastName,
             institutionalAffiliation: institution,
             trainingLevel,
+            specialtyId,
           }
         : { email, password };
 
@@ -227,23 +246,27 @@ export default function Login() {
       <header className="glass-nav w-full static flex-shrink-0 rounded-b-2xl sm:sticky sm:top-0 sm:z-50">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-3 pb-2">
           <div className="flex items-center justify-between">
-            <button
-              onClick={() => window.location.href = '/'}
-              className="flex items-center gap-3 min-w-0 rounded-xl px-4 py-1.5 cursor-pointer hover:bg-primary/10 outline-none focus-visible:ring-0"
-              data-testid="button-home"
-            >
-              <div className="logo-glass flex items-center justify-center p-1.5 flex-shrink-0 ring-1 ring-black/5 dark:ring-white/10">
+            <div className="flex min-w-0 items-center gap-3 rounded-xl px-4 py-1.5">
+              <button
+                type="button"
+                onClick={() => (window.location.href = '/')}
+                className="logo-glass flex items-center justify-center p-1.5 flex-shrink-0 ring-1 ring-black/5 dark:ring-white/10 cursor-pointer outline-none focus-visible:ring-0 hover:opacity-90"
+                data-testid="button-home"
+                aria-label={`${marketingSpecialty.productName} home`}
+              >
                 <img src={isDark ? atlasLogoLight : atlasLogo} alt="Atlas Logo" className="h-7 w-7 sm:h-8 sm:w-8 object-contain" />
-              </div>
+              </button>
               <div className="hidden sm:flex flex-col min-w-0">
-                <span className="text-base sm:text-lg font-bold tracking-tight gradient-text leading-tight truncate">
-                  Atlas
-                </span>
-                <span className="text-xs font-medium text-muted-foreground tracking-widest uppercase truncate">
-                  Review
-                </span>
+                <button
+                  type="button"
+                  onClick={() => (window.location.href = '/')}
+                  className="text-left text-base sm:text-lg font-bold tracking-tight gradient-text leading-snug truncate cursor-pointer outline-none focus-visible:ring-0 hover:opacity-90"
+                >
+                  {marketingSpecialty.productName}
+                </button>
+                <SpecialtySubheaderDropdown />
               </div>
-            </button>
+            </div>
             <div className="flex items-center gap-2 flex-shrink-0">
               <button onClick={toggleTheme} className="p-2 hover-elevate rounded-md" data-testid="button-theme-toggle" title="Toggle theme">
                 {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
@@ -262,7 +285,7 @@ export default function Login() {
       </header>
 
       {/* Main Content */}
-      <div className="flex-1 overflow-y-auto flex flex-col">
+      <div ref={scrollContainerRef} className="flex-1 overflow-y-auto flex flex-col">
         <div className="flex flex-col items-center justify-center px-4 py-16 flex-1">
           <Card variant="glass" className="w-full max-w-md glow-primary">
             <CardHeader className="space-y-2">
@@ -275,7 +298,7 @@ export default function Login() {
               <CardDescription className="text-center">
                 {isSignUp
                   ? 'Start your 7-day free trial of the Atlas Review.'
-                  : 'Access your plastic surgery study materials today.'}
+                  : 'Access your study materials today.'}
               </CardDescription>
             </CardHeader>
 
@@ -370,6 +393,35 @@ export default function Login() {
                       required
                       data-testid="input-confirm-password"
                     />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label htmlFor="specialty" className="text-sm font-medium">
+                      Specialty
+                    </label>
+                    <Select
+                      value={specialtyId}
+                      onValueChange={(value) => {
+                        const next = value as SpecialtyId;
+                        setSpecialtyId(next);
+                        switchMarketingSpecialty(next);
+                      }}
+                      disabled={isLoading}
+                    >
+                      <SelectTrigger id="specialty" className="w-full" data-testid="select-specialty">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent position="popper">
+                        {SPECIALTY_LIST.map((option) => (
+                          <SelectItem key={option.id} value={option.id}>
+                            {option.specialtyName}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <p className="text-xs text-muted-foreground">
+                      Your question bank. You can subscribe to the other one later from your account.
+                    </p>
                   </div>
 
                   <div className="space-y-2">
@@ -492,6 +544,7 @@ export default function Login() {
                       setLastName('');
                       setInstitution('');
                       setTrainingLevel('');
+                      scrollContainerRef.current?.scrollTo({ top: 0 });
                     }}
                     className="text-primary hover:underline font-medium"
                     data-testid="button-toggle-auth"
@@ -520,7 +573,8 @@ export default function Login() {
         {/* Footer */}
         <footer className="border-t py-6 bg-muted/30 flex-shrink-0">
           <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-            {new Date().getFullYear()} Atlas Review © | PRS Atlas, LLC. All Rights Reserved.
+            {new Date().getFullYear()} Atlas Review © | {getSpecialty(specialtyId).legalEntity}. All
+            Rights Reserved.
           </div>
         </footer>
       </div>

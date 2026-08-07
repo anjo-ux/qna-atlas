@@ -30,3 +30,7 @@ dist-ssr
 
 # Bun
 bun.lockb
+
+# Large Anki decks (extract topics instead of committing)
+*.apkg
+attached_assets/*.apkg

@@ -2,7 +2,7 @@ import express, { type Express, type Request, type Response } from "express";
 import fs from "fs";
 import path from "path";
 import type { Server } from "http";
-import { injectSpaIndexHtml, registerSeoPublicRoutes } from "./seoPublic";
+import { injectSpaIndexHtml, registerSeoPublicRoutes, requestHostname } from "./seoPublic";
 
 // Load Vite only when setupVite runs — avoids eager `import "vite"` (and tsx resolving its
 // internal chunks) on production `npm start` or with an incomplete install.
@@ -18,10 +18,15 @@ export function log(message: string) {
   console.log(`${formattedTime} [express] ${message}`);
 }
 
-function sendSpaIndexHtml(res: Response, distPath: string, requestPath: string): void {
+function sendSpaIndexHtml(
+  res: Response,
+  distPath: string,
+  requestPath: string,
+  host: string,
+): void {
   const indexPath = path.resolve(distPath, "index.html");
   const raw = fs.readFileSync(indexPath, "utf-8");
-  const html = injectSpaIndexHtml(raw, requestPath);
+  const html = injectSpaIndexHtml(raw, requestPath, host);
   res
     .status(200)
     .type("html")
@@ -52,7 +57,7 @@ export async function setupVite(app: Express, server: Server) {
       );
       let template = fs.readFileSync(clientTemplate, "utf-8");
       template = await vite.transformIndexHtml(url, template);
-      template = injectSpaIndexHtml(template, url);
+      template = injectSpaIndexHtml(template, url, requestHostname(req));
 
       res
         .status(200)
@@ -85,6 +90,6 @@ export function serveStatic(app: Express) {
   app.use(express.static(distPath, { index: false }));
 
   app.use("*", (req, res) => {
-    sendSpaIndexHtml(res, distPath, req.originalUrl || "/");
+    sendSpaIndexHtml(res, distPath, req.originalUrl || "/", requestHostname(req));
   });
 }

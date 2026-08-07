@@ -14,6 +14,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { ORAL_BOARDS_MARKETING_FAQ } from "@shared/marketingFaqs";
+import { useHostSpecialty } from "@/hooks/useSpecialty";
 import { Link } from "wouter";
 
 const SESSION_CONTROLS = [
@@ -53,6 +54,8 @@ const SESSION_CONTROLS = [
 
 export default function OralBoardsCoachPage() {
   usePageSeo("/oral-boards-coach");
+  const specialty = useHostSpecialty();
+  const specialtyLower = specialty.specialtyName.toLowerCase();
 
   return (
     <MarketingShell>
@@ -62,7 +65,7 @@ export default function OralBoardsCoachPage() {
             <p className="text-sm font-medium tracking-tight text-muted-foreground">
               Interactive Oral Exam Preparation
             </p>
-            <h1 className="text-4xl font-bold leading-tight tracking-tight gradient-text sm:text-5xl">
+            <h1 className="text-4xl font-bold leading-snug tracking-tight gradient-text sm:text-5xl">
               Oral Boards Coach · The Power Of Interactive Oral Prep
             </h1>
             <p className="text-lg leading-relaxed text-muted-foreground">
@@ -79,7 +82,10 @@ export default function OralBoardsCoachPage() {
             </p>
             <p className="leading-relaxed text-muted-foreground">
               Whether you are preparing for{" "}
-              <strong className="font-semibold text-foreground">plastic surgery oral boards</strong>,{" "}
+              <strong className="font-semibold text-foreground">
+                {specialtyLower} oral boards
+              </strong>
+              ,{" "}
               sharpening skills before an{" "}
               <strong className="font-semibold text-foreground">in-service oral component</strong>, or
               maintaining verbal fluency between cases, this guide explains how the coach works, why{" "}
@@ -114,7 +120,9 @@ export default function OralBoardsCoachPage() {
               <strong className="font-semibold text-foreground">timed mock exams</strong>, the coach
               closes the loop from “I knew it” to “I can explain it clearly in sixty seconds.” That
               combination is what we mean by{" "}
-              <strong className="font-semibold text-foreground">comprehensive plastic surgery exam prep</strong>{" "}
+              <strong className="font-semibold text-foreground">
+                comprehensive {specialtyLower} exam prep
+              </strong>{" "}
               inside one subscription.
             </p>
           </section>
@@ -236,7 +244,7 @@ export default function OralBoardsCoachPage() {
               <Link href="/contact" className="font-medium text-primary underline-offset-4 hover:underline">
                 Contact Us
               </Link>{" "}
-              at hello@prs-atlas.com.
+              at {specialty.contactEmail}.
             </p>
             <div className="flex flex-wrap gap-3">
               <Button asChild className="glow-primary transition-glow">
@@ -260,7 +268,7 @@ export default function OralBoardsCoachPage() {
               <p className="text-base leading-relaxed text-muted-foreground">
                 <strong className="text-foreground">Atlas Review Oral Boards Coach</strong> offers
                 configurable, conversational{" "}
-                <strong className="text-foreground">plastic surgery oral board practice</strong> with
+                <strong className="text-foreground">{specialtyLower} oral board practice</strong> with
                 streaming dialogue, session history, scoring and hinting controls, and modes that
                 span oral boards, written-boards density, and case walkthroughs, designed to
                 complement your clinical training and multiple-choice mastery without replacing them.

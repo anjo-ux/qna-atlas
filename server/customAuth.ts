@@ -3,10 +3,17 @@ import bcrypt from 'bcrypt';
 import session from 'express-session';
 import rateLimit from 'express-rate-limit';
 import sgMail from '@sendgrid/mail';
-import type { Express, RequestHandler } from 'express';
+import type { Express, Request, RequestHandler } from 'express';
 import connectPg from 'connect-pg-simple';
 import { isAllowedTrainingLevel } from "@shared/trainingLevels";
+import {
+  DEFAULT_SPECIALTY_ID,
+  getSpecialty,
+  isSpecialtyId,
+  type SpecialtyId,
+} from "@shared/specialties";
 import { storage } from './storage';
+import { getCanonicalOriginForHost, getSpecialtyForHost, requestHostname } from './seoPublic';
 import { sanitizeUser } from './authUtils';
 
 const SALT_ROUNDS = 12; // Strong password hashing
@@ -64,15 +71,24 @@ function generatePasswordResetPlainToken(): string {
   return randomBytes(32).toString('base64url');
 }
 
-function appBaseUrl(): string {
-  return (process.env.APP_URL || 'https://prs-atlas.com').replace(/\/$/, '');
+/**
+ * Base URL for emailed links. Derived from the request host so a reset started on
+ * ortho-atlas.com links back to ortho-atlas.com. APP_URL still forces one origin.
+ */
+function appBaseUrl(req?: Request): string {
+  const forced = process.env.APP_URL?.trim();
+  if (forced) return forced.replace(/\/$/, '');
+  const host = req ? requestHostname(req) : '';
+  const fromHost = getCanonicalOriginForHost(host);
+  if (fromHost) return fromHost.replace(/\/$/, '');
+  return getSpecialty(DEFAULT_SPECIALTY_ID).canonicalOrigin;
 }
 
 /**
  * Sends only a reset link — never the user's password. Update the SendGrid dynamic template to use
  * {{{resetUrl}}} (and optionally {{{loginUrl}}}); do not pass passwords to SendGrid.
  */
-async function sendPasswordResetEmail(email: string, resetUrl: string): Promise<void> {
+async function sendPasswordResetEmail(email: string, resetUrl: string, base: string): Promise<void> {
   const apiKey = process.env.SENDGRID_API_KEY;
   const fromEmail = process.env.SENDGRID_FROM_EMAIL || 'noreply@prs-atlas.com';
 
@@ -81,7 +97,6 @@ async function sendPasswordResetEmail(email: string, resetUrl: string): Promise<
     return;
   }
 
-  const base = appBaseUrl();
   const templateId =
     process.env.SENDGRID_PASSWORD_RESET_TEMPLATE_ID || DEFAULT_PASSWORD_RESET_TEMPLATE_ID;
 
@@ -190,10 +205,11 @@ export async function setupAuth(app: Express) {
       await storage.deletePasswordResetTokensForUser(user.id);
       await storage.createPasswordResetToken(user.id, tokenHash, expiresAt);
 
-      const resetUrl = `${appBaseUrl()}/reset-password?token=${encodeURIComponent(plainToken)}`;
+      const base = appBaseUrl(req);
+      const resetUrl = `${base}/reset-password?token=${encodeURIComponent(plainToken)}`;
 
       try {
-        await sendPasswordResetEmail(email, resetUrl);
+        await sendPasswordResetEmail(email, resetUrl, base);
       } catch (err) {
         console.error('Failed to send password reset email:', err);
         await storage.deletePasswordResetTokensForUser(user.id);
@@ -342,7 +358,7 @@ export async function setupAuth(app: Express) {
   // Register route
   app.post('/api/auth/register', authRateLimiter, async (req, res) => {
     try {
-      const { email, password, confirmPassword, firstName, lastName, institutionalAffiliation, trainingLevel } =
+      const { email, password, confirmPassword, firstName, lastName, institutionalAffiliation, trainingLevel, specialtyId } =
         req.body;
 
       // Validation
@@ -380,6 +396,14 @@ export async function setupAuth(app: Express) {
         return res.status(400).json({ message: 'Please select a valid training level.' });
       }
 
+      /** Signup picker defaults to the host's specialty but the client may send the other one. */
+      if (specialtyId != null && !isSpecialtyId(specialtyId)) {
+        return res.status(400).json({ message: 'Please select a valid specialty.' });
+      }
+      const signupSpecialtyId: SpecialtyId = isSpecialtyId(specialtyId)
+        ? specialtyId
+        : getSpecialtyForHost(requestHostname(req));
+
       // Check email validity
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(email)) {
@@ -402,6 +426,14 @@ export async function setupAuth(app: Express) {
         lastName,
         institutionalAffiliation: institutionalAffiliation || '',
         trainingLevel,
+        subscriptionStatus: 'expired',
+        trialEndsAt: null,
+        signupSpecialtyId,
+        activeSpecialtyId: signupSpecialtyId,
+      });
+
+      /** Locked entitlement row for the chosen q-bank only; the other one is created on demand. */
+      await storage.updateSpecialtyEntitlement(newUser.id, signupSpecialtyId, {
         subscriptionStatus: 'expired',
         trialEndsAt: null,
       });

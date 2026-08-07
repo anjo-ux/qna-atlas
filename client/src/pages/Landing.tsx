@@ -6,12 +6,14 @@ import { LandingHomeSurface } from "@/components/marketing/LandingHomeSurface";
 import { LandingTopicStudyPreview } from "@/components/marketing/LandingTopicStudyPreview";
 import { AtlasWayTestModeDemo } from "@/components/marketing/AtlasWayTestModeDemo";
 import { OralBoardSetupInteractiveDemo } from "@/components/marketing/OralBoardSetupInteractiveDemo";
+import { SpecialtySubheaderDropdown } from "@/components/SpecialtySubheaderDropdown";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowRight, BookOpen, Check, Eye, Mic, Sparkles, Timer } from "lucide-react";
 import { useState } from "react";
 import { Link } from "wouter";
 import { PreviewWizard } from "@/components/PreviewWizard";
 import { useTheme } from "@/hooks/useTheme";
+import { useHostSpecialty } from "@/hooks/useSpecialty";
 import atlasLogo from "@assets/atlas_1764093111680.png";
 import atlasLogoLight from "@assets/logo_light_1774918799268.png";
 import { usePageSeo } from "@/lib/usePageSeo";
@@ -35,6 +37,7 @@ const EXPLORE_LINKS = [
 export default function Landing() {
   const [showPreviewWizard, setShowPreviewWizard] = useState(false);
   const { theme } = useTheme();
+  const specialty = useHostSpecialty();
 
   usePageSeo("/");
 
@@ -57,14 +60,20 @@ export default function Landing() {
                 <div className="mb-4 flex justify-center">
                   <img
                     src={theme === "dark" ? atlasLogoLight : atlasLogo}
-                    alt="Plastic Surgery Atlas"
+                    alt={`${specialty.productName}, ${specialty.specialtyName.toLowerCase()} study platform`}
                     className="h-24 w-24 object-contain drop-shadow-lg transition-transform duration-500 motion-safe:hover:scale-[1.03]"
                   />
                 </div>
-                <h1 className="text-5xl font-bold leading-tight gradient-text">Plastic Surgery Atlas</h1>
+                <div className="space-y-2">
+                  <h1 className="text-5xl font-bold leading-snug gradient-text">
+                    {specialty.productName}
+                  </h1>
+                  <div className="flex justify-center">
+                    <SpecialtySubheaderDropdown size="hero" align="center" />
+                  </div>
+                </div>
                 <p className="text-xl leading-normal text-muted-foreground">
-                  Master Comprehensive Plastic Surgery Knowledge Through Interactive Questions, Detailed
-                  Explanations, And Structured Learning Paths
+                  {specialty.marketing.heroSubtitle}
                 </p>
                 <div className="flex justify-center gap-3 pt-4">
                   <Button
@@ -90,7 +99,7 @@ export default function Landing() {
 
               <div className="grid gap-3 sm:grid-cols-3">
                 {[
-                  { icon: BookOpen, value: "2500+", label: "Curated Questions" },
+                  { icon: BookOpen, value: specialty.marketing.questionCountLabel, label: "Curated Questions" },
                   { icon: Timer, value: "Mock Exams", label: "Timed Or Untimed" },
                   { icon: Mic, value: "Oral Boards", label: "Coach Ready Practice" },
                 ].map(({ icon: Icon, value, label }) => (
@@ -230,7 +239,7 @@ export default function Landing() {
                   <div className="flex items-start gap-2">
                     <Check className="mt-0.5 h-5 w-5 flex-shrink-0 text-secondary" />
                     <span className="leading-normal text-muted-foreground">
-                      <strong>2500+ Carefully Curated Questions.</strong>
+                      <strong>{specialty.marketing.questionCountBullet}</strong>
                     </span>
                   </div>
                   <div className="flex items-start gap-2">
@@ -286,7 +295,7 @@ export default function Landing() {
               </CardHeader>
               <CardContent className="space-y-6">
                 <p className="leading-normal text-foreground">
-                  Join Surgeons Studying For In-Service Training Exam And Board Certification. Create
+                  Join Surgeons Studying For The {specialty.marketing.examName} And Board Certification. Create
                   An Account To Unlock The Full Learning Experience With Progress Tracking, Custom
                   Tests, And Personalized Recommendations.
                 </p>

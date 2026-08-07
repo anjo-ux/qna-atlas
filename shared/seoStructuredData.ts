@@ -1,6 +1,7 @@
 import { ORAL_BOARDS_MARKETING_FAQ, PRICING_MARKETING_FAQ } from "./marketingFaqs";
 import type { PublicPageSeo } from "./publicPageSeo";
-import { PUBLIC_PAGE_SEO, SITE_ORIGIN } from "./publicPageSeo";
+import { PUBLIC_PAGE_SEO_BY_SPECIALTY } from "./publicPageSeo";
+import { DEFAULT_SPECIALTY_ID, getSpecialty, type SpecialtyId } from "./specialties";
 
 function normalizePath(pathname: string): string {
   const p = pathname.split("?")[0]?.split("#")[0] || "/";
@@ -13,12 +14,17 @@ function pageUrl(pathname: string, origin: string): string {
   return `${origin}${pathname}`;
 }
 
-function organizationAndWebSite(meta: PublicPageSeo, origin: string): Record<string, unknown>[] {
+function organizationAndWebSite(
+  meta: PublicPageSeo,
+  origin: string,
+  specialtyId: SpecialtyId,
+): Record<string, unknown>[] {
+  const specialty = getSpecialty(specialtyId);
   return [
     {
       "@type": "Organization",
       "@id": `${origin}/#organization`,
-      name: "PRS Atlas, LLC",
+      name: specialty.legalEntity,
       url: origin,
       logo: {
         "@type": "ImageObject",
@@ -31,8 +37,8 @@ function organizationAndWebSite(meta: PublicPageSeo, origin: string): Record<str
       "@type": "WebSite",
       "@id": `${origin}/#website`,
       url: origin,
-      name: "Atlas Review",
-      alternateName: "Plastic Surgery Atlas Review",
+      name: specialty.productName,
+      alternateName: `${specialty.specialtyName} Atlas Review`,
       description: meta.description,
       publisher: { "@id": `${origin}/#organization` },
       inLanguage: "en-US",
@@ -81,25 +87,29 @@ function faqJsonLd(pathname: string, origin: string): Record<string, unknown> | 
  */
 export function getStructuredData(
   pathname: string,
-  origin: string = SITE_ORIGIN,
+  origin?: string,
+  specialtyId: SpecialtyId = DEFAULT_SPECIALTY_ID,
 ): Record<string, unknown> | null {
+  const specialty = getSpecialty(specialtyId);
+  const resolvedOrigin = origin ?? specialty.canonicalOrigin;
+  const catalog = PUBLIC_PAGE_SEO_BY_SPECIALTY[specialty.id];
   const n = normalizePath(pathname);
-  const meta = PUBLIC_PAGE_SEO[n];
+  const meta = catalog[n];
   if (!meta) return null;
 
   if (n === "/") {
     return {
       "@context": "https://schema.org",
-      "@graph": organizationAndWebSite(meta, origin),
+      "@graph": organizationAndWebSite(meta, resolvedOrigin, specialty.id),
     };
   }
 
   const graph: Record<string, unknown>[] = [
-    ...organizationAndWebSite(PUBLIC_PAGE_SEO["/"]!, origin),
-    webPageJson(n, meta, origin),
+    ...organizationAndWebSite(catalog["/"]!, resolvedOrigin, specialty.id),
+    webPageJson(n, meta, resolvedOrigin),
   ];
 
-  const faq = faqJsonLd(n, origin);
+  const faq = faqJsonLd(n, resolvedOrigin);
   if (faq) graph.push(faq);
 
   return {

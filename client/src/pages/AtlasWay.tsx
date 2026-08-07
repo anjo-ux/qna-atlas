@@ -11,6 +11,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { AtlasWayTestModeDemo } from "@/components/marketing/AtlasWayTestModeDemo";
+import { useHostSpecialty } from "@/hooks/useSpecialty";
 import { Link } from "wouter";
 import { cn } from "@/lib/utils";
 
@@ -35,7 +36,7 @@ const PILLARS: PillarConfig[] = [
     Icon: BookMarked,
     BulletIcon: Sparkles,
     bullets: [
-      "Topics grouped the way plastic surgery is learned and tested, so you always know where you are in the map.",
+      "Topics grouped the way the specialty is learned and tested, so you always know where you are in the map.",
       "Rich answer discussions to connect principles, pitfalls, and decision forks.",
       "A single home for bookmarks, notes, and return visits, with no lost sticky notes.",
     ],
@@ -73,6 +74,7 @@ const PILLARS: PillarConfig[] = [
 
 export default function AtlasWay() {
   const [activePillar, setActivePillar] = useState(0);
+  const specialty = useHostSpecialty();
 
   usePageSeo("/the-atlas-way");
 
@@ -102,7 +104,7 @@ export default function AtlasWay() {
             <p className="mb-3 text-sm font-medium tracking-tight text-muted-foreground">
               One System, Three Pillars
             </p>
-            <h1 className="mb-4 text-4xl font-bold leading-tight tracking-tight gradient-text sm:text-5xl">
+            <h1 className="mb-4 text-4xl font-bold leading-snug tracking-tight gradient-text sm:text-5xl">
               The Atlas Way
             </h1>
             <p className="text-lg leading-relaxed text-muted-foreground">
@@ -209,7 +211,9 @@ export default function AtlasWay() {
             </h2>
             <p className="mx-auto mb-4 max-w-3xl text-center text-base leading-relaxed text-muted-foreground">
               Our{" "}
-              <strong className="font-semibold text-foreground">plastic surgery mock exam</strong>{" "}
+              <strong className="font-semibold text-foreground">
+                {specialty.specialtyName.toLowerCase()} mock exam
+              </strong>{" "}
               experience is built around the same rhythm you will use on test day with a dedicated{" "}
               <strong className="font-semibold text-foreground">question navigator</strong>,{" "}
               <strong className="font-semibold text-foreground">flagging</strong> for review, clear{" "}

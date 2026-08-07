@@ -8,20 +8,22 @@ import { useAuth } from "@/hooks/useAuth";
 import { FALLBACK_PLANS, getPlanDisplay } from "@/data/subscriptionPlanDisplay";
 import { Check, Building2, GraduationCap, Sparkles } from "lucide-react";
 import { Link } from "wouter";
-
-const INCLUDED_FEATURES = [
-  "Full Plastic Surgery Question Bank With Thousands Of Curated Items",
-  "Detailed Explanations And Reference-Friendly Study Flows",
-  "Timed Mock Exams And Custom Test Builder",
-  "Spaced Repetition And Bookmarking Across Devices",
-  "Oral Board-Style Coach For Verbal Practice",
-  "Progress Tracking By Section And Sub-Topic",
-] as const;
+import { useHostSpecialty } from "@/hooks/useSpecialty";
 
 export default function PricingPage() {
   const { isAuthenticated, isLoading } = useAuth();
+  const specialty = useHostSpecialty();
 
   usePageSeo("/pricing");
+
+  const includedFeatures = [
+    `Full ${specialty.specialtyName} Question Bank`,
+    "Detailed Explanations And Reference-Friendly Study Flows",
+    "Timed Mock Exams And Custom Test Builder",
+    "Spaced Repetition And Bookmarking Across Devices",
+    "Oral Board-Style Coach For Verbal Practice",
+    "Progress Tracking By Section And Sub-Topic",
+  ];
 
   const checkoutHref = isAuthenticated ? "/subscribe" : "/signup";
   const checkoutLabel = isAuthenticated ? "Go To Checkout" : "Create Account & Subscribe";
@@ -34,7 +36,7 @@ export default function PricingPage() {
             <p className="mb-2 text-sm font-medium tracking-tight text-muted-foreground">
               Simple Plans, Serious Prep
             </p>
-            <h1 className="mb-4 text-4xl font-bold leading-tight tracking-tight gradient-text sm:text-5xl">
+            <h1 className="mb-4 text-4xl font-bold leading-snug tracking-tight gradient-text sm:text-5xl">
               Pricing
             </h1>
             <p className="text-lg leading-relaxed text-muted-foreground">
@@ -161,13 +163,13 @@ export default function PricingPage() {
               </h2>
               <p className="text-muted-foreground">
                 Atlas Review is built as one premium product, not a stripped-down “basic” tier. When
-                you subscribe, you invest in the full plastic surgery study ecosystem with recall,
-                testing, and oral rehearsal in one subscription.
+                you subscribe, you invest in the full {specialty.specialtyName.toLowerCase()} study
+                ecosystem with recall, testing, and oral rehearsal in one subscription.
               </p>
             </div>
             <Card className="border-primary/20 bg-primary/[0.03]">
               <CardContent className="grid gap-4 p-6 sm:grid-cols-2">
-                {INCLUDED_FEATURES.map((line) => (
+                {includedFeatures.map((line) => (
                   <div key={line} className="flex gap-3 text-sm leading-relaxed text-muted-foreground">
                     <Check className="mt-0.5 h-5 w-5 shrink-0 text-secondary" aria-hidden />
                     <span>{line}</span>

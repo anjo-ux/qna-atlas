@@ -6,6 +6,8 @@ import { Moon, Sun, Home, Lock } from 'lucide-react';
 import atlasLogo from '@assets/atlas_1764093111680.png';
 import atlasLogoLight from '@assets/logo_light_1774918799268.png';
 import { toast } from 'sonner';
+import { SpecialtySubheaderDropdown } from '@/components/SpecialtySubheaderDropdown';
+import { useHostSpecialty } from '@/hooks/useSpecialty';
 
 export default function ResetPassword() {
   const [token, setToken] = useState<string | null>(null);
@@ -13,6 +15,7 @@ export default function ResetPassword() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isDark, setIsDark] = useState(false);
+  const specialty = useHostSpecialty();
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -76,23 +79,26 @@ export default function ResetPassword() {
         <header className="glass-nav w-full static flex-shrink-0 rounded-b-2xl sm:sticky sm:top-0 sm:z-50">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-3 pb-2">
             <div className="flex items-center justify-between">
-              <button
-                type="button"
-                onClick={() => (window.location.href = '/')}
-                className="flex items-center gap-3 min-w-0 rounded-xl px-4 py-1.5 cursor-pointer hover:bg-primary/10 outline-none focus-visible:ring-0"
-              >
-                <div className="logo-glass flex items-center justify-center p-1.5 flex-shrink-0 ring-1 ring-black/5 dark:ring-white/10">
+              <div className="flex min-w-0 items-center gap-3 rounded-xl px-4 py-1.5">
+                <button
+                  type="button"
+                  onClick={() => (window.location.href = '/')}
+                  className="logo-glass flex items-center justify-center p-1.5 flex-shrink-0 ring-1 ring-black/5 dark:ring-white/10 cursor-pointer outline-none focus-visible:ring-0 hover:opacity-90"
+                  aria-label={`${specialty.productName} home`}
+                >
                   <img src={isDark ? atlasLogoLight : atlasLogo} alt="Atlas Logo" className="h-7 w-7 sm:h-8 sm:w-8 object-contain" />
-                </div>
+                </button>
                 <div className="hidden sm:flex flex-col min-w-0">
-                  <span className="text-base sm:text-lg font-bold tracking-tight gradient-text leading-tight truncate">
-                    Atlas
-                  </span>
-                  <span className="text-xs font-medium text-muted-foreground tracking-widest uppercase truncate">
-                    Review
-                  </span>
+                  <button
+                    type="button"
+                    onClick={() => (window.location.href = '/')}
+                    className="text-left text-base sm:text-lg font-bold tracking-tight gradient-text leading-snug truncate cursor-pointer outline-none focus-visible:ring-0 hover:opacity-90"
+                  >
+                    {specialty.productName}
+                  </button>
+                  <SpecialtySubheaderDropdown />
                 </div>
-              </button>
+              </div>
               <div className="flex items-center gap-2 flex-shrink-0">
                 <button type="button" onClick={toggleTheme} className="p-2 hover-elevate rounded-md" title="Toggle theme">
                   {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}

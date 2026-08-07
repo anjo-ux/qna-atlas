@@ -1,10 +1,20 @@
 import Stripe from "stripe";
+import { DEFAULT_SPECIALTY_ID, getSpecialty, type SpecialtyId } from "@shared/specialties";
 import { storage } from "./storage";
 
 const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;
 const STRIPE_LIVE_SECRET_KEY = process.env.STRIPE_LIVE_SECRET_KEY;
 const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET;
-const APP_BASE_URL = process.env.APP_BASE_URL || process.env.VITE_APP_URL || "http://localhost:5000";
+
+/**
+ * Base URL for Stripe success/cancel redirects. Defaults to the specialty's own domain so an
+ * Orthopaedic checkout returns to ortho-atlas.com; APP_BASE_URL overrides for local/staging.
+ */
+function checkoutBaseUrl(specialtyId: SpecialtyId, requestOrigin?: string | null): string {
+  const explicit = requestOrigin?.trim() || process.env.APP_BASE_URL || process.env.VITE_APP_URL;
+  if (explicit) return explicit.replace(/\/$/, "");
+  return getSpecialty(specialtyId).canonicalOrigin;
+}
 
 export const stripe: Stripe | null = STRIPE_SECRET_KEY
   ? new Stripe(STRIPE_SECRET_KEY)
@@ -54,18 +64,21 @@ export async function createCheckoutSession(params: {
   planId: string;
   /** When false, use no-trial Payment Link if configured (returning subscribers). */
   introTrialEligible?: boolean;
+  /** Origin the checkout started from; used for success/cancel redirects. */
+  requestOrigin?: string | null;
   successUrl?: string;
   cancelUrl?: string;
-}): Promise<{ sessionId: string; url: string } | { error: string }> {
+}): Promise<{ sessionId: string; url: string; specialtyId: SpecialtyId } | { error: string }> {
   if (!stripe) {
     return { error: "Stripe is not configured. Set STRIPE_SECRET_KEY." };
   }
 
-  const plans = await storage.getSubscriptionPlans();
-  const plan = plans.find((p) => p.id === params.planId);
+  const plan = await storage.getSubscriptionPlanById(params.planId);
   if (!plan) {
     return { error: "Plan not found" };
   }
+  const specialtyId = getSpecialty(plan.specialtyId).id;
+  const specialty = getSpecialty(specialtyId);
 
   const planRow = plan as {
     stripePaymentLinkUrl?: string | null;
@@ -73,17 +86,20 @@ export async function createCheckoutSession(params: {
   };
   const introOk = params.introTrialEligible !== false;
 
+  const envSuffix = specialtyId === DEFAULT_SPECIALTY_ID ? "" : `${specialtyId.toUpperCase()}_`;
+
   if (!introOk) {
     const noTrialUrl = planRow.stripePaymentLinkUrlNoTrial?.trim();
     if (noTrialUrl) {
       return {
         sessionId: "",
         url: noTrialUrl,
+        specialtyId,
       };
     }
     return {
       error:
-        "No-trial checkout is not configured for this plan. In Stripe, duplicate each Payment Link without a trial phase, then set stripe_payment_link_url_no_trial in the DB or env STRIPE_PAYMENT_LINK_MONTHLY_NO_TRIAL / STRIPE_PAYMENT_LINK_6_MONTH_NO_TRIAL / STRIPE_PAYMENT_LINK_1_YEAR_NO_TRIAL.",
+        `No-trial checkout is not configured for the ${specialty.brandName} ${plan.name} plan. In Stripe, duplicate each Payment Link without a trial phase, then set stripe_payment_link_url_no_trial in the DB or env STRIPE_PAYMENT_LINK_${envSuffix}MONTHLY_NO_TRIAL / STRIPE_PAYMENT_LINK_${envSuffix}6_MONTH_NO_TRIAL / STRIPE_PAYMENT_LINK_${envSuffix}1_YEAR_NO_TRIAL.`,
     };
   }
 
@@ -93,12 +109,21 @@ export async function createCheckoutSession(params: {
     return {
       sessionId: "",
       url: paymentLinkUrl,
+      specialtyId,
+    };
+  }
+
+  if (!plan.stripePriceId && !plan.stripeProductId) {
+    return {
+      error:
+        `Checkout is not configured for the ${specialty.brandName} ${plan.name} plan yet. Create the Stripe product/Payment Link and set env STRIPE_PRODUCT_${envSuffix}${plan.name.toUpperCase().replace(/-/g, "_")} or STRIPE_PAYMENT_LINK_${envSuffix}${plan.name.toUpperCase().replace(/-/g, "_")}.`,
     };
   }
 
   // Fallback: create session with product/price (one-time payment)
-  const successUrl = params.successUrl ?? `${APP_BASE_URL.replace(/\/$/, "")}/?subscription=success`;
-  const cancelUrl = params.cancelUrl ?? `${APP_BASE_URL.replace(/\/$/, "")}/?subscription=cancelled`;
+  const base = checkoutBaseUrl(specialtyId, params.requestOrigin);
+  const successUrl = params.successUrl ?? `${base}/?subscription=success`;
+  const cancelUrl = params.cancelUrl ?? `${base}/?subscription=cancelled`;
 
   const lineItem: Stripe.Checkout.SessionCreateParams.LineItem = plan.stripePriceId
     ? { price: plan.stripePriceId, quantity: 1 }
@@ -134,6 +159,7 @@ export async function createCheckoutSession(params: {
     metadata: {
       userId: params.userId,
       planId: params.planId,
+      specialtyId,
     },
   };
 
@@ -143,7 +169,7 @@ export async function createCheckoutSession(params: {
   if (!url) {
     return { error: "Failed to create checkout session" };
   }
-  return { sessionId: session.id, url };
+  return { sessionId: session.id, url, specialtyId };
 }
 
 export type StripeWebhookRequest = {
@@ -194,12 +220,14 @@ export async function handleStripeWebhook(
       return;
     }
 
-    const plan = (await storage.getSubscriptionPlans()).find((p) => p.id === planId);
+    const plan = await storage.getSubscriptionPlanById(planId);
     if (!plan) {
       console.error("Stripe webhook: plan not found", { planId });
       res.status(200).send("OK");
       return;
     }
+    /** The plan owns the specialty — never assume a single product set. */
+    const specialtyId = getSpecialty(plan.specialtyId).id;
 
     const startDate = new Date();
     const endDate = new Date(startDate);
@@ -244,6 +272,7 @@ export async function handleStripeWebhook(
 
     await storage.createSubscriptionTransaction({
       userId,
+      specialtyId,
       planId,
       amount: transactionAmount,
       status: "completed",
@@ -253,16 +282,22 @@ export async function handleStripeWebhook(
       endDate: transactionEndDate,
     });
 
-    await storage.updateUserProfile(userId, {
+    await storage.updateSpecialtyEntitlement(userId, specialtyId, {
       subscriptionStatus: "active",
-      subscriptionPlan: plan.name as any,
+      subscriptionPlan: plan.name,
       subscriptionEndsAt: endDate,
-      subscriptionCancelAtPeriodEnd: false as any,
-      subscriptionCanceledAt: null as any,
+      subscriptionCancelAtPeriodEnd: false,
+      subscriptionCanceledAt: null,
       subscriptionTrialUsed: true,
+      ...(subId ? { stripeSubscriptionId: subId } : {}),
     });
 
-    console.log("Stripe subscription fulfilled", { userId, planId, sessionId: session.id });
+    console.log("Stripe subscription fulfilled", {
+      userId,
+      planId,
+      specialtyId,
+      sessionId: session.id,
+    });
   }
 
   /**
@@ -305,23 +340,29 @@ export async function handleStripeWebhook(
       return;
     }
 
-    const u = await storage.getUserByStripeSubscriptionId(subId);
-    if (!u) {
-      console.warn("Stripe invoice.paid: no user for subscription", { subId, invId });
+    /** The entitlement row owning this Stripe subscription tells us the user *and* the q-bank. */
+    const entitlement = await storage.getEntitlementByStripeSubscriptionId(subId);
+    if (!entitlement) {
+      console.warn("Stripe invoice.paid: no entitlement for subscription", { subId, invId });
       res.status(200).send("OK");
       return;
     }
+    const specialtyId = getSpecialty(entitlement.specialtyId).id;
 
-    const planName = u.subscriptionPlan;
+    const planName = entitlement.subscriptionPlan;
     if (!planName || planName === "institutional") {
       res.status(200).send("OK");
       return;
     }
 
-    const dbPlans = await storage.getSubscriptionPlans();
+    const dbPlans = await storage.getSubscriptionPlans(specialtyId);
     const plan = dbPlans.find((p) => p.name === planName);
     if (!plan) {
-      console.error("Stripe invoice.paid: plan not found", { planName, userId: u.id });
+      console.error("Stripe invoice.paid: plan not found", {
+        planName,
+        specialtyId,
+        userId: entitlement.userId,
+      });
       res.status(200).send("OK");
       return;
     }
@@ -338,7 +379,8 @@ export async function handleStripeWebhook(
           : null;
 
     await storage.createSubscriptionTransaction({
-      userId: u.id,
+      userId: entitlement.userId,
+      specialtyId,
       planId: plan.id,
       amount: amountCents,
       status: "completed",
@@ -348,15 +390,20 @@ export async function handleStripeWebhook(
       endDate: periodEnd,
     });
 
-    const nextEnd = periodEnd;
-    await storage.updateUserProfile(u.id, {
-      subscriptionEndsAt: nextEnd,
-      subscriptionCancelAtPeriodEnd: false as any,
-      subscriptionCanceledAt: null as any,
-      ...(u.subscriptionStatus !== "trial" ? { subscriptionStatus: "active" as const } : {}),
-    } as any);
+    await storage.updateSpecialtyEntitlement(entitlement.userId, specialtyId, {
+      subscriptionEndsAt: periodEnd,
+      subscriptionCancelAtPeriodEnd: false,
+      subscriptionCanceledAt: null,
+      ...(entitlement.subscriptionStatus !== "trial" ? { subscriptionStatus: "active" } : {}),
+    });
 
-    console.log("Stripe invoice.paid recorded", { userId: u.id, invId, subId, br });
+    console.log("Stripe invoice.paid recorded", {
+      userId: entitlement.userId,
+      specialtyId,
+      invId,
+      subId,
+      br,
+    });
   }
 
   res.status(200).send("OK");
@@ -373,9 +420,9 @@ export async function fulfillFromCheckoutSession(sessionId: string, userId: stri
   try {
     const session = await client.checkout.sessions.retrieve(sessionId, { expand: ["subscription", "invoice"] });
     if (session.payment_status !== "paid" && session.status !== "complete") return { error: "Checkout session not paid." };
-    const plans = await storage.getSubscriptionPlans();
-    const plan = plans.find((p) => p.id === planId);
+    const plan = await storage.getSubscriptionPlanById(planId);
     if (!plan) return { error: "Plan not found." };
+    const specialtyId = getSpecialty(plan.specialtyId).id;
     const sub = typeof session.subscription === "object" && session.subscription !== null ? (session.subscription as Stripe.Subscription) : null;
     const subId = sub?.id ?? null;
 
@@ -414,6 +461,7 @@ export async function fulfillFromCheckoutSession(sessionId: string, userId: stri
 
     await storage.createSubscriptionTransaction({
       userId,
+      specialtyId,
       planId: plan.id,
       amount: transactionAmount,
       status: "completed",
@@ -422,17 +470,16 @@ export async function fulfillFromCheckoutSession(sessionId: string, userId: stri
       startDate: transactionStartDate,
       endDate: transactionEndDate,
     });
-    const updates: Record<string, unknown> = {
+    await storage.updateSpecialtyEntitlement(userId, specialtyId, {
       subscriptionStatus,
       subscriptionPlan: plan.name,
       subscriptionEndsAt,
       subscriptionCancelAtPeriodEnd: false,
       subscriptionCanceledAt: null,
       trialEndsAt: trialEndsAt ?? null,
-    };
-    if (subId) updates.stripeSubscriptionId = subId;
-    updates.subscriptionTrialUsed = true;
-    await storage.updateUserProfile(userId, updates as any);
+      subscriptionTrialUsed: true,
+      ...(subId ? { stripeSubscriptionId: subId } : {}),
+    });
     return { ok: true };
   } catch (err: any) {
     const msg = err?.message ?? String(err);
@@ -597,8 +644,8 @@ async function retrieveStripeSubscriptionAcrossClients(
 }
 
 /**
- * Periodic Stripe reconciliation:
- * - Ensures user entitlement dates/status match Stripe subscription state
+ * Periodic Stripe reconciliation, per (user, specialty) entitlement:
+ * - Ensures entitlement dates/status match Stripe subscription state
  * - Backfills missed recurring paid invoices into subscription_transactions (idempotent by invoice id)
  */
 export async function reconcileStripeSubscriptions(): Promise<{
@@ -612,21 +659,26 @@ export async function reconcileStripeSubscriptions(): Promise<{
     return { scanned: 0, updatedUsers: 0, createdTransactions: 0, skippedNoStripe: 0, errors: 0 };
   }
 
-  const users = await storage.getUsersWithStripeSubscriptions();
-  const plans = await storage.getSubscriptionPlans();
-  const planByName = new Map(plans.map((p) => [p.name, p]));
+  const entitlements = await storage.getEntitlementsWithStripeSubscriptions();
+  const planByNameForSpecialty = new Map<SpecialtyId, Map<string, Awaited<ReturnType<typeof storage.getSubscriptionPlanById>>>>();
   let updatedUsers = 0;
   let createdTransactions = 0;
   let skippedNoStripe = 0;
   let errors = 0;
   const nowMs = Date.now();
 
-  for (const u of users) {
+  for (const u of entitlements) {
     const subId = u.stripeSubscriptionId?.trim();
     if (!subId) {
       skippedNoStripe += 1;
       continue;
     }
+    const specialtyId = getSpecialty(u.specialtyId).id;
+    if (!planByNameForSpecialty.has(specialtyId)) {
+      const plans = await storage.getSubscriptionPlans(specialtyId);
+      planByNameForSpecialty.set(specialtyId, new Map(plans.map((p) => [p.name, p])));
+    }
+    const planByName = planByNameForSpecialty.get(specialtyId)!;
     try {
       const sub = await retrieveStripeSubscriptionAcrossClients(subId);
       if (!sub) continue;
@@ -656,7 +708,7 @@ export async function reconcileStripeSubscriptions(): Promise<{
         updates.trialEndsAt = null;
       }
 
-      await storage.updateUserProfile(u.id, updates as any);
+      await storage.updateSpecialtyEntitlement(u.userId, specialtyId, updates);
       updatedUsers += 1;
 
       const latestInvoice = sub.latest_invoice as Stripe.Invoice | string | null | undefined;
@@ -686,7 +738,8 @@ export async function reconcileStripeSubscriptions(): Promise<{
                 : null;
 
           await storage.createSubscriptionTransaction({
-            userId: u.id,
+            userId: u.userId,
+            specialtyId,
             planId: plan.id,
             amount: amountCents,
             status: "completed",
@@ -700,8 +753,9 @@ export async function reconcileStripeSubscriptions(): Promise<{
       }
     } catch (err: any) {
       errors += 1;
-      console.error("Stripe reconciliation user error:", {
-        userId: u.id,
+      console.error("Stripe reconciliation entitlement error:", {
+        userId: u.userId,
+        specialtyId,
         stripeSubscriptionId: subId,
         message: err?.message ?? String(err),
       });
@@ -709,7 +763,7 @@ export async function reconcileStripeSubscriptions(): Promise<{
   }
 
   return {
-    scanned: users.length,
+    scanned: entitlements.length,
     updatedUsers,
     createdTransactions,
     skippedNoStripe,

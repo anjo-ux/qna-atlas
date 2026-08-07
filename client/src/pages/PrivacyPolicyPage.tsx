@@ -1,11 +1,10 @@
 import type { ReactNode } from "react";
 import { MarketingShell } from "@/components/marketing/MarketingShell";
 import { usePageSeo } from "@/lib/usePageSeo";
+import { useHostSpecialty } from "@/hooks/useSpecialty";
 import { Link } from "wouter";
 
-const SITE_URL = "https://prs-atlas.com";
 const SITE_NAME = "Atlas Review";
-const LEGAL_ENTITY = "PRS Atlas, LLC";
 const SUPPORT_EMAIL = "support@prsatlas.com";
 const mailto = (subject: string) =>
   `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(subject)}`;
@@ -31,6 +30,7 @@ function Section({
 
 export default function PrivacyPolicyPage() {
   usePageSeo("/privacy");
+  const { canonicalOrigin: SITE_URL, legalEntity: LEGAL_ENTITY } = useHostSpecialty();
 
   return (
     <MarketingShell>
@@ -38,7 +38,7 @@ export default function PrivacyPolicyPage() {
         <article className="container mx-auto max-w-3xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
           <header className="mb-10 space-y-3 border-b border-border/60 pb-8">
             <p className="text-sm font-medium tracking-tight text-muted-foreground">{LEGAL_ENTITY}</p>
-            <h1 className="text-4xl font-bold leading-tight tracking-tight gradient-text sm:text-5xl">
+            <h1 className="text-4xl font-bold leading-snug tracking-tight gradient-text sm:text-5xl">
               Privacy Policy
             </h1>
             <p className="text-sm text-muted-foreground">Updated on April 16, 2026</p>

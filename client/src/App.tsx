@@ -8,6 +8,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/useAuth";
 import { useContentProtection } from "@/hooks/useContentProtection";
 import { ThemeProvider } from "@/hooks/useTheme";
+import { SpecialtyProvider } from "@/hooks/useSpecialty";
 import Index from "./pages/Index";
 import PreviewMode from "./pages/PreviewMode";
 import NotFound from "./pages/NotFound";
@@ -153,7 +154,7 @@ function Router() {
         <Route component={Landing} />
       ) : (
         <>
-          <Route path="/subscribe" component={SubscriptionPage} />
+          <Route path="/subscribe">{() => <SubscriptionPage />}</Route>
           <Route path="/" component={Index} />
           <Route path="/bookmarks">
             {() => <BookmarksPage onBack={() => setLocation('/')} />}
@@ -186,11 +187,13 @@ export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <AppContent />
-        </TooltipProvider>
+        <SpecialtyProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <AppContent />
+          </TooltipProvider>
+        </SpecialtyProvider>
       </ThemeProvider>
     </QueryClientProvider>
   );

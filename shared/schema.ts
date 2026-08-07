@@ -10,6 +10,7 @@ import {
   boolean,
   uniqueIndex,
 } from "drizzle-orm/pg-core";
+import { DEFAULT_SPECIALTY_ID, type SpecialtyId } from "./specialties";
 
 // Session storage table
 // (IMPORTANT) This table is mandatory for Replit Auth, don't drop it.
@@ -36,10 +37,25 @@ export const users = pgTable("users", {
   institutionalAffiliation: varchar("institutional_affiliation"), // Profile only: user's registered/display affiliation (settings, signup)
   /** Signup-only; internal analytics. Not returned on SanitizedUser. */
   trainingLevel: varchar("training_level"),
+  /** Question bank currently selected in the app; drives content, theme, and entitlement scope. */
+  activeSpecialtyId: varchar("active_specialty_id", { length: 32 })
+    .$type<SpecialtyId>()
+    .notNull()
+    .default(DEFAULT_SPECIALTY_ID),
+  /** Specialty chosen at signup (which domain/q-bank the account was created for). */
+  signupSpecialtyId: varchar("signup_specialty_id", { length: 32 })
+    .$type<SpecialtyId>()
+    .notNull()
+    .default(DEFAULT_SPECIALTY_ID),
   institutionalAccessAffiliation: varchar("institutional_access_affiliation"), // Display name from last code redeem; access requires redemption row + future expires_at
   institutionalAccessExpiresAt: timestamp("institutional_access_expires_at"), // End of code-granted access; must be in the future (with a redemption) to unlock
   /** Legacy timestamp; redemption limits use `user_institutional_code_redemptions` (per code per account). */
   institutionalCodeRedeemedAt: timestamp("institutional_code_redeemed_at"),
+  /**
+   * Entitlement columns below are the legacy single-specialty shape and are kept in sync as the
+   * Plastic Surgery mirror of `user_specialty_subscriptions`. Read/write per-specialty entitlement
+   * through storage.getSpecialtyEntitlement / updateSpecialtyEntitlement, never these directly.
+   */
   subscriptionStatus: varchar("subscription_status").default('trial'), // trial, active, expired
   subscriptionPlan: varchar("subscription_plan"), // 1-month, 3-month, 6-month
   trialEndsAt: timestamp("trial_ends_at"),
@@ -226,9 +242,14 @@ export type SpacedRepetition = typeof spacedRepetitions.$inferSelect;
 // Question bank: sections, subsections, questions (replaces Excel as source)
 export const sections = pgTable("sections", {
   id: varchar("id", { length: 64 }).primaryKey(),
+  /** Owning specialty. Section/subsection ids are globally unique via specialty prefixes. */
+  specialtyId: varchar("specialty_id", { length: 32 })
+    .$type<SpecialtyId>()
+    .notNull()
+    .default(DEFAULT_SPECIALTY_ID),
   title: varchar("title").notNull(),
   sortOrder: integer("sort_order").notNull().default(0),
-});
+}, (table) => [index("idx_sections_specialty_id").on(table.specialtyId)]);
 
 export const subsections = pgTable("subsections", {
   id: varchar("id", { length: 64 }).primaryKey(),
@@ -261,6 +282,11 @@ export type QuestionRow = typeof questions.$inferSelect;
 // Subscription Plans table - stores available plans
 export const subscriptionPlans = pgTable("subscription_plans", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  /** Plans are per specialty: each q-bank has its own Stripe products / Payment Links. */
+  specialtyId: varchar("specialty_id", { length: 32 })
+    .$type<SpecialtyId>()
+    .notNull()
+    .default(DEFAULT_SPECIALTY_ID),
   name: varchar("name").notNull(), // '1-month', '3-month', '6-month'
   durationMonths: integer("duration_months").notNull(),
   priceUSD: integer("price_usd").notNull(), // in cents: 2500 = $25.00
@@ -272,6 +298,7 @@ export const subscriptionPlans = pgTable("subscription_plans", {
   createdAt: timestamp("created_at").defaultNow(),
 }, (table) => [
   index("idx_subscription_plans_name").on(table.name),
+  uniqueIndex("uidx_subscription_plans_specialty_name").on(table.specialtyId, table.name),
 ]);
 
 export type SubscriptionPlan = typeof subscriptionPlans.$inferSelect;
@@ -281,6 +308,11 @@ export type InsertSubscriptionPlan = typeof subscriptionPlans.$inferInsert;
 export const subscriptionTransactions = pgTable("subscription_transactions", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   userId: varchar("user_id").notNull().references(() => users.id, { onDelete: 'cascade' }),
+  /** Which q-bank this purchase paid for (denormalized from the plan for cheap filtering). */
+  specialtyId: varchar("specialty_id", { length: 32 })
+    .$type<SpecialtyId>()
+    .notNull()
+    .default(DEFAULT_SPECIALTY_ID),
   planId: varchar("plan_id").notNull().references(() => subscriptionPlans.id),
   stripePaymentIntentId: varchar("stripe_payment_intent_id"),
   /** Stripe invoice id (in_xxx) when checkout created a subscription invoice — used for hosted invoice links */
@@ -296,16 +328,62 @@ export const subscriptionTransactions = pgTable("subscription_transactions", {
 }, (table) => [
   index("idx_subscription_transactions_user_id").on(table.userId),
   index("idx_subscription_transactions_status").on(table.status),
+  index("idx_subscription_transactions_user_specialty").on(table.userId, table.specialtyId),
 ]);
 
 export type SubscriptionTransaction = typeof subscriptionTransactions.$inferSelect;
 export type InsertSubscriptionTransaction = typeof subscriptionTransactions.$inferInsert;
+
+/**
+ * Per-specialty entitlement: one row per (user, specialty). A single account may hold an active
+ * Plastic Surgery subscription and an active Orthopaedic subscription at the same time, each with
+ * its own Stripe subscription, trial usage, and institutional grant.
+ *
+ * The Plastic Surgery row is mirrored onto the legacy `users` columns so untouched code paths
+ * (reconciliation scripts, admin tooling) keep working during the transition.
+ */
+export const userSpecialtySubscriptions = pgTable(
+  "user_specialty_subscriptions",
+  {
+    id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+    userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+    specialtyId: varchar("specialty_id", { length: 32 }).$type<SpecialtyId>().notNull(),
+    subscriptionStatus: varchar("subscription_status").notNull().default("expired"),
+    subscriptionPlan: varchar("subscription_plan"),
+    trialEndsAt: timestamp("trial_ends_at"),
+    subscriptionEndsAt: timestamp("subscription_ends_at"),
+    subscriptionCancelAtPeriodEnd: boolean("subscription_cancel_at_period_end")
+      .notNull()
+      .default(false),
+    subscriptionCanceledAt: timestamp("subscription_canceled_at"),
+    stripeSubscriptionId: varchar("stripe_subscription_id"),
+    /** Once true, this specialty uses no-trial Payment Links / checkout. */
+    subscriptionTrialUsed: boolean("subscription_trial_used").notNull().default(false),
+    institutionalAccessAffiliation: varchar("institutional_access_affiliation"),
+    institutionalAccessExpiresAt: timestamp("institutional_access_expires_at"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex("uidx_user_specialty_subscription").on(table.userId, table.specialtyId),
+    index("idx_user_specialty_subscriptions_user_id").on(table.userId),
+    index("idx_user_specialty_subscriptions_stripe_sub").on(table.stripeSubscriptionId),
+  ],
+);
+
+export type UserSpecialtySubscription = typeof userSpecialtySubscriptions.$inferSelect;
+export type InsertUserSpecialtySubscription = typeof userSpecialtySubscriptions.$inferInsert;
 
 // Institutional access codes (code stored as bcrypt hash; never store plaintext)
 export const institutionalCodes = pgTable("institutional_codes", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   codeHash: varchar("code_hash").notNull().unique(),
   institutionName: varchar("institution_name").notNull(),
+  /** A code unlocks exactly one q-bank. */
+  specialtyId: varchar("specialty_id", { length: 32 })
+    .$type<SpecialtyId>()
+    .notNull()
+    .default(DEFAULT_SPECIALTY_ID),
   /** When false, no new redemptions; existing users keep access until expiry / removal. */
   active: boolean("active").notNull().default(true),
   createdAt: timestamp("created_at").defaultNow(),
@@ -326,11 +404,17 @@ export const userInstitutionalCodeRedemptions = pgTable(
     institutionalCodeId: varchar("institutional_code_id")
       .notNull()
       .references(() => institutionalCodes.id, { onDelete: "cascade" }),
+    /** Denormalized from the code so entitlement checks stay specialty-scoped. */
+    specialtyId: varchar("specialty_id", { length: 32 })
+      .$type<SpecialtyId>()
+      .notNull()
+      .default(DEFAULT_SPECIALTY_ID),
     redeemedAt: timestamp("redeemed_at").defaultNow(),
   },
   (table) => [
     uniqueIndex("uidx_user_institutional_code").on(table.userId, table.institutionalCodeId),
     index("idx_user_institutional_redemptions_user_id").on(table.userId),
+    index("idx_user_institutional_redemptions_user_specialty").on(table.userId, table.specialtyId),
   ]
 );
 

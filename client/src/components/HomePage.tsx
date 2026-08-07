@@ -6,6 +6,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { useQuestionStats } from '@/hooks/useQuestionStats';
 import { useTestSessions } from '@/hooks/useTestSessions';
 import { useAuth } from '@/hooks/useAuth';
+import { useSpecialty } from '@/hooks/useSpecialty';
 import { TestHistory } from '@/components/TestHistory';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { Section } from '@/types/question';
@@ -37,6 +38,7 @@ export function HomePage({ sections, onNavigate, onReviewIncorrect, onStartTest,
   const { getAllStats, responses, getSubsectionStats, resetAll } = useQuestionStats();
   const { sessions, deleteSession } = useTestSessions();
   const { user, logout } = useAuth();
+  const { specialty } = useSpecialty();
   const overallStats = getAllStats();
 
   const AVATAR_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -157,7 +159,7 @@ export function HomePage({ sections, onNavigate, onReviewIncorrect, onStartTest,
       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
         <div className="space-y-1 min-w-0">
           <h1 className="text-base sm:text-lg md:text-xl font-bold text-foreground">
-            Plastic Surgery In-Training Exam Review
+            {specialty.specialtyName} {specialty.marketing.examName} Review
           </h1>
           <p className="text-muted-foreground text-sm md:text-base">
             {user && (

@@ -1,13 +1,21 @@
 import type { Express, Request, Response, NextFunction } from "express";
 import type { PublicPageSeo } from "../shared/publicPageSeo";
-import { PUBLIC_PAGE_SEO, SITE_ORIGIN } from "../shared/publicPageSeo";
+import { PUBLIC_PAGE_SEO_BY_SPECIALTY } from "../shared/publicPageSeo";
 import { MARKETING_NAV_LINKS } from "../shared/seoCrawlerNav";
 import { getStructuredData } from "../shared/seoStructuredData";
+import {
+  DEFAULT_SPECIALTY_ID,
+  SPECIALTY_BOOTSTRAP_GLOBAL,
+  getSpecialty,
+  isKnownSpecialtyHost,
+  normalizeHostname,
+  specialtyFromHostname,
+  type SpecialtyId,
+} from "../shared/specialties";
 
 /**
- * Public site origin without trailing slash (e.g. https://prs-atlas.com).
- * Override in any environment with CANONICAL_PUBLIC_ORIGIN. In production, defaults to
- * https://prs-atlas.com so www→apex and HTML canonical work without extra config.
+ * Public site origins are per specialty (see shared/specialties.ts): prs-atlas.com, ortho-atlas.com.
+ * `CANONICAL_PUBLIC_ORIGIN` still forces a single origin for every host (useful for staging).
  */
 export function normalizePublicOrigin(origin: string): string {
   const trimmed = origin.trim().replace(/\/$/, "");
@@ -23,11 +31,46 @@ export function normalizePublicOrigin(origin: string): string {
   }
 }
 
-export function getCanonicalOrigin(): string {
+function canonicalOriginOverride(): string {
   const fromEnv = process.env.CANONICAL_PUBLIC_ORIGIN?.trim();
-  if (fromEnv) return normalizePublicOrigin(fromEnv);
-  if (process.env.NODE_ENV === "production") return "https://prs-atlas.com";
+  return fromEnv ? normalizePublicOrigin(fromEnv) : "";
+}
+
+/**
+ * Canonical origin for a request host. Known specialty hosts always resolve to their own apex;
+ * unknown hosts (Replit preview, localhost) fall back to the env override, then production default.
+ */
+export function getCanonicalOriginForHost(rawHost?: string | null): string {
+  const host = normalizeHostname(rawHost);
+  if (isKnownSpecialtyHost(host)) {
+    return getSpecialty(specialtyFromHostname(host)).canonicalOrigin;
+  }
+  const override = canonicalOriginOverride();
+  if (override) return override;
+  if (process.env.NODE_ENV === "production") {
+    return getSpecialty(DEFAULT_SPECIALTY_ID).canonicalOrigin;
+  }
   return "";
+}
+
+/** Legacy single-origin accessor (no request host available). */
+export function getCanonicalOrigin(): string {
+  return getCanonicalOriginForHost(null);
+}
+
+/** Specialty for a request host; unknown hosts use the env override's host, then the default. */
+export function getSpecialtyForHost(rawHost?: string | null): SpecialtyId {
+  const host = normalizeHostname(rawHost);
+  if (isKnownSpecialtyHost(host)) return specialtyFromHostname(host);
+  const override = canonicalOriginOverride();
+  if (override) {
+    try {
+      return specialtyFromHostname(new URL(`${override}/`).hostname);
+    } catch {
+      return DEFAULT_SPECIALTY_ID;
+    }
+  }
+  return DEFAULT_SPECIALTY_ID;
 }
 
 function escapeAttr(text: string): string {
@@ -54,7 +97,7 @@ function normalizePathname(urlPath: string): string {
 }
 
 export function isMarketingIndexablePath(pathname: string): boolean {
-  return metaForPath(pathname) !== undefined;
+  return metaForPath(pathname, DEFAULT_SPECIALTY_ID) !== undefined;
 }
 
 export function isNonIndexableAppPath(pathname: string): boolean {
@@ -64,8 +107,8 @@ export function isNonIndexableAppPath(pathname: string): boolean {
   );
 }
 
-function metaForPath(pathname: string): PublicPageSeo | undefined {
-  return PUBLIC_PAGE_SEO[normalizePathname(pathname)];
+function metaForPath(pathname: string, specialtyId: SpecialtyId): PublicPageSeo | undefined {
+  return PUBLIC_PAGE_SEO_BY_SPECIALTY[specialtyId][normalizePathname(pathname)];
 }
 
 /** Strip :443 / :80 so redirect targets match canonical URLs (avoids GSC redirect validation issues). */
@@ -141,6 +184,7 @@ function injectMarketingHeadTags(
   meta: PublicPageSeo,
   canonicalUrl: string,
   origin: string,
+  specialtyId: SpecialtyId,
 ): string {
   const ogTitle = meta.ogTitle ?? meta.title;
   const ogDescription = meta.ogDescription ?? meta.description;
@@ -153,7 +197,7 @@ function injectMarketingHeadTags(
   out = setMetaProperty(out, "og:url", canonicalUrl);
   out = setMetaProperty(out, "og:type", "website");
   out = setMetaProperty(out, "og:image", ogImage);
-  out = setMetaProperty(out, "og:site_name", "Atlas Review");
+  out = setMetaProperty(out, "og:site_name", getSpecialty(specialtyId).productName);
   out = setMetaProperty(out, "og:locale", "en_US");
 
   out = setMetaName(out, "twitter:card", "summary_large_image");
@@ -161,7 +205,7 @@ function injectMarketingHeadTags(
   out = setMetaName(out, "twitter:description", ogDescription);
   out = setMetaName(out, "twitter:image", ogImage);
 
-  const structured = getStructuredData(pathname, normOrigin);
+  const structured = getStructuredData(pathname, normOrigin, specialtyId);
   if (structured) {
     const raw = JSON.stringify(structured).replace(/</g, "\\u003c");
     const script = `<script type="application/ld+json" id="atlas-structured-data">${raw}</script>`;
@@ -184,28 +228,52 @@ function injectRobotsMeta(html: string, content: string): string {
 }
 
 /**
- * Injects per-route title, meta description, canonical, or noindex into the SPA index.html shell.
+ * Sets `data-specialty` on <html> and a bootstrap global so the SPA themes the first paint
+ * from the request host without waiting for an API round trip.
  */
-export function injectSpaIndexHtml(html: string, requestPathWithQuery: string): string {
-  const canonical = getCanonicalOrigin();
-  if (!canonical) return html;
+function injectSpecialtyBootstrap(html: string, specialtyId: SpecialtyId): string {
+  let out = html.replace(/<html([^>]*)\sdata-specialty="[^"]*"/i, "<html$1");
+  out = out.replace(/<html\b([^>]*)>/i, `<html$1 data-specialty="${escapeAttr(specialtyId)}">`);
+  const script = `<script id="atlas-specialty-bootstrap">window.${SPECIALTY_BOOTSTRAP_GLOBAL}=${JSON.stringify(
+    { hostSpecialty: specialtyId },
+  ).replace(/</g, "\\u003c")};</script>`;
+  if (/<script[^>]*id="atlas-specialty-bootstrap"/i.test(out)) {
+    return out.replace(/<script[^>]*id="atlas-specialty-bootstrap"[^>]*>[\s\S]*?<\/script>/i, script);
+  }
+  return out.replace("</head>", `    ${script}\n  </head>`);
+}
+
+/**
+ * Injects per-route title, meta description, canonical, or noindex into the SPA index.html shell.
+ * `host` selects the specialty (branding, SEO catalog, canonical origin).
+ */
+export function injectSpaIndexHtml(
+  html: string,
+  requestPathWithQuery: string,
+  host?: string | null,
+): string {
+  const specialtyId = getSpecialtyForHost(host);
+  const withBootstrap = injectSpecialtyBootstrap(html, specialtyId);
+
+  const canonical = getCanonicalOriginForHost(host);
+  if (!canonical) return withBootstrap;
 
   const pathname = normalizePathname(requestPathWithQuery);
 
   if (isNonIndexableAppPath(pathname)) {
-    return injectRobotsMeta(html, "noindex, nofollow");
+    return injectRobotsMeta(withBootstrap, "noindex, nofollow");
   }
 
-  const meta = metaForPath(pathname);
+  const meta = metaForPath(pathname, specialtyId);
   if (!meta) {
-    return injectRobotsMeta(html, "noindex, nofollow");
+    return injectRobotsMeta(withBootstrap, "noindex, nofollow");
   }
 
   const canonicalUrl = buildRedirectUrl(pathname === "/" ? "/" : pathname, canonical);
   const titleEscaped = meta.title.replace(/</g, "");
   const descEscaped = escapeAttr(meta.description);
 
-  let out = html.replace(/<title>[^<]*<\/title>/i, `<title>${titleEscaped}</title>`);
+  let out = withBootstrap.replace(/<title>[^<]*<\/title>/i, `<title>${titleEscaped}</title>`);
   out = out.replace(
     /<meta\s+name="description"\s+content="[^"]*"\s*\/?>/i,
     `<meta name="description" content="${descEscaped}" />`,
@@ -218,9 +286,9 @@ export function injectSpaIndexHtml(html: string, requestPathWithQuery: string): 
     out = out.replace("</head>", `    ${canonicalTag}\n  </head>`);
   }
 
-  out = injectMarketingHeadTags(out, pathname, meta, canonicalUrl, canonical || SITE_ORIGIN);
-  out = injectAbsoluteFavicons(out, canonical || SITE_ORIGIN);
-  out = injectCrawlerSiteNav(out, canonical || SITE_ORIGIN);
+  out = injectMarketingHeadTags(out, pathname, meta, canonicalUrl, canonical, specialtyId);
+  out = injectAbsoluteFavicons(out, canonical);
+  out = injectCrawlerSiteNav(out, canonical);
 
   return injectRobotsMeta(out, "index, follow");
 }
@@ -249,13 +317,13 @@ function buildSitemapXml(base: string): string {
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>\n`;
 }
 
-function requestHostname(req: Request): string {
+export function requestHostname(req: Request): string {
   const rawHost = (req.headers["x-forwarded-host"] as string) || req.headers.host || "";
-  return rawHost.split(",")[0]?.trim().split(":")[0]?.toLowerCase() || "";
+  return normalizeHostname(rawHost);
 }
 
 /**
- * 301 www→apex and http→https when CANONICAL_PUBLIC_ORIGIN is https (or inferred in production).
+ * 301 www→apex and http→https for every configured specialty host.
  */
 export function canonicalHostRedirect(req: Request, res: Response, next: NextFunction): void {
   if (req.method !== "GET" && req.method !== "HEAD") {
@@ -263,7 +331,13 @@ export function canonicalHostRedirect(req: Request, res: Response, next: NextFun
     return;
   }
 
-  const canonical = getCanonicalOrigin();
+  const host = requestHostname(req);
+  if (!host) {
+    next();
+    return;
+  }
+
+  const canonical = getCanonicalOriginForHost(host);
   if (!canonical) {
     next();
     return;
@@ -276,12 +350,6 @@ export function canonicalHostRedirect(req: Request, res: Response, next: NextFun
     canonicalHost = parsed.hostname.toLowerCase();
     needHttps = parsed.protocol === "https:";
   } catch {
-    next();
-    return;
-  }
-
-  const host = requestHostname(req);
-  if (!host) {
     next();
     return;
   }
@@ -307,10 +375,13 @@ export function canonicalHostRedirect(req: Request, res: Response, next: NextFun
 
 /**
  * Registers GET /robots.txt and GET /sitemap.xml before static middleware.
+ * Both are host-aware so each domain advertises its own canonical URLs.
  */
 export function registerSeoPublicRoutes(app: Express): void {
-  app.get("/robots.txt", (_req, res) => {
-    const base = getCanonicalOrigin() || "https://prs-atlas.com";
+  app.get("/robots.txt", (req, res) => {
+    const base =
+      getCanonicalOriginForHost(requestHostname(req)) ||
+      getSpecialty(DEFAULT_SPECIALTY_ID).canonicalOrigin;
     const disallow = NON_INDEXABLE_PATH_PREFIXES.map((p) => `Disallow: ${p}`).join("\n");
     const lines = [
       "User-agent: *",
@@ -333,8 +404,10 @@ export function registerSeoPublicRoutes(app: Express): void {
     res.type("text/plain").send(lines.join("\n"));
   });
 
-  app.get("/sitemap.xml", (_req, res) => {
-    const base = getCanonicalOrigin() || "https://prs-atlas.com";
+  app.get("/sitemap.xml", (req, res) => {
+    const base =
+      getCanonicalOriginForHost(requestHostname(req)) ||
+      getSpecialty(DEFAULT_SPECIALTY_ID).canonicalOrigin;
     res
       .status(200)
       .setHeader("Content-Type", "application/xml; charset=utf-8")

@@ -17,6 +17,7 @@ import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { X } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { useSpecialty } from '@/hooks/useSpecialty';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   FALLBACK_PLANS,
@@ -42,10 +43,11 @@ interface SubscriptionPlansProps {
 
 export function SubscriptionPlans({ open = true, onOpenChange, asDialog = true, noPlanOverlay = false, embeddedInPage = false, onAccessGranted }: SubscriptionPlansProps) {
   const { user } = useAuth();
+  const { specialty, activeSpecialty } = useSpecialty();
   /** false only when server says they used trial / had a prior personal subscription checkout */
   const introTrialEligible = user?.introTrialAvailable !== false;
   const { data: plans = [], isLoading: plansLoading, isError: plansError, refetch: refetchPlans } = useQuery<Plan[]>({
-    queryKey: ['/api/subscription/plans'],
+    queryKey: ['/api/subscription/plans', activeSpecialty],
   });
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [institutionalCode, setInstitutionalCode] = useState('');
@@ -185,9 +187,9 @@ export function SubscriptionPlans({ open = true, onOpenChange, asDialog = true, 
         )}>
           {noPlanOverlay
             ? introTrialEligible
-              ? 'Choose a plan below or use your institution code to get started.'
-              : 'Choose a plan below. Your free trial was already used on this account, and you will be charged when you subscribe. You can also use an institution code.'
-            : 'Unlock full access with a subscription.'}
+              ? `Choose a plan below or use your institution code to unlock the ${specialty.specialtyName} question bank.`
+              : `Choose a plan below to unlock the ${specialty.specialtyName} question bank. Your free trial was already used on this account, and you will be charged when you subscribe. You can also use an institution code.`
+            : `Unlock full access to the ${specialty.specialtyName} question bank with a subscription.`}
         </p>
 
         {(plansError || (plans.length === 0 && !plansLoading)) && (
