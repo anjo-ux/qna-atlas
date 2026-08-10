@@ -66,6 +66,16 @@ assert.match(orthoHome, /rel="canonical" href="https:\/\/ortho-atlas\.com\/"/);
 assert.match(orthoHome, /href="https:\/\/ortho-atlas\.com\/favicon-48\.png\?v=/);
 assert.match(orthoHome, /Ortho Atlas/);
 assert.doesNotMatch(orthoHome, /prs-atlas\.com/);
+assert.doesNotMatch(orthoHome, /oral-boards-coach/);
+assert.doesNotMatch(orthoHome, /oral board/i);
+
+assert.equal(isMarketingIndexablePath("/oral-boards-coach", "prs"), true);
+assert.equal(isMarketingIndexablePath("/oral-boards-coach", "ortho"), false);
+
+import { getMarketingNavLinks } from "../../shared/seoCrawlerNav";
+const orthoNav = getMarketingNavLinks("ortho").map((l) => l.href);
+assert.ok(!orthoNav.includes("/oral-boards-coach"));
+assert.ok(getMarketingNavLinks("prs").some((l) => l.href === "/oral-boards-coach"));
 
 /** Known specialty hosts must win over a single-origin override. */
 process.env.CANONICAL_PUBLIC_ORIGIN = "https://prs-atlas.com:443";

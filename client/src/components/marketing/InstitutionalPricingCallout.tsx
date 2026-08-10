@@ -1,15 +1,20 @@
 import { Button } from "@/components/ui/button";
 import { GraduationCap, Instagram, Mail } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-const INSTAGRAM_URL =
-  "https://www.instagram.com/prs_atlas?igsh=bDk1dmtld2Uzdnpt";
+import { useHostSpecialty } from "@/hooks/useSpecialty";
 
 type InstitutionalPricingCalloutProps = {
   className?: string;
 };
 
 export function InstitutionalPricingCallout({ className }: InstitutionalPricingCalloutProps) {
+  const specialty = useHostSpecialty();
+  const contactEmail = specialty.contactEmail;
+  const programLabel =
+    specialty.id === "ortho"
+      ? "orthopaedic surgery residency and fellowship programs"
+      : "plastic and reconstructive surgery residency and fellowship programs";
+
   return (
     <section
       aria-labelledby="institutional-pricing-heading"
@@ -39,18 +44,20 @@ export function InstitutionalPricingCallout({ className }: InstitutionalPricingC
             </h2>
           </div>
           <p className="text-pretty text-sm leading-relaxed text-muted-foreground sm:text-base">
-            We partner with plastic and reconstructive surgery residency and fellowship programs across the
-            country and internationally to offer bulk pricing for full access to the Atlas Review platform.
-            Send us an email at{" "}
-            <a href="mailto:hello@prsatlas.com" className="font-medium text-primary underline-offset-4 hover:underline">
-              hello@prsatlas.com
+            We partner with {programLabel} across the country and internationally to offer bulk
+            pricing for full access to the {specialty.brandName} platform. Send us an email at{" "}
+            <a
+              href={`mailto:${contactEmail}`}
+              className="font-medium text-primary underline-offset-4 hover:underline"
+            >
+              {contactEmail}
             </a>
-            , or reach out to us on Instagram and we will get back to you within 24 hours on how to provide
-            access to all of your residents and fellows.
+            , or reach out to us on Instagram and we will get back to you within 24 hours on how to
+            provide access to all of your residents and fellows.
           </p>
           <div className="flex flex-wrap gap-2 pt-1">
             <Button size="lg" className="glow-primary transition-glow" asChild>
-              <a href="mailto:hello@prsatlas.com?subject=Institutional%20pricing%20inquiry">
+              <a href={`mailto:${contactEmail}?subject=Institutional%20pricing%20inquiry`}>
                 <Mail className="mr-2 h-4 w-4 shrink-0" aria-hidden />
                 Email Us
               </a>
@@ -61,7 +68,7 @@ export function InstitutionalPricingCallout({ className }: InstitutionalPricingC
               className="border-primary/30 bg-background/60 backdrop-blur-sm"
               asChild
             >
-              <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer">
+              <a href={specialty.instagramUrl} target="_blank" rel="noopener noreferrer">
                 <Instagram className="mr-2 h-4 w-4 shrink-0" aria-hidden />
                 Message Us
               </a>

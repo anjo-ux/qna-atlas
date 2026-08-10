@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
@@ -12,6 +12,7 @@ import {
   MonitorSmartphone,
 } from "lucide-react";
 import { Link } from "wouter";
+import { useHostSpecialty } from "@/hooks/useSpecialty";
 
 type Choice = { letter: string; text: string };
 
@@ -25,7 +26,7 @@ type DemoQuestion = {
   explanation: string;
 };
 
-const DEMO_QUESTIONS: DemoQuestion[] = [
+const PRS_DEMO_QUESTIONS: DemoQuestion[] = [
   {
     id: "demo-1",
     topic: "Breast / Reconstruction (Sample)",
@@ -103,6 +104,84 @@ const DEMO_QUESTIONS: DemoQuestion[] = [
   },
 ];
 
+const ORTHO_DEMO_QUESTIONS: DemoQuestion[] = [
+  {
+    id: "ortho-demo-1",
+    topic: "Trauma / Hip Fracture (Sample)",
+    stem:
+      "An independently ambulatory 78-year-old sustains a displaced femoral neck fracture after a ground-level fall. Medical clearance is obtained within 24 hours. Which treatment strategy is most appropriate for durable function?",
+    choices: [
+      { letter: "A", text: "Nonoperative mobilization with traction for 6 weeks in all patients over 75." },
+      { letter: "B", text: "Urgent arthroplasty (hemi or total) tailored to activity, cognitions, and acetabular status rather than prolonged bed rest." },
+      { letter: "C", text: "Closed reduction and percutaneous pinning without regard to displacement." },
+      { letter: "D", text: "Delayed surgery beyond 1 week to maximize medical optimization in every case." },
+    ],
+    correct: "B",
+    explanation:
+      "Displaced femoral neck fractures in older ambulatory patients are typically treated with timely arthroplasty. Atlas Ortho mock exams emphasize decision algorithms that balance biology, displacement, and functional demand under timed conditions.",
+  },
+  {
+    id: "ortho-demo-2",
+    topic: "Sports / ACL (Sample)",
+    stem:
+      "A cutting athlete tears the ACL and has a high-grade pivot-shift with an intact MCL. Which reconstruction principle most reliably restores rotatory stability for return to pivoting sport?",
+    choices: [
+      { letter: "A", text: "Extra-articular tenodesis alone without an intra-articular ACL graft." },
+      { letter: "B", text: "Anatomic ACL reconstruction restoring the femoral and tibial footprints, with lateral procedures reserved for selected high-risk instability patterns." },
+      { letter: "C", text: "Transtibial non-anatomic placement prioritized solely for graft length." },
+      { letter: "D", text: "Primary repair of the midsubstance tear in all adolescents without reconstruction." },
+    ],
+    correct: "B",
+    explanation:
+      "Modern ACL care centers on anatomic tunnel placement and individualized lateral augmentation. Ortho Atlas stems reward mechanism-based thinking you will see on the OITE and boards.",
+  },
+  {
+    id: "ortho-demo-3",
+    topic: "Spine / Cauda Equina (Sample)",
+    stem:
+      "A patient with an acute large central lumbar disc herniation develops saddle anesthesia, bilateral leg weakness, and new urinary retention. What is the most appropriate next step?",
+    choices: [
+      { letter: "A", text: "Outpatient MRI in 2 weeks with activity modification." },
+      { letter: "B", text: "Urgent MRI and decompression as a surgical emergency once confirmed." },
+      { letter: "C", text: "Epidural steroid injection as first-line definitive treatment." },
+      { letter: "D", text: "Bed rest and oral opioids for 6 weeks before imaging." },
+    ],
+    correct: "B",
+    explanation:
+      "Cauda equina syndrome is a surgical emergency. Timed Ortho Atlas exams train you to recognize red-flag presentations and move quickly to the correct next action.",
+  },
+  {
+    id: "ortho-demo-4",
+    topic: "Adult Reconstruction / THA (Sample)",
+    stem:
+      "During primary total hip arthroplasty through a posterior approach, which combination most reduces postoperative dislocation risk while preserving abductor function?",
+    choices: [
+      { letter: "A", text: "Leaving the capsule unrepaired to improve exposure." },
+      { letter: "B", text: "Accurate cup position, appropriate head size/offset, and soft-tissue repair of the capsule and short external rotators." },
+      { letter: "C", text: "Excessive cup anteversion beyond 40° in every patient." },
+      { letter: "D", text: "Routine constrained liner use in primary THA for all patients." },
+    ],
+    correct: "B",
+    explanation:
+      "Dislocation prevention is multifactorial: component orientation, soft-tissue tension, and repair. Mock-exam chrome here mirrors the live Ortho Atlas test navigator and flagging tools.",
+  },
+  {
+    id: "ortho-demo-5",
+    topic: "Basic Science / Bone Healing (Sample)",
+    stem:
+      "Which statement best describes secondary bone healing under relative stability with callus formation?",
+    choices: [
+      { letter: "A", text: "It requires absolute rigidity and primary Haversian remodeling only." },
+      { letter: "B", text: "It proceeds through hematoma, inflammation, soft then hard callus, and remodeling when interfragmentary strain is controlled but not absolute." },
+      { letter: "C", text: "It occurs only in cortical bone and never in metaphysis." },
+      { letter: "D", text: "It is abolished by any micromotion at the fracture site." },
+    ],
+    correct: "B",
+    explanation:
+      "Secondary healing under relative stability is a high-yield basic-science theme. Ortho Atlas groups these items with trauma and reconstruction so you practice the same interface you will use for full-length mocks.",
+  },
+];
+
 type PerQuestion = { selected: string | null; locked: boolean };
 
 function statusFor(q: DemoQuestion, pq: PerQuestion | undefined): "unanswered" | "correct" | "incorrect" {
@@ -117,17 +196,28 @@ type AtlasWayTestModeDemoProps = {
 
 /**
  * Static marketing preview of Test Mode chrome (not connected to the real question bank or API).
+ * Demo stems follow the host specialty so Ortho Atlas home never shows PRS samples.
  */
 export function AtlasWayTestModeDemo({ compact = false }: AtlasWayTestModeDemoProps) {
+  const hostSpecialty = useHostSpecialty();
+  const demoQuestions =
+    hostSpecialty.id === "ortho" ? ORTHO_DEMO_QUESTIONS : PRS_DEMO_QUESTIONS;
+
   const [index, setIndex] = useState(0);
   const [perQuestion, setPerQuestion] = useState<Record<number, PerQuestion>>({});
   const [flagged, setFlagged] = useState<Set<number>>(() => new Set());
 
-  const q = DEMO_QUESTIONS[index];
+  useEffect(() => {
+    setIndex(0);
+    setPerQuestion({});
+    setFlagged(new Set());
+  }, [hostSpecialty.id]);
+
+  const q = demoQuestions[index] ?? demoQuestions[0];
   const pq = perQuestion[index] ?? { selected: null, locked: false };
   const answeredCount = useMemo(
-    () => DEMO_QUESTIONS.filter((_, i) => perQuestion[i]?.locked).length,
-    [perQuestion],
+    () => demoQuestions.filter((_, i) => perQuestion[i]?.locked).length,
+    [perQuestion, demoQuestions],
   );
 
   const setChoice = useCallback((letter: string) => {
@@ -156,7 +246,7 @@ export function AtlasWayTestModeDemo({ compact = false }: AtlasWayTestModeDemoPr
   }, [index]);
 
   const goPrev = () => setIndex((i) => Math.max(0, i - 1));
-  const goNext = () => setIndex((i) => Math.min(DEMO_QUESTIONS.length - 1, i + 1));
+  const goNext = () => setIndex((i) => Math.min(demoQuestions.length - 1, i + 1));
 
   const showResult = pq.locked;
 
@@ -196,11 +286,11 @@ export function AtlasWayTestModeDemo({ compact = false }: AtlasWayTestModeDemoPr
           <div className="border-b border-border p-3">
             <h3 className="text-sm font-semibold text-foreground">Questions</h3>
             <p className="mt-1 text-xs text-muted-foreground">
-              {answeredCount} / {DEMO_QUESTIONS.length} Answered (Demo)
+              {answeredCount} / {demoQuestions.length} Answered (Demo)
             </p>
           </div>
           <div className="grid grid-cols-5 gap-1.5 p-2 md:grid-cols-2">
-            {DEMO_QUESTIONS.map((item, i) => {
+            {demoQuestions.map((item, i) => {
               const st = statusFor(item, perQuestion[i]);
               const isCurrent = i === index;
               return (
@@ -247,7 +337,7 @@ export function AtlasWayTestModeDemo({ compact = false }: AtlasWayTestModeDemoPr
               <div className="min-w-0">
                 <h3 className="truncate text-lg font-bold md:text-xl">Test Mode</h3>
                 <p className="text-xs text-muted-foreground md:text-sm">
-                  Question {index + 1} / {DEMO_QUESTIONS.length} · {q.topic}
+                  Question {index + 1} / {demoQuestions.length} · {q.topic}
                 </p>
               </div>
               <div className="flex flex-shrink-0 items-center gap-1 md:gap-2">
@@ -352,7 +442,8 @@ export function AtlasWayTestModeDemo({ compact = false }: AtlasWayTestModeDemoPr
                 <span className="hidden sm:inline">Previous</span>
               </Button>
               <span className="text-center text-xs text-muted-foreground sm:text-sm">
-                Plastic Surgery Mock Exam Interface · Timed Sessions · Question Navigator
+                {hostSpecialty.marketing.mockExamLabel} Mock Exam Interface · Timed Sessions ·
+                Question Navigator
               </span>
               <Button
                 type="button"
@@ -360,7 +451,7 @@ export function AtlasWayTestModeDemo({ compact = false }: AtlasWayTestModeDemoPr
                 size="sm"
                 className="gap-1"
                 onClick={goNext}
-                disabled={index === DEMO_QUESTIONS.length - 1}
+                disabled={index === demoQuestions.length - 1}
               >
                 <span className="hidden sm:inline">Next</span>
                 <ChevronRight className="h-4 w-4" />

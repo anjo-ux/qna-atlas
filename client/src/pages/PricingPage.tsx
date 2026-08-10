@@ -21,7 +21,9 @@ export default function PricingPage() {
     "Detailed Explanations And Reference-Friendly Study Flows",
     "Timed Mock Exams And Custom Test Builder",
     "Spaced Repetition And Bookmarking Across Devices",
-    "Oral Board-Style Coach For Verbal Practice",
+    ...(specialty.id === "ortho"
+      ? []
+      : ["Oral Board-Style Coach For Verbal Practice"]),
     "Progress Tracking By Section And Sub-Topic",
   ];
 
@@ -42,8 +44,10 @@ export default function PricingPage() {
             <p className="text-lg leading-relaxed text-muted-foreground">
               Choose the commitment that matches your timeline, whether you are sprinting toward an
               in-service window, mapping a full board season, or joining through your institution.
-              Every personal plan unlocks the same deep question bank, testing tools, and oral
-              practice environment.
+              Every personal plan unlocks the same deep question bank
+              {specialty.id === "ortho"
+                ? ", testing tools, and progress analytics."
+                : ", testing tools, and oral practice environment."}
             </p>
           </header>
 

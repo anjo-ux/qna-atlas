@@ -268,9 +268,17 @@ export const questions = pgTable("questions", {
   visible: boolean("visible").notNull().default(true), // false = hidden from users (e.g. picture-based)
   /** True once auto-hidden due to user report volume (>=10); stays true if visibility is restored by admin */
   reported: boolean("reported").notNull().default(false),
+  /**
+   * Content-audit flag (any specialty). When true the question is hidden from learners
+   * until an admin clears the flag (unflag). Independent of `reported`.
+   */
+  flagged: boolean("flagged").notNull().default(false),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
-}, (table) => [index("idx_questions_subsection_id").on(table.subsectionId)]);
+}, (table) => [
+  index("idx_questions_subsection_id").on(table.subsectionId),
+  index("idx_questions_flagged").on(table.flagged),
+]);
 
 export type InsertSection = typeof sections.$inferInsert;
 export type SectionRow = typeof sections.$inferSelect;
@@ -470,3 +478,57 @@ export type OralBoardSession = typeof oralBoardSessions.$inferSelect;
 export type InsertOralBoardSession = typeof oralBoardSessions.$inferInsert;
 export type OralBoardMessage = typeof oralBoardMessages.$inferSelect;
 export type InsertOralBoardMessage = typeof oralBoardMessages.$inferInsert;
+
+/**
+ * One-time cross-domain login handoff (prs-atlas.com ↔ ortho-atlas.com).
+ * Cookies cannot span apex domains, so specialty switch / Ortho Stripe checkout
+ * mints a short-lived token consumed on the target host to recreate the session.
+ */
+export const authHandoffTokens = pgTable(
+  "auth_handoff_tokens",
+  {
+    id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+    userId: varchar("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    tokenHash: varchar("token_hash", { length: 64 }).notNull(),
+    targetSpecialtyId: varchar("target_specialty_id", { length: 32 })
+      .$type<SpecialtyId>()
+      .notNull(),
+    /** Relative path on the target origin after session is established (default `/`). */
+    nextPath: varchar("next_path", { length: 512 }).notNull().default("/"),
+    /** Optional allowlisted external URL (buy.stripe.com) to open after login. */
+    continueExternalUrl: varchar("continue_external_url", { length: 1024 }),
+    expiresAt: timestamp("expires_at").notNull(),
+    usedAt: timestamp("used_at"),
+    createdAt: timestamp("created_at").defaultNow(),
+  },
+  (table) => [
+    uniqueIndex("uidx_auth_handoff_tokens_hash").on(table.tokenHash),
+    index("idx_auth_handoff_tokens_user_id").on(table.userId),
+  ],
+);
+
+export type AuthHandoffToken = typeof authHandoffTokens.$inferSelect;
+export type InsertAuthHandoffToken = typeof authHandoffTokens.$inferInsert;
+
+/**
+ * Remembers which plan a user just started checkout for so Stripe return can fulfill
+ * even when sessionStorage was lost during a cross-domain handoff.
+ */
+export const pendingCheckoutPlans = pgTable("pending_checkout_plans", {
+  userId: varchar("user_id")
+    .primaryKey()
+    .references(() => users.id, { onDelete: "cascade" }),
+  planId: varchar("plan_id")
+    .notNull()
+    .references(() => subscriptionPlans.id, { onDelete: "cascade" }),
+  specialtyId: varchar("specialty_id", { length: 32 })
+    .$type<SpecialtyId>()
+    .notNull()
+    .default(DEFAULT_SPECIALTY_ID),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export type PendingCheckoutPlan = typeof pendingCheckoutPlans.$inferSelect;
+export type InsertPendingCheckoutPlan = typeof pendingCheckoutPlans.$inferInsert;

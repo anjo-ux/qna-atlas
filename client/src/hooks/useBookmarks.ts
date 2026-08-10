@@ -2,11 +2,15 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import { queryClient, apiRequest } from '@/lib/queryClient';
 import { toast } from 'sonner';
 import type { Bookmark } from '@shared/schema';
+import { useSpecialty } from '@/hooks/useSpecialty';
 
 export function useBookmarks() {
+  const { activeSpecialty } = useSpecialty();
+  const bookmarksQueryKey = ['/api/bookmarks', activeSpecialty] as const;
+
   // Fetch all bookmarks for the user
   const { data: bookmarks = [], isLoading } = useQuery<Bookmark[]>({
-    queryKey: ['/api/bookmarks'],
+    queryKey: bookmarksQueryKey,
   });
 
   // Add bookmark mutation
@@ -24,8 +28,8 @@ export function useBookmarks() {
     },
     onMutate: async (data) => {
       // Optimistic update: immediately add the bookmark to the cache
-      await queryClient.cancelQueries({ queryKey: ['/api/bookmarks'] });
-      const previousBookmarks = queryClient.getQueryData<Bookmark[]>(['/api/bookmarks']) || [];
+      await queryClient.cancelQueries({ queryKey: bookmarksQueryKey });
+      const previousBookmarks = queryClient.getQueryData<Bookmark[]>(bookmarksQueryKey) || [];
       const newBookmark: Bookmark = {
         id: `temp-${Date.now()}`,
         userId: '',
@@ -34,20 +38,20 @@ export function useBookmarks() {
         subsectionId: data.subsectionId,
         createdAt: new Date(),
       };
-      queryClient.setQueryData(['/api/bookmarks'], [...previousBookmarks, newBookmark]);
+      queryClient.setQueryData(bookmarksQueryKey, [...previousBookmarks, newBookmark]);
       return { previousBookmarks };
     },
     onSuccess: async () => {
       toast.success('Question bookmarked!');
       // Refetch to ensure we have the real IDs from the server
-      await queryClient.invalidateQueries({ queryKey: ['/api/bookmarks'] });
-      await queryClient.refetchQueries({ queryKey: ['/api/bookmarks'] });
+      await queryClient.invalidateQueries({ queryKey: bookmarksQueryKey });
+      await queryClient.refetchQueries({ queryKey: bookmarksQueryKey });
     },
     onError: (error: any, variables, context: any) => {
       console.error('[Bookmark] Error adding bookmark:', error);
       // Rollback on error
       if (context?.previousBookmarks) {
-        queryClient.setQueryData(['/api/bookmarks'], context.previousBookmarks);
+        queryClient.setQueryData(bookmarksQueryKey, context.previousBookmarks);
       }
       const message = error.message || 'Failed to bookmark question.';
       toast.error(message.endsWith('.') || message.endsWith('!') || message.endsWith('?') ? message : message + '.');
@@ -71,10 +75,10 @@ export function useBookmarks() {
     },
     onMutate: async (questionId) => {
       // Optimistic update: immediately remove the bookmark from the cache
-      await queryClient.cancelQueries({ queryKey: ['/api/bookmarks'] });
-      const previousBookmarks = queryClient.getQueryData<Bookmark[]>(['/api/bookmarks']) || [];
+      await queryClient.cancelQueries({ queryKey: bookmarksQueryKey });
+      const previousBookmarks = queryClient.getQueryData<Bookmark[]>(bookmarksQueryKey) || [];
       queryClient.setQueryData(
-        ['/api/bookmarks'],
+        bookmarksQueryKey,
         previousBookmarks.filter(b => b.questionId !== questionId)
       );
       return { previousBookmarks };
@@ -83,16 +87,16 @@ export function useBookmarks() {
       console.log('[Bookmark] onSuccess called - bookmark removed successfully');
       toast.success('Bookmark removed!');
       // Refetch to ensure consistency
-      await queryClient.invalidateQueries({ queryKey: ['/api/bookmarks'] });
+      await queryClient.invalidateQueries({ queryKey: bookmarksQueryKey });
       console.log('[Bookmark] Bookmarks invalidated');
-      await queryClient.refetchQueries({ queryKey: ['/api/bookmarks'] });
+      await queryClient.refetchQueries({ queryKey: bookmarksQueryKey });
       console.log('[Bookmark] Bookmarks refetched after removal');
     },
     onError: (error: any, variables, context: any) => {
       console.error('[Bookmark] onError called - Error removing bookmark:', error);
       // Rollback on error
       if (context?.previousBookmarks) {
-        queryClient.setQueryData(['/api/bookmarks'], context.previousBookmarks);
+        queryClient.setQueryData(bookmarksQueryKey, context.previousBookmarks);
       }
       const message = error.message || 'Failed to remove bookmark.';
       toast.error(message.endsWith('.') || message.endsWith('!') || message.endsWith('?') ? message : message + '.');

@@ -2,6 +2,7 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import { queryClient, apiRequest } from '@/lib/queryClient';
 import { Question } from '@/types/question';
 import { QuestionResponse } from './useQuestionStats';
+import { useSpecialty } from '@/hooks/useSpecialty';
 import type { TestSession as DbTestSession } from '@shared/schema';
 
 // Frontend test session interface extends database schema with local data
@@ -26,9 +27,10 @@ export interface TestSession {
 const QUESTIONS_KEY = 'psite-test-questions';
 
 export function useTestSessions() {
+  const { activeSpecialty } = useSpecialty();
   // Fetch all test sessions from database
   const { data: dbSessions = [], isLoading } = useQuery<DbTestSession[]>({
-    queryKey: ['/api/test-sessions'],
+    queryKey: ['/api/test-sessions', activeSpecialty],
     retry: 1,
   });
 

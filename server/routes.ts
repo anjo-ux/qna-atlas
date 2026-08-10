@@ -438,16 +438,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Questions API (sections with nested subsections and questions)
-  // Public so unauthenticated users can load the preview test at /preview
-  app.get('/api/sections', async (req: any, res) => {
+  // Full question bank — entitled subscribers only (never ship stems/answers to anonymous clients)
+  app.get('/api/sections', isAuthenticated, async (req: any, res) => {
     try {
       const specialtyId = await resolveRequestSpecialty(req);
+      const userId = req.session?.userId as string;
+      if (await specialtyIsLocked(userId, specialtyId)) {
+        return res.status(403).json({ message: "An active subscription is required to access the question bank." });
+      }
       const sections = await storage.getSections(specialtyId);
       res.json(sections);
     } catch (error) {
       console.error("Error fetching sections:", error);
       res.status(500).json({ message: "Failed to fetch sections." });
+    }
+  });
+
+  // Marketing outline: section/subsection titles + counts only (no stems or answers)
+  app.get('/api/sections/meta', async (req: any, res) => {
+    try {
+      const specialtyId = await resolveRequestSpecialty(req);
+      const meta = await storage.getSectionsMeta(specialtyId);
+      res.json(meta);
+    } catch (error) {
+      console.error("Error fetching sections meta:", error);
+      res.status(500).json({ message: "Failed to fetch sections meta." });
+    }
+  });
+
+  // Public 20-question preview sample (capped server-side; never the full bank)
+  app.get('/api/preview/questions', async (req: any, res) => {
+    try {
+      const specialtyId = await resolveRequestSpecialty(req);
+      const questions = await storage.getPreviewQuestions(specialtyId);
+      res.json(questions);
+    } catch (error) {
+      console.error("Error fetching preview questions:", error);
+      res.status(500).json({ message: "Failed to fetch preview questions." });
     }
   });
 
@@ -543,7 +570,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Update question visibility (push generated question live; requires auth OR valid admin code)
+  // Update question visibility / content-audit flag (requires auth OR valid admin code)
   app.patch('/api/questions/:id', async (req: any, res) => {
     const hasAuth = req.session?.userId;
     const hasCode = requireAdminCode(req);
@@ -552,13 +579,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
     try {
       const { id } = req.params;
-      const { visible } = req.body;
+      const { visible, flagged } = req.body ?? {};
+
+      if (typeof flagged === "boolean") {
+        if (flagged) {
+          const ok = await storage.flagQuestion(id, "admin-flagged");
+          if (!ok) return res.status(404).json({ message: "Question not found." });
+          return res.json({ id, flagged: true, visible: false });
+        }
+        const ok = await storage.unflagQuestion(id);
+        if (!ok) return res.status(404).json({ message: "Question not found." });
+        const refreshed = await storage.getQuestion(id);
+        return res.json({ id, flagged: false, visible: refreshed?.visible ?? true });
+      }
+
       if (typeof visible !== "boolean") {
-        return res.status(400).json({ message: "Body must include visible: boolean." });
+        return res.status(400).json({ message: "Body must include visible: boolean and/or flagged: boolean." });
       }
       const question = await storage.getQuestion(id);
       if (!question) {
         return res.status(404).json({ message: "Question not found." });
+      }
+      if (visible && question.flagged) {
+        return res.status(400).json({
+          message: "Cannot make this question visible while it is flagged. Unflag it first (flagged: false).",
+        });
       }
       if (
         visible &&
@@ -785,7 +830,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.sendStatus(204);
   });
 
-  // Get user percentile rank
+  // Get user percentile rank for the active (or requested) question bank
   app.get('/api/user/percentile', async (req: any, res) => {
     try {
       const userId = req.session?.userId;
@@ -793,8 +838,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Unauthorized." });
       }
 
-      const percentile = await storage.getUserPercentileRank(userId);
-      res.json({ percentile });
+      const specialtyId = await resolveRequestSpecialty(req);
+      const percentile = await storage.getUserPercentileRank(userId, specialtyId);
+      res.json({ percentile, specialtyId });
     } catch (error) {
       console.error("Error calculating percentile:", error);
       res.status(500).json({ message: "Failed to calculate percentile." });
@@ -1616,6 +1662,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       const specialtyId = getSpecialty(plan.specialtyId).id;
       const introTrialEligible = await storage.getIntroTrialEligibility(userId, specialtyId);
+      await storage.setPendingCheckoutPlan(userId, planId.trim(), specialtyId);
       const result = await createCheckoutSession({
         userId,
         userEmail: user?.email ?? null,
@@ -1626,21 +1673,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if ("error" in result) {
         return res.status(400).json({ message: result.error });
       }
-      res.json({ sessionUrl: result.url, specialtyId: result.specialtyId });
+      res.json({
+        sessionUrl: result.url,
+        specialtyId: result.specialtyId,
+        /** True when the browser must hand off to the plan's specialty domain before Stripe. */
+        requiresDomainHandoff:
+          getSpecialtyForHost(requestHostname(req)) !== result.specialtyId,
+      });
     } catch (error) {
       console.error("Error creating checkout session:", error);
       res.status(500).json({ message: "Failed to start checkout." });
     }
   });
 
-  // Fulfill after Payment Link checkout (session_id + planId from client)
+  // Fulfill after Payment Link checkout (session_id; planId optional if pending checkout was stored)
   app.post("/api/subscription/fulfill", isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.session?.userId;
       const body = req.body ?? {};
       const sessionId = typeof body.session_id === "string" ? body.session_id.trim() : "";
-      const planId = typeof body.planId === "string" ? body.planId.trim() : "";
-      if (!sessionId || !planId) {
+      let planId = typeof body.planId === "string" ? body.planId.trim() : "";
+      if (!sessionId) {
+        return res.status(400).json({ message: "session_id required." });
+      }
+      if (!planId) {
+        const pending = await storage.takePendingCheckoutPlan(userId);
+        planId = pending?.planId ?? "";
+      }
+      if (!planId) {
         return res.status(400).json({ message: "session_id and planId required." });
       }
       const user = await storage.getUser(userId);
@@ -1652,6 +1712,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if ("error" in result) {
         return res.status(400).json({ message: result.error });
       }
+      await storage.clearPendingCheckoutPlan(userId);
       res.json({ message: "Subscription activated." });
     } catch (error) {
       console.error("Error fulfilling subscription:", error);

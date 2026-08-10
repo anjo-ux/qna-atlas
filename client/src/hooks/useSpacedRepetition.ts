@@ -1,5 +1,6 @@
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { queryClient, apiRequest } from '@/lib/queryClient';
+import { useSpecialty } from '@/hooks/useSpecialty';
 import type { SpacedRepetition } from '@shared/schema';
 
 export interface SpacedRepetitionDueResponse {
@@ -9,12 +10,13 @@ export interface SpacedRepetitionDueResponse {
 }
 
 export function useSpacedRepetition() {
+  const { activeSpecialty } = useSpecialty();
   // Fetch questions due for review and IDs of all questions ever in SR
   const { data, isLoading } = useQuery<SpacedRepetitionDueResponse | SpacedRepetition[]>({
-    queryKey: ['/api/spaced-repetition/due'],
-    queryFn: async ({ queryKey }) => {
+    queryKey: ['/api/spaced-repetition/due', activeSpecialty],
+    queryFn: async () => {
       try {
-        const res = await fetch(queryKey[0] as string, { credentials: 'include' });
+        const res = await fetch('/api/spaced-repetition/due', { credentials: 'include' });
         if (!res.ok) return { due: [], reviewedQuestionIds: [], incorrectQuestionIds: [] };
         const json = await res.json();
         return json;

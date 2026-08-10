@@ -1,4 +1,4 @@
-import { useState, useEffect, type ComponentType, type KeyboardEvent, type SVGProps } from "react";
+import { useState, useEffect, useMemo, type ComponentType, type KeyboardEvent, type SVGProps } from "react";
 import { MarketingShell } from "@/components/marketing/MarketingShell";
 import { usePageSeo } from "@/lib/usePageSeo";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,6 +6,7 @@ import {
   BookMarked,
   Brain,
   ClipboardCheck,
+  Lightbulb,
   MessageSquareText,
   Route,
   Sparkles,
@@ -25,9 +26,10 @@ type PillarConfig = {
   BulletIcon: IconType;
   bullets: string[];
   cardClass: string;
+  footerLink?: { href: string; label: string };
 };
 
-const PILLARS: PillarConfig[] = [
+const SHARED_PILLARS: PillarConfig[] = [
   {
     step: 1,
     title: "Question Bank",
@@ -56,25 +58,51 @@ const PILLARS: PillarConfig[] = [
     ],
     cardClass: "glow-accent border-secondary/25 transition-glow",
   },
-  {
-    step: 3,
-    title: "Oral Boards Coach",
-    description:
-      "Practice The Skill Oral Exams Measure. Structured Verbal Reasoning Under Uncertainty, Without Giving Away Proprietary Exam Content.",
-    Icon: MessageSquareText,
-    BulletIcon: Route,
-    bullets: [
-      "Scenario-style prompts designed to mirror how examiners probe depth, breadth, and judgment.",
-      "A dedicated space to rehearse pacing, headings, and safe algorithms out loud.",
-      "Marketing promise only. We help you build the habit of thinking like an oral examiner expects, ethically and transparently.",
-    ],
-    cardClass: "border-primary/15 transition-glow",
-  },
 ];
+
+const PRS_PILLAR_3: PillarConfig = {
+  step: 3,
+  title: "Oral Boards Coach",
+  description:
+    "Practice The Skill Oral Exams Measure. Structured Verbal Reasoning Under Uncertainty, Without Giving Away Proprietary Exam Content.",
+  Icon: MessageSquareText,
+  BulletIcon: Route,
+  bullets: [
+    "Scenario-style prompts designed to mirror how examiners probe depth, breadth, and judgment.",
+    "A dedicated space to rehearse pacing, headings, and safe algorithms out loud.",
+    "Marketing promise only. We help you build the habit of thinking like an oral examiner expects, ethically and transparently.",
+  ],
+  cardClass: "border-primary/15 transition-glow",
+  footerLink: {
+    href: "/oral-boards-coach",
+    label: "Oral Boards Coach · Interactive Prep Guide",
+  },
+};
+
+const ORTHO_PILLAR_3: PillarConfig = {
+  step: 3,
+  title: "Spaced Repetition",
+  description:
+    "Keep High-Yield Orthopaedics Durable. A Review Queue That Surfaces Misses And Weak Spots On A Schedule Built For Long-Term Retention.",
+  Icon: Lightbulb,
+  BulletIcon: Brain,
+  bullets: [
+    "Incorrect and hard items return on an evidence-aligned schedule so forgetting curves work for you, not against you.",
+    "Pair daily bank work with targeted review so OITE and boards prep compounds instead of resetting every week.",
+    "Bookmarks and due cards live beside the question bank, so retention stays part of the same study loop.",
+  ],
+  cardClass: "border-primary/15 transition-glow",
+};
 
 export default function AtlasWay() {
   const [activePillar, setActivePillar] = useState(0);
   const specialty = useHostSpecialty();
+  const isOrtho = specialty.id === "ortho";
+
+  const pillars = useMemo(
+    () => [...SHARED_PILLARS, isOrtho ? ORTHO_PILLAR_3 : PRS_PILLAR_3],
+    [isOrtho],
+  );
 
   usePageSeo("/the-atlas-way");
 
@@ -91,10 +119,10 @@ export default function AtlasWay() {
     if (reduce.matches) return;
     const intervalMs = 4500;
     const id = window.setInterval(() => {
-      setActivePillar((p) => (p + 1) % PILLARS.length);
+      setActivePillar((p) => (p + 1) % pillars.length);
     }, intervalMs);
     return () => window.clearInterval(id);
-  }, []);
+  }, [pillars.length]);
 
   return (
     <MarketingShell>
@@ -104,13 +132,23 @@ export default function AtlasWay() {
             <p className="mb-3 text-sm font-medium tracking-tight text-muted-foreground">
               One System, Three Pillars
             </p>
-            <h1 className="mb-4 text-4xl font-bold leading-snug tracking-tight gradient-text sm:text-5xl">
+            <h1 className="mb-6 text-4xl font-bold leading-snug tracking-tight gradient-text sm:mb-8 sm:text-5xl">
               The Atlas Way
             </h1>
             <p className="text-lg leading-relaxed text-muted-foreground">
-              Atlas Review is designed as a closed loop: learn from a deep question bank, pressure-test
-              yourself in a realistic testing environment, then rehearse the verbal judgment skills
-              oral boards demand. Below is how those pieces fit together, at a glance.
+              {isOrtho ? (
+                <>
+                  Atlas Review is designed as a closed loop: learn from a deep orthopaedic question bank,
+                  pressure-test yourself in a realistic testing environment, then lock gains in with spaced
+                  repetition. Below is how those pieces fit together, at a glance.
+                </>
+              ) : (
+                <>
+                  Atlas Review is designed as a closed loop: learn from a deep question bank, pressure-test
+                  yourself in a realistic testing environment, then rehearse the verbal judgment skills
+                  oral boards demand. Below is how those pieces fit together, at a glance.
+                </>
+              )}
             </p>
           </header>
 
@@ -124,7 +162,7 @@ export default function AtlasWay() {
               aria-hidden
             />
             <div className="grid gap-8 md:grid-cols-3 md:gap-6">
-              {PILLARS.map((pillar, index) => {
+              {pillars.map((pillar, index) => {
                 const isActive = activePillar === index;
                 const Icon = pillar.Icon;
                 const BulletIcon = pillar.BulletIcon;
@@ -181,15 +219,15 @@ export default function AtlasWay() {
                             </li>
                           ))}
                         </ul>
-                        {pillar.step === 3 ? (
+                        {pillar.footerLink ? (
                           <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
                             Read The Full Story{" "}
                             <Link
-                              href="/oral-boards-coach"
+                              href={pillar.footerLink.href}
                               className="font-medium text-primary underline-offset-4 hover:underline"
                               onClick={(e) => e.stopPropagation()}
                             >
-                              Oral Boards Coach · Interactive Prep Guide
+                              {pillar.footerLink.label}
                             </Link>
                             .
                           </p>
@@ -245,10 +283,21 @@ export default function AtlasWay() {
           >
             <h2 className="mb-3 text-lg font-semibold text-foreground">How It Flows In Practice</h2>
             <p className="leading-relaxed text-muted-foreground">
-              Most learners rotate through the bank for depth, schedule regular mock exams for
-              stamina, and use the oral board coach when it is time to translate what they know into
-              how they speak. You can emphasize any pillar week to week. Atlas is built so all three
-              reinforce each other instead of fighting for attention.
+              {isOrtho ? (
+                <>
+                  Most learners rotate through the bank for depth, schedule regular mock exams for
+                  stamina, and clear their spaced-repetition queue so weak topics keep resurfacing until
+                  they stick. You can emphasize any pillar week to week. Atlas is built so all three
+                  reinforce each other instead of fighting for attention.
+                </>
+              ) : (
+                <>
+                  Most learners rotate through the bank for depth, schedule regular mock exams for
+                  stamina, and use the oral board coach when it is time to translate what they know into
+                  how they speak. You can emphasize any pillar week to week. Atlas is built so all three
+                  reinforce each other instead of fighting for attention.
+                </>
+              )}
             </p>
           </section>
         </div>

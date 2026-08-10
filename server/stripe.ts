@@ -7,13 +7,27 @@ const STRIPE_LIVE_SECRET_KEY = process.env.STRIPE_LIVE_SECRET_KEY;
 const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET;
 
 /**
- * Base URL for Stripe success/cancel redirects. Defaults to the specialty's own domain so an
- * Orthopaedic checkout returns to ortho-atlas.com; APP_BASE_URL overrides for local/staging.
+ * Base URL for Stripe Checkout Session success/cancel (Payment Link success URLs are set in Stripe).
+ * Always the specialty's own production domain so Ortho never returns to prs-atlas.com.
+ * APP_BASE_URL / VITE_APP_URL override only outside production (local/staging).
  */
-function checkoutBaseUrl(specialtyId: SpecialtyId, requestOrigin?: string | null): string {
-  const explicit = requestOrigin?.trim() || process.env.APP_BASE_URL || process.env.VITE_APP_URL;
-  if (explicit) return explicit.replace(/\/$/, "");
+function checkoutBaseUrl(specialtyId: SpecialtyId, _requestOrigin?: string | null): string {
+  if (process.env.NODE_ENV !== "production") {
+    const explicit = process.env.APP_BASE_URL || process.env.VITE_APP_URL;
+    if (explicit?.trim()) return explicit.trim().replace(/\/$/, "");
+  }
   return getSpecialty(specialtyId).canonicalOrigin;
+}
+
+/** Attach client_reference_id so webhooks / fulfill can map Payment Link sessions to a user. */
+function withPaymentLinkClientReference(paymentLinkUrl: string, userId: string): string {
+  try {
+    const u = new URL(paymentLinkUrl);
+    u.searchParams.set("client_reference_id", userId);
+    return u.toString();
+  } catch {
+    return paymentLinkUrl;
+  }
 }
 
 export const stripe: Stripe | null = STRIPE_SECRET_KEY
@@ -93,7 +107,7 @@ export async function createCheckoutSession(params: {
     if (noTrialUrl) {
       return {
         sessionId: "",
-        url: noTrialUrl,
+        url: withPaymentLinkClientReference(noTrialUrl, params.userId),
         specialtyId,
       };
     }
@@ -108,7 +122,7 @@ export async function createCheckoutSession(params: {
   if (paymentLinkUrl) {
     return {
       sessionId: "",
-      url: paymentLinkUrl,
+      url: withPaymentLinkClientReference(paymentLinkUrl, params.userId),
       specialtyId,
     };
   }

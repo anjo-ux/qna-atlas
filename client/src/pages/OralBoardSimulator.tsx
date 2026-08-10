@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ChevronLeft, Send, Loader2, Plus, Trash2, Menu, X, Check } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { useSpecialty } from '@/hooks/useSpecialty';
 import { Card } from '@/components/ui/card';
 import {
   OralBoardAssistantContent,
@@ -166,6 +167,9 @@ function OralBoardSidebarPanel({
 
 export default function OralBoardSimulator({ onBack }: { onBack: () => void }) {
   useAuth();
+  const { specialty } = useSpecialty();
+  const specialtyOptions = specialty.marketing.oralSpecialtyOptions;
+  const defaultSpecialty = specialtyOptions[0] ?? specialty.specialtyName;
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [currentConversationId, setCurrentConversationId] = useState<string>('');
   const [messages, setMessages] = useState<Message[]>([]);
@@ -217,7 +221,7 @@ export default function OralBoardSimulator({ onBack }: { onBack: () => void }) {
   }, []);
 
   const [sessionSetup, setSessionSetup] = useState<SessionSetup>({
-    specialty: 'Plastic Surgery',
+    specialty: defaultSpecialty,
     level: 'Fellow',
     mode: 'Oral Boards',
     focusAreas: 'All',
@@ -226,6 +230,13 @@ export default function OralBoardSimulator({ onBack }: { onBack: () => void }) {
     scoring: true,
     hinting: 'Off',
   });
+
+  useEffect(() => {
+    setSessionSetup((prev) => ({
+      ...prev,
+      specialty: specialtyOptions.includes(prev.specialty) ? prev.specialty : defaultSpecialty,
+    }));
+  }, [defaultSpecialty, specialtyOptions]);
 
   const fetchSessionsList = useCallback(async (): Promise<Conversation[]> => {
     const res = await fetch('/api/oral-board/sessions', { credentials: 'include' });
@@ -507,7 +518,7 @@ Hinting: ${sessionSetup.hinting}`;
         await loadMessagesForSession(pick);
       }
       setSessionSetup({
-        specialty: 'Plastic Surgery',
+        specialty: defaultSpecialty,
         level: 'Fellow',
         mode: 'Oral Boards',
         focusAreas: 'All',
@@ -685,7 +696,7 @@ Hinting: ${sessionSetup.hinting}`;
                 <div className="mb-3">
                   <label className="text-xs font-medium mb-1 block">Specialty/Subspecialty</label>
                   <div className="flex gap-1 flex-wrap">
-                    {['Plastic Surgery', 'Hand Surgery', 'Burn Surgery'].map(opt => (
+                    {specialtyOptions.map(opt => (
                       <Button
                         key={opt}
                         variant={sessionSetup.specialty === opt ? 'default' : 'outline'}

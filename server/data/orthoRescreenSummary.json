@@ -1,0 +1,15 @@
+{
+  "reviewedAt": "2026-08-10T01:50:57.633Z",
+  "provider": "claude",
+  "model": "claude-opus-4-6",
+  "totalLive": 2529,
+  "skippedAlreadyRescreened": 727,
+  "remainingReviewed": 1802,
+  "ok": 729,
+  "autoFixed": 1690,
+  "letterChanged": 235,
+  "flaggedThisRun": 110,
+  "totalFlagsOnDisk": 153,
+  "fixSkippedFormat": 0,
+  "flagPath": "/home/runner/workspace/server/data/orthoRescreenFlags.json"
+}

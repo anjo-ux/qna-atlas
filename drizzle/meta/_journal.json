@@ -22,6 +22,20 @@
       "when": 1775337600000,
       "tag": "0016_multi_specialty",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1775520000000,
+      "tag": "0017_auth_handoff",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1775670000000,
+      "tag": "0018_questions_flagged",
+      "breakpoints": true
     }
   ]
 }

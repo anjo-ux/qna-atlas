@@ -92,6 +92,24 @@ export function SubscriptionPlans({ open = true, onOpenChange, asDialog = true, 
         try {
           sessionStorage.setItem('subscription_pending_plan', planToUse.id);
         } catch (_) {}
+
+        // Ortho checkout from prs-atlas.com (or the reverse): hand off the session to the
+        // specialty domain first, then continue to Stripe so the success redirect stays logged in.
+        if (response.requiresDomainHandoff && response.specialtyId) {
+          const handoff = await apiRequest('/api/auth/handoff', {
+            method: 'POST',
+            body: JSON.stringify({
+              targetSpecialtyId: response.specialtyId,
+              nextPath: '/',
+              continueExternalUrl: response.sessionUrl,
+            }),
+          });
+          if (handoff?.handoffUrl) {
+            window.location.assign(handoff.handoffUrl);
+            return;
+          }
+        }
+
         window.location.href = response.sessionUrl;
       }
     } catch (error) {

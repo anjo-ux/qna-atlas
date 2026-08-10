@@ -14,6 +14,7 @@ import {
   DEFAULT_SPECIALTY_ID,
   SPECIALTY_LIST,
   getSpecialty,
+  isKnownSpecialtyHost,
   isSpecialtyId,
   type SpecialtyConfig,
   type SpecialtyId,
@@ -40,18 +41,25 @@ interface SpecialtyContextType {
 
 const SpecialtyContext = createContext<SpecialtyContextType | undefined>(undefined);
 
-/** Queries invalidated on switch: everything whose contents depend on the question bank. */
-const SPECIALTY_SCOPED_QUERY_PREFIXES = [
+/** Queries cleared on switch so the dashboard never keeps the previous bank's numbers. */
+const SPECIALTY_CONTENT_QUERY_PREFIXES = [
   "/api/sections",
+  "/api/preview/questions",
   "/api/subscription",
-  "/api/user",
-  "/api/auth/user",
-  "/api/specialty",
-  "/api/progress",
-  "/api/stats",
+  "/api/question-responses",
+  "/api/test-sessions",
+  "/api/highlights",
   "/api/bookmarks",
   "/api/spaced-repetition",
 ];
+
+function isSpecialtyContentQuery(queryKey: readonly unknown[]): boolean {
+  const key = queryKey[0];
+  return (
+    typeof key === "string" &&
+    SPECIALTY_CONTENT_QUERY_PREFIXES.some((prefix) => key.startsWith(prefix))
+  );
+}
 
 const MARKETING_PATHS = new Set([
   "/about",
@@ -126,32 +134,70 @@ export function SpecialtyProvider({ children }: { children: React.ReactNode }) {
   }, [activeSpecialty, hostSpecialty, location, isAuthenticated, isAuthLoading]);
 
   const switchMutation = useMutation({
-    mutationFn: async (specialtyId: SpecialtyId) =>
-      apiRequest("/api/specialty/active", {
+    mutationFn: async (specialtyId: SpecialtyId) => {
+      await apiRequest("/api/specialty/active", {
         method: "POST",
         body: JSON.stringify({ specialtyId }),
-      }),
-    onSuccess: (_result, specialtyId) => {
-      setActiveSpecialty(specialtyId);
-      queryClient.invalidateQueries({
-        predicate: (query) => {
-          const key = query.queryKey[0];
-          return (
-            typeof key === "string" &&
-            SPECIALTY_SCOPED_QUERY_PREFIXES.some((prefix) => key.startsWith(prefix))
-          );
-        },
       });
-      // Land on home so locked banks show the themed subscribe paywall immediately.
+      return specialtyId;
+    },
+    onMutate: async (specialtyId) => {
+      const previousSpecialty = activeSpecialty;
+      // Theme flips immediately; activeSpecialty waits for the server so /api/sections
+      // does not briefly return the previous bank under the new specialty key.
+      if (!isAuthPath(location) && !isMarketingPath(location, isAuthenticated, isAuthLoading)) {
+        applySpecialtyToDocument(specialtyId);
+      }
+      return { previousSpecialty };
+    },
+    onSuccess: async (_result, specialtyId) => {
+      // Production: switching banks navigates to that specialty's domain with a session handoff.
+      if (
+        typeof window !== "undefined" &&
+        isKnownSpecialtyHost(window.location.hostname) &&
+        getSpecialty(specialtyId).apexHost !== window.location.hostname.replace(/^www\./, "")
+      ) {
+        try {
+          const handoff = await apiRequest("/api/auth/handoff", {
+            method: "POST",
+            body: JSON.stringify({
+              targetSpecialtyId: specialtyId,
+              nextPath: "/",
+            }),
+          });
+          if (handoff?.handoffUrl) {
+            window.location.assign(handoff.handoffUrl);
+            return;
+          }
+        } catch (error) {
+          console.error("Cross-domain handoff failed:", error);
+        }
+      }
+
+      // Same-host (localhost / preview): stay put and refresh queries.
+      queryClient.removeQueries({
+        predicate: (query) => isSpecialtyContentQuery(query.queryKey),
+      });
+      setActiveSpecialty(specialtyId);
+      queryClient.invalidateQueries({ queryKey: ["/api/specialty"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
       if (normalizePath(location) !== "/") {
         setLocation("/");
+      }
+    },
+    onError: (_error, _specialtyId, context) => {
+      const previous = context?.previousSpecialty;
+      if (isSpecialtyId(previous)) {
+        if (!isAuthPath(location) && !isMarketingPath(location, isAuthenticated, isAuthLoading)) {
+          applySpecialtyToDocument(previous);
+        }
       }
     },
   });
 
   const switchSpecialty = useCallback(
     (specialtyId: SpecialtyId) => {
-      if (specialtyId === activeSpecialty) return;
+      if (specialtyId === activeSpecialty || switchMutation.isPending) return;
       switchMutation.mutate(specialtyId);
     },
     [activeSpecialty, switchMutation]

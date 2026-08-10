@@ -44,7 +44,8 @@ export function getSession() {
     cookie: {
       httpOnly: true, // Prevent XSS attacks
       secure: process.env.NODE_ENV === 'production', // HTTPS only in production
-      sameSite: 'strict', // CSRF protection
+      // Lax so cookies are sent on top-level returns from Stripe Checkout (Strict would drop them).
+      sameSite: 'lax',
       maxAge: SESSION_TTL,
     },
   });
@@ -466,6 +467,93 @@ export async function setupAuth(app: Express) {
       res.clearCookie('connect.sid');
       res.json({ success: true });
     });
+  });
+
+  /**
+   * Mint a one-time URL that recreates this session on another specialty's domain.
+   * Used when switching q-banks (prs ↔ ortho) and when Ortho Stripe checkout starts on PRS.
+   */
+  app.post('/api/auth/handoff', isAuthenticated, async (req, res) => {
+    try {
+      const userId = (req as any).session?.userId as string;
+      const targetSpecialtyId = req.body?.targetSpecialtyId;
+      if (!isSpecialtyId(targetSpecialtyId)) {
+        return res.status(400).json({ message: 'targetSpecialtyId must be prs or ortho.' });
+      }
+      const nextPath =
+        typeof req.body?.nextPath === 'string' ? req.body.nextPath : '/';
+      const continueExternalUrl =
+        typeof req.body?.continueExternalUrl === 'string' ? req.body.continueExternalUrl : null;
+
+      const target = getSpecialty(targetSpecialtyId);
+      const { plainToken } = await storage.createAuthHandoffToken({
+        userId,
+        targetSpecialtyId,
+        nextPath,
+        continueExternalUrl,
+      });
+
+      // Ensure active specialty matches the destination before they land.
+      await storage.setActiveSpecialty(userId, targetSpecialtyId);
+
+      const handoffUrl = `${target.canonicalOrigin}/api/auth/handoff/consume?token=${encodeURIComponent(plainToken)}`;
+      res.json({
+        handoffUrl,
+        targetSpecialtyId: target.id,
+        targetOrigin: target.canonicalOrigin,
+      });
+    } catch (error) {
+      console.error('Handoff mint error:', error);
+      res.status(500).json({ message: 'Failed to create cross-domain handoff.' });
+    }
+  });
+
+  /**
+   * Consume a handoff token on the destination host: establish session cookie, then redirect.
+   */
+  app.get('/api/auth/handoff/consume', async (req, res) => {
+    try {
+      const token = typeof req.query.token === 'string' ? req.query.token : '';
+      const consumed = await storage.consumeAuthHandoffToken(token);
+      if (!consumed) {
+        return res.redirect(302, '/login?handoff=expired');
+      }
+
+      const hostSpecialty = getSpecialtyForHost(requestHostname(req));
+      // Prefer landing on the specialty this token was minted for; fall back to host if mismatched in staging.
+      if (hostSpecialty !== consumed.targetSpecialtyId && process.env.NODE_ENV === 'production') {
+        console.warn('[handoff] host specialty mismatch', {
+          host: requestHostname(req),
+          hostSpecialty,
+          target: consumed.targetSpecialtyId,
+        });
+      }
+
+      const user = await storage.getUser(consumed.userId);
+      if (!user) {
+        return res.redirect(302, '/login?handoff=invalid');
+      }
+
+      await storage.setActiveSpecialty(consumed.userId, consumed.targetSpecialtyId);
+
+      const session = (req as any).session;
+      session.userId = user.id;
+      session.user = sanitizeUser(user);
+
+      await new Promise<void>((resolve, reject) => {
+        session.save((err: Error | null) => (err ? reject(err) : resolve()));
+      });
+
+      if (consumed.continueExternalUrl) {
+        return res.redirect(302, consumed.continueExternalUrl);
+      }
+
+      const next = consumed.nextPath.startsWith('/') ? consumed.nextPath : '/';
+      return res.redirect(302, next);
+    } catch (error) {
+      console.error('Handoff consume error:', error);
+      return res.redirect(302, '/login?handoff=error');
+    }
   });
 }
 

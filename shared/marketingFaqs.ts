@@ -14,7 +14,7 @@ export const PRICING_MARKETING_FAQ = [
   },
   {
     q: "Can I Switch Plans Later?",
-    a: "You can choose a new term when you renew or upgrade from your account flow. For billing questions, email hello@prs-atlas.com with the email on your account.",
+    a: "You can choose a new term when you renew or upgrade from your account flow. For billing questions, email the contact address listed on this site’s Contact page with the email on your account.",
   },
 ] as const;
 

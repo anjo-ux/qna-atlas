@@ -21,19 +21,22 @@ export function ChatBubble() {
   const [isLoading, setIsLoading] = useState(false);
   const [threadId, setThreadId] = useState<string>('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const { specialty } = useSpecialty();
+  const { specialty, activeSpecialty } = useSpecialty();
+  const isOrthoBank = activeSpecialty === "ortho";
 
   // Initialize thread on first open
   useEffect(() => {
+    if (isOrthoBank) return;
     if (isOpen && !threadId) {
       initializeThread();
     }
-  }, [isOpen]);
+  }, [isOpen, isOrthoBank]);
 
   // Auto-scroll to bottom
   useEffect(() => {
+    if (isOrthoBank) return;
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+  }, [messages, isOrthoBank]);
 
   const initializeThread = async () => {
     try {
@@ -94,6 +97,9 @@ export function ChatBubble() {
       setIsLoading(false);
     }
   };
+
+  // Atlas Agent is PRS-only for now.
+  if (isOrthoBank) return null;
 
   return (
     <div

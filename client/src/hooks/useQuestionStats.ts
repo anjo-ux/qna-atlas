@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { queryClient, apiRequest } from '@/lib/queryClient';
+import { useSpecialty } from '@/hooks/useSpecialty';
 import type { QuestionResponse as DBQuestionResponse, User } from '@shared/schema';
 
 export interface QuestionResponse {
@@ -23,6 +24,7 @@ export interface SubsectionStats {
 const RESPONSES_KEY = 'psite-question-responses';
 
 export function useQuestionStats() {
+  const { activeSpecialty } = useSpecialty();
   const [localResponses, setLocalResponses] = useState<QuestionResponse[]>([]);
   const hasSyncedRef = useRef(false);
 
@@ -33,10 +35,15 @@ export function useQuestionStats() {
   const isAuthenticated = !!user;
 
   const { data: serverResponses = [], isLoading: isServerLoading, isError } = useQuery<DBQuestionResponse[]>({
-    queryKey: ['/api/question-responses'],
+    queryKey: ['/api/question-responses', activeSpecialty],
     staleTime: 30000,
     enabled: isAuthenticated,
   });
+
+  // Re-allow local→server sync after switching banks.
+  useEffect(() => {
+    hasSyncedRef.current = false;
+  }, [activeSpecialty]);
 
   const saveResponseMutation = useMutation({
     mutationFn: async (response: QuestionResponse) => {

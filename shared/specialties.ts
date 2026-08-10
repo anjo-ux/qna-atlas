@@ -51,6 +51,10 @@ export type SpecialtyConfig = {
     questionCountLabel: string;
     questionCountBullet: string;
     examName: string;
+    /** Short label for mock-exam UI chrome, e.g. "Plastic Surgery" or "Ortho". */
+    mockExamLabel: string;
+    /** Specialty/subspecialty chips in oral board session setup. */
+    oralSpecialtyOptions: readonly string[];
     /** Inline prose list of representative subspecialty domains. */
     subspecialtyExamples: string;
   };
@@ -79,6 +83,8 @@ export const SPECIALTIES: Record<SpecialtyId, SpecialtyConfig> = {
       questionCountLabel: "2500+",
       questionCountBullet: "2500+ Carefully Curated Questions.",
       examName: "In-Training Exam",
+      mockExamLabel: "Plastic Surgery",
+      oralSpecialtyOptions: ["Plastic Surgery", "Hand Surgery", "Burn Surgery"],
       subspecialtyExamples:
         "core principles to hand, craniomaxillofacial, breast, cosmetic, and comprehensive themes",
     },
@@ -120,9 +126,11 @@ export const SPECIALTIES: Record<SpecialtyId, SpecialtyConfig> = {
       heroTitle: "Orthopaedic Surgery Atlas",
       heroSubtitle:
         "Master Comprehensive Orthopaedic Surgery Knowledge Through Interactive Questions, Detailed Explanations, And Structured Learning Paths",
-      questionCountLabel: "Curated",
-      questionCountBullet: "Carefully Curated Questions Across Every Major Domain.",
+      questionCountLabel: "2500+",
+      questionCountBullet: "2500+ Carefully Curated Board-Style Questions Across Every Major Domain.",
       examName: "OITE",
+      mockExamLabel: "Ortho",
+      oralSpecialtyOptions: ["Orthopaedic Surgery", "Trauma", "Sports Medicine"],
       subspecialtyExamples:
         "basic science to trauma, sports, spine, arthroplasty, hand, foot and ankle, pediatric, and oncology themes",
     },

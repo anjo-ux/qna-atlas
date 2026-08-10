@@ -1,7 +1,7 @@
 import type { Express, Request, Response, NextFunction } from "express";
 import type { PublicPageSeo } from "../shared/publicPageSeo";
 import { PUBLIC_PAGE_SEO_BY_SPECIALTY } from "../shared/publicPageSeo";
-import { MARKETING_NAV_LINKS } from "../shared/seoCrawlerNav";
+import { getMarketingNavLinks } from "../shared/seoCrawlerNav";
 import { getStructuredData } from "../shared/seoStructuredData";
 import {
   DEFAULT_SPECIALTY_ID,
@@ -96,8 +96,11 @@ function normalizePathname(urlPath: string): string {
   return p.endsWith("/") ? p.slice(0, -1) || "/" : p;
 }
 
-export function isMarketingIndexablePath(pathname: string): boolean {
-  return metaForPath(pathname, DEFAULT_SPECIALTY_ID) !== undefined;
+export function isMarketingIndexablePath(
+  pathname: string,
+  specialtyId: SpecialtyId = DEFAULT_SPECIALTY_ID,
+): boolean {
+  return metaForPath(pathname, specialtyId) !== undefined;
 }
 
 export function isNonIndexableAppPath(pathname: string): boolean {
@@ -144,12 +147,14 @@ function injectAbsoluteFavicons(html: string, origin: string): string {
   return out.replace("</head>", `    ${iconBlock}\n  </head>`);
 }
 
-function injectCrawlerSiteNav(html: string, origin: string): string {
+function injectCrawlerSiteNav(html: string, origin: string, specialtyId: SpecialtyId): string {
   const base = normalizePublicOrigin(origin);
-  const links = MARKETING_NAV_LINKS.map(({ href, label }) => {
-    const url = href === "/" ? `${base}/` : `${base}${href}`;
-    return `<a href="${escapeAttr(url)}">${label}</a>`;
-  }).join("\n      ");
+  const links = getMarketingNavLinks(specialtyId)
+    .map(({ href, label }) => {
+      const url = href === "/" ? `${base}/` : `${base}${href}`;
+      return `<a href="${escapeAttr(url)}">${label}</a>`;
+    })
+    .join("\n      ");
   const footer = `<footer id="seo-crawler-nav" aria-label="Site pages">
     <nav>
       ${links}
@@ -288,12 +293,10 @@ export function injectSpaIndexHtml(
 
   out = injectMarketingHeadTags(out, pathname, meta, canonicalUrl, canonical, specialtyId);
   out = injectAbsoluteFavicons(out, canonical);
-  out = injectCrawlerSiteNav(out, canonical);
+  out = injectCrawlerSiteNav(out, canonical, specialtyId);
 
   return injectRobotsMeta(out, "index, follow");
 }
-
-const SITEMAP_PATHS = MARKETING_NAV_LINKS.map((l) => l.href);
 
 function sitemapPriority(path: string): string {
   if (path === "/") return "1.0";
@@ -307,13 +310,16 @@ function sitemapChangeFreq(path: string): string {
   return "weekly";
 }
 
-function buildSitemapXml(base: string): string {
+function buildSitemapXml(base: string, specialtyId: SpecialtyId): string {
   const origin = normalizePublicOrigin(base);
   const lastMod = new Date().toISOString().slice(0, 10);
-  const urls = SITEMAP_PATHS.map(
-    (p) =>
-      `  <url>\n    <loc>${escapeAttr(`${origin}${p === "/" ? "/" : p}`)}</loc>\n    <lastmod>${lastMod}</lastmod>\n    <changefreq>${sitemapChangeFreq(p)}</changefreq>\n    <priority>${sitemapPriority(p)}</priority>\n  </url>`,
-  ).join("\n");
+  const paths = getMarketingNavLinks(specialtyId).map((l) => l.href);
+  const urls = paths
+    .map(
+      (p) =>
+        `  <url>\n    <loc>${escapeAttr(`${origin}${p === "/" ? "/" : p}`)}</loc>\n    <lastmod>${lastMod}</lastmod>\n    <changefreq>${sitemapChangeFreq(p)}</changefreq>\n    <priority>${sitemapPriority(p)}</priority>\n  </url>`,
+    )
+    .join("\n");
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>\n`;
 }
 
@@ -374,15 +380,19 @@ export function canonicalHostRedirect(req: Request, res: Response, next: NextFun
 }
 
 /**
- * Registers GET /robots.txt and GET /sitemap.xml before static middleware.
- * Both are host-aware so each domain advertises its own canonical URLs.
+ * Registers GET /robots.txt, GET /sitemap.xml, and GET /site.webmanifest before static middleware.
+ * All are host-aware so each domain advertises its own brand and canonical URLs.
  */
 export function registerSeoPublicRoutes(app: Express): void {
   app.get("/robots.txt", (req, res) => {
+    const host = requestHostname(req);
+    const specialtyId = getSpecialtyForHost(host);
     const base =
-      getCanonicalOriginForHost(requestHostname(req)) ||
-      getSpecialty(DEFAULT_SPECIALTY_ID).canonicalOrigin;
+      getCanonicalOriginForHost(host) || getSpecialty(DEFAULT_SPECIALTY_ID).canonicalOrigin;
     const disallow = NON_INDEXABLE_PATH_PREFIXES.map((p) => `Disallow: ${p}`).join("\n");
+    // Ortho does not ship oral boards — keep crawlers off the PRS-only route if they guess the URL.
+    const specialtyDisallow =
+      specialtyId === "ortho" ? "Disallow: /oral-boards-coach\n" : "";
     const lines = [
       "User-agent: *",
       "Allow: /",
@@ -397,7 +407,7 @@ export function registerSeoPublicRoutes(app: Express): void {
       "Allow: /favicon-192.png",
       "",
       disallow,
-      "",
+      specialtyDisallow,
       `Sitemap: ${normalizePublicOrigin(base)}/sitemap.xml`,
       "",
     ];
@@ -405,12 +415,56 @@ export function registerSeoPublicRoutes(app: Express): void {
   });
 
   app.get("/sitemap.xml", (req, res) => {
+    const host = requestHostname(req);
+    const specialtyId = getSpecialtyForHost(host);
     const base =
-      getCanonicalOriginForHost(requestHostname(req)) ||
-      getSpecialty(DEFAULT_SPECIALTY_ID).canonicalOrigin;
+      getCanonicalOriginForHost(host) || getSpecialty(DEFAULT_SPECIALTY_ID).canonicalOrigin;
     res
       .status(200)
       .setHeader("Content-Type", "application/xml; charset=utf-8")
-      .send(buildSitemapXml(base));
+      .send(buildSitemapXml(base, specialtyId));
+  });
+
+  app.get("/site.webmanifest", (req, res) => {
+    const host = requestHostname(req);
+    const specialty = getSpecialty(getSpecialtyForHost(host));
+    const origin =
+      getCanonicalOriginForHost(host) || specialty.canonicalOrigin;
+    const base = normalizePublicOrigin(origin);
+    const v = "20260721d";
+    const manifest = {
+      name: specialty.brandName,
+      short_name: specialty.brandName,
+      description: `${specialty.specialtyName} board prep and Q&A study platform`,
+      start_url: "/",
+      display: "standalone",
+      background_color: "#ffffff",
+      theme_color: specialty.id === "ortho" ? "#1F6B5C" : "#1E5AA8",
+      icons: [
+        {
+          src: `${base}/favicon-48.png?v=${v}`,
+          sizes: "48x48",
+          type: "image/png",
+          purpose: "any",
+        },
+        {
+          src: `${base}/favicon-192.png?v=${v}`,
+          sizes: "192x192",
+          type: "image/png",
+          purpose: "any",
+        },
+        {
+          src: `${base}/atlas-app-icon.png?v=${v}`,
+          sizes: "1024x1024",
+          type: "image/png",
+          purpose: "any",
+        },
+      ],
+    };
+    res
+      .status(200)
+      .setHeader("Content-Type", "application/manifest+json; charset=utf-8")
+      .setHeader("Cache-Control", "public, max-age=3600")
+      .send(JSON.stringify(manifest, null, 2));
   });
 }

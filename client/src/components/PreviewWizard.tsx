@@ -4,17 +4,22 @@ import { Button } from '@/components/ui/button';
 import { ChevronRight, BookOpen, Target, TrendingUp, Lock } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { useSpecialty } from '@/hooks/useSpecialty';
+import type { SpecialtyConfig } from '@shared/specialties';
 
 interface PreviewWizardProps {
   open: boolean;
   onClose: () => void;
   onStart: () => void;
+  /** Landing should pass the host specialty so Ortho home never advertises PRS. */
+  specialtyOverride?: SpecialtyConfig;
 }
 
-export function PreviewWizard({ open, onClose, onStart }: PreviewWizardProps) {
+export function PreviewWizard({ open, onClose, onStart, specialtyOverride }: PreviewWizardProps) {
   const [step, setStep] = useState(0);
-  const { specialty } = useSpecialty();
+  const { specialty: activeSpecialty } = useSpecialty();
+  const specialty = specialtyOverride ?? activeSpecialty;
   const specialtyLower = specialty.specialtyName.toLowerCase();
+  const isOrtho = specialty.id === 'ortho';
 
   const steps = [
     {
@@ -97,7 +102,11 @@ export function PreviewWizard({ open, onClose, onStart }: PreviewWizardProps) {
           </Card>
           <Card className="p-4 bg-accent/5 border-accent/20">
             <p className="text-sm text-foreground font-medium">Sign Up For Full Access</p>
-            <p className="text-xs text-muted-foreground mt-2">Start your 7-day free trial and access thousands of questions now, and our unique oral boards review agent. Upgrade to extend your subscription at anytime.</p>
+            <p className="text-xs text-muted-foreground mt-2">
+              {isOrtho
+                ? 'Start your 7-day free trial and access the full Ortho Atlas question bank with mock exams, spaced repetition, and progress tracking. Upgrade to extend your subscription at any time.'
+                : 'Start your 7-day free trial and access thousands of questions now, and our unique oral boards review agent. Upgrade to extend your subscription at anytime.'}
+            </p>
           </Card>
         </div>
       ),

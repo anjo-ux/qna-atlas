@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { queryClient, apiRequest } from '@/lib/queryClient';
+import { useSpecialty } from '@/hooks/useSpecialty';
 import type { Highlight as DBHighlight, User } from '@shared/schema';
 
 export type HighlightColor = 'yellow' | 'green' | 'blue' | 'pink';
@@ -64,6 +65,7 @@ function mergeServerAndPending(serverMapped: Highlight[], localHighlights: Highl
 }
 
 export function useHighlights() {
+  const { activeSpecialty } = useSpecialty();
   const [localHighlights, setLocalHighlights] = useState<Highlight[]>([]);
   const [notes, setNotes] = useState<Note[]>([]);
   const [activeColor, setActiveColor] = useState<HighlightColor>('yellow');
@@ -77,10 +79,14 @@ export function useHighlights() {
   const isAuthenticated = !!user;
 
   const { data: serverHighlights = [], isLoading: isLoadingHighlights, isError } = useQuery<DBHighlight[]>({
-    queryKey: ['/api/highlights'],
+    queryKey: ['/api/highlights', activeSpecialty],
     staleTime: 30000,
     enabled: isAuthenticated,
   });
+
+  useEffect(() => {
+    hasSyncedRef.current = false;
+  }, [activeSpecialty]);
 
   const createHighlightMutation = useMutation({
     mutationFn: async (highlight: Omit<Highlight, 'id'>) => {

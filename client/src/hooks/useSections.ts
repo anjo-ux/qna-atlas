@@ -3,14 +3,20 @@ import type { Section } from "@/types/question";
 import { useSpecialty } from "@/hooks/useSpecialty";
 
 export function useSections() {
-  const { activeSpecialty } = useSpecialty();
+  const { activeSpecialty, lockedBySpecialty } = useSpecialty();
+  const isLocked = lockedBySpecialty[activeSpecialty] === true;
+
   const { data: sections = [], isLoading, error } = useQuery<Section[]>({
     queryKey: ["/api/sections", activeSpecialty],
+    enabled: !isLocked,
     queryFn: async () => {
       const res = await fetch("/api/sections", { credentials: "include" });
+      if (res.status === 401 || res.status === 403) {
+        throw new Error("Subscription required to access the question bank");
+      }
       if (!res.ok) throw new Error("Failed to fetch sections");
       return res.json();
     },
   });
-  return { sections, isLoading, error };
+  return { sections, isLoading: isLoading && !isLocked, error };
 }

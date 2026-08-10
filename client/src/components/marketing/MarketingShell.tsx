@@ -11,10 +11,10 @@ import { cn } from "@/lib/utils";
 import atlasLogo from "@assets/atlas_1764093111680.png";
 import atlasLogoLight from "@assets/logo_light_1774918799268.png";
 
-const NAV = [
+const ALL_NAV = [
   { href: "/about", label: "About Us" },
   { href: "/the-atlas-way", label: "The Atlas Way" },
-  { href: "/oral-boards-coach", label: "Oral Boards Coach" },
+  { href: "/oral-boards-coach", label: "Oral Boards Coach", prsOnly: true },
   { href: "/pricing", label: "Pricing" },
   { href: "/contact", label: "Contact Us" },
 ] as const;
@@ -50,6 +50,7 @@ export function MarketingShell({
   /** Marketing surfaces follow the domain, not the logged-in q-bank. */
   const specialty = useHostSpecialty();
   const path = pathname.replace(/\/$/, "") || "/";
+  const nav = ALL_NAV.filter((item) => !("prsOnly" in item && item.prsOnly && specialty.id === "ortho"));
 
   return (
     <div
@@ -128,7 +129,7 @@ export function MarketingShell({
                 className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 sm:flex-1 sm:justify-center sm:gap-x-3 sm:gap-y-1 md:gap-x-4"
                 aria-label="Marketing"
               >
-                {NAV.map(({ href, label }) => {
+                {nav.map(({ href, label }) => {
                   const isActive = path === href || path === `${href}/`;
                   return (
                     <Link

@@ -302,7 +302,7 @@ html, body {
   }
 
   body {
-    background: linear-gradient(135deg, #d5e8f5 0%, #d5f0f5 20%, #d5f0f2 40%, #d5e0ff 60%, #d5d5ff 80%, #e0e8ff 100%);
+    background: linear-gradient(135deg, #eef5fa 0%, #f0f7fa 20%, #eef8f9 40%, #f0f3fb 60%, #f2f1fb 80%, #f4f6fc 100%);
     background-attachment: fixed;
     min-height: 100vh;
     color: hsl(var(--foreground));

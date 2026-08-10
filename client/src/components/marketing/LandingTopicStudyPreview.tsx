@@ -1,9 +1,22 @@
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useHostSpecialty } from "@/hooks/useSpecialty";
 
-/** Representative curriculum tree for marketing only (not live bank data). */
-const PREVIEW_SECTIONS = [
+type PreviewSection = {
+  title: string;
+  subs: { title: string; count: number }[];
+};
+
+type SectionMeta = {
+  id: string;
+  title: string;
+  subsections: { id: string; title: string; questionCount: number }[];
+};
+
+/** Representative PRS curriculum tree for marketing only (not live bank data). */
+const PRS_PREVIEW_SECTIONS: PreviewSection[] = [
   {
     title: "Foundations & Core Principles",
     subs: [
@@ -52,14 +65,35 @@ const PREVIEW_SECTIONS = [
       { title: "Periorbital & Rhinoplasty", count: 51 },
     ],
   },
-] as const;
+];
 
-const totalSubs = PREVIEW_SECTIONS.reduce((n, s) => n + s.subs.length, 0);
+function stripSectionPrefix(title: string): string {
+  return title.replace(/^Section\s+\d+:\s*/i, "").trim() || title;
+}
 
-/**
- * Static sidebar-style preview of the in-app topic navigation (marketing only).
- */
-export function LandingTopicStudyPreview({ className }: { className?: string }) {
+function metaToPreview(meta: SectionMeta[]): PreviewSection[] {
+  return meta
+    .map((section) => ({
+      title: stripSectionPrefix(section.title),
+      subs: (section.subsections ?? [])
+        .map((sub) => ({
+          title: sub.title,
+          count: sub.questionCount ?? 0,
+        }))
+        .filter((sub) => sub.count > 0),
+    }))
+    .filter((section) => section.subs.length > 0);
+}
+
+function PreviewTree({
+  previewSections,
+  className,
+}: {
+  previewSections: PreviewSection[];
+  className?: string;
+}) {
+  const totalSubs = previewSections.reduce((n, s) => n + s.subs.length, 0);
+
   return (
     <div
       className={cn(
@@ -68,7 +102,9 @@ export function LandingTopicStudyPreview({ className }: { className?: string }) 
       )}
     >
       <div className="border-b border-border bg-gradient-to-r from-primary/10 to-accent/10 px-4 py-3">
-        <h3 className="text-sm font-semibold text-foreground">Sections ({PREVIEW_SECTIONS.length})</h3>
+        <h3 className="text-sm font-semibold text-foreground">
+          Sections ({previewSections.length})
+        </h3>
         <p className="mt-0.5 text-xs text-muted-foreground">
           {totalSubs} Subsections In The Full Bank
         </p>
@@ -76,12 +112,11 @@ export function LandingTopicStudyPreview({ className }: { className?: string }) 
       <div
         className={cn(
           "h-64 overflow-y-auto overflow-x-hidden overscroll-y-contain sm:h-72",
-          /* Radix ScrollArea always paints a track; native scroll hides chrome on phones/tablets */
           "max-lg:[-ms-overflow-style:none] max-lg:[scrollbar-width:none] max-lg:[&::-webkit-scrollbar]:hidden",
         )}
       >
         <div className="space-y-5 p-4">
-          {PREVIEW_SECTIONS.map((section) => (
+          {previewSections.map((section) => (
             <div key={section.title} className="space-y-1.5">
               <div className="flex items-center gap-2 px-1">
                 <ChevronDown className="h-3.5 w-3.5 shrink-0 text-foreground" aria-hidden />
@@ -110,4 +145,60 @@ export function LandingTopicStudyPreview({ className }: { className?: string }) 
       </div>
     </div>
   );
+}
+
+/**
+ * Sidebar-style preview of in-app topic navigation.
+ * PRS uses a curated static tree; Ortho loads live host specialty metadata (counts only).
+ */
+export function LandingTopicStudyPreview({ className }: { className?: string }) {
+  const specialty = useHostSpecialty();
+  const isOrtho = specialty.id === "ortho";
+
+  const { data: orthoMeta = [], isLoading } = useQuery<SectionMeta[]>({
+    queryKey: ["/api/sections/meta", "landing-topic-preview", "ortho"],
+    enabled: isOrtho,
+    queryFn: async () => {
+      const res = await fetch("/api/sections/meta?specialtyId=ortho", {
+        credentials: "include",
+      });
+      if (!res.ok) throw new Error("Failed to fetch Ortho section metadata");
+      return res.json();
+    },
+    staleTime: 60_000,
+  });
+
+  if (!isOrtho) {
+    return <PreviewTree previewSections={PRS_PREVIEW_SECTIONS} className={className} />;
+  }
+
+  const previewSections = metaToPreview(orthoMeta);
+
+  if (isLoading && previewSections.length === 0) {
+    return (
+      <div
+        className={cn(
+          "flex h-64 items-center justify-center rounded-lg border border-border bg-muted/20 text-sm text-muted-foreground sm:h-72",
+          className,
+        )}
+      >
+        Loading Ortho topics…
+      </div>
+    );
+  }
+
+  if (previewSections.length === 0) {
+    return (
+      <div
+        className={cn(
+          "flex h-64 items-center justify-center rounded-lg border border-border bg-muted/20 text-sm text-muted-foreground sm:h-72",
+          className,
+        )}
+      >
+        Ortho topics coming soon.
+      </div>
+    );
+  }
+
+  return <PreviewTree previewSections={previewSections} className={className} />;
 }

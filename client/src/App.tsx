@@ -1,4 +1,4 @@
-import { Component, type ReactNode } from "react";
+import { Component, useEffect, type ReactNode } from "react";
 import { Switch, Route, useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -8,7 +8,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/useAuth";
 import { useContentProtection } from "@/hooks/useContentProtection";
 import { ThemeProvider } from "@/hooks/useTheme";
-import { SpecialtyProvider } from "@/hooks/useSpecialty";
+import { SpecialtyProvider, useSpecialty, useHostSpecialty } from "@/hooks/useSpecialty";
 import Index from "./pages/Index";
 import PreviewMode from "./pages/PreviewMode";
 import NotFound from "./pages/NotFound";
@@ -85,6 +85,28 @@ function normalizeAppPath(p: string): string {
   return p || "/";
 }
 
+/** Marketing Oral Boards Coach is PRS-only; Ortho host redirects home. */
+function OralBoardsCoachMarketingRoute() {
+  const specialty = useHostSpecialty();
+  const [, setLocation] = useLocation();
+  useEffect(() => {
+    if (specialty.id === "ortho") setLocation("/");
+  }, [specialty.id, setLocation]);
+  if (specialty.id === "ortho") return null;
+  return <OralBoardsCoachPage />;
+}
+
+/** In-app Oral Boards simulator is PRS-only while Ortho bank is active. */
+function OralBoardSimulatorRoute() {
+  const { activeSpecialty } = useSpecialty();
+  const [, setLocation] = useLocation();
+  useEffect(() => {
+    if (activeSpecialty === "ortho") setLocation("/");
+  }, [activeSpecialty, setLocation]);
+  if (activeSpecialty === "ortho") return null;
+  return <OralBoardSimulator onBack={() => setLocation("/")} />;
+}
+
 /** Public routes that should render immediately (no auth-loading spinner) for SEO and UX. */
 function isPublicPathWithoutAuthGate(p: string): boolean {
   const n = normalizeAppPath(p);
@@ -147,7 +169,7 @@ function Router() {
       <Route path="/the-atlas-way" component={AtlasWay} />
       <Route path="/contact" component={ContactPage} />
       <Route path="/pricing" component={PricingPage} />
-      <Route path="/oral-boards-coach" component={OralBoardsCoachPage} />
+      <Route path="/oral-boards-coach" component={OralBoardsCoachMarketingRoute} />
       <Route path="/terms" component={TermsOfUsePage} />
       <Route path="/privacy" component={PrivacyPolicyPage} />
       {!isAuthenticated ? (
@@ -162,9 +184,7 @@ function Router() {
           <Route path="/spaced-repetition">
             {() => <SpacedRepetitionPage onBack={() => setLocation('/')} />}
           </Route>
-          <Route path="/oral-board">
-            {() => <OralBoardSimulator onBack={() => setLocation('/')} />}
-          </Route>
+          <Route path="/oral-board" component={OralBoardSimulatorRoute} />
           <Route component={NotFound} />
         </>
       )}

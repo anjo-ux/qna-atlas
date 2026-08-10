@@ -20,6 +20,8 @@ import {
   subsections,
   questions,
   userSpecialtySubscriptions,
+  authHandoffTokens,
+  pendingCheckoutPlans,
   type User,
   type UpsertUser,
   type UserSpecialtySubscription,
@@ -46,7 +48,9 @@ import {
   type OralBoardMessage,
 } from "@shared/schema";
 import { extractQuestionStem, questionMcqChoicesReferenceSeeImage } from "@shared/questionFormat";
+import { selectPreviewQuestions, PREVIEW_COUNT } from "@shared/previewQuestions";
 import { subsectionTitles } from "@shared/questionImport";
+import { orthoSubsectionTitles } from "@shared/orthoQuestionImport";
 import {
   DEFAULT_SPECIALTY_ID,
   SPECIALTY_IDS,
@@ -65,6 +69,7 @@ let institutionalRedemptionConsistencyMigrationDone = false;
 let subscriptionResetDone = false;
 let userInstitutionalRedemptionsTableDone = false;
 let multiSpecialtyMigrationDone = false;
+let questionsFlaggedColumnDone = false;
 
 /**
  * Entitlement fields that exist on both `user_specialty_subscriptions` and (as the Plastic Surgery
@@ -83,10 +88,26 @@ export type SpecialtyEntitlementUpdate = Partial<{
   institutionalAccessExpiresAt: Date | null;
 }>;
 
+export type SectionQuestionDto = {
+  id: string;
+  question: string;
+  answer: string;
+  category: string;
+  subcategory: string;
+  tags: string[];
+};
+
 export type SectionDto = {
   id: string;
   title: string;
-  subsections: { id: string; title: string; questions: { id: string; question: string; answer: string; category: string; subcategory: string; tags: string[] }[] }[];
+  subsections: { id: string; title: string; questions: SectionQuestionDto[] }[];
+};
+
+/** Public marketing outline: titles + counts only (no stems or answers). */
+export type SectionMetaDto = {
+  id: string;
+  title: string;
+  subsections: { id: string; title: string; questionCount: number }[];
 };
 
 // Interface for storage operations
@@ -269,11 +290,36 @@ export interface IStorage {
   getThemePreference(userId: string): Promise<string>;
   updateThemePreference(userId: string, theme: string): Promise<string>;
 
-  // Percentile rank operations
-  getUserPercentileRank(userId: string): Promise<number | null>;
+  // Cross-domain auth handoff (prs-atlas.com ↔ ortho-atlas.com)
+  createAuthHandoffToken(params: {
+    userId: string;
+    targetSpecialtyId: SpecialtyId;
+    nextPath?: string;
+    continueExternalUrl?: string | null;
+  }): Promise<{ plainToken: string; expiresAt: Date }>;
+  consumeAuthHandoffToken(plainToken: string): Promise<{
+    userId: string;
+    targetSpecialtyId: SpecialtyId;
+    nextPath: string;
+    continueExternalUrl: string | null;
+  } | null>;
+  setPendingCheckoutPlan(
+    userId: string,
+    planId: string,
+    specialtyId: SpecialtyId,
+  ): Promise<void>;
+  takePendingCheckoutPlan(userId: string): Promise<{ planId: string; specialtyId: SpecialtyId } | null>;
+  clearPendingCheckoutPlan(userId: string): Promise<void>;
+
+  // Percentile rank operations (scoped to one question bank)
+  getUserPercentileRank(userId: string, specialtyId?: SpecialtyId): Promise<number | null>;
 
   // Question bank (sections API)
   getSections(specialtyId?: SpecialtyId): Promise<SectionDto[]>;
+  /** Titles + question counts only — safe for unauthenticated marketing pages. */
+  getSectionsMeta(specialtyId?: SpecialtyId): Promise<SectionMetaDto[]>;
+  /** Deterministic capped preview set (stems + answers for the free sample only). */
+  getPreviewQuestions(specialtyId?: SpecialtyId, count?: number): Promise<SectionQuestionDto[]>;
 
   // Question reports
   createQuestionReport(report: InsertQuestionReport): Promise<QuestionReport>;
@@ -281,6 +327,15 @@ export interface IStorage {
   countQuestionReportsForQuestion(questionId: string): Promise<number>;
   /** If question exists, set visible=false and reported=true (idempotent). */
   hideQuestionDueToReports(questionId: string): Promise<boolean>;
+  /**
+   * Content-audit flag (any specialty). Hides the question until unflagged.
+   * Sets flagged=true and visible=false.
+   */
+  flagQuestion(questionId: string, reasonTag?: string): Promise<boolean>;
+  /**
+   * Clears content-audit flag. Restores visible=true unless the question is reported.
+   */
+  unflagQuestion(questionId: string): Promise<boolean>;
 
   // Oral board simulator (persisted sessions + messages)
   createOralBoardSession(userId: string, openaiThreadId: string): Promise<OralBoardSession>;
@@ -976,6 +1031,7 @@ export class DatabaseStorage implements IStorage {
 
   async getSections(specialtyId: SpecialtyId = DEFAULT_SPECIALTY_ID): Promise<SectionDto[]> {
     await this.ensureMultiSpecialtyMigration();
+    await this.ensureQuestionsFlaggedColumn();
     const sectionRows = await db
       .select()
       .from(sections)
@@ -986,8 +1042,9 @@ export class DatabaseStorage implements IStorage {
     const questionRows = await db.select().from(questions);
     const bySub = new Map<string, typeof questionRows>();
     for (const q of questionRows) {
-      // Only include visible questions (hide picture-based etc.)
+      // Only include visible, unflagged questions (applies to every specialty bank)
       if (q.visible === false) continue;
+      if (q.flagged === true) continue;
       if (extractQuestionStem(q.question).toLowerCase().includes("radiographic")) continue;
       if (questionMcqChoicesReferenceSeeImage(q.question)) continue;
       const list = bySub.get(q.subsectionId) ?? [];
@@ -1003,7 +1060,7 @@ export class DatabaseStorage implements IStorage {
     return sectionRows.map((sec) => {
       const subs = (bySec.get(sec.id) ?? []).map((sub) => ({
         id: sub.id,
-        title: subsectionTitles[sub.id] ?? sub.title,
+        title: subsectionTitles[sub.id] ?? orthoSubsectionTitles[sub.id] ?? sub.title,
         questions: (bySub.get(sub.id) ?? []).map((q) => ({
           id: q.id,
           question: q.question,
@@ -1015,6 +1072,32 @@ export class DatabaseStorage implements IStorage {
       }));
       return { id: sec.id, title: sec.title, subsections: subs };
     });
+  }
+
+  async getSectionsMeta(specialtyId: SpecialtyId = DEFAULT_SPECIALTY_ID): Promise<SectionMetaDto[]> {
+    const sections = await this.getSections(specialtyId);
+    return sections
+      .map((sec) => ({
+        id: sec.id,
+        title: sec.title,
+        subsections: sec.subsections
+          .map((sub) => ({
+            id: sub.id,
+            title: sub.title,
+            questionCount: sub.questions.length,
+          }))
+          .filter((sub) => sub.questionCount > 0),
+      }))
+      .filter((sec) => sec.subsections.length > 0);
+  }
+
+  async getPreviewQuestions(
+    specialtyId: SpecialtyId = DEFAULT_SPECIALTY_ID,
+    count: number = PREVIEW_COUNT,
+  ): Promise<SectionQuestionDto[]> {
+    const sections = await this.getSections(specialtyId);
+    const all = sections.flatMap((sec) => sec.subsections.flatMap((sub) => sub.questions));
+    return selectPreviewQuestions(all, count);
   }
 
   async createQuestionReport(report: InsertQuestionReport): Promise<QuestionReport> {
@@ -1039,6 +1122,38 @@ export class DatabaseStorage implements IStorage {
     const [updated] = await db
       .update(questions)
       .set({ visible: false, reported: true, updatedAt: new Date() })
+      .where(eq(questions.id, questionId))
+      .returning({ id: questions.id });
+    return !!updated;
+  }
+
+  async flagQuestion(questionId: string, reasonTag?: string): Promise<boolean> {
+    await this.ensureQuestionsFlaggedColumn();
+    const [row] = await db.select().from(questions).where(eq(questions.id, questionId));
+    if (!row) return false;
+    const tags = Array.isArray(row.tags) ? [...row.tags] : [];
+    if (!tags.includes("content-flagged")) tags.push("content-flagged");
+    if (reasonTag && !tags.includes(reasonTag)) tags.push(reasonTag);
+    const [updated] = await db
+      .update(questions)
+      .set({ flagged: true, visible: false, tags, updatedAt: new Date() })
+      .where(eq(questions.id, questionId))
+      .returning({ id: questions.id });
+    return !!updated;
+  }
+
+  async unflagQuestion(questionId: string): Promise<boolean> {
+    await this.ensureQuestionsFlaggedColumn();
+    const [row] = await db.select().from(questions).where(eq(questions.id, questionId));
+    if (!row) return false;
+    const tags = (Array.isArray(row.tags) ? row.tags : []).filter(
+      (t) => t !== "content-flagged" && t !== "validation-flagged"
+    );
+    // Restore visibility unless report-volume hide still applies
+    const visible = row.reported ? false : true;
+    const [updated] = await db
+      .update(questions)
+      .set({ flagged: false, visible, tags, updatedAt: new Date() })
       .where(eq(questions.id, questionId))
       .returning({ id: questions.id });
     return !!updated;
@@ -1163,6 +1278,14 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateQuestionVisibility(id: string, visible: boolean): Promise<boolean> {
+    await this.ensureQuestionsFlaggedColumn();
+    if (visible) {
+      const [row] = await db.select().from(questions).where(eq(questions.id, id));
+      if (row?.flagged) {
+        // Cannot show a flagged question; caller must unflag first.
+        return false;
+      }
+    }
     const [updated] = await db
       .update(questions)
       .set({ visible, updatedAt: new Date() })
@@ -1255,8 +1378,11 @@ export class DatabaseStorage implements IStorage {
       '6-month': 'https://buy.stripe.com/7sYeVc0GQ7SJc1saM9cV201',
       '1-year': 'https://buy.stripe.com/aFaaEW2OY3Ct6H88E1cV200',
     },
-    /** Ortho Stripe products/links are created separately; fill via env until then. */
-    ortho: {},
+    ortho: {
+      monthly: 'https://buy.stripe.com/9B6fZg61ac8Z3uWbQdcV20a',
+      '6-month': 'https://buy.stripe.com/9B6aEWblu4Gx4z09I5cV20b',
+      '1-year': 'https://buy.stripe.com/28E9AScpya0R9Tk8E1cV20c',
+    },
   };
 
   /**
@@ -1270,17 +1396,25 @@ export class DatabaseStorage implements IStorage {
       '6-month': 'https://buy.stripe.com/14A8wO9dmb4V8PgbQdcV204',
       '1-year': 'https://buy.stripe.com/14A8wOahq6OF3uWf2pcV205',
     },
-    ortho: {},
+    ortho: {
+      monthly: 'https://buy.stripe.com/14AeVcfBKeh70iKbQdcV20d',
+      '6-month': 'https://buy.stripe.com/00w00iexGb4V5D42fDcV20e',
+      '1-year': 'https://buy.stripe.com/4gMbJ0cpyc8Z6H8bQdcV20f',
+    },
   };
 
-  /** Stripe product ids per specialty. Ortho ids come from env until the products exist. */
+  /** Stripe product ids per specialty. Env `STRIPE_PRODUCT_ORTHO_*` overrides when set. */
   private static readonly STRIPE_PRODUCT_IDS: Record<SpecialtyId, Record<string, string>> = {
     prs: {
       monthly: 'prod_U14VnZW3eRgkDL',
       '6-month': 'prod_U14WP9DcWZEZWi',
       '1-year': 'prod_U14X6csDhWjhrk',
     },
-    ortho: {},
+    ortho: {
+      monthly: 'prod_V218CzLt976UgM',
+      '6-month': 'prod_V218kM9zJaPSBq',
+      '1-year': 'prod_V218Mt3OZmOZ3P',
+    },
   };
 
   /** `STRIPE_PAYMENT_LINK_MONTHLY…` for PRS; `STRIPE_PAYMENT_LINK_ORTHO_MONTHLY…` for Ortho. */
@@ -1430,15 +1564,65 @@ export class DatabaseStorage implements IStorage {
     `);
   }
 
+  /** Content-audit `flagged` column (drizzle/0018_questions_flagged.sql). Idempotent. */
+  private async ensureQuestionsFlaggedColumn(): Promise<void> {
+    if (questionsFlaggedColumnDone) return;
+    questionsFlaggedColumnDone = true;
+    await pool.query(
+      `ALTER TABLE "questions" ADD COLUMN IF NOT EXISTS "flagged" boolean DEFAULT false NOT NULL`
+    );
+    try {
+      await pool.query(
+        `CREATE INDEX IF NOT EXISTS "idx_questions_flagged" ON "questions" ("flagged")`
+      );
+    } catch (err) {
+      console.warn("[questionsFlagged] index skipped:", err);
+    }
+  }
+
   /** Call once at server startup so user rows match schema before any getUser(). */
   async warmupSubscriptionSchema(): Promise<void> {
     await this.ensureSubscriptionTrialMigrations();
     await this.ensureInstitutionalCodesTable();
     await this.ensureInstitutionalUserAccessColumnsMigration();
+    await this.ensureQuestionsFlaggedColumn();
     await this.ensureInstitutionalCodeRedeemedAtMigration();
     await this.ensureUserInstitutionalRedemptionsTable();
     await this.ensureInstitutionalAccessRedemptionConsistencyMigration();
     await this.ensureMultiSpecialtyMigration();
+    await this.ensureAuthHandoffTables();
+  }
+
+  private async ensureAuthHandoffTables(): Promise<void> {
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS "auth_handoff_tokens" (
+        "id" varchar PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+        "user_id" varchar NOT NULL REFERENCES "users"("id") ON DELETE CASCADE,
+        "token_hash" varchar(64) NOT NULL,
+        "target_specialty_id" varchar(32) NOT NULL,
+        "next_path" varchar(512) NOT NULL DEFAULT '/',
+        "continue_external_url" varchar(1024),
+        "expires_at" timestamp NOT NULL,
+        "used_at" timestamp,
+        "created_at" timestamp DEFAULT now()
+      )
+    `);
+    await pool.query(`
+      CREATE UNIQUE INDEX IF NOT EXISTS "uidx_auth_handoff_tokens_hash"
+      ON "auth_handoff_tokens" ("token_hash")
+    `);
+    await pool.query(`
+      CREATE INDEX IF NOT EXISTS "idx_auth_handoff_tokens_user_id"
+      ON "auth_handoff_tokens" ("user_id")
+    `);
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS "pending_checkout_plans" (
+        "user_id" varchar PRIMARY KEY REFERENCES "users"("id") ON DELETE CASCADE,
+        "plan_id" varchar NOT NULL REFERENCES "subscription_plans"("id") ON DELETE CASCADE,
+        "specialty_id" varchar(32) NOT NULL DEFAULT 'prs',
+        "updated_at" timestamp DEFAULT now() NOT NULL
+      )
+    `);
   }
 
   /** List prices are identical across specialties; Stripe products/links are not. */
@@ -2073,43 +2257,166 @@ export class DatabaseStorage implements IStorage {
     return updated?.themePreference || 'light';
   }
 
-  // Percentile rank operations
-  async getUserPercentileRank(userId: string): Promise<number | null> {
-    // Get user's accuracy
+  // Percentile rank within one specialty's question bank (PRS vs Ortho are separate pools).
+  async getUserPercentileRank(
+    userId: string,
+    specialtyId: SpecialtyId = DEFAULT_SPECIALTY_ID,
+  ): Promise<number | null> {
+    const target = getSpecialty(specialtyId).id;
+    const specialtySections = await db
+      .select({ id: sections.id })
+      .from(sections)
+      .where(eq(sections.specialtyId, target));
+    const sectionIds = specialtySections.map((s) => s.id);
+    if (sectionIds.length === 0) return null;
+
     const userResponses = await db
       .select()
       .from(questionResponses)
-      .where(eq(questionResponses.userId, userId));
-    
+      .where(
+        and(
+          eq(questionResponses.userId, userId),
+          inArray(questionResponses.sectionId, sectionIds),
+        ),
+      );
+
     if (userResponses.length === 0) {
       return null;
     }
 
-    const userCorrect = userResponses.filter(r => r.isCorrect).length;
+    const userCorrect = userResponses.filter((r) => r.isCorrect).length;
     const userAccuracy = (userCorrect / userResponses.length) * 100;
 
-    // Get all users' accuracy percentages
-    const allUsers = await db.select({ id: users.id }).from(users);
-    
-    let betterCount = 0;
-    for (const user of allUsers) {
-      const responses = await db
-        .select()
-        .from(questionResponses)
-        .where(eq(questionResponses.userId, user.id));
-      
-      if (responses.length > 0) {
-        const correct = responses.filter(r => r.isCorrect).length;
-        const accuracy = (correct / responses.length) * 100;
-        
-        if (accuracy > userAccuracy) {
-          betterCount++;
-        }
-      }
+    // Only compare against users who have answered questions in this specialty.
+    const peerRows = await db
+      .select({
+        userId: questionResponses.userId,
+        isCorrect: questionResponses.isCorrect,
+      })
+      .from(questionResponses)
+      .where(inArray(questionResponses.sectionId, sectionIds));
+
+    const byUser = new Map<string, { total: number; correct: number }>();
+    for (const row of peerRows) {
+      const cur = byUser.get(row.userId) ?? { total: 0, correct: 0 };
+      cur.total += 1;
+      if (row.isCorrect) cur.correct += 1;
+      byUser.set(row.userId, cur);
     }
 
-    const percentile = Math.round(((allUsers.length - betterCount) / allUsers.length) * 100);
+    const peerCount = byUser.size;
+    if (peerCount === 0) return null;
+
+    let betterCount = 0;
+    for (const stats of byUser.values()) {
+      const accuracy = (stats.correct / stats.total) * 100;
+      if (accuracy > userAccuracy) betterCount += 1;
+    }
+
+    const percentile = Math.round(((peerCount - betterCount) / peerCount) * 100);
     return Math.min(100, Math.max(0, percentile));
+  }
+
+  async createAuthHandoffToken(params: {
+    userId: string;
+    targetSpecialtyId: SpecialtyId;
+    nextPath?: string;
+    continueExternalUrl?: string | null;
+  }): Promise<{ plainToken: string; expiresAt: Date }> {
+    await this.ensureAuthHandoffTables();
+    const { randomBytes, createHash } = await import("crypto");
+    const plainToken = randomBytes(32).toString("base64url");
+    const tokenHash = createHash("sha256").update(plainToken, "utf8").digest("hex");
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+    const nextPath = sanitizeHandoffNextPath(params.nextPath);
+    const continueExternalUrl = sanitizeStripeContinueUrl(params.continueExternalUrl);
+    await db.insert(authHandoffTokens).values({
+      userId: params.userId,
+      tokenHash,
+      targetSpecialtyId: getSpecialty(params.targetSpecialtyId).id,
+      nextPath,
+      continueExternalUrl,
+      expiresAt,
+    });
+    return { plainToken, expiresAt };
+  }
+
+  async consumeAuthHandoffToken(plainToken: string): Promise<{
+    userId: string;
+    targetSpecialtyId: SpecialtyId;
+    nextPath: string;
+    continueExternalUrl: string | null;
+  } | null> {
+    await this.ensureAuthHandoffTables();
+    const trimmed = plainToken?.trim();
+    if (!trimmed) return null;
+    const { createHash } = await import("crypto");
+    const tokenHash = createHash("sha256").update(trimmed, "utf8").digest("hex");
+    const [row] = await db
+      .select()
+      .from(authHandoffTokens)
+      .where(eq(authHandoffTokens.tokenHash, tokenHash))
+      .limit(1);
+    if (!row || row.usedAt) return null;
+    if (row.expiresAt.getTime() < Date.now()) return null;
+    await db
+      .update(authHandoffTokens)
+      .set({ usedAt: new Date() })
+      .where(eq(authHandoffTokens.id, row.id));
+    return {
+      userId: row.userId,
+      targetSpecialtyId: getSpecialty(row.targetSpecialtyId).id,
+      nextPath: sanitizeHandoffNextPath(row.nextPath),
+      continueExternalUrl: sanitizeStripeContinueUrl(row.continueExternalUrl),
+    };
+  }
+
+  async setPendingCheckoutPlan(
+    userId: string,
+    planId: string,
+    specialtyId: SpecialtyId,
+  ): Promise<void> {
+    await this.ensureAuthHandoffTables();
+    await db
+      .insert(pendingCheckoutPlans)
+      .values({
+        userId,
+        planId,
+        specialtyId: getSpecialty(specialtyId).id,
+        updatedAt: new Date(),
+      })
+      .onConflictDoUpdate({
+        target: pendingCheckoutPlans.userId,
+        set: {
+          planId,
+          specialtyId: getSpecialty(specialtyId).id,
+          updatedAt: new Date(),
+        },
+      });
+  }
+
+  async takePendingCheckoutPlan(
+    userId: string,
+  ): Promise<{ planId: string; specialtyId: SpecialtyId } | null> {
+    await this.ensureAuthHandoffTables();
+    const [row] = await db
+      .select()
+      .from(pendingCheckoutPlans)
+      .where(eq(pendingCheckoutPlans.userId, userId))
+      .limit(1);
+    if (!row) return null;
+    // Keep row until successful fulfill so webhook races / retries still resolve the plan.
+    // Stale rows older than 48h are ignored.
+    if (row.updatedAt.getTime() < Date.now() - 48 * 60 * 60 * 1000) {
+      await db.delete(pendingCheckoutPlans).where(eq(pendingCheckoutPlans.userId, userId));
+      return null;
+    }
+    return { planId: row.planId, specialtyId: getSpecialty(row.specialtyId).id };
+  }
+
+  async clearPendingCheckoutPlan(userId: string): Promise<void> {
+    await this.ensureAuthHandoffTables();
+    await db.delete(pendingCheckoutPlans).where(eq(pendingCheckoutPlans.userId, userId));
   }
 
   async createChatBubbleThread(threadId: string) {
@@ -2118,6 +2425,29 @@ export class DatabaseStorage implements IStorage {
 
   async getChatBubbleThread(threadId: string) {
     return this.chatBubbleThreads.get(threadId);
+  }
+}
+
+/** Only same-site relative paths — blocks open redirects. */
+function sanitizeHandoffNextPath(raw: string | null | undefined): string {
+  const fallback = "/";
+  if (!raw || typeof raw !== "string") return fallback;
+  const trimmed = raw.trim();
+  if (!trimmed.startsWith("/") || trimmed.startsWith("//")) return fallback;
+  if (trimmed.includes("://") || trimmed.includes("\\")) return fallback;
+  return trimmed.slice(0, 512) || fallback;
+}
+
+/** Payment Links only — never arbitrary external URLs. */
+function sanitizeStripeContinueUrl(raw: string | null | undefined): string | null {
+  if (!raw || typeof raw !== "string") return null;
+  try {
+    const u = new URL(raw.trim());
+    if (u.protocol !== "https:") return null;
+    if (u.hostname !== "buy.stripe.com") return null;
+    return u.toString().slice(0, 1024);
+  } catch {
+    return null;
   }
 }
 

@@ -116,17 +116,17 @@ const ORTHO_PAGE_SEO: Record<string, PublicPageSeo> = {
   "/": {
     title: "Orthopaedic Surgery Board Prep & Q&A Bank | Ortho Atlas",
     description:
-      "Ortho Atlas: orthopaedic surgery board-style questions with detailed explanations, spaced repetition, timed mock exams, and oral board coaching. Structured OITE and ABOS study built for residents and fellows.",
+      "Ortho Atlas: orthopaedic surgery board-style questions with detailed explanations, spaced repetition, and timed mock exams. Structured OITE and ABOS study built for residents and fellows.",
     keywords:
-      "orthopaedic surgery board prep, OITE questions, ABOS exam questions, orthopedic surgery Q&A, board review orthopaedics, oral boards orthopaedic surgery, spaced repetition medical, Ortho Atlas",
+      "orthopaedic surgery board prep, OITE questions, ABOS exam questions, orthopedic surgery Q&A, board review orthopaedics, spaced repetition medical, Ortho Atlas, mock exam orthopaedics",
     ogTitle: "Ortho Atlas | Orthopaedic Surgery Board Prep & Q&A",
     ogDescription:
-      "Board-style orthopaedic surgery questions, explanations, mock exams, and oral board practice. Train online with Ortho Atlas.",
+      "Board-style orthopaedic surgery questions, explanations, and timed mock exams. Train online with Ortho Atlas.",
   },
   "/about": {
     title: "About Ortho Atlas | Orthopaedic Surgery Education Platform",
     description:
-      "Who we are: Ortho Atlas helps orthopaedic surgery residents and fellows prepare for the OITE and ABOS boards with a curated question bank, mock exams, spaced repetition, and oral board coaching.",
+      "Who we are: Ortho Atlas helps orthopaedic surgery residents and fellows prepare for the OITE and ABOS boards with a curated question bank, mock exams, spaced repetition, and progress analytics.",
     keywords:
       "Ortho Atlas about, orthopaedic surgery education platform, orthopedic study app, board prep company, curated question bank orthopaedics",
     ogTitle: "About Ortho Atlas | Orthopaedic Board Study Mission",
@@ -136,12 +136,12 @@ const ORTHO_PAGE_SEO: Record<string, PublicPageSeo> = {
   "/the-atlas-way": {
     title: "The Atlas Way | How We Teach Orthopaedic Exam Prep",
     description:
-      "How Ortho Atlas works: guided study paths, test mode with navigator and flags, timed mocks, and oral board-style practice—so you learn orthopaedic clinical reasoning, not just recall.",
+      "How Ortho Atlas works: guided study paths, test mode with navigator and flags, and timed mocks—so you learn orthopaedic clinical reasoning, not just recall.",
     keywords:
       "orthopaedic surgery study method, OITE prep approach, Atlas Way, timed mock exams, test mode study, clinical reasoning orthopaedics",
     ogTitle: "The Atlas Way | Orthopaedic Study & Exam Workflow",
     ogDescription:
-      "See how Ortho Atlas combines structured topics, exam UI, mocks, and oral practice into one board prep workflow.",
+      "See how Ortho Atlas combines structured topics, exam UI, and mocks into one board prep workflow.",
   },
   "/preview": {
     title: "Free Orthopaedic Board Q&A Preview | Ortho Atlas Test Mode",
@@ -166,22 +166,12 @@ const ORTHO_PAGE_SEO: Record<string, PublicPageSeo> = {
   "/pricing": {
     title: "Ortho Atlas Pricing | Orthopaedic Board Prep Plans",
     description:
-      "Compare Ortho Atlas plans: monthly ($50), 6-month ($270), annual savings, and institutional codes. Full Q&A bank, mocks, spaced repetition, and oral boards coach included on every paid tier.",
+      "Compare Ortho Atlas plans: monthly ($50), 6-month ($270), annual savings, and institutional codes. Full Q&A bank, timed mocks, spaced repetition, and progress tracking on every paid tier.",
     keywords:
       "Ortho Atlas price, orthopaedic board prep cost, monthly subscription medical education, institutional code Ortho Atlas, OITE prep pricing",
     ogTitle: "Ortho Atlas Plans & Pricing | Board Prep",
     ogDescription:
       "Flexible pricing for orthopaedic board prep—monthly, 6-month, and annual access with the full feature set.",
-  },
-  "/oral-boards-coach": {
-    title: "Orthopaedic Oral Board Practice | Ortho Atlas Coach",
-    description:
-      "Practice oral board-style cases with the Ortho Atlas interactive coach: conversational sessions, scoring, hints, and session history to complement your multiple-choice board prep.",
-    keywords:
-      "orthopaedic oral boards, oral board practice, ABOS Part II prep, verbal exam prep orthopaedics, Ortho Atlas coach, mock oral orthopaedic surgery",
-    ogTitle: "Oral Boards Coach | Orthopaedic Verbal Exam Prep",
-    ogDescription:
-      "Interactive oral board-style practice for orthopaedic surgery—streaming sessions, feedback, and history alongside your Q&A bank.",
   },
   "/terms": {
     title: "Terms of Use | Ortho Atlas (PRS Atlas, LLC)",

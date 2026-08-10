@@ -39,7 +39,7 @@ interface SettingsProps {
 
 export function Settings({ onBack, subscription }: SettingsProps) {
   const { user, logout } = useAuth();
-  const { specialty } = useSpecialty();
+  const { specialty, activeSpecialty } = useSpecialty();
   const { getAllStats } = useQuestionStats();
   const overallStats = getAllStats();
   const [isSaving, setIsSaving] = useState(false);
@@ -206,8 +206,12 @@ export function Settings({ onBack, subscription }: SettingsProps) {
     const fetchPercentile = async () => {
       if (!user) return;
       setPercentileLoading(true);
+      setPercentile(null);
       try {
-        const res = await fetch('/api/user/percentile');
+        const res = await fetch(
+          `/api/user/percentile?specialtyId=${encodeURIComponent(activeSpecialty)}`,
+          { credentials: 'include', cache: 'no-store' },
+        );
         if (res.ok) {
           const data = await res.json();
           setPercentile(data.percentile);
@@ -219,7 +223,7 @@ export function Settings({ onBack, subscription }: SettingsProps) {
       }
     };
     fetchPercentile();
-  }, [user]);
+  }, [user, activeSpecialty]);
 
   const hasChanges = 
     formData.username !== (user?.username || '') ||
@@ -408,7 +412,7 @@ export function Settings({ onBack, subscription }: SettingsProps) {
                 </div>
               </Card>
 
-              {/* Percentile Rank Section */}
+              {/* Percentile Rank Section — scoped to the active question bank */}
               <Card className="p-6 bg-gradient-to-br from-purple-500/10 to-blue-500/10 border-purple-500/20">
                 <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
                   <Award className="h-5 w-5 text-purple-500" />
@@ -424,15 +428,22 @@ export function Settings({ onBack, subscription }: SettingsProps) {
                     </div>
                     <div className="flex-1">
                       <p className="text-sm text-foreground">
-                        You're in the <span className="font-semibold text-purple-500">{percentile}th percentile</span> among all users based on your accuracy percentage.
+                        You're in the{" "}
+                        <span className="font-semibold text-purple-500">{percentile}th percentile</span>{" "}
+                        among {specialty.specialtyName} Atlas users based on your accuracy in this
+                        question bank.
                       </p>
                       <p className="text-xs text-muted-foreground mt-2">
-                        100th percentile is the highest score.
+                        100th percentile is the highest score. Switching banks recalculates this
+                        rank.
                       </p>
                     </div>
                   </div>
                 ) : (
-                  <div className="text-sm text-muted-foreground">Not enough data yet. Answer more questions to see your rank.</div>
+                  <div className="text-sm text-muted-foreground">
+                    Not enough data yet in {specialty.specialtyName}. Answer more questions in this
+                    bank to see your rank.
+                  </div>
                 )}
               </Card>
 

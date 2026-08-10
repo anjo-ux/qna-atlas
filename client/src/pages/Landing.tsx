@@ -8,8 +8,8 @@ import { AtlasWayTestModeDemo } from "@/components/marketing/AtlasWayTestModeDem
 import { OralBoardSetupInteractiveDemo } from "@/components/marketing/OralBoardSetupInteractiveDemo";
 import { SpecialtySubheaderDropdown } from "@/components/SpecialtySubheaderDropdown";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowRight, BookOpen, Check, Eye, Mic, Sparkles, Timer } from "lucide-react";
-import { useState } from "react";
+import { ArrowRight, BookOpen, Check, Eye, Mic, Repeat, Sparkles, Timer } from "lucide-react";
+import { useMemo, useState } from "react";
 import { Link } from "wouter";
 import { PreviewWizard } from "@/components/PreviewWizard";
 import { useTheme } from "@/hooks/useTheme";
@@ -19,25 +19,42 @@ import atlasLogoLight from "@assets/logo_light_1774918799268.png";
 import { usePageSeo } from "@/lib/usePageSeo";
 import { cn } from "@/lib/utils";
 
-function handleLogin() {
-  window.location.href = "/login";
-}
-
 function handleSignUp() {
   window.location.href = "/signup";
 }
-
-const EXPLORE_LINKS = [
-  { href: "/the-atlas-way", label: "The Atlas Way" },
-  { href: "/pricing", label: "Plans & Pricing" },
-  { href: "/oral-boards-coach", label: "Oral Boards Coach" },
-  { href: "/about", label: "About Us" },
-] as const;
 
 export default function Landing() {
   const [showPreviewWizard, setShowPreviewWizard] = useState(false);
   const { theme } = useTheme();
   const specialty = useHostSpecialty();
+  const isOrtho = specialty.id === "ortho";
+
+  const exploreLinks = useMemo(
+    () =>
+      [
+        { href: "/the-atlas-way", label: "The Atlas Way" },
+        { href: "/pricing", label: "Plans & Pricing" },
+        ...(!isOrtho ? [{ href: "/oral-boards-coach", label: "Oral Boards Coach" } as const] : []),
+        { href: "/about", label: "About Us" },
+      ] as const,
+    [isOrtho],
+  );
+
+  const highlightStats = useMemo(
+    () =>
+      isOrtho
+        ? [
+            { icon: BookOpen, value: specialty.marketing.questionCountLabel, label: "Curated Questions" },
+            { icon: Timer, value: "Mock Exams", label: "Timed Or Untimed" },
+            { icon: Repeat, value: "Spaced Repetition", label: "Retention Built In" },
+          ]
+        : [
+            { icon: BookOpen, value: specialty.marketing.questionCountLabel, label: "Curated Questions" },
+            { icon: Timer, value: "Mock Exams", label: "Timed Or Untimed" },
+            { icon: Mic, value: "Oral Boards", label: "Coach Ready Practice" },
+          ],
+    [isOrtho, specialty.marketing.questionCountLabel],
+  );
 
   usePageSeo("/");
 
@@ -46,6 +63,7 @@ export default function Landing() {
       <PreviewWizard
         open={showPreviewWizard}
         onClose={() => setShowPreviewWizard(false)}
+        specialtyOverride={specialty}
         onStart={() => {
           setShowPreviewWizard(false);
           window.location.href = "/preview";
@@ -98,11 +116,7 @@ export default function Landing() {
               </div>
 
               <div className="grid gap-3 sm:grid-cols-3">
-                {[
-                  { icon: BookOpen, value: specialty.marketing.questionCountLabel, label: "Curated Questions" },
-                  { icon: Timer, value: "Mock Exams", label: "Timed Or Untimed" },
-                  { icon: Mic, value: "Oral Boards", label: "Coach Ready Practice" },
-                ].map(({ icon: Icon, value, label }) => (
+                {highlightStats.map(({ icon: Icon, value, label }) => (
                   <div
                     key={label}
                     className="hover-elevate glass-surface border-glass flex items-center gap-3 rounded-2xl p-4 text-left ring-1 ring-black/[0.04] dark:ring-white/[0.06]"
@@ -121,7 +135,7 @@ export default function Landing() {
               <div className="space-y-3 text-center">
                 <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Explore</p>
                 <div className="flex flex-wrap items-center justify-center gap-2">
-                  {EXPLORE_LINKS.map(({ href, label }) => (
+                  {exploreLinks.map(({ href, label }) => (
                     <Link
                       key={href}
                       href={href}
@@ -153,7 +167,12 @@ export default function Landing() {
                 </CardHeader>
                 <CardContent>
                   <Tabs defaultValue="topics" className="w-full">
-                    <TabsList className="grid h-auto w-full grid-cols-1 gap-1 p-1 sm:grid-cols-3">
+                    <TabsList
+                      className={cn(
+                        "grid h-auto w-full grid-cols-1 gap-1 p-1",
+                        isOrtho ? "sm:grid-cols-2" : "sm:grid-cols-3",
+                      )}
+                    >
                       <TabsTrigger value="topics" className="gap-2 py-2.5">
                         <BookOpen className="h-4 w-4 shrink-0" />
                         Topic Study
@@ -162,10 +181,12 @@ export default function Landing() {
                         <Timer className="h-4 w-4 shrink-0" />
                         Mock Exams
                       </TabsTrigger>
-                      <TabsTrigger value="oral" className="gap-2 py-2.5">
-                        <Mic className="h-4 w-4 shrink-0" />
-                        Oral Boards
-                      </TabsTrigger>
+                      {!isOrtho && (
+                        <TabsTrigger value="oral" className="gap-2 py-2.5">
+                          <Mic className="h-4 w-4 shrink-0" />
+                          Oral Boards
+                        </TabsTrigger>
+                      )}
                     </TabsList>
                     <TabsContent
                       value="topics"
@@ -204,25 +225,27 @@ export default function Landing() {
                         </Button>
                       </div>
                     </TabsContent>
-                    <TabsContent
-                      value="oral"
-                      className="mt-4 space-y-4 rounded-xl border border-border/60 bg-muted/20 p-4 text-left text-sm leading-relaxed text-muted-foreground focus-visible:outline-none"
-                    >
-                      <p>
-                        Practice Judgment Out Loud With Coaching Flows Built For Conversation-Style Exams, Not
-                        Just Multiple Choice In Disguise.
-                      </p>
-                      <div className="overflow-hidden rounded-lg border border-border/70 ring-1 ring-black/[0.04] dark:ring-white/[0.05]">
-                        <OralBoardSetupInteractiveDemo embedded />
-                      </div>
-                      <div className="pt-1">
-                        <Button size="sm" variant="secondary" asChild>
-                          <Link href="/oral-boards-coach">
-                            Explore Oral Coach <ArrowRight className="ml-1 h-3.5 w-3.5" />
-                          </Link>
-                        </Button>
-                      </div>
-                    </TabsContent>
+                    {!isOrtho && (
+                      <TabsContent
+                        value="oral"
+                        className="mt-4 space-y-4 rounded-xl border border-border/60 bg-muted/20 p-4 text-left text-sm leading-relaxed text-muted-foreground focus-visible:outline-none"
+                      >
+                        <p>
+                          Practice Judgment Out Loud With Coaching Flows Built For Conversation-Style Exams, Not
+                          Just Multiple Choice In Disguise.
+                        </p>
+                        <div className="overflow-hidden rounded-lg border border-border/70 ring-1 ring-black/[0.04] dark:ring-white/[0.05]">
+                          <OralBoardSetupInteractiveDemo embedded />
+                        </div>
+                        <div className="pt-1">
+                          <Button size="sm" variant="secondary" asChild>
+                            <Link href="/oral-boards-coach">
+                              Explore Oral Coach <ArrowRight className="ml-1 h-3.5 w-3.5" />
+                            </Link>
+                          </Button>
+                        </div>
+                      </TabsContent>
+                    )}
                   </Tabs>
                 </CardContent>
               </Card>

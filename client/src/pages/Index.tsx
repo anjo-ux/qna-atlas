@@ -50,7 +50,8 @@ type TestModeState = { mode: 'new' } | { mode: 'resume'; sessionId: string };
 export default function Index() {
   const [, setLocation] = useLocation();
   const { theme } = useTheme();
-  const { specialty, activeSpecialty } = useSpecialty();
+  const { specialty, activeSpecialty, isSwitching } = useSpecialty();
+  const isOrthoBank = activeSpecialty === "ortho";
   const { sections, isLoading: sectionsLoading } = useSections();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSection, setSelectedSection] = useState<string | null>(null);
@@ -58,7 +59,7 @@ export default function Index() {
   const [isNavOpen, setIsNavOpen] = useState(
     () => typeof window !== 'undefined' && window.innerWidth >= 1024
   );
-  const isLoading = sectionsLoading;
+  const isLoading = sectionsLoading || isSwitching;
   const [filterMode, setFilterMode] = useState<FilterMode>('all');
   const [showSearchResults, setShowSearchResults] = useState(false);
   const [screenMode, setScreenMode] = useState<ScreenMode>('study');
@@ -181,10 +182,10 @@ export default function Index() {
       });
     };
 
-    if (sessionId && planId) {
+    if (sessionId) {
       apiRequest('/api/subscription/fulfill', {
         method: 'POST',
-        body: JSON.stringify({ session_id: sessionId, planId }),
+        body: JSON.stringify({ session_id: sessionId, ...(planId ? { planId } : {}) }),
       })
         .then(runSuccess)
         .catch((err) => {
@@ -199,6 +200,7 @@ export default function Index() {
       };
     }
 
+    // Webhook-only path (no session_id): still show success and poll.
     runSuccess();
     return () => {
       if (subscriptionSuccessIntervalRef.current) {
@@ -671,15 +673,17 @@ export default function Index() {
                     <FileText className="h-4 w-4" />
                     <span className="hidden md:inline">Test</span>
                   </Button>
-                  <Button
-                    onClick={() => setLocation('/oral-board')}
-                    variant="outline"
-                    className="gap-2"
-                    data-testid="button-oral-board"
-                  >
-                    <Mic className="h-4 w-4" />
-                    <span className="hidden md:inline">Oral Boards Coach</span>
-                  </Button>
+                  {!isOrthoBank && (
+                    <Button
+                      onClick={() => setLocation('/oral-board')}
+                      variant="outline"
+                      className="gap-2"
+                      data-testid="button-oral-board"
+                    >
+                      <Mic className="h-4 w-4" />
+                      <span className="hidden md:inline">Oral Boards Coach</span>
+                    </Button>
+                  )}
                 </div>
               </div>
             </div>
@@ -738,13 +742,17 @@ export default function Index() {
                 >
                   <FileText className="h-4 w-4" />
                 </Button>
-                <Button
-                  onClick={() => setLocation('/oral-board')}
-                  variant="outline"
-                  size="icon"
-                >
-                  <Mic className="h-4 w-4" />
-                </Button>
+                {!isOrthoBank && (
+                  <Button
+                    onClick={() => setLocation('/oral-board')}
+                    variant="outline"
+                    size="icon"
+                    data-testid="button-oral-board-mobile"
+                    aria-label="Oral Boards Coach"
+                  >
+                    <Mic className="h-4 w-4" />
+                  </Button>
+                )}
               </div>
             </div>
           </div>
@@ -824,11 +832,16 @@ export default function Index() {
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
             </div>
           ) : !currentSubsection ? (
-            <div className="flex-1 min-h-0 w-full overflow-y-auto overflow-x-hidden scrollbar-hide">
+            <div
+              key="home-scroll"
+              className="flex-1 min-h-0 w-full overflow-y-auto overflow-x-hidden scrollbar-hide"
+            >
               <div className="min-h-full w-full">
                 <HomePage 
                   sections={sections}
-                  onNavigate={handleNavigate}
+                  onNavigate={(sectionId, subsectionId) =>
+                    handleNavigate(sectionId, subsectionId, { scrollMainToTop: true })
+                  }
                   onReviewIncorrect={handleReviewIncorrect}
                   onStartTest={handleStartTest}
                   onResumeTest={handleResumeTest}
@@ -839,6 +852,7 @@ export default function Index() {
             </div>
           ) : (
             <div
+              key="study-scroll"
               ref={studyMainScrollRef}
               className="flex-1 flex flex-col min-h-0 overflow-y-auto overflow-x-hidden scrollbar-hide"
             >
@@ -919,7 +933,7 @@ export default function Index() {
           )}
         </main>
       </div>
-      {(screenMode as ScreenMode) !== 'test' && <ChatBubble />}
+      {(screenMode as ScreenMode) !== 'test' && !isOrthoBank && <ChatBubble />}
     </div>
   );
 }

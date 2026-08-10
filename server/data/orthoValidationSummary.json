@@ -1,0 +1,9 @@
+{
+  "reviewedAt": "2026-08-09T16:37:11.241Z",
+  "totalReviewed": 2676,
+  "ok": 2262,
+  "autoFixed": 311,
+  "flagged": 103,
+  "fixSkippedFormat": 0,
+  "flagPath": "/home/runner/workspace/server/data/orthoValidationFlags.json"
+}

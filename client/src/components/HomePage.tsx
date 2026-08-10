@@ -35,11 +35,28 @@ interface HomePageProps {
 }
 
 export function HomePage({ sections, onNavigate, onReviewIncorrect, onStartTest, onResumeTest, onSettings, onPreview }: HomePageProps) {
-  const { getAllStats, responses, getSubsectionStats, resetAll } = useQuestionStats();
+  const { responses, getSubsectionStats, resetAll } = useQuestionStats();
   const { sessions, deleteSession } = useTestSessions();
   const { user, logout } = useAuth();
   const { specialty } = useSpecialty();
-  const overallStats = getAllStats();
+
+  const specialtySectionIds = useMemo(
+    () => new Set(sections.map((section) => section.id)),
+    [sections],
+  );
+
+  /** Progress APIs return all banks; scope dashboard numbers to the active question bank. */
+  const specialtyResponses = useMemo(
+    () => responses.filter((r) => specialtySectionIds.has(r.sectionId)),
+    [responses, specialtySectionIds],
+  );
+
+  const overallStats = useMemo(() => {
+    const total = specialtyResponses.length;
+    const correct = specialtyResponses.filter((r) => r.isCorrect).length;
+    const incorrect = total - correct;
+    return { total, correct, incorrect };
+  }, [specialtyResponses]);
 
   const AVATAR_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
     smile: Smile,
@@ -128,16 +145,20 @@ export function HomePage({ sections, onNavigate, onReviewIncorrect, onStartTest,
 
   const recentSessions = useMemo(() => {
     return [...sessions]
+      .filter((session) =>
+        session.useAllQuestions ||
+        session.selectedSectionIds.some((id) => specialtySectionIds.has(id)),
+      )
       .sort((a, b) => b.createdAt - a.createdAt)
       .slice(0, 3);
-  }, [sessions]);
+  }, [sessions, specialtySectionIds]);
 
-  // Get recent activity (last 7 days)
+  // Get recent activity (last 7 days) for the active question bank only
   const recentActivity = useMemo(() => {
     const now = Date.now();
     const sevenDaysAgo = now - (7 * 24 * 60 * 60 * 1000);
     
-    const recentResponses = responses.filter(r => r.timestamp >= sevenDaysAgo);
+    const recentResponses = specialtyResponses.filter(r => r.timestamp >= sevenDaysAgo);
     const correct = recentResponses.filter(r => r.isCorrect).length;
     
     return {
@@ -147,7 +168,7 @@ export function HomePage({ sections, onNavigate, onReviewIncorrect, onStartTest,
         ? Math.round((correct / recentResponses.length) * 100)
         : 0
     };
-  }, [responses]);
+  }, [specialtyResponses]);
 
   const completionPercentage = totalQuestions > 0
     ? Math.round((overallStats.total / totalQuestions) * 100)
@@ -301,11 +322,13 @@ export function HomePage({ sections, onNavigate, onReviewIncorrect, onStartTest,
 
       {/* Progress Overview */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
-        <Card variant="glass" className="p-4 md:p-6 glow-primary transition-glow hover:glow-primary">
-          <h2 className="text-lg md:text-xl font-semibold mb-4 flex items-center gap-2 gradient-text">
-            <BarChart3 className="h-5 w-5 text-primary" />
-            Overall Progress
-          </h2>
+        <Card variant="glass" className="px-4 pb-4 pt-3 md:px-6 md:pb-6 md:pt-4 glow-primary transition-glow hover:glow-primary">
+          <div className="mb-8">
+            <h2 className="flex items-center gap-2 text-lg font-semibold leading-snug gradient-text md:text-xl">
+              <BarChart3 className="h-5 w-5 text-primary" />
+              Overall Progress
+            </h2>
+          </div>
           <div className="space-y-4">
             <div>
               <div className="flex justify-between mb-2">
@@ -326,8 +349,12 @@ export function HomePage({ sections, onNavigate, onReviewIncorrect, onStartTest,
           </div>
         </Card>
 
-        <Card variant="glass" className="p-4 md:p-6 glow-accent transition-glow hover:glow-accent">
-          <h2 className="text-lg md:text-xl font-semibold mb-4 gradient-text">Recent Activity (7 Days)</h2>
+        <Card variant="glass" className="px-4 pb-4 pt-3 md:px-6 md:pb-6 md:pt-4 glow-accent transition-glow hover:glow-accent">
+          <div className="mb-8">
+            <h2 className="text-lg font-semibold leading-snug gradient-text md:text-xl">
+              Recent Activity (7 Days)
+            </h2>
+          </div>
           <div className="space-y-4">
             <div className="flex justify-between items-center p-3 md:p-4 bg-muted/50 rounded-lg gap-2">
               <div>

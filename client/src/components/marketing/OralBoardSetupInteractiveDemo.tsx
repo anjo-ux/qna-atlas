@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Check, Plus } from "lucide-react";
 import { Link } from "wouter";
 import { cn } from "@/lib/utils";
+import { useHostSpecialty } from "@/hooks/useSpecialty";
 
 type SessionSetup = {
   specialty: string;
@@ -22,25 +23,34 @@ const MOCK_SESSIONS = [
   { id: "demo-3", title: "Hand Fellowship Review" },
 ] as const;
 
-const DEFAULT_SETUP: SessionSetup = {
-  specialty: "Plastic Surgery",
-  level: "Fellow",
-  mode: "Oral Boards",
-  focusAreas: "All",
-  difficultyCurve: "Adaptive",
-  numCases: 6,
-  scoring: true,
-  hinting: "Off",
-};
-
 type OralBoardSetupInteractiveDemoProps = {
   /** Omits page heading and tightens chrome for embedding on the home page. */
   embedded?: boolean;
 };
 
 export function OralBoardSetupInteractiveDemo({ embedded = false }: OralBoardSetupInteractiveDemoProps) {
+  const hostSpecialty = useHostSpecialty();
+  const specialtyOptions = hostSpecialty.marketing.oralSpecialtyOptions;
+  const defaultSpecialty = specialtyOptions[0] ?? hostSpecialty.specialtyName;
+
   const [activeId, setActiveId] = useState<string>(MOCK_SESSIONS[0].id);
-  const [sessionSetup, setSessionSetup] = useState<SessionSetup>(DEFAULT_SETUP);
+  const [sessionSetup, setSessionSetup] = useState<SessionSetup>(() => ({
+    specialty: defaultSpecialty,
+    level: "Fellow",
+    mode: "Oral Boards",
+    focusAreas: "All",
+    difficultyCurve: "Adaptive",
+    numCases: 6,
+    scoring: true,
+    hinting: "Off",
+  }));
+
+  useEffect(() => {
+    setSessionSetup((prev) => ({
+      ...prev,
+      specialty: specialtyOptions.includes(prev.specialty) ? prev.specialty : defaultSpecialty,
+    }));
+  }, [defaultSpecialty, specialtyOptions]);
 
   const demoSurface = (
     <div
@@ -118,7 +128,7 @@ export function OralBoardSetupInteractiveDemo({ embedded = false }: OralBoardSet
                 <div className="mb-3">
                   <label className="mb-1 block text-xs font-medium">Specialty/Subspecialty</label>
                   <div className="flex flex-wrap gap-1">
-                    {(["Plastic Surgery", "Hand Surgery", "Burn Surgery"] as const).map((opt) => (
+                    {specialtyOptions.map((opt) => (
                       <Button
                         key={opt}
                         type="button"

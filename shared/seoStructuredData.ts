@@ -59,11 +59,15 @@ function webPageJson(pathname: string, meta: PublicPageSeo, origin: string): Rec
   };
 }
 
-function faqJsonLd(pathname: string, origin: string): Record<string, unknown> | null {
+function faqJsonLd(
+  pathname: string,
+  origin: string,
+  specialtyId: SpecialtyId,
+): Record<string, unknown> | null {
   const faqs =
     pathname === "/pricing"
       ? PRICING_MARKETING_FAQ
-      : pathname === "/oral-boards-coach"
+      : pathname === "/oral-boards-coach" && specialtyId === "prs"
         ? ORAL_BOARDS_MARKETING_FAQ
         : null;
   if (!faqs) return null;
@@ -109,7 +113,7 @@ export function getStructuredData(
     webPageJson(n, meta, resolvedOrigin),
   ];
 
-  const faq = faqJsonLd(n, resolvedOrigin);
+  const faq = faqJsonLd(n, resolvedOrigin, specialty.id);
   if (faq) graph.push(faq);
 
   return {

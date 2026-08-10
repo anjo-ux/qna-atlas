@@ -30,6 +30,10 @@ async function main() {
   let approved = 0;
   let skipped = 0;
   for (const row of generatedHidden) {
+    if (row.flagged) {
+      skipped++;
+      continue;
+    }
     const formatResult = validateQuestionFormat(row.question, row.answer);
     if (!formatResult.valid) {
       skipped++;
@@ -43,7 +47,7 @@ async function main() {
     const ok = await storage.updateQuestionVisibility(row.id, true);
     if (ok) approved++;
   }
-  console.log(`Approved ${approved} generated questions (skipped ${skipped} that failed validation or content rules).`);
+  console.log(`Approved ${approved} generated questions (skipped ${skipped} that failed validation, were flagged, or failed content rules).`);
 }
 
 main().catch((e) => {

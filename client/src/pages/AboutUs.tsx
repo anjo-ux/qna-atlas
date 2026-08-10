@@ -26,7 +26,9 @@ export default function AboutUs() {
               Atlas Review is a dedicated study companion for {specialty.specialtyName} trainees and surgeons who want
               depth, structure, and accountability, not scattered PDFs and endless browser tabs. We
               combine a large, organized question bank with active recall tools, mock testing, and
-              oral board-style practice so you can study the way high-stakes exams actually reward.
+              {specialty.id === "ortho"
+                ? " spaced repetition so you can study the way high-stakes exams actually reward."
+                : " oral board-style practice so you can study the way high-stakes exams actually reward."}
             </p>
           </header>
 
@@ -40,7 +42,7 @@ export default function AboutUs() {
               in the operating room. Our mission is to make comprehensive, subspecialty-spanning
               knowledge easier to build, retain, and stress-test, whether you are preparing for
               in-service exams, consolidating clinical knowledge between rotations, or sharpening
-              judgment before oral boards.
+              {specialty.id === "ortho" ? " board-style judgment under timed conditions." : " judgment before oral boards."}
             </p>
             <p className="leading-relaxed text-muted-foreground">
               Every feature we ship is aimed at one outcome. Helping you close gaps you did not know
@@ -72,14 +74,16 @@ export default function AboutUs() {
                 <strong className="text-foreground">Lock It In.</strong> Spaced repetition and
                 bookmarks help you revisit high-yield material on a schedule that fights forgetting.
               </li>
-              <li>
-                <strong className="text-foreground">Practice Out Loud.</strong> The{" "}
-                <Link href="/oral-boards-coach" className="font-medium text-primary underline-offset-4 hover:underline">
-                  Oral Boards Coach
-                </Link>{" "}
-                simulates the verbal, scenario-driven style of oral examinations so you can rehearse
-                structure, pacing, and depth, not only multiple-choice mechanics.
-              </li>
+              {specialty.id !== "ortho" && (
+                <li>
+                  <strong className="text-foreground">Practice Out Loud.</strong> The{" "}
+                  <Link href="/oral-boards-coach" className="font-medium text-primary underline-offset-4 hover:underline">
+                    Oral Boards Coach
+                  </Link>{" "}
+                  simulates the verbal, scenario-driven style of oral examinations so you can rehearse
+                  structure, pacing, and depth, not only multiple-choice mechanics.
+                </li>
+              )}
             </ol>
           </section>
 
