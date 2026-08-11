@@ -2,15 +2,21 @@
  * Import a curated PRS question batch from server/data/prsManualBatchRaw.txt
  * into the live question bank with subsection tags from section headers.
  *
- * Usage: npx tsx server/scripts/importManualPrsQuestions.ts [--dry-run]
+ * Defaults to production Neon (NEON_DATABASE_URL).
+ *
+ * Usage:
+ *   npm run import:prs-manual
+ *   npm run import:prs-manual -- --dry-run
+ *   IMPORT_DB=local npm run import:prs-manual          # Replit helium
+ *   IMPORT_DATABASE_URL=postgresql://... npm run import:prs-manual
  */
 import * as fs from "fs";
 import * as path from "path";
 import { createHash } from "crypto";
-import { db } from "../db";
 import { questions } from "@shared/schema";
 import { validateQuestionFormat } from "@shared/questionFormat";
 import { sql } from "drizzle-orm";
+import { applyImportDatabaseUrl } from "./importDbTarget";
 
 const RAW_PATH = path.join(process.cwd(), "server/data/prsManualBatchRaw.txt");
 const DRY_RUN = process.argv.includes("--dry-run");
@@ -197,83 +203,90 @@ function stableId(subsectionId: string, question: string, index: number): string
 }
 
 async function main() {
-  if (!fs.existsSync(RAW_PATH)) {
-    console.error("Raw file not found:", RAW_PATH);
-    process.exit(1);
-  }
-  const raw = fs.readFileSync(RAW_PATH, "utf8");
-  const parsed = parseRaw(raw);
-  console.log(`Parsed ${parsed.length} questions`);
+  const target = applyImportDatabaseUrl();
+  // Load db only after DATABASE_URL has been pointed at the import target (Neon by default).
+  const { db, pool } = await import("../db");
 
-  const bySub: Record<string, number> = {};
-  let invalid = 0;
-  for (const q of parsed) {
-    bySub[q.subsectionId] = (bySub[q.subsectionId] ?? 0) + 1;
-    const v = validateQuestionFormat(q.question, q.answer);
-    if (!v.valid) {
-      invalid++;
-      console.warn(`INVALID [${q.title}]:`, v.errors.join("; "));
-      console.warn("Q preview:", q.question.slice(0, 200).replace(/\n/g, " | "));
-    }
-  }
-  console.log("By subsection:", bySub);
-  if (invalid > 0) {
-    console.error(`${invalid} questions failed format validation; aborting import.`);
-    process.exit(1);
-  }
+  console.log(`Import target: ${target.label} @ ${target.host}`);
 
-  if (DRY_RUN) {
-    console.log("Dry run — no DB writes.");
-    // Show one sample
-    const s = parsed[0];
-    console.log("\nSample:", s.title, "→", s.subsectionId);
-    console.log(s.question.slice(0, 400));
-    console.log("---");
-    console.log(s.answer.slice(0, 300));
-    process.exit(0);
-  }
-
-  // Ensure subsections exist (they should already)
-  const existingSubs = await db.execute(sql`select id from subsections`);
-  const subIds = new Set((existingSubs.rows as { id: string }[]).map((r) => r.id));
-  for (const id of Object.values({ ...SECTION_TO_SUBSECTION, ...STANDALONE_SUBSECTION })) {
-    if (!subIds.has(id)) {
-      console.error("Missing subsection in DB:", id);
+  try {
+    if (!fs.existsSync(RAW_PATH)) {
+      console.error("Raw file not found:", RAW_PATH);
       process.exit(1);
     }
-  }
+    const raw = fs.readFileSync(RAW_PATH, "utf8");
+    const parsed = parseRaw(raw);
+    console.log(`Parsed ${parsed.length} questions`);
 
-  let inserted = 0;
-  let skipped = 0;
-  for (let i = 0; i < parsed.length; i++) {
-    const q = parsed[i];
-    const id = stableId(q.subsectionId, q.question, i);
-    try {
-      await db
-        .insert(questions)
-        .values({
-          id,
-          subsectionId: q.subsectionId,
-          question: q.question,
-          answer: q.answer,
-          tags: q.tags,
-          source: SOURCE,
-          visible: true,
-        })
-        .onConflictDoNothing({ target: questions.id });
-      inserted++;
-    } catch (e) {
-      skipped++;
-      console.warn("Insert failed for", id, e);
+    const bySub: Record<string, number> = {};
+    let invalid = 0;
+    for (const q of parsed) {
+      bySub[q.subsectionId] = (bySub[q.subsectionId] ?? 0) + 1;
+      const v = validateQuestionFormat(q.question, q.answer);
+      if (!v.valid) {
+        invalid++;
+        console.warn(`INVALID [${q.title}]:`, v.errors.join("; "));
+        console.warn("Q preview:", q.question.slice(0, 200).replace(/\n/g, " | "));
+      }
     }
-  }
+    console.log("By subsection:", bySub);
+    if (invalid > 0) {
+      console.error(`${invalid} questions failed format validation; aborting import.`);
+      process.exit(1);
+    }
 
-  // Count how many of our IDs exist now
-  const counted = await db.execute(
-    sql`select count(*)::int as c from questions where id like ${ID_PREFIX + "%"}`
-  );
-  console.log(`Insert attempted: ${inserted}, failed: ${skipped}`);
-  console.log(`Rows with prefix ${ID_PREFIX}:`, (counted.rows as { c: number }[])[0]?.c);
+    if (DRY_RUN) {
+      console.log("Dry run — no DB writes.");
+      const s = parsed[0];
+      console.log("\nSample:", s.title, "→", s.subsectionId);
+      console.log(s.question.slice(0, 400));
+      console.log("---");
+      console.log(s.answer.slice(0, 300));
+      process.exit(0);
+    }
+
+    const existingSubs = await db.execute(sql`select id from subsections`);
+    const subIds = new Set((existingSubs.rows as { id: string }[]).map((r) => r.id));
+    for (const id of Object.values({ ...SECTION_TO_SUBSECTION, ...STANDALONE_SUBSECTION })) {
+      if (!subIds.has(id)) {
+        console.error("Missing subsection in DB:", id);
+        process.exit(1);
+      }
+    }
+
+    let inserted = 0;
+    let skipped = 0;
+    for (let i = 0; i < parsed.length; i++) {
+      const q = parsed[i];
+      const id = stableId(q.subsectionId, q.question, i);
+      try {
+        await db
+          .insert(questions)
+          .values({
+            id,
+            subsectionId: q.subsectionId,
+            question: q.question,
+            answer: q.answer,
+            tags: q.tags,
+            source: SOURCE,
+            visible: true,
+          })
+          .onConflictDoNothing({ target: questions.id });
+        inserted++;
+      } catch (e) {
+        skipped++;
+        console.warn("Insert failed for", id, e);
+      }
+    }
+
+    const counted = await db.execute(
+      sql`select count(*)::int as c from questions where id like ${ID_PREFIX + "%"}`
+    );
+    console.log(`Insert attempted: ${inserted}, failed: ${skipped}`);
+    console.log(`Rows with prefix ${ID_PREFIX}:`, (counted.rows as { c: number }[])[0]?.c);
+  } finally {
+    await pool.end().catch(() => undefined);
+  }
   process.exit(0);
 }
 

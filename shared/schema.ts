@@ -1,5 +1,6 @@
 import { sql } from 'drizzle-orm';
 import {
+  foreignKey,
   index,
   integer,
   jsonb,
@@ -409,9 +410,8 @@ export const userInstitutionalCodeRedemptions = pgTable(
   {
     id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
     userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
-    institutionalCodeId: varchar("institutional_code_id")
-      .notNull()
-      .references(() => institutionalCodes.id, { onDelete: "cascade" }),
+    // Named FK: default Drizzle name exceeds Postgres' 63-char limit and causes infinite db:push renames.
+    institutionalCodeId: varchar("institutional_code_id").notNull(),
     /** Denormalized from the code so entitlement checks stay specialty-scoped. */
     specialtyId: varchar("specialty_id", { length: 32 })
       .$type<SpecialtyId>()
@@ -420,6 +420,11 @@ export const userInstitutionalCodeRedemptions = pgTable(
     redeemedAt: timestamp("redeemed_at").defaultNow(),
   },
   (table) => [
+    foreignKey({
+      name: "uicr_institutional_code_id_fk",
+      columns: [table.institutionalCodeId],
+      foreignColumns: [institutionalCodes.id],
+    }).onDelete("cascade"),
     uniqueIndex("uidx_user_institutional_code").on(table.userId, table.institutionalCodeId),
     index("idx_user_institutional_redemptions_user_id").on(table.userId),
     index("idx_user_institutional_redemptions_user_specialty").on(table.userId, table.specialtyId),
