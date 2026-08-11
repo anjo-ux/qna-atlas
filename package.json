@@ -12,6 +12,7 @@
     "db:generate": "drizzle-kit generate",
     "db:push": "drizzle-kit push",
     "import:questions": "tsx server/scripts/importQuestionsFromExcel.ts",
+    "import:prs-manual": "tsx server/scripts/importManualPrsQuestions.ts",
     "extract:ortho-topics": "tsx server/scripts/extractOrthoTopicsFromAnki.ts",
     "generate:ortho-questions": "tsx server/scripts/generateOrthoQuestionsFromTopics.ts",
     "generate:ortho-fill-empty": "tsx server/scripts/fillEmptyOrthoSubsections.ts",

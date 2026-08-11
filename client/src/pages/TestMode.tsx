@@ -67,6 +67,8 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
   const [expandedCompletedTests, setExpandedCompletedTests] = useState(true);
   const hasResumedRef = useRef(false);
   const finishTestInFlightRef = useRef(false);
+  // Preserve the user's intended count when Bookmarks/Incorrect temporarily lower it
+  const preferredQuestionCountRef = useRef(10);
   const [timerEnabledForNewTest, setTimerEnabledForNewTest] = useState(false);
   const [timedTestRemainingSeconds, setTimedTestRemainingSeconds] = useState<number | null>(null);
   const timedTestRemainingRef = useRef<number | null>(null);
@@ -324,6 +326,7 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
     const count = session.questionCount as 10 | 20 | 30 | 40;
     setQuestionCount(count);
     setQuestionCountInput(String(count));
+    preferredQuestionCountRef.current = count;
     setUseAllQuestions(session.useAllQuestions);
     setSelectedSubsections(new Set(session.selectedSectionIds));
 
@@ -348,6 +351,7 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
     const count = session.questionCount as 10 | 20 | 30 | 40;
     setQuestionCount(count);
     setQuestionCountInput(String(count));
+    preferredQuestionCountRef.current = count;
     setUseAllQuestions(session.useAllQuestions);
     setSelectedSubsections(new Set(session.selectedSectionIds));
 
@@ -864,6 +868,9 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
                               const parsed = parseInt(raw, 10);
                               if (raw !== '' && !Number.isNaN(parsed) && parsed >= 1) {
                                 setQuestionCount(parsed);
+                                if (!useBookmarkedOnly && !useIncorrectOnly) {
+                                  preferredQuestionCountRef.current = parsed;
+                                }
                               }
                             }}
                             onBlur={() => {
@@ -871,6 +878,9 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
                               if (questionCountInput === '' || Number.isNaN(parsed) || parsed < 1) {
                                 setQuestionCount(1);
                                 setQuestionCountInput('1');
+                                if (!useBookmarkedOnly && !useIncorrectOnly) {
+                                  preferredQuestionCountRef.current = 1;
+                                }
                               }
                             }}
                             placeholder="00"
@@ -973,6 +983,9 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
                                 : "border-border bg-muted/30 hover:bg-muted/50"
                             )}
                             onClick={() => {
+                              if (!useBookmarkedOnly && !useIncorrectOnly) {
+                                preferredQuestionCountRef.current = questionCount;
+                              }
                               setUseBookmarkedOnly(true);
                               setUseAllQuestions(false);
                               setUseIncorrectOnly(false);
@@ -1014,6 +1027,9 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
                                     ids.forEach(id => incorrectIds.add(id));
                                   });
                                 });
+                                if (!useBookmarkedOnly && !useIncorrectOnly) {
+                                  preferredQuestionCountRef.current = questionCount;
+                                }
                                 setUseIncorrectOnly(true);
                                 setUseAllQuestions(false);
                                 setUseBookmarkedOnly(false);
@@ -1040,9 +1056,14 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
                               : "border-border bg-muted/30 hover:bg-muted/50"
                           )}
                           onClick={() => {
+                            const wasRestricted = useBookmarkedOnly || useIncorrectOnly;
                             setUseAllQuestions(true);
                             setUseBookmarkedOnly(false);
                             setUseIncorrectOnly(false);
+                            if (wasRestricted) {
+                              setQuestionCount(preferredQuestionCountRef.current);
+                              setQuestionCountInput(String(preferredQuestionCountRef.current));
+                            }
                           }}
                         >
                           <div className="flex items-center justify-between mb-2">
@@ -1074,9 +1095,14 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
                               : "border-border bg-muted/30 hover:bg-muted/50"
                           )}
                           onClick={() => {
+                            const wasRestricted = useBookmarkedOnly || useIncorrectOnly;
                             setUseAllQuestions(false);
                             setUseBookmarkedOnly(false);
                             setUseIncorrectOnly(false);
+                            if (wasRestricted) {
+                              setQuestionCount(preferredQuestionCountRef.current);
+                              setQuestionCountInput(String(preferredQuestionCountRef.current));
+                            }
                           }}
                         >
                           <div className="flex items-center justify-between mb-2">
