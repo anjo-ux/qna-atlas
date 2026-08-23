@@ -166,6 +166,15 @@ export function getSpecialty(id: SpecialtyId | string | null | undefined): Speci
   return isSpecialtyId(id) ? SPECIALTIES[id] : SPECIALTIES[DEFAULT_SPECIALTY_ID];
 }
 
+/** Ortho bank ids are prefixed `ortho-`; PRS keeps historical unprefixed ids. */
+export function isOrthoContentId(id: string): boolean {
+  return id.startsWith("ortho-");
+}
+
+export function contentIdMatchesSpecialty(id: string, specialtyId: SpecialtyId): boolean {
+  return specialtyId === "ortho" ? isOrthoContentId(id) : !isOrthoContentId(id);
+}
+
 /** Normalizes a Host / X-Forwarded-Host value to a bare lowercase hostname. */
 export function normalizeHostname(rawHost: string | null | undefined): string {
   if (!rawHost) return "";

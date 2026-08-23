@@ -54,11 +54,12 @@ import { orthoSubsectionTitles } from "@shared/orthoQuestionImport";
 import {
   DEFAULT_SPECIALTY_ID,
   SPECIALTY_IDS,
+  contentIdMatchesSpecialty,
   getSpecialty,
   type SpecialtyId,
 } from "@shared/specialties";
 import { db, pool } from "./db";
-import { eq, and, asc, desc, lte, sql, count, inArray } from "drizzle-orm";
+import { eq, and, asc, desc, lte, sql, count, inArray, like, notLike } from "drizzle-orm";
 import {
   SOCIALMEDIA_INSTITUTIONAL_CODE,
 } from "./institutionalAccess";
@@ -70,6 +71,26 @@ let subscriptionResetDone = false;
 let userInstitutionalRedemptionsTableDone = false;
 let multiSpecialtyMigrationDone = false;
 let questionsFlaggedColumnDone = false;
+let testSessionsSpecialtyColumnDone = false;
+
+function questionIdMatchesSpecialtySql(
+  column: typeof questions.id | typeof spacedRepetitions.questionId | typeof bookmarks.questionId | typeof questionResponses.questionId,
+  specialtyId: SpecialtyId,
+) {
+  return specialtyId === "ortho" ? like(column, "ortho-%") : notLike(column, "ortho-%");
+}
+
+function testSessionMatchesSpecialty(session: TestSession, specialtyId: SpecialtyId): boolean {
+  const stored = (session as TestSession & { specialtyId?: string | null }).specialtyId;
+  if (stored === "ortho" || stored === "prs") return stored === specialtyId;
+  const selected = Array.isArray(session.selectedSectionIds) ? session.selectedSectionIds : [];
+  const questionIds = Array.isArray(session.questions)
+    ? (session.questions as { id?: string }[]).map((q) => q?.id).filter((id): id is string => !!id)
+    : [];
+  const ids = [...selected, ...questionIds];
+  if (ids.length === 0) return specialtyId === "prs";
+  return ids.some((id) => contentIdMatchesSpecialty(id, specialtyId));
+}
 
 /**
  * Entitlement fields that exist on both `user_specialty_subscriptions` and (as the Plastic Surgery
@@ -130,8 +151,8 @@ export interface IStorage {
   // Test Session operations
   createTestSession(session: InsertTestSession): Promise<TestSession>;
   getTestSession(id: string): Promise<TestSession | undefined>;
-  getUserTestSessions(userId: string): Promise<TestSession[]>;
-  getInProgressSessions(userId: string): Promise<TestSession[]>;
+  getUserTestSessions(userId: string, specialtyId?: SpecialtyId): Promise<TestSession[]>;
+  getInProgressSessions(userId: string, specialtyId?: SpecialtyId): Promise<TestSession[]>;
   updateTestSession(id: string, updates: Partial<InsertTestSession>): Promise<TestSession>;
   completeTestSession(id: string): Promise<TestSession>;
   deleteTestSession(id: string): Promise<void>;
@@ -160,7 +181,7 @@ export interface IStorage {
   deleteHighlightsByLocation(userId: string, sectionId: string, subsectionId: string, location: string, questionId?: string): Promise<void>;
 
   // Study-mode question responses (without testSessionId)
-  getUserQuestionResponses(userId: string): Promise<QuestionResponse[]>;
+  getUserQuestionResponses(userId: string, specialtyId?: SpecialtyId): Promise<QuestionResponse[]>;
   upsertStudyModeResponse(userId: string, response: {
     questionId: string;
     sectionId: string;
@@ -174,15 +195,15 @@ export interface IStorage {
   // Bookmarks operations
   addBookmark(bookmark: InsertBookmark): Promise<Bookmark>;
   removeBookmark(userId: string, questionId: string): Promise<void>;
-  getUserBookmarks(userId: string): Promise<Bookmark[]>;
+  getUserBookmarks(userId: string, specialtyId?: SpecialtyId): Promise<Bookmark[]>;
   isQuestionBookmarked(userId: string, questionId: string): Promise<boolean>;
 
   // Spaced Repetition operations
   upsertSpacedRepetition(sr: InsertSpacedRepetition): Promise<SpacedRepetition>;
   getSpacedRepetition(userId: string, questionId: string): Promise<SpacedRepetition | undefined>;
-  getUserDueQuestions(userId: string): Promise<SpacedRepetition[]>;
-  getUserSpacedRepetitionQuestionIds(userId: string): Promise<string[]>;
-  getUserIncorrectQuestionIds(userId: string): Promise<string[]>;
+  getUserDueQuestions(userId: string, specialtyId?: SpecialtyId): Promise<SpacedRepetition[]>;
+  getUserSpacedRepetitionQuestionIds(userId: string, specialtyId?: SpecialtyId): Promise<string[]>;
+  getUserIncorrectQuestionIds(userId: string, specialtyId?: SpecialtyId): Promise<string[]>;
   updateSpacedRepetition(id: string, updates: Partial<InsertSpacedRepetition>): Promise<SpacedRepetition>;
 
   // Topic Analytics operations
@@ -588,6 +609,7 @@ export class DatabaseStorage implements IStorage {
 
   // Test Session operations
   async createTestSession(sessionData: InsertTestSession): Promise<TestSession> {
+    await this.ensureTestSessionsSpecialtyColumn();
     const [session] = await db
       .insert(testSessions)
       .values({
@@ -606,16 +628,19 @@ export class DatabaseStorage implements IStorage {
     return session;
   }
 
-  async getUserTestSessions(userId: string): Promise<TestSession[]> {
-    return await db
+  async getUserTestSessions(userId: string, specialtyId?: SpecialtyId): Promise<TestSession[]> {
+    await this.ensureTestSessionsSpecialtyColumn();
+    const rows = await db
       .select()
       .from(testSessions)
       .where(eq(testSessions.userId, userId))
       .orderBy(desc(testSessions.createdAt));
+    return specialtyId ? rows.filter((row) => testSessionMatchesSpecialty(row, specialtyId)) : rows;
   }
 
-  async getInProgressSessions(userId: string): Promise<TestSession[]> {
-    return await db
+  async getInProgressSessions(userId: string, specialtyId?: SpecialtyId): Promise<TestSession[]> {
+    await this.ensureTestSessionsSpecialtyColumn();
+    const rows = await db
       .select()
       .from(testSessions)
       .where(
@@ -625,6 +650,7 @@ export class DatabaseStorage implements IStorage {
         )
       )
       .orderBy(desc(testSessions.createdAt));
+    return specialtyId ? rows.filter((row) => testSessionMatchesSpecialty(row, specialtyId)) : rows;
   }
 
   async updateTestSession(id: string, updates: Partial<InsertTestSession>): Promise<TestSession> {
@@ -822,11 +848,15 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Study-mode question responses (without testSessionId)
-  async getUserQuestionResponses(userId: string): Promise<QuestionResponse[]> {
+  async getUserQuestionResponses(userId: string, specialtyId?: SpecialtyId): Promise<QuestionResponse[]> {
     return await db
       .select()
       .from(questionResponses)
-      .where(eq(questionResponses.userId, userId))
+      .where(
+        specialtyId
+          ? and(eq(questionResponses.userId, userId), questionIdMatchesSpecialtySql(questionResponses.questionId, specialtyId))
+          : eq(questionResponses.userId, userId)
+      )
       .orderBy(desc(questionResponses.answeredAt));
   }
 
@@ -922,11 +952,15 @@ export class DatabaseStorage implements IStorage {
       );
   }
 
-  async getUserBookmarks(userId: string): Promise<Bookmark[]> {
+  async getUserBookmarks(userId: string, specialtyId?: SpecialtyId): Promise<Bookmark[]> {
     return await db
       .select()
       .from(bookmarks)
-      .where(eq(bookmarks.userId, userId))
+      .where(
+        specialtyId
+          ? and(eq(bookmarks.userId, userId), questionIdMatchesSpecialtySql(bookmarks.questionId, specialtyId))
+          : eq(bookmarks.userId, userId)
+      )
       .orderBy(desc(bookmarks.createdAt));
   }
 
@@ -987,7 +1021,7 @@ export class DatabaseStorage implements IStorage {
     return result;
   }
 
-  async getUserDueQuestions(userId: string): Promise<SpacedRepetition[]> {
+  async getUserDueQuestions(userId: string, specialtyId?: SpecialtyId): Promise<SpacedRepetition[]> {
     const now = new Date();
     return await db
       .select()
@@ -995,25 +1029,36 @@ export class DatabaseStorage implements IStorage {
       .where(
         and(
           eq(spacedRepetitions.userId, userId),
-          lte(spacedRepetitions.nextReviewAt, now)
+          lte(spacedRepetitions.nextReviewAt, now),
+          ...(specialtyId ? [questionIdMatchesSpecialtySql(spacedRepetitions.questionId, specialtyId)] : []),
         )
       )
       .orderBy(spacedRepetitions.nextReviewAt);
   }
 
-  async getUserSpacedRepetitionQuestionIds(userId: string): Promise<string[]> {
+  async getUserSpacedRepetitionQuestionIds(userId: string, specialtyId?: SpecialtyId): Promise<string[]> {
     const rows = await db
       .select({ questionId: spacedRepetitions.questionId })
       .from(spacedRepetitions)
-      .where(eq(spacedRepetitions.userId, userId));
+      .where(
+        specialtyId
+          ? and(eq(spacedRepetitions.userId, userId), questionIdMatchesSpecialtySql(spacedRepetitions.questionId, specialtyId))
+          : eq(spacedRepetitions.userId, userId)
+      );
     return rows.map((r) => r.questionId);
   }
 
-  async getUserIncorrectQuestionIds(userId: string): Promise<string[]> {
+  async getUserIncorrectQuestionIds(userId: string, specialtyId?: SpecialtyId): Promise<string[]> {
     const rows = await db
       .selectDistinct({ questionId: questionResponses.questionId })
       .from(questionResponses)
-      .where(and(eq(questionResponses.userId, userId), eq(questionResponses.isCorrect, false)));
+      .where(
+        and(
+          eq(questionResponses.userId, userId),
+          eq(questionResponses.isCorrect, false),
+          ...(specialtyId ? [questionIdMatchesSpecialtySql(questionResponses.questionId, specialtyId)] : []),
+        )
+      );
     return rows.map((r) => r.questionId);
   }
 
@@ -1580,12 +1625,37 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
+  private async ensureTestSessionsSpecialtyColumn(): Promise<void> {
+    if (testSessionsSpecialtyColumnDone) return;
+    testSessionsSpecialtyColumnDone = true;
+    await pool.query(
+      `ALTER TABLE "test_sessions" ADD COLUMN IF NOT EXISTS "specialty_id" varchar(32) NOT NULL DEFAULT 'prs'`
+    );
+    try {
+      await pool.query(
+        `CREATE INDEX IF NOT EXISTS "idx_test_sessions_user_specialty" ON "test_sessions" ("user_id", "specialty_id")`
+      );
+    } catch (err) {
+      console.warn("[testSessionsSpecialty] index skipped:", err);
+    }
+    await pool.query(`
+      UPDATE "test_sessions"
+      SET "specialty_id" = 'ortho'
+      WHERE "specialty_id" = 'prs'
+        AND (
+          COALESCE("selected_section_ids"::text, '') LIKE '%ortho-%'
+          OR COALESCE("questions"::text, '') LIKE '%ortho-%'
+        )
+    `);
+  }
+
   /** Call once at server startup so user rows match schema before any getUser(). */
   async warmupSubscriptionSchema(): Promise<void> {
     await this.ensureSubscriptionTrialMigrations();
     await this.ensureInstitutionalCodesTable();
     await this.ensureInstitutionalUserAccessColumnsMigration();
     await this.ensureQuestionsFlaggedColumn();
+    await this.ensureTestSessionsSpecialtyColumn();
     await this.ensureInstitutionalCodeRedeemedAtMigration();
     await this.ensureUserInstitutionalRedemptionsTable();
     await this.ensureInstitutionalAccessRedemptionConsistencyMigration();

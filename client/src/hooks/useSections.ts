@@ -3,12 +3,12 @@ import type { Section } from "@/types/question";
 import { useSpecialty } from "@/hooks/useSpecialty";
 
 export function useSections() {
-  const { activeSpecialty, lockedBySpecialty } = useSpecialty();
+  const { activeSpecialty, lockedBySpecialty, isSwitching } = useSpecialty();
   const isLocked = lockedBySpecialty[activeSpecialty] === true;
 
   const { data: sections = [], isLoading, error } = useQuery<Section[]>({
     queryKey: ["/api/sections", activeSpecialty],
-    enabled: !isLocked,
+    enabled: !isLocked && !isSwitching,
     queryFn: async () => {
       const res = await fetch("/api/sections", { credentials: "include" });
       if (res.status === 401 || res.status === 403) {

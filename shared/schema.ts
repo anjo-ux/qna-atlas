@@ -112,6 +112,8 @@ export type InsertPasswordResetToken = typeof passwordResetTokens.$inferInsert;
 export const testSessions = pgTable("test_sessions", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   userId: varchar("user_id").notNull().references(() => users.id, { onDelete: 'cascade' }),
+  /** Which q-bank this test belongs to (PRS vs Ortho). */
+  specialtyId: varchar("specialty_id", { length: 32 }).notNull().default("prs"),
   status: varchar("status", { length: 20 }).notNull().default('in-progress'),
   questionCount: integer("question_count").notNull(),
   useAllQuestions: boolean("use_all_questions").notNull().default(false),
@@ -128,6 +130,7 @@ export const testSessions = pgTable("test_sessions", {
 }, (table) => [
   index("idx_test_sessions_user_id").on(table.userId),
   index("idx_test_sessions_status").on(table.status),
+  index("idx_test_sessions_user_specialty").on(table.userId, table.specialtyId),
 ]);
 
 export type InsertTestSession = typeof testSessions.$inferInsert;

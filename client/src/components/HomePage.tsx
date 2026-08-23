@@ -40,15 +40,19 @@ export function HomePage({ sections, onNavigate, onReviewIncorrect, onStartTest,
   const { user, logout } = useAuth();
   const { specialty } = useSpecialty();
 
-  const specialtySectionIds = useMemo(
-    () => new Set(sections.map((section) => section.id)),
-    [sections],
-  );
+  const specialtyContentIds = useMemo(() => {
+    const ids = new Set<string>();
+    for (const section of sections) {
+      ids.add(section.id);
+      for (const sub of section.subsections) ids.add(sub.id);
+    }
+    return ids;
+  }, [sections]);
 
   /** Progress APIs return all banks; scope dashboard numbers to the active question bank. */
   const specialtyResponses = useMemo(
-    () => responses.filter((r) => specialtySectionIds.has(r.sectionId)),
-    [responses, specialtySectionIds],
+    () => responses.filter((r) => specialtyContentIds.has(r.sectionId)),
+    [responses, specialtyContentIds],
   );
 
   const overallStats = useMemo(() => {
@@ -145,13 +149,16 @@ export function HomePage({ sections, onNavigate, onReviewIncorrect, onStartTest,
 
   const recentSessions = useMemo(() => {
     return [...sessions]
-      .filter((session) =>
-        session.useAllQuestions ||
-        session.selectedSectionIds.some((id) => specialtySectionIds.has(id)),
-      )
+      .filter((session) => {
+        if ("specialtyId" in session && session.specialtyId && session.specialtyId !== specialty.id) {
+          return false;
+        }
+        if (session.useAllQuestions) return true;
+        return session.selectedSectionIds.some((id) => specialtyContentIds.has(id));
+      })
       .sort((a, b) => b.createdAt - a.createdAt)
       .slice(0, 3);
-  }, [sessions, specialtySectionIds]);
+  }, [sessions, specialtyContentIds, specialty.id]);
 
   // Get recent activity (last 7 days) for the active question bank only
   const recentActivity = useMemo(() => {

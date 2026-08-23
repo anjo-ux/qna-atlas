@@ -962,7 +962,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/test-sessions', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.session?.userId;
-      const sessions = await storage.getUserTestSessions(userId);
+      const specialtyId = await resolveRequestSpecialty(req);
+      const sessions = await storage.getUserTestSessions(userId, specialtyId);
       res.json(sessions);
     } catch (error) {
       console.error("Error fetching test sessions:", error);
@@ -973,7 +974,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/test-sessions/in-progress', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.session?.userId;
-      const sessions = await storage.getInProgressSessions(userId);
+      const specialtyId = await resolveRequestSpecialty(req);
+      const sessions = await storage.getInProgressSessions(userId, specialtyId);
       res.json(sessions);
     } catch (error) {
       console.error("Error fetching in-progress sessions:", error);
@@ -1014,9 +1016,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
+      const specialtyId = await resolveRequestSpecialty(req);
       const sessionData = {
         ...validationResult.data,
         userId,
+        specialtyId,
       };
       
       const session = await storage.createTestSession(sessionData as any);
@@ -1246,7 +1250,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/bookmarks', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.session?.userId;
-      const bookmarks = await storage.getUserBookmarks(userId);
+      const specialtyId = await resolveRequestSpecialty(req);
+      const bookmarks = await storage.getUserBookmarks(userId, specialtyId);
       // Disable caching for bookmarks to ensure fresh data is always returned
       res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
       res.json(bookmarks);
@@ -1443,7 +1448,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/question-responses', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.session?.userId;
-      const responses = await storage.getUserQuestionResponses(userId);
+      const specialtyId = await resolveRequestSpecialty(req);
+      const responses = await storage.getUserQuestionResponses(userId, specialtyId);
       res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
       res.json(responses);
     } catch (error) {
@@ -1515,7 +1521,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Return all responses (merged)
-      const allResponses = await storage.getUserQuestionResponses(userId);
+      const specialtyId = await resolveRequestSpecialty(req);
+      const allResponses = await storage.getUserQuestionResponses(userId, specialtyId);
       res.json(allResponses);
     } catch (error) {
       console.error("Error syncing question responses:", error);
@@ -1527,10 +1534,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/spaced-repetition/due', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.session?.userId;
+      const specialtyId = await resolveRequestSpecialty(req);
       const [dueQuestions, reviewedQuestionIds, incorrectQuestionIds] = await Promise.all([
-        storage.getUserDueQuestions(userId),
-        storage.getUserSpacedRepetitionQuestionIds(userId),
-        storage.getUserIncorrectQuestionIds(userId),
+        storage.getUserDueQuestions(userId, specialtyId),
+        storage.getUserSpacedRepetitionQuestionIds(userId, specialtyId),
+        storage.getUserIncorrectQuestionIds(userId, specialtyId),
       ]);
       res.json({
         due: dueQuestions,

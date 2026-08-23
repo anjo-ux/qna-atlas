@@ -5,12 +5,13 @@ import type { Bookmark } from '@shared/schema';
 import { useSpecialty } from '@/hooks/useSpecialty';
 
 export function useBookmarks() {
-  const { activeSpecialty } = useSpecialty();
+  const { activeSpecialty, isSwitching } = useSpecialty();
   const bookmarksQueryKey = ['/api/bookmarks', activeSpecialty] as const;
 
   // Fetch all bookmarks for the user
   const { data: bookmarks = [], isLoading } = useQuery<Bookmark[]>({
     queryKey: bookmarksQueryKey,
+    enabled: !isSwitching,
   });
 
   // Add bookmark mutation

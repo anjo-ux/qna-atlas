@@ -15,6 +15,7 @@ export interface TestSession {
   questionCount: number;
   selectedSectionIds: string[];
   useAllQuestions: boolean;
+  specialtyId?: string;
   questions: Question[];
   responses: Record<string, QuestionResponse>;
   currentQuestionIndex: number;
@@ -27,10 +28,11 @@ export interface TestSession {
 const QUESTIONS_KEY = 'psite-test-questions';
 
 export function useTestSessions() {
-  const { activeSpecialty } = useSpecialty();
+  const { activeSpecialty, isSwitching } = useSpecialty();
   // Fetch all test sessions from database
   const { data: dbSessions = [], isLoading } = useQuery<DbTestSession[]>({
     queryKey: ['/api/test-sessions', activeSpecialty],
+    enabled: !isSwitching,
     retry: 1,
   });
 
@@ -44,6 +46,7 @@ export function useTestSessions() {
       questionCount: dbSession.questionCount,
       selectedSectionIds: dbSession.selectedSectionIds,
       useAllQuestions: dbSession.useAllQuestions,
+      specialtyId: dbSession.specialtyId,
       questions: (dbSession.questions as any) || [],
       responses: {},
       currentQuestionIndex: dbSession.currentQuestionIndex,

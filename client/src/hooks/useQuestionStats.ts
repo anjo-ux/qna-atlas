@@ -24,7 +24,7 @@ export interface SubsectionStats {
 const RESPONSES_KEY = 'psite-question-responses';
 
 export function useQuestionStats() {
-  const { activeSpecialty } = useSpecialty();
+  const { activeSpecialty, isSwitching } = useSpecialty();
   const [localResponses, setLocalResponses] = useState<QuestionResponse[]>([]);
   const hasSyncedRef = useRef(false);
 
@@ -37,7 +37,7 @@ export function useQuestionStats() {
   const { data: serverResponses = [], isLoading: isServerLoading, isError } = useQuery<DBQuestionResponse[]>({
     queryKey: ['/api/question-responses', activeSpecialty],
     staleTime: 30000,
-    enabled: isAuthenticated,
+    enabled: isAuthenticated && !isSwitching,
   });
 
   // Re-allow local→server sync after switching banks.

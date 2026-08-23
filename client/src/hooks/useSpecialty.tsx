@@ -97,6 +97,7 @@ function isMarketingPath(
 export function SpecialtyProvider({ children }: { children: React.ReactNode }) {
   const hostSpecialtyFromShell = readHostSpecialty();
   const [activeSpecialty, setActiveSpecialty] = useState<SpecialtyId>(hostSpecialtyFromShell);
+  const [handoffPending, setHandoffPending] = useState(false);
   const [location, setLocation] = useLocation();
   const { isAuthenticated, isLoading: isAuthLoading } = useAuth();
 
@@ -143,6 +144,10 @@ export function SpecialtyProvider({ children }: { children: React.ReactNode }) {
     },
     onMutate: async (specialtyId) => {
       const previousSpecialty = activeSpecialty;
+      setHandoffPending(true);
+      queryClient.removeQueries({
+        predicate: (query) => isSpecialtyContentQuery(query.queryKey),
+      });
       // Theme flips immediately; activeSpecialty waits for the server so /api/sections
       // does not briefly return the previous bank under the new specialty key.
       if (!isAuthPath(location) && !isMarketingPath(location, isAuthenticated, isAuthLoading)) {
@@ -165,8 +170,9 @@ export function SpecialtyProvider({ children }: { children: React.ReactNode }) {
               nextPath: "/",
             }),
           });
-          if (handoff?.handoffUrl) {
-            window.location.assign(handoff.handoffUrl);
+          const dest = handoff?.handoffUrl ?? handoff?.url;
+          if (typeof dest === "string" && dest) {
+            window.location.assign(dest);
             return;
           }
         } catch (error) {
@@ -179,6 +185,7 @@ export function SpecialtyProvider({ children }: { children: React.ReactNode }) {
         predicate: (query) => isSpecialtyContentQuery(query.queryKey),
       });
       setActiveSpecialty(specialtyId);
+      setHandoffPending(false);
       queryClient.invalidateQueries({ queryKey: ["/api/specialty"] });
       queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
       if (normalizePath(location) !== "/") {
@@ -186,6 +193,7 @@ export function SpecialtyProvider({ children }: { children: React.ReactNode }) {
       }
     },
     onError: (_error, _specialtyId, context) => {
+      setHandoffPending(false);
       const previous = context?.previousSpecialty;
       if (isSpecialtyId(previous)) {
         if (!isAuthPath(location) && !isMarketingPath(location, isAuthenticated, isAuthLoading)) {
@@ -216,7 +224,7 @@ export function SpecialtyProvider({ children }: { children: React.ReactNode }) {
         specialty: getSpecialty(activeSpecialty),
         available: SPECIALTY_LIST,
         lockedBySpecialty,
-        isSwitching: switchMutation.isPending,
+        isSwitching: switchMutation.isPending || handoffPending,
         switchSpecialty,
       }}
     >

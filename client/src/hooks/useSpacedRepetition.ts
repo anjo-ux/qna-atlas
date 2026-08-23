@@ -10,10 +10,11 @@ export interface SpacedRepetitionDueResponse {
 }
 
 export function useSpacedRepetition() {
-  const { activeSpecialty } = useSpecialty();
+  const { activeSpecialty, isSwitching } = useSpecialty();
   // Fetch questions due for review and IDs of all questions ever in SR
   const { data, isLoading } = useQuery<SpacedRepetitionDueResponse | SpacedRepetition[]>({
     queryKey: ['/api/spaced-repetition/due', activeSpecialty],
+    enabled: !isSwitching,
     queryFn: async () => {
       try {
         const res = await fetch('/api/spaced-repetition/due', { credentials: 'include' });
