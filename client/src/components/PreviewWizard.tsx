@@ -119,15 +119,15 @@ export function PreviewWizard({ open, onClose, onStart, specialtyOverride }: Pre
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-md w-[calc(100vw-2rem)] max-h-[90vh] overflow-y-auto overflow-x-hidden">
-        <DialogHeader>
-          <div className="flex items-center gap-2">
-            <Icon className="w-5 h-5 text-primary" />
-            <DialogTitle>{currentStep.title}</DialogTitle>
+        <DialogHeader className="space-y-2 text-left">
+          <div className="flex items-center gap-2 pr-8">
+            <Icon className="h-5 w-5 shrink-0 text-primary" />
+            <DialogTitle className="text-left">{currentStep.title}</DialogTitle>
           </div>
-          <DialogDescription>{currentStep.description}</DialogDescription>
+          <DialogDescription className="text-left">{currentStep.description}</DialogDescription>
         </DialogHeader>
 
-        <div className="py-6">
+        <div className="py-6 text-left">
           {currentStep.content}
         </div>
 

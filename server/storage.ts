@@ -635,16 +635,18 @@ export class DatabaseStorage implements IStorage {
   }
 
   async takePasswordResetToken(tokenHash: string): Promise<string | undefined> {
-    const now = new Date();
+    // Single statement: two concurrent redemptions of one link cannot both see the row.
     const [row] = await db
-      .select()
-      .from(passwordResetTokens)
-      .where(eq(passwordResetTokens.tokenHash, tokenHash));
+      .delete(passwordResetTokens)
+      .where(eq(passwordResetTokens.tokenHash, tokenHash))
+      .returning({
+        userId: passwordResetTokens.userId,
+        expiresAt: passwordResetTokens.expiresAt,
+      });
     if (!row) {
       return undefined;
     }
-    await db.delete(passwordResetTokens).where(eq(passwordResetTokens.id, row.id));
-    if (row.expiresAt < now) {
+    if (row.expiresAt < new Date()) {
       return undefined;
     }
     return row.userId;

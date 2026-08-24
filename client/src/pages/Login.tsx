@@ -239,7 +239,7 @@ export default function Login() {
       const data = await response.json();
 
       if (!response.ok) {
-        const msg = data.message || 'Failed to send password retrieval email.';
+        const msg = data.message || 'Failed to send the password reset email.';
         toast.error(msg.endsWith('.') || msg.endsWith('!') || msg.endsWith('?') ? msg : msg + '.');
         return;
       }
@@ -730,10 +730,10 @@ export default function Login() {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Mail className="h-5 w-5" />
-              Retrieve Password
+              Reset Password
             </DialogTitle>
             <DialogDescription>
-              Enter your email address and we'll send your password to your inbox.
+              Enter your email address and we'll send you a link to create a new password.
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleForgotPassword} className="space-y-4">
@@ -768,7 +768,7 @@ export default function Login() {
                 className="flex-1 glow-primary"
                 data-testid="button-send-password"
               >
-                {isForgotPasswordLoading ? 'Sending...' : 'Send Password'}
+                {isForgotPasswordLoading ? 'Sending...' : 'Send Reset Link'}
               </Button>
             </div>
           </form>

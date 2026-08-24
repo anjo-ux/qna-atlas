@@ -46,6 +46,21 @@ shared/           # Shared types between client and server
 
 ## Recent Changes
 
+### August 24, 2026
+- **Email provider moved from SendGrid to Resend** (supersedes the SendGrid notes below):
+  - All outbound mail now goes through `server/email.ts` (`sendEmail`): password reset, question
+    reports, and the support/contact form
+  - Required secret: `RESEND_API_KEY`. Optional: `RESEND_FROM_EMAIL` (defaults to
+    `Atlas Review <noreply@prs-atlas.com>`), which must be on a domain verified in Resend
+  - `SENDGRID_API_KEY` / `SENDGRID_FROM_EMAIL` are no longer read, and `@sendgrid/mail` is removed
+  - The branded reset email is built in `renderPasswordResetEmail`; Resend has no server-side
+    template for transactional sends, so the HTML is version-controlled here
+- **Forgot password no longer reports success when mail delivery fails**:
+  - `/api/auth/forgot-password` returns 503 when the provider is unconfigured or failing, instead of
+    the generic "email sent" message that masked a total mail outage
+  - Replies stay identical for existing vs unknown addresses, so the endpoint still cannot be used
+    to enumerate accounts
+
 ### December 07, 2025
 - **Auto-Save Test Responses**:
   - Each answer selection now auto-saves immediately to the database

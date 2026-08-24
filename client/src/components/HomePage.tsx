@@ -10,7 +10,7 @@ import { useSpecialty } from '@/hooks/useSpecialty';
 import { TestHistory } from '@/components/TestHistory';
 import { Section } from '@/types/question';
 import { cn } from '@/lib/utils';
-import { BookOpen, Trophy, X, BarChart3, Crosshair, ChevronRight, RotateCcw, Lightbulb, Zap, LogOut, User, Settings, Eye, Smile, Sparkles, Heart, Rocket, Flame, Crown, Coffee, Moon, Sun, Star, Target, CheckCircle2, AlertCircle } from 'lucide-react';
+import { BookOpen, Trophy, X, BarChart3, Crosshair, ChevronRight, RotateCcw, Lightbulb, Zap, LogOut, User, Settings, Eye, Smile, Sparkles, Heart, Rocket, Flame, Crown, Coffee, Moon, Sun, Star, Target, CheckCircle2, AlertCircle, Menu } from 'lucide-react';
 import { useMemo } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
@@ -31,9 +31,11 @@ interface HomePageProps {
   onResumeTest?: (sessionId: string) => void;
   onSettings?: () => void;
   onPreview?: () => void;
+  isNavOpen?: boolean;
+  onToggleNav?: () => void;
 }
 
-export function HomePage({ sections, onNavigate, onReviewIncorrect, onStartTest, onResumeTest, onSettings, onPreview }: HomePageProps) {
+export function HomePage({ sections, onNavigate, onReviewIncorrect, onStartTest, onResumeTest, onSettings, onPreview, isNavOpen, onToggleNav }: HomePageProps) {
   const { responses, getSubsectionStats, resetAll } = useQuestionStats();
   const { sessions, deleteSession } = useTestSessions();
   const { user, logout } = useAuth();
@@ -183,17 +185,38 @@ export function HomePage({ sections, onNavigate, onReviewIncorrect, onStartTest,
   return (
     <div className="p-4 md:p-6 lg:p-8 max-w-7xl mx-auto space-y-3 md:space-y-4 animate-fade-in scrollbar-hide flex-1">
       {/* Welcome Header */}
-      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-        <div className="space-y-1 min-w-0">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0 flex-1 space-y-1">
           <h1 className="text-base sm:text-lg md:text-xl font-bold text-foreground">
             {specialty.specialtyName} {specialty.marketing.examName} Review
           </h1>
-          <p className="text-muted-foreground text-sm md:text-base">
-            {user && (
-              <span>Welcome back, {user.firstName || user.email?.split('@')[0]}.</span>
+          <div className="flex items-center gap-2">
+            {onToggleNav && (
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                className="lg:hidden h-9 w-9 shrink-0"
+                onClick={onToggleNav}
+                title={isNavOpen ? 'Close all content menu' : 'Open all content menu'}
+                data-testid="button-toggle-nav-home"
+                aria-expanded={isNavOpen}
+                aria-controls="study-navigation-panel"
+              >
+                {isNavOpen ? (
+                  <X className="h-5 w-5" aria-hidden />
+                ) : (
+                  <Menu className="h-5 w-5" aria-hidden />
+                )}
+              </Button>
             )}
-            {!user && "Welcome back."}
-          </p>
+            <p className="min-w-0 text-muted-foreground text-sm md:text-base">
+              {user && (
+                <span>Welcome back, {user.firstName || user.email?.split('@')[0]}.</span>
+              )}
+              {!user && "Welcome back."}
+            </p>
+          </div>
         </div>
         <div className="flex items-center gap-1 sm:gap-2 md:gap-3 flex-shrink-0">
           <DropdownMenu>

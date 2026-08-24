@@ -576,7 +576,7 @@ export default function Index() {
                     handleGoHome();
                     (e.currentTarget as HTMLButtonElement).blur();
                   }}
-                  className="hover:bg-primary/20 hover:text-primary flex-shrink-0 outline-none focus-visible:ring-0 rounded-xl transition-colors"
+                  className="hidden sm:inline-flex hover:bg-primary/20 hover:text-primary flex-shrink-0 outline-none focus-visible:ring-0 rounded-xl transition-colors"
                   title="Go to Dashboard"
                 >
                   <Home className="h-5 w-5" />
@@ -600,7 +600,14 @@ export default function Index() {
                   )}
                 </Button>
                 
-                <div className="flex items-center gap-3 min-w-0 px-4 py-1.5 rounded-xl">
+                <button
+                  type="button"
+                  onClick={handleGoHome}
+                  className="flex min-w-0 items-center gap-3 rounded-xl px-2 py-1.5 sm:pointer-events-none sm:cursor-default sm:px-4"
+                  title="Go to Dashboard"
+                  aria-label="Go to Dashboard"
+                  data-testid="button-logo-home"
+                >
                   <div className="logo-glass flex items-center justify-center p-1.5 flex-shrink-0 ring-1 ring-black/5 dark:ring-white/10">
                     <img 
                       src={resolvedTheme === 'dark' ? atlasLogoLight : atlasLogo} 
@@ -616,7 +623,7 @@ export default function Index() {
                       {specialty.specialtyName}
                     </span>
                   </div>
-                </div>
+                </button>
               </div>
 
               {/* Spacer */}
@@ -702,6 +709,7 @@ export default function Index() {
           <div className="border-t border-white/40 dark:border-white/10 px-4 sm:px-6 lg:px-8 py-3 bg-white/20 dark:bg-white/5 backdrop-blur-sm min-w-0">
             <div className="w-full max-w-6xl mx-auto flex items-center gap-2 sm:gap-4 min-w-0">
               {/* Below lg (nav overlay mode): obvious menu control next to search */}
+              {currentSubsection && (
               <Button
                 type="button"
                 variant="outline"
@@ -719,6 +727,7 @@ export default function Index() {
                   <Menu className="h-5 w-5" aria-hidden />
                 )}
               </Button>
+              )}
               <div className="relative z-[9999] flex-1 min-w-0 max-w-full" ref={searchRef}>
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                 <Input
@@ -856,6 +865,8 @@ export default function Index() {
                   onResumeTest={handleResumeTest}
                   onSettings={() => setScreenMode('settings')}
                   onPreview={() => setShowPreviewWizard(true)}
+                  isNavOpen={isNavOpen}
+                  onToggleNav={() => setIsNavOpen((open) => !open)}
                 />
               </div>
             </div>

@@ -102,11 +102,11 @@ app.use((req, res, next) => {
       .then(({ runContentBootstrap }) => runContentBootstrap(log))
       .catch((e) => log(`[contentBootstrap] error: ${e}`));
 
-    const sgKey = process.env.SENDGRID_API_KEY;
-    const sgFrom = process.env.SENDGRID_FROM_EMAIL;
-    log(`SendGrid: SENDGRID_API_KEY=${sgKey ? "set" : "NOT SET"}, SENDGRID_FROM_EMAIL=${sgFrom ? "set" : "not set"}`);
-    if (!sgKey) {
-      log("Forgot-password emails will not be sent. Add SENDGRID_API_KEY to your environment (e.g. Replit Secrets) and restart the server.");
+    const resendKey = process.env.RESEND_API_KEY;
+    const resendFrom = process.env.RESEND_FROM_EMAIL;
+    log(`Resend: RESEND_API_KEY=${resendKey ? "set" : "NOT SET"}, RESEND_FROM_EMAIL=${resendFrom ? "set" : "using default"}`);
+    if (!resendKey) {
+      log("Forgot-password emails will not be sent. Add RESEND_API_KEY to your environment (e.g. Replit Secrets) and restart the server.");
     }
     const slackWebhook =
       process.env.SLACK_WEBHOOK_URL ||

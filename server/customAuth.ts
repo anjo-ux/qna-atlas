@@ -2,7 +2,6 @@ import { createHash, randomBytes } from 'crypto';
 import bcrypt from 'bcrypt';
 import session from 'express-session';
 import rateLimit from 'express-rate-limit';
-import sgMail from '@sendgrid/mail';
 import type { Express, Request, RequestHandler, Response } from 'express';
 import connectPg from 'connect-pg-simple';
 import { isAllowedTrainingLevel } from "@shared/trainingLevels";
@@ -23,6 +22,12 @@ import {
 } from './seoPublic';
 import { sanitizeUser } from './authUtils';
 import { pool, normalizeDatabaseUrl } from './db';
+import {
+  emailIsConfigured,
+  emailProviderIsDown,
+  renderPasswordResetEmail,
+  sendEmail,
+} from './email';
 
 const SALT_ROUNDS = 12; // Strong password hashing
 const SESSION_TTL = 7 * 24 * 60 * 60 * 1000; // 7 days
@@ -170,8 +175,6 @@ export async function verifyPassword(
   return bcrypt.compare(password, hash);
 }
 
-const DEFAULT_PASSWORD_RESET_TEMPLATE_ID = 'd-c1a8296876d045eb8ca21c193f321224';
-
 function hashPasswordResetToken(plainToken: string): string {
   return createHash('sha256').update(plainToken, 'utf8').digest('hex');
 }
@@ -193,44 +196,25 @@ function appBaseUrl(req?: Request): string {
   return getSpecialty(DEFAULT_SPECIALTY_ID).canonicalOrigin;
 }
 
-/**
- * Sends only a reset link — never the user's password. Update the SendGrid dynamic template to use
- * {{{resetUrl}}} (and optionally {{{loginUrl}}}); do not pass passwords to SendGrid.
- */
-async function sendPasswordResetEmail(email: string, resetUrl: string, base: string): Promise<void> {
-  const apiKey = process.env.SENDGRID_API_KEY;
-  const fromEmail = process.env.SENDGRID_FROM_EMAIL || 'noreply@prs-atlas.com';
+/** Sends only a reset link — never the user's password. Throws if the provider rejects the send. */
+async function sendPasswordResetEmail(
+  req: Request,
+  email: string,
+  resetUrl: string,
+  base: string,
+  ttlMs: number
+): Promise<void> {
+  const specialty = getSpecialty(getSpecialtyForHost(requestHostname(req)));
+  const { subject, html, text } = renderPasswordResetEmail({
+    productName: specialty.productName,
+    resetUrl,
+    logoUrl: `${base}/atlas-logo.png`,
+    loginUrl: `${base}/login`,
+    supportEmail: specialty.supportEmail,
+    expiresInMinutes: Math.max(1, Math.round(ttlMs / 60000)),
+  });
 
-  if (!apiKey) {
-    console.warn('[Forgot password] SENDGRID_API_KEY is not set — no email will be sent.');
-    return;
-  }
-
-  const templateId =
-    process.env.SENDGRID_PASSWORD_RESET_TEMPLATE_ID || DEFAULT_PASSWORD_RESET_TEMPLATE_ID;
-
-  try {
-    sgMail.setApiKey(apiKey);
-    await sgMail.send({
-      to: email,
-      from: fromEmail,
-      templateId,
-      dynamicTemplateData: {
-        resetUrl,
-        loginUrl: `${base}/login`,
-      },
-    });
-  } catch (error: unknown) {
-    const err = error as { response?: { body?: unknown; statusCode?: number } };
-    console.error('[Forgot password] SendGrid error:', err);
-    if (err.response?.body) {
-      console.error('[Forgot password] SendGrid response body:', JSON.stringify(err.response.body, null, 2));
-    }
-    if (err.response?.statusCode) {
-      console.error('[Forgot password] SendGrid status code:', err.response.statusCode);
-    }
-    throw error;
-  }
+  await sendEmail({ to: email, subject, html, text }, 'Forgot password');
 }
 
 const REPORT_SUPPORT_EMAIL = 'support@prs-atlas.com';
@@ -240,33 +224,22 @@ export async function sendReportQuestionEmail(
   message: string,
   userEmail?: string | null
 ): Promise<void> {
-  const apiKey = process.env.SENDGRID_API_KEY;
-  const fromEmail = process.env.SENDGRID_FROM_EMAIL || 'noreply@prs-atlas.com';
-
-  if (!apiKey) {
-    console.warn('[Report question] SENDGRID_API_KEY is not set — no email will be sent. Question ID:', questionId);
+  if (!emailIsConfigured()) {
+    console.warn('[Report question] RESEND_API_KEY is not set — no email will be sent. Question ID:', questionId);
     return;
   }
 
   const body = `A question has been reported.\n\nQuestion ID: ${questionId}\n\nReport:\n${message}${userEmail ? `\n\nReported by: ${userEmail}` : '\n\n(Submitted anonymously)'}`;
 
-  try {
-    sgMail.setApiKey(apiKey);
-    await sgMail.send({
+  await sendEmail(
+    {
       to: REPORT_SUPPORT_EMAIL,
-      from: fromEmail,
       subject: 'Question Reported',
       text: body,
-    });
-    console.log('[Report question] Email sent to', REPORT_SUPPORT_EMAIL, 'for question', questionId);
-  } catch (error: unknown) {
-    const err = error as { response?: { body?: unknown; statusCode?: number } };
-    console.error('[Report question] SendGrid error:', err);
-    if (err.response?.body) {
-      console.error('[Report question] SendGrid response body:', JSON.stringify(err.response.body, null, 2));
-    }
-    throw error;
-  }
+      ...(userEmail ? { replyTo: userEmail } : {}),
+    },
+    'Report question'
+  );
 }
 
 /** Shared limiter for public support intake (contact form). */
@@ -310,28 +283,37 @@ export async function setupAuth(app: Express) {
     next();
   });
 
-  // Forgot password route
+  /**
+   * Replies identically whether or not the address has an account, so the endpoint cannot be used
+   * to enumerate registered emails. Mail-provider outages are the one thing it does report, and
+   * that reply is driven by provider state rather than by the address, so it leaks nothing.
+   */
+  const RESET_SENT_MESSAGE =
+    'If an account exists with that email, a password recovery email has been sent.';
+  const MAIL_UNAVAILABLE_MESSAGE =
+    'We could not send the reset email right now. Please try again in a few minutes, or contact support if the problem continues.';
+
   app.post('/api/auth/forgot-password', authRateLimiter, async (req, res) => {
     try {
       const { email } = req.body;
 
       if (!email) {
-        return res.status(400).json({ message: 'Email is required to retrieve password.' });
+        return res.status(400).json({ message: 'Email is required to reset your password.' });
+      }
+
+      if (!emailIsConfigured()) {
+        console.error('[Forgot password] RESEND_API_KEY is not set — cannot send reset email.');
+        return res.status(503).json({ message: MAIL_UNAVAILABLE_MESSAGE });
+      }
+
+      if (emailProviderIsDown()) {
+        console.error('[Forgot password] Skipping send: Resend failed recently.');
+        return res.status(503).json({ message: MAIL_UNAVAILABLE_MESSAGE });
       }
 
       const user = await storage.getUserByEmail(email);
-      if (!user) {
-        // Don't reveal if email exists or not (security best practice)
-        return res.json({ message: 'If an account exists with that email, a password recovery email has been sent.' });
-      }
-
-      if (!user.passwordHash) {
-        return res.json({ message: 'If an account exists with that email, a password recovery email has been sent.' });
-      }
-
-      if (!process.env.SENDGRID_API_KEY) {
-        console.warn('[Forgot password] SENDGRID_API_KEY is not set — reset email will not be sent.');
-        return res.json({ message: 'If an account exists with that email, a password recovery email has been sent.' });
+      if (!user?.passwordHash) {
+        return res.json({ message: RESET_SENT_MESSAGE });
       }
 
       const plainToken = generatePasswordResetPlainToken();
@@ -346,13 +328,14 @@ export async function setupAuth(app: Express) {
       const resetUrl = `${base}/reset-password?token=${encodeURIComponent(plainToken)}`;
 
       try {
-        await sendPasswordResetEmail(email, resetUrl, base);
+        await sendPasswordResetEmail(req, user.email, resetUrl, base, ttlMs);
       } catch (err) {
         console.error('Failed to send password reset email:', err);
         await storage.deletePasswordResetTokensForUser(user.id);
+        return res.status(503).json({ message: MAIL_UNAVAILABLE_MESSAGE });
       }
 
-      return res.json({ message: 'If an account exists with that email, a password recovery email has been sent.' });
+      return res.json({ message: RESET_SENT_MESSAGE });
     } catch (error) {
       console.error('Forgot password error:', error);
       res.status(500).json({ message: 'An error occurred while processing your request.' });

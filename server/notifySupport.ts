@@ -1,4 +1,4 @@
-import sgMail from "@sendgrid/mail";
+import { emailIsConfigured, sendEmail } from "./email";
 
 export type SlackNotifyKind = "question-report" | "support-form";
 
@@ -116,10 +116,8 @@ export async function sendSupportContactEmail(params: {
   message: string;
   specialtyLabel: string;
 }): Promise<boolean> {
-  const apiKey = process.env.SENDGRID_API_KEY;
-  const fromEmail = process.env.SENDGRID_FROM_EMAIL || "noreply@prs-atlas.com";
-  if (!apiKey) {
-    console.warn("[Support form] SENDGRID_API_KEY is not set — no email will be sent.");
+  if (!emailIsConfigured()) {
+    console.warn("[Support form] RESEND_API_KEY is not set — no email will be sent.");
     return false;
   }
 
@@ -133,22 +131,18 @@ export async function sendSupportContactEmail(params: {
   ].join("\n");
 
   try {
-    sgMail.setApiKey(apiKey);
-    await sgMail.send({
-      to: params.toEmail,
-      from: fromEmail,
-      replyTo: params.fromEmail,
-      subject: `[Support] ${params.subject}`,
-      text: body,
-    });
-    console.log("[Support form] Email sent to", params.toEmail);
+    await sendEmail(
+      {
+        to: params.toEmail,
+        replyTo: params.fromEmail,
+        subject: `[Support] ${params.subject}`,
+        text: body,
+      },
+      "Support form"
+    );
     return true;
-  } catch (error: unknown) {
-    const err = error as { response?: { body?: unknown } };
-    console.error("[Support form] SendGrid error:", err);
-    if (err.response?.body) {
-      console.error("[Support form] SendGrid response body:", JSON.stringify(err.response.body, null, 2));
-    }
+  } catch (error) {
+    console.error("[Support form] Failed to send:", error);
     return false;
   }
 }
