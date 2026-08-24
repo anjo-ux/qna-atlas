@@ -17,6 +17,8 @@ import {
   contactMessages,
   questionRevisions,
   agentJobRuns,
+  agentLessons,
+  agentFinetuneExamples,
   oralBoardSessions,
   oralBoardMessages,
   sections,
@@ -52,6 +54,10 @@ import {
   type QuestionRevision,
   type InsertQuestionRevision,
   type AgentJobRun,
+  type AgentLesson,
+  type InsertAgentLesson,
+  type AgentFinetuneExample,
+  type InsertAgentFinetuneExample,
   type OralBoardSession,
   type OralBoardMessage,
 } from "@shared/schema";
@@ -396,6 +402,12 @@ export interface IStorage {
     stats: Record<string, unknown>
   ): Promise<void>;
   getLastSuccessfulAgentJobRun(jobName: string): Promise<AgentJobRun | undefined>;
+  listActiveAgentLessons(limit?: number): Promise<AgentLesson[]>;
+  insertAgentLessonIfNew(row: InsertAgentLesson): Promise<boolean>;
+  createFinetuneExample(row: InsertAgentFinetuneExample): Promise<AgentFinetuneExample>;
+  listFinetuneExamples(kind?: string, limit?: number): Promise<AgentFinetuneExample[]>;
+  listRecentRevisedQuestions(limit?: number): Promise<{ question: string; answer: string; subsectionId: string }[]>;
+  listRecentRevisions(limit?: number): Promise<QuestionRevision[]>;
   ensureFeedbackAgentTables(): Promise<void>;
 
   // Oral board simulator (persisted sessions + messages)
@@ -1422,6 +1434,123 @@ export class DatabaseStorage implements IStorage {
     await pool.query(
       `CREATE INDEX IF NOT EXISTS "idx_agent_job_runs_started_at" ON "agent_job_runs" ("started_at")`
     );
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS "agent_lessons" (
+        "id" varchar PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+        "category" varchar(64) NOT NULL,
+        "lesson" text NOT NULL,
+        "fingerprint" varchar(64) NOT NULL,
+        "source" varchar(64) NOT NULL DEFAULT 'feedback_agent',
+        "evidence" jsonb DEFAULT '{}'::jsonb NOT NULL,
+        "active" boolean DEFAULT true NOT NULL,
+        "created_at" timestamp DEFAULT now() NOT NULL
+      )
+    `);
+    await pool.query(
+      `CREATE UNIQUE INDEX IF NOT EXISTS "uidx_agent_lessons_fingerprint" ON "agent_lessons" ("fingerprint")`
+    );
+    await pool.query(
+      `CREATE INDEX IF NOT EXISTS "idx_agent_lessons_active" ON "agent_lessons" ("active")`
+    );
+    await pool.query(
+      `CREATE INDEX IF NOT EXISTS "idx_agent_lessons_created_at" ON "agent_lessons" ("created_at")`
+    );
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS "agent_finetune_examples" (
+        "id" varchar PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+        "kind" varchar(32) NOT NULL,
+        "messages" jsonb NOT NULL,
+        "metadata" jsonb DEFAULT '{}'::jsonb NOT NULL,
+        "created_at" timestamp DEFAULT now() NOT NULL
+      )
+    `);
+    await pool.query(
+      `CREATE INDEX IF NOT EXISTS "idx_agent_finetune_examples_kind" ON "agent_finetune_examples" ("kind")`
+    );
+    await pool.query(
+      `CREATE INDEX IF NOT EXISTS "idx_agent_finetune_examples_created_at" ON "agent_finetune_examples" ("created_at")`
+    );
+  }
+
+  async listActiveAgentLessons(limit = 40): Promise<AgentLesson[]> {
+    await this.ensureFeedbackAgentTables();
+    return db
+      .select()
+      .from(agentLessons)
+      .where(eq(agentLessons.active, true))
+      .orderBy(desc(agentLessons.createdAt))
+      .limit(limit);
+  }
+
+  async insertAgentLessonIfNew(row: InsertAgentLesson): Promise<boolean> {
+    await this.ensureFeedbackAgentTables();
+    const inserted = await db
+      .insert(agentLessons)
+      .values(row)
+      .onConflictDoNothing({ target: agentLessons.fingerprint })
+      .returning({ id: agentLessons.id });
+    return inserted.length > 0;
+  }
+
+  async createFinetuneExample(row: InsertAgentFinetuneExample): Promise<AgentFinetuneExample> {
+    await this.ensureFeedbackAgentTables();
+    const [created] = await db.insert(agentFinetuneExamples).values(row).returning();
+    if (!created) throw new Error("Failed to store fine-tune example");
+    return created;
+  }
+
+  async listFinetuneExamples(kind?: string, limit = 5000): Promise<AgentFinetuneExample[]> {
+    await this.ensureFeedbackAgentTables();
+    if (kind) {
+      return db
+        .select()
+        .from(agentFinetuneExamples)
+        .where(eq(agentFinetuneExamples.kind, kind))
+        .orderBy(desc(agentFinetuneExamples.createdAt))
+        .limit(limit);
+    }
+    return db
+      .select()
+      .from(agentFinetuneExamples)
+      .orderBy(desc(agentFinetuneExamples.createdAt))
+      .limit(limit);
+  }
+
+  async listRecentRevisedQuestions(
+    limit = 40
+  ): Promise<{ question: string; answer: string; subsectionId: string }[]> {
+    await this.ensureFeedbackAgentTables();
+    const revs = await db
+      .select({ questionId: questionRevisions.questionId })
+      .from(questionRevisions)
+      .where(eq(questionRevisions.action, "revise"))
+      .orderBy(desc(questionRevisions.createdAt))
+      .limit(limit * 2);
+    const ids = [...new Set(revs.map((r) => r.questionId))].slice(0, limit);
+    if (ids.length === 0) return [];
+    const rows = await db
+      .select({
+        id: questions.id,
+        question: questions.question,
+        answer: questions.answer,
+        subsectionId: questions.subsectionId,
+      })
+      .from(questions)
+      .where(inArray(questions.id, ids));
+    const byId = new Map(rows.map((r) => [r.id, r]));
+    return ids
+      .map((id) => byId.get(id))
+      .filter((r): r is NonNullable<typeof r> => !!r)
+      .map((r) => ({ question: r.question, answer: r.answer, subsectionId: r.subsectionId }));
+  }
+
+  async listRecentRevisions(limit = 50): Promise<QuestionRevision[]> {
+    await this.ensureFeedbackAgentTables();
+    return db
+      .select()
+      .from(questionRevisions)
+      .orderBy(desc(questionRevisions.createdAt))
+      .limit(limit);
   }
 
   async createOralBoardSession(userId: string, openaiThreadId: string): Promise<OralBoardSession> {

@@ -10,6 +10,12 @@ import { storage } from "../storage";
 import { validateQuestionFormat, contentRulesForGenerated } from "@shared/questionFormat";
 import { postSlackNotification } from "../notifySupport";
 import {
+  formatMemoryBlock,
+  lessonFingerprint,
+  parseLessonDrafts,
+  revisionFinetuneMessages,
+} from "./agentMemory";
+import {
   extractQuestionIdsFromText,
   parseAgentDecision,
   rankCandidates,
@@ -46,6 +52,8 @@ export type FeedbackAgentResult = {
   skipped: number;
   errors: string[];
   digestPosted: boolean;
+  lessonsAdded: number;
+  finetuneExamples: number;
 };
 
 function modelId(): string {
@@ -90,26 +98,31 @@ async function decideWithOpus(params: {
   answer: string;
   reports: string[];
   missNote: string;
-}): Promise<AgentDecision> {
+  system: string;
+}): Promise<{ decision: AgentDecision; userPayload: string; assistantPayload: string | null }> {
   const apiKey = process.env.CLAUDE_API_KEY?.trim();
-  if (!apiKey) {
-    return { action: "skip", reason: "CLAUDE_API_KEY is not set" };
-  }
-  const client = new Anthropic({ apiKey });
-  const user = JSON.stringify({
+  const userPayload = JSON.stringify({
     questionId: params.questionId,
     question: params.question.slice(0, 6000),
     answer: params.answer.slice(0, 4000),
     reports: params.reports.slice(0, 20),
     performance: params.missNote,
   });
+  if (!apiKey) {
+    return {
+      decision: { action: "skip", reason: "CLAUDE_API_KEY is not set" },
+      userPayload,
+      assistantPayload: null,
+    };
+  }
+  const client = new Anthropic({ apiKey });
 
   const create = (extra: Record<string, unknown> = {}) =>
     client.messages.create({
       model: modelId(),
       max_tokens: 8000,
-      system: SYSTEM_PROMPT,
-      messages: [{ role: "user", content: user }],
+      system: params.system,
+      messages: [{ role: "user", content: userPayload }],
       ...extra,
     } as Anthropic.MessageCreateParams);
 
@@ -120,11 +133,16 @@ async function decideWithOpus(params: {
     response = await create();
   }
 
-  const parsed = parseAgentDecision(textFromClaude(response));
+  const raw = textFromClaude(response);
+  const parsed = parseAgentDecision(raw);
   if (!parsed) {
-    return { action: "skip", reason: "Could not parse Opus 5 JSON" };
+    return {
+      decision: { action: "skip", reason: "Could not parse Opus 5 JSON" },
+      userPayload,
+      assistantPayload: null,
+    };
   }
-  return parsed;
+  return { decision: parsed, userPayload, assistantPayload: JSON.stringify(parsed) };
 }
 
 function buildDigest(params: {
@@ -134,10 +152,11 @@ function buildDigest(params: {
   skipped: { id: string; reason: string }[];
   errors: string[];
   candidates: number;
+  lessonsAdded: number;
 }): string {
   const lines = [
     `*Weekly feedback agent* (\`${params.model}\`)`,
-    `Candidates: ${params.candidates} · Revised: ${params.revised.length} · Hidden for manual fix: ${params.needsManual.length} · Skipped: ${params.skipped.length}`,
+    `Candidates: ${params.candidates} · Revised: ${params.revised.length} · Hidden for manual fix: ${params.needsManual.length} · Skipped: ${params.skipped.length} · New memory lessons: ${params.lessonsAdded}`,
   ];
   if (params.needsManual.length) {
     lines.push("");
@@ -172,6 +191,109 @@ function buildDigest(params: {
   return lines.join("\n");
 }
 
+async function backfillFinetuneFromRevisions(system: string): Promise<number> {
+  const existing = await storage.listFinetuneExamples("revision", 1);
+  if (existing.length > 0) return 0;
+  const revs = await storage.listRecentRevisions(200);
+  let n = 0;
+  for (const rev of revs) {
+    if (rev.action !== "revise" && rev.action !== "needs_manual") continue;
+    const assistant =
+      rev.action === "revise"
+        ? JSON.stringify({
+            action: "revise",
+            reason: rev.rationale ?? "",
+            revisedQuestion: rev.newQuestion ?? "",
+            revisedAnswer: rev.newAnswer ?? "",
+          })
+        : JSON.stringify({ action: "needs_manual", reason: rev.rationale ?? "" });
+    const user = JSON.stringify({
+      questionId: rev.questionId,
+      question: (rev.previousQuestion ?? "").slice(0, 6000),
+      answer: (rev.previousAnswer ?? "").slice(0, 4000),
+      source: "backfill",
+    });
+    await storage.createFinetuneExample({
+      kind: "revision",
+      messages: revisionFinetuneMessages({ system, user, assistant }),
+      metadata: { questionId: rev.questionId, action: rev.action, source: "backfill", revisionId: rev.id },
+    });
+    n += 1;
+  }
+  return n;
+}
+
+async function distillLessonsFromRun(params: {
+  system: string;
+  revised: { id: string; reason: string }[];
+  needsManual: { id: string; reason: string }[];
+  skipped: { id: string; reason: string }[];
+  runId: string;
+}): Promise<number> {
+  const existing = await storage.listActiveAgentLessons(40);
+  const hasNewOutcomes =
+    params.revised.length + params.needsManual.length + params.skipped.length > 0;
+  let outcomes = {
+    revised: params.revised.slice(0, 40).map((r) => ({ id: r.id, reason: r.reason })),
+    needsManual: params.needsManual.slice(0, 40).map((r) => ({ id: r.id, reason: r.reason })),
+    skipped: params.skipped.slice(0, 20).map((r) => ({ id: r.id, reason: r.reason })),
+  };
+  if (!hasNewOutcomes && existing.length === 0) {
+    const revs = await storage.listRecentRevisions(80);
+    if (revs.length === 0) return 0;
+    outcomes = {
+      revised: revs
+        .filter((r) => r.action === "revise")
+        .map((r) => ({ id: r.questionId, reason: r.rationale ?? "revised" })),
+      needsManual: revs
+        .filter((r) => r.action === "needs_manual")
+        .map((r) => ({ id: r.questionId, reason: r.rationale ?? "needs manual" })),
+      skipped: [],
+    };
+  } else if (!hasNewOutcomes) {
+    return 0;
+  }
+
+  const apiKey = process.env.CLAUDE_API_KEY?.trim();
+  if (!apiKey) return 0;
+  const client = new Anthropic({ apiKey });
+  const user = JSON.stringify({
+    existingLessons: existing.map((l) => ({ category: l.category, lesson: l.lesson })),
+    thisRun: outcomes,
+  });
+  const distillSystem = `You distill durable editorial rules for Atlas Review MCQ generation and revision.
+Given this week's outcomes and existing lessons, return ONLY new, generalizable rules (not item-specific IDs).
+Categories: media, keying, explanation, format, distractors, difficulty, generation_avoid.
+JSON array only: [{"category":"...","lesson":"..."}]
+If nothing new, return []. Max 8 lessons. Each lesson one sentence.`;
+
+  let response: Anthropic.Message;
+  try {
+    response = await client.messages.create({
+      model: modelId(),
+      max_tokens: 2000,
+      system: distillSystem,
+      messages: [{ role: "user", content: user }],
+    });
+  } catch {
+    return 0;
+  }
+  const drafts = parseLessonDrafts(textFromClaude(response));
+  let added = 0;
+  for (const d of drafts) {
+    const ok = await storage.insertAgentLessonIfNew({
+      category: d.category,
+      lesson: d.lesson,
+      fingerprint: lessonFingerprint(d.lesson),
+      source: "feedback_agent",
+      evidence: { runId: params.runId },
+      active: true,
+    });
+    if (ok) added += 1;
+  }
+  return added;
+}
+
 export async function runFeedbackLearningJob(opts: { force?: boolean } = {}): Promise<FeedbackAgentResult> {
   const model = modelId();
   const empty: FeedbackAgentResult = {
@@ -183,6 +305,8 @@ export async function runFeedbackLearningJob(opts: { force?: boolean } = {}): Pr
     skipped: 0,
     errors: [],
     digestPosted: false,
+    lessonsAdded: 0,
+    finetuneExamples: 0,
   };
 
   if (!opts.force && !(await isFeedbackAgentDue())) {
@@ -226,6 +350,11 @@ export async function runFeedbackLearningJob(opts: { force?: boolean } = {}): Pr
       minReports: allHistory ? 1 : MIN_REPORTS,
     });
 
+    const lessonRows = await storage.listActiveAgentLessons(40);
+    const memoryBlock = formatMemoryBlock(lessonRows);
+    const system = memoryBlock ? `${SYSTEM_PROMPT}\n\n${memoryBlock}` : SYSTEM_PROMPT;
+    let finetuneExamples = await backfillFinetuneFromRevisions(system);
+
     const revised: { id: string; reason: string; before: string; after: string }[] = [];
     const needsManual: { id: string; reason: string }[] = [];
     const skipped: { id: string; reason: string }[] = [];
@@ -240,6 +369,10 @@ export async function runFeedbackLearningJob(opts: { force?: boolean } = {}): Pr
           revised,
           needsManual,
           skipped,
+          system,
+          onFinetune: () => {
+            finetuneExamples += 1;
+          },
           bumpRevise: () => {
             reviseCount += 1;
           },
@@ -250,6 +383,14 @@ export async function runFeedbackLearningJob(opts: { force?: boolean } = {}): Pr
       }
     }
 
+    const lessonsAdded = await distillLessonsFromRun({
+      system,
+      revised,
+      needsManual,
+      skipped,
+      runId: run.id,
+    });
+
     const digestPosted = await postSlackNotification(
       "question-report",
       buildDigest({
@@ -259,6 +400,7 @@ export async function runFeedbackLearningJob(opts: { force?: boolean } = {}): Pr
         skipped,
         errors,
         candidates: candidates.length,
+        lessonsAdded,
       })
     );
 
@@ -268,6 +410,8 @@ export async function runFeedbackLearningJob(opts: { force?: boolean } = {}): Pr
       revised: revised.length,
       needsManual: needsManual.length,
       skipped: skipped.length,
+      lessonsAdded,
+      finetuneExamples,
       errors,
     };
     await storage.finishAgentJobRun(run.id, "success", stats);
@@ -280,6 +424,8 @@ export async function runFeedbackLearningJob(opts: { force?: boolean } = {}): Pr
       skipped: skipped.length,
       errors,
       digestPosted,
+      lessonsAdded,
+      finetuneExamples,
     };
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
@@ -298,6 +444,8 @@ async function processCandidate(
     revised: { id: string; reason: string; before: string; after: string }[];
     needsManual: { id: string; reason: string }[];
     skipped: { id: string; reason: string }[];
+    system: string;
+    onFinetune: () => void;
     bumpRevise: () => void;
   }
 ): Promise<void> {
@@ -312,12 +460,13 @@ async function processCandidate(
       ? "no recent performance sample"
       : `recent miss rate ${(cand.missRate * 100).toFixed(0)}% over ${cand.answered} answers; rank reasons: ${cand.reasons.join(", ")}`;
 
-  const decision = await decideWithOpus({
+  const { decision, userPayload, assistantPayload } = await decideWithOpus({
     questionId: cand.questionId,
     question: q.question,
     answer: q.answer,
     reports: cand.reports.map((r) => r.message),
     missNote,
+    system: ctx.system,
   });
 
   if (decision.action === "needs_manual") {
@@ -333,6 +482,18 @@ async function processCandidate(
       runId: ctx.runId,
     });
     ctx.needsManual.push({ id: cand.questionId, reason: decision.reason });
+    if (assistantPayload) {
+      await storage.createFinetuneExample({
+        kind: "revision",
+        messages: revisionFinetuneMessages({
+          system: ctx.system,
+          user: userPayload,
+          assistant: assistantPayload,
+        }),
+        metadata: { questionId: cand.questionId, action: "needs_manual", runId: ctx.runId },
+      });
+      ctx.onFinetune();
+    }
     return;
   }
 
@@ -392,6 +553,31 @@ async function processCandidate(
     before: q.question,
     after: newQ,
   });
+  if (assistantPayload) {
+    await storage.createFinetuneExample({
+      kind: "revision",
+      messages: revisionFinetuneMessages({
+        system: ctx.system,
+        user: userPayload,
+        assistant: assistantPayload,
+      }),
+      metadata: { questionId: cand.questionId, action: "revise", runId: ctx.runId },
+    });
+    ctx.onFinetune();
+  }
+}
+
+export async function seedAgentMemoryFromHistory(): Promise<{ lessonsAdded: number; finetuneExamples: number }> {
+  const system = SYSTEM_PROMPT;
+  const finetuneExamples = await backfillFinetuneFromRevisions(system);
+  const lessonsAdded = await distillLessonsFromRun({
+    system,
+    revised: [],
+    needsManual: [],
+    skipped: [],
+    runId: "seed",
+  });
+  return { lessonsAdded, finetuneExamples };
 }
 
 if (process.argv[1]?.includes("feedbackLearningJob")) {

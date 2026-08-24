@@ -533,6 +533,50 @@ export const agentJobRuns = pgTable(
 export type AgentJobRun = typeof agentJobRuns.$inferSelect;
 export type InsertAgentJobRun = typeof agentJobRuns.$inferInsert;
 
+/** Distilled rules both the feedback editor and question generator inject into prompts. */
+export const agentLessons = pgTable(
+  "agent_lessons",
+  {
+    id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+    category: varchar("category", { length: 64 }).notNull(),
+    lesson: text("lesson").notNull(),
+    fingerprint: varchar("fingerprint", { length: 64 }).notNull(),
+    source: varchar("source", { length: 64 }).notNull().default("feedback_agent"),
+    evidence: jsonb("evidence").$type<Record<string, unknown>>().default({}).notNull(),
+    active: boolean("active").notNull().default(true),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex("uidx_agent_lessons_fingerprint").on(table.fingerprint),
+    index("idx_agent_lessons_active").on(table.active),
+    index("idx_agent_lessons_created_at").on(table.createdAt),
+  ]
+);
+
+export type AgentLesson = typeof agentLessons.$inferSelect;
+export type InsertAgentLesson = typeof agentLessons.$inferInsert;
+
+/** Prompt/completion pairs for later model fine-tunes (OpenAI/Anthropic JSONL). */
+export const agentFinetuneExamples = pgTable(
+  "agent_finetune_examples",
+  {
+    id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+    kind: varchar("kind", { length: 32 }).notNull(), // revision | generation
+    messages: jsonb("messages")
+      .$type<{ role: string; content: string }[]>()
+      .notNull(),
+    metadata: jsonb("metadata").$type<Record<string, unknown>>().default({}).notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [
+    index("idx_agent_finetune_examples_kind").on(table.kind),
+    index("idx_agent_finetune_examples_created_at").on(table.createdAt),
+  ]
+);
+
+export type AgentFinetuneExample = typeof agentFinetuneExamples.$inferSelect;
+export type InsertAgentFinetuneExample = typeof agentFinetuneExamples.$inferInsert;
+
 /** Oral board simulator: one row per saved chat session (OpenAI thread + UI "Session N"). */
 export const oralBoardSessions = pgTable(
   "oral_board_sessions",

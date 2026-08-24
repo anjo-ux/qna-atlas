@@ -11,6 +11,7 @@ import { storage } from "../storage";
 import { loadReferenceText } from "../utils/loadReferenceText";
 import { subsectionOrder, subsectionTitles } from "@shared/questionImport";
 import { validateQuestionFormat, contentRulesForGenerated } from "@shared/questionFormat";
+import { formatMemoryBlock } from "./agentMemory";
 
 const VALID_SUBSECTION_IDS = new Set(subsectionOrder);
 const SAMPLE_QUESTIONS_LIMIT = 80;
@@ -31,7 +32,7 @@ function getOpenAI(): OpenAI | null {
   return new OpenAI({ apiKey });
 }
 
-function buildSystemPrompt(opts: { count?: number; section?: string } = {}): string {
+function buildSystemPrompt(opts: { count?: number; section?: string; memory?: string } = {}): string {
   const count = opts.count ?? QUESTIONS_PER_RUN;
   const section = opts.section ?? "plastic surgery (use one of the allowed subsection IDs per question)";
   const subsectionList = subsectionOrder
@@ -73,7 +74,11 @@ Output format (strict):
 - subsectionId: Must be exactly one of these IDs: ${subsectionList}
 - tags: Optional array of short topic strings (e.g. ["wound", "healing"]).
 
-Generate only valid JSON. No markdown code fences.`;
+Generate only valid JSON. No markdown code fences.${
+    opts.memory
+      ? `\n\n${opts.memory}\nNever write a question that requires a missing photo, figure, or imaging exhibit. Put all needed findings in the stem text.`
+      : ""
+  }`;
 }
 
 function buildUserPrompt(sampleQuestionsJson: string, referenceExcerpt: string): string {
@@ -141,7 +146,8 @@ function parseGeneratedJson(raw: string): GeneratedQuestion[] {
 
 async function generateWithLLM(
   sampleQuestionsJson: string,
-  referenceText: string
+  referenceText: string,
+  memory: string
 ): Promise<GeneratedQuestion[]> {
   const openai = getOpenAI();
   if (!openai) {
@@ -152,7 +158,7 @@ async function generateWithLLM(
   const response = await openai.chat.completions.create({
     model: process.env.OPENAI_QUESTION_GENERATION_MODEL || "gpt-4o-mini",
     messages: [
-      { role: "system", content: buildSystemPrompt() },
+      { role: "system", content: buildSystemPrompt({ memory }) },
       { role: "user", content: buildUserPrompt(sampleQuestionsJson, refExcerpt) },
     ],
     temperature: 0.6,
@@ -169,15 +175,32 @@ async function generateWithLLM(
 }
 
 export async function runQuestionGenerationJob(): Promise<{ created: number; total: number; skipped: number }> {
-  const existing = await db.select().from(questions).limit(SAMPLE_QUESTIONS_LIMIT);
+  const [existing, revised, lessonRows] = await Promise.all([
+    db.select().from(questions).limit(SAMPLE_QUESTIONS_LIMIT),
+    storage.listRecentRevisedQuestions(30),
+    storage.listActiveAgentLessons(40),
+  ]);
+  const memory = formatMemoryBlock(lessonRows);
+  const stylePool = [
+    ...revised,
+    ...existing.map((q) => ({
+      question: q.question,
+      answer: q.answer,
+      subsectionId: q.subsectionId,
+    })),
+  ].slice(0, SAMPLE_QUESTIONS_LIMIT);
   const existingQuestionTexts = existing.map((q) => q.question);
   const referenceText = await loadReferenceText();
   const sampleJson = JSON.stringify(
-    existing.map((q) => ({ question: q.question, answer: q.answer.slice(0, 500), subsectionId: q.subsectionId })),
+    stylePool.map((q) => ({
+      question: q.question,
+      answer: q.answer.slice(0, 500),
+      subsectionId: q.subsectionId,
+    })),
     null,
     0
   );
-  const toInsert = await generateWithLLM(sampleJson, referenceText);
+  const toInsert = await generateWithLLM(sampleJson, referenceText, memory);
   let created = 0;
   let skipped = 0;
   for (const r of toInsert) {
