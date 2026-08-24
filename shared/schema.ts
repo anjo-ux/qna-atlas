@@ -437,7 +437,7 @@ export const userInstitutionalCodeRedemptions = pgTable(
 export type UserInstitutionalCodeRedemption = typeof userInstitutionalCodeRedemptions.$inferSelect;
 export type InsertUserInstitutionalCodeRedemption = typeof userInstitutionalCodeRedemptions.$inferInsert;
 
-// Question reports - user-reported issues with questions (also emailed to support)
+// Question reports - user-reported issues with questions (stored + Slack)
 export const questionReports = pgTable("question_reports", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   questionId: varchar("question_id", { length: 128 }).notNull(),

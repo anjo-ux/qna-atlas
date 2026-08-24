@@ -212,6 +212,15 @@ export async function sendReportQuestionEmail(
   }
 }
 
+/** Shared limiter for public support intake (contact form). */
+export const supportFormRateLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 8,
+  message: { message: "Too many messages. Please try again later." },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 /** Rate limiter for auth-sensitive endpoints (login, register, forgot-password) to prevent brute force. */
 const authRateLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes

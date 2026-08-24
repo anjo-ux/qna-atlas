@@ -95,6 +95,16 @@ app.use((req, res, next) => {
     if (!sgKey) {
       log("Forgot-password emails will not be sent. Add SENDGRID_API_KEY to your environment (e.g. Replit Secrets) and restart the server.");
     }
+    const slackWebhook =
+      process.env.SLACK_WEBHOOK_URL ||
+      process.env.SLACK_QUESTION_REPORTS_WEBHOOK_URL ||
+      process.env.SLACK_SUPPORT_WEBHOOK_URL;
+    log(`Slack incoming webhooks: ${slackWebhook ? "set" : "NOT SET"}`);
+    if (!slackWebhook) {
+      log(
+        "Question reports and contact form will not post to Slack. Add SLACK_WEBHOOK_URL (or SLACK_QUESTION_REPORTS_WEBHOOK_URL / SLACK_SUPPORT_WEBHOOK_URL) and restart."
+      );
+    }
     const stripeKey = process.env.STRIPE_SECRET_KEY;
     const stripeWebhook = process.env.STRIPE_WEBHOOK_SECRET;
     log(`Stripe: STRIPE_SECRET_KEY=${stripeKey ? "set" : "NOT SET"}, STRIPE_WEBHOOK_SECRET=${stripeWebhook ? "set" : "NOT SET"}`);

@@ -1,15 +1,46 @@
+import { useState } from "react";
 import { MarketingShell } from "@/components/marketing/MarketingShell";
 import { usePageSeo } from "@/lib/usePageSeo";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Mail, Clock, KeyRound, CreditCard, BookOpenCheck, LifeBuoy } from "lucide-react";
 import { Link } from "wouter";
 import { useHostSpecialty } from "@/hooks/useSpecialty";
+import { apiRequest } from "@/lib/queryClient";
+import { toast } from "sonner";
 
 export default function ContactPage() {
   usePageSeo("/contact");
-  const { contactEmail: CONTACT_EMAIL } = useHostSpecialty();
+  const { contactEmail: CONTACT_EMAIL, brandName } = useHostSpecialty();
   const mailtoHref = `mailto:${CONTACT_EMAIL}?subject=Atlas%20Review%20inquiry`;
+
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [subject, setSubject] = useState("");
+  const [message, setMessage] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    try {
+      await apiRequest("/api/contact", {
+        method: "POST",
+        body: JSON.stringify({ name, email, subject, message }),
+      });
+      toast.success("Message sent. We will get back to you soon.");
+      setName("");
+      setEmail("");
+      setSubject("");
+      setMessage("");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to send message.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <MarketingShell>
@@ -29,15 +60,89 @@ export default function ContactPage() {
             </p>
           </header>
 
-          <Card className="mb-10 border-primary/25 bg-primary/5">
+          <Card className="mb-8 border-primary/25 bg-primary/5">
+            <CardHeader>
+              <CardTitle className="text-xl">Send a Message</CardTitle>
+              <CardDescription>
+                This reaches the {brandName} support inbox and our team channel.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleSubmit} className="flex flex-col gap-4" noValidate>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="grid gap-2">
+                    <label htmlFor="contact-name" className="text-sm font-medium">
+                      Name
+                    </label>
+                    <Input
+                      id="contact-name"
+                      name="name"
+                      autoComplete="name"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      required
+                      disabled={isSubmitting}
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <label htmlFor="contact-email" className="text-sm font-medium">
+                      Email
+                    </label>
+                    <Input
+                      id="contact-email"
+                      name="email"
+                      type="email"
+                      autoComplete="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                      disabled={isSubmitting}
+                    />
+                  </div>
+                </div>
+                <div className="grid gap-2">
+                  <label htmlFor="contact-subject" className="text-sm font-medium">
+                    Subject
+                  </label>
+                  <Input
+                    id="contact-subject"
+                    name="subject"
+                    value={subject}
+                    onChange={(e) => setSubject(e.target.value)}
+                    placeholder="Account, billing, content, partnerships…"
+                    disabled={isSubmitting}
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <label htmlFor="contact-message" className="text-sm font-medium">
+                    Message
+                  </label>
+                  <Textarea
+                    id="contact-message"
+                    name="message"
+                    rows={6}
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                    required
+                    disabled={isSubmitting}
+                    className="resize-y"
+                  />
+                </div>
+                <Button type="submit" size="lg" disabled={isSubmitting} className="sm:self-start">
+                  {isSubmitting ? "Sending…" : "Send Message"}
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+
+          <Card className="mb-10">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-xl">
                 <Mail className="h-6 w-6 text-primary" aria-hidden />
-                Email Us
+                Email Us Directly
               </CardTitle>
               <CardDescription>
-                For General Questions, Partnerships, Feedback, Or Anything That Does Not Fit The
-                Categories Below.
+                Prefer your own mail app? You can still write us at the address below.
               </CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -47,7 +152,7 @@ export default function ContactPage() {
               >
                 {CONTACT_EMAIL}
               </a>
-              <Button asChild size="lg" className="glow-primary shrink-0 transition-glow">
+              <Button asChild size="lg" variant="outline" className="shrink-0">
                 <a href={mailtoHref}>Open In Email App</a>
               </Button>
             </CardContent>

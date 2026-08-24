@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { setupAuth, isAuthenticated } from "./customAuth";
+import { setupAuth, isAuthenticated, supportFormRateLimiter } from "./customAuth";
 import { sanitizeUser } from "./authUtils";
 import { createTesterRedirectToken, verifyTesterRedirectToken, ATLAS_TRAINER_CALLBACK_URL } from "./testerToken";
 import { insertTestSessionSchema, updateTestSessionSchema, insertQuestionResponseSchema, insertQuestionSchema } from "@shared/schemas";
@@ -28,6 +28,11 @@ import {
   normalizeInstitutionalCodeForLookup,
 } from "./institutionalAccess";
 import { getSpecialtyForHost, requestHostname } from "./seoPublic";
+import {
+  notifyQuestionReportSlack,
+  notifySupportFormSlack,
+  sendSupportContactEmail,
+} from "./notifySupport";
 
 const ADMIN_CODE = process.env.ADMIN_CODE || "1127";
 
@@ -641,7 +646,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Report question (sends email to support; works with or without auth)
+  // Report question (stored in DB + Slack; works with or without auth)
   app.post('/api/report-question', async (req: any, res) => {
     try {
       const { questionId, message } = req.body ?? {};
@@ -667,19 +672,80 @@ export async function registerRoutes(app: Express): Promise<Server> {
         userId: userId ?? undefined,
       });
       const reportCount = await storage.countQuestionReportsForQuestion(trimmedQuestionId);
+      let autoHidden = false;
       if (reportCount >= 10) {
-        const hid = await storage.hideQuestionDueToReports(trimmedQuestionId);
-        if (hid) {
+        autoHidden = await storage.hideQuestionDueToReports(trimmedQuestionId);
+        if (autoHidden) {
           console.log(
             `[report-question] Question ${trimmedQuestionId} auto-hidden (${reportCount} reports); reported flag set.`
           );
         }
       }
-      // Email disabled for now; reports are stored in DB only. Run npm run summarize:reports to view.
+      await notifyQuestionReportSlack({
+        questionId: trimmedQuestionId,
+        message: trimmedMessage,
+        userEmail,
+        reportCount,
+        autoHidden,
+      });
       res.json({ message: 'Report sent.' });
     } catch (error) {
       console.error('Error sending question report:', error);
       res.status(500).json({ message: 'Failed to send report. Please try again later.' });
+    }
+  });
+
+  const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  app.post('/api/contact', supportFormRateLimiter, async (req: any, res) => {
+    try {
+      const { name, email, subject, message } = req.body ?? {};
+      if (typeof name !== 'string' || !name.trim()) {
+        return res.status(400).json({ message: 'Please enter your name.' });
+      }
+      if (typeof email !== 'string' || !EMAIL_RE.test(email.trim())) {
+        return res.status(400).json({ message: 'Please enter a valid email address.' });
+      }
+      if (typeof message !== 'string' || !message.trim()) {
+        return res.status(400).json({ message: 'Please enter a message.' });
+      }
+      const trimmedName = name.trim().slice(0, 200);
+      const trimmedEmail = email.trim().slice(0, 320);
+      const trimmedSubject =
+        typeof subject === 'string' && subject.trim()
+          ? subject.trim().slice(0, 200)
+          : 'Website inquiry';
+      const trimmedMessage = message.trim().slice(0, 5000);
+      const specialty = getSpecialty(getSpecialtyForHost(requestHostname(req)));
+
+      const [emailed, slacked] = await Promise.all([
+        sendSupportContactEmail({
+          toEmail: specialty.supportEmail,
+          fromName: trimmedName,
+          fromEmail: trimmedEmail,
+          subject: trimmedSubject,
+          message: trimmedMessage,
+          specialtyLabel: specialty.brandName,
+        }),
+        notifySupportFormSlack({
+          fromName: trimmedName,
+          fromEmail: trimmedEmail,
+          subject: trimmedSubject,
+          message: trimmedMessage,
+          specialtyLabel: specialty.brandName,
+        }),
+      ]);
+
+      if (!emailed && !slacked) {
+        return res.status(503).json({
+          message: 'Messaging is temporarily unavailable. Please email us directly.',
+        });
+      }
+
+      res.json({ message: 'Message sent.' });
+    } catch (error) {
+      console.error('Error sending support form:', error);
+      res.status(500).json({ message: 'Failed to send message. Please try again later.' });
     }
   });
 
