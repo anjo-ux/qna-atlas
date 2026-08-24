@@ -59,8 +59,8 @@ export function getCanonicalOrigin(): string {
 }
 
 /**
- * Session `Domain` for a known specialty host. Apex and www must share the cookie —
- * host-only cookies vanish on the www→apex 301, a common Ortho custom-domain failure.
+ * Apex `Domain` (".prs-atlas.com") for a known specialty host.
+ * The session cookie is host-only; this is used to delete legacy domain-scoped cookies.
  */
 export function sessionCookieDomainForHost(rawHost?: string | null): string | undefined {
   const host = normalizeHostname(rawHost);

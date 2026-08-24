@@ -126,9 +126,13 @@ function isPublicPathWithoutAuthGate(p: string): boolean {
   );
 }
 
-function hasSessionCookie(): boolean {
+/**
+ * The session cookie is httpOnly and unreadable here, so the server mirrors it with
+ * `atlas.auth`. Used only to keep a spinner up instead of flashing the landing page.
+ */
+function hasAuthHintCookie(): boolean {
   if (typeof document === "undefined") return false;
-  return document.cookie.split(";").some((part) => part.trim().startsWith("connect.sid="));
+  return document.cookie.split(";").some((part) => part.trim().startsWith("atlas.auth=1"));
 }
 
 function Router() {
@@ -143,7 +147,7 @@ function Router() {
 
   const publicWhileAuthLoading = isPublicPathWithoutAuthGate(pathname);
   const homeWaitingOnSession =
-    normalizeAppPath(pathname) === "/" && isLoading && hasSessionCookie();
+    normalizeAppPath(pathname) === "/" && isLoading && hasAuthHintCookie();
 
   if (!isAdminPage && isLoading && (!publicWhileAuthLoading || homeWaitingOnSession)) {
     return (

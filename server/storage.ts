@@ -2516,12 +2516,15 @@ function sanitizeHandoffNextPath(raw: string | null | undefined): string {
 }
 
 /** Payment Links only — never arbitrary external URLs. */
+/** Payment Links are hosted on buy.stripe.com; Checkout Sessions on checkout.stripe.com. */
+const STRIPE_CHECKOUT_HOSTS = new Set(["buy.stripe.com", "checkout.stripe.com"]);
+
 function sanitizeStripeContinueUrl(raw: string | null | undefined): string | null {
   if (!raw || typeof raw !== "string") return null;
   try {
     const u = new URL(raw.trim());
     if (u.protocol !== "https:") return null;
-    if (u.hostname !== "buy.stripe.com") return null;
+    if (!STRIPE_CHECKOUT_HOSTS.has(u.hostname)) return null;
     return u.toString().slice(0, 1024);
   } catch {
     return null;

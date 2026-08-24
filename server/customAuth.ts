@@ -3,7 +3,7 @@ import bcrypt from 'bcrypt';
 import session from 'express-session';
 import rateLimit from 'express-rate-limit';
 import sgMail from '@sendgrid/mail';
-import type { Express, Request, RequestHandler } from 'express';
+import type { Express, Request, RequestHandler, Response } from 'express';
 import connectPg from 'connect-pg-simple';
 import { isAllowedTrainingLevel } from "@shared/trainingLevels";
 import {
@@ -13,11 +13,42 @@ import {
   type SpecialtyId,
 } from "@shared/specialties";
 import { storage } from './storage';
-import { getCanonicalOriginForHost, getSpecialtyForHost, requestHostname } from './seoPublic';
+import {
+  getCanonicalOriginForHost,
+  getSpecialtyForHost,
+  requestHostname,
+  sessionCookieDomainForHost,
+} from './seoPublic';
 import { sanitizeUser } from './authUtils';
 
 const SALT_ROUNDS = 12; // Strong password hashing
 const SESSION_TTL = 7 * 24 * 60 * 60 * 1000; // 7 days
+
+/**
+ * Renamed from `connect.sid`: a previous deploy issued a `Domain=.prs-atlas.com`
+ * cookie, so browsers now hold two cookies with that name. Express reads whichever
+ * arrives first, which can be the stale one, leaving the user permanently logged out.
+ */
+const SESSION_COOKIE_NAME = 'atlas.sid';
+const LEGACY_SESSION_COOKIE_NAME = 'connect.sid';
+/** JS-readable marker so the SPA can hold a spinner instead of flashing the landing page. */
+const AUTH_HINT_COOKIE_NAME = 'atlas.auth';
+
+function requestCookieHeader(req: Request): string {
+  return typeof req.headers.cookie === 'string' ? req.headers.cookie : '';
+}
+
+function requestHasCookie(req: Request, name: string): boolean {
+  return requestCookieHeader(req)
+    .split(';')
+    .some((part) => part.trim().startsWith(`${name}=`));
+}
+
+/** Apex domain for the current specialty host, used only to delete legacy domain cookies. */
+function legacyCookieDomain(req: Request): string | undefined {
+  const domain = sessionCookieDomainForHost(requestHostname(req));
+  return domain ?? undefined;
+}
 
 function getSessionSecret(): string {
   const secret = process.env.SESSION_SECRET;
@@ -37,6 +68,7 @@ export function getSession() {
   });
 
   return session({
+    name: SESSION_COOKIE_NAME,
     secret: getSessionSecret(),
     store: sessionStore,
     resave: false,
@@ -50,8 +82,24 @@ export function getSession() {
       sameSite: "lax",
       maxAge: SESSION_TTL,
       path: "/",
+      // Host-only on purpose: each specialty domain owns its own session.
     },
   });
+}
+
+/** Marks the browser as signed in so the SPA does not render Landing before auth resolves. */
+function setAuthHintCookie(req: Request, res: Response): void {
+  res.cookie(AUTH_HINT_COOKIE_NAME, '1', {
+    httpOnly: false,
+    secure: req.secure,
+    sameSite: 'lax',
+    maxAge: SESSION_TTL,
+    path: '/',
+  });
+}
+
+function clearAuthHintCookie(req: Request, res: Response): void {
+  res.clearCookie(AUTH_HINT_COOKIE_NAME, { path: '/', sameSite: 'lax', secure: req.secure });
 }
 
 export async function hashPassword(password: string): Promise<string> {
@@ -177,6 +225,25 @@ export async function setupAuth(app: Express) {
   app.set('trust proxy', 1);
   app.use(getSession());
 
+  app.use((req, res, next) => {
+    // A leftover `connect.sid` (host-only or `Domain=.prs-atlas.com`) can arrive ahead of
+    // the real session cookie, so delete both variants once the browser stops sending it.
+    if (requestHasCookie(req, LEGACY_SESSION_COOKIE_NAME)) {
+      const secure = req.secure;
+      res.clearCookie(LEGACY_SESSION_COOKIE_NAME, { path: '/', sameSite: 'lax', secure });
+      const domain = legacyCookieDomain(req);
+      if (domain) {
+        res.clearCookie(LEGACY_SESSION_COOKIE_NAME, { path: '/', sameSite: 'lax', secure, domain });
+      }
+    }
+
+    const signedIn = Boolean((req as any).session?.userId);
+    const hasHint = requestHasCookie(req, AUTH_HINT_COOKIE_NAME);
+    if (signedIn && !hasHint) setAuthHintCookie(req, res);
+    if (!signedIn && hasHint) clearAuthHintCookie(req, res);
+    next();
+  });
+
   // Forgot password route
   app.post('/api/auth/forgot-password', authRateLimiter, async (req, res) => {
     try {
@@ -266,6 +333,7 @@ export async function setupAuth(app: Express) {
           console.error('Session Save Error:', err);
           return res.status(500).json({ message: 'Session Creation Failed.' });
         }
+        setAuthHintCookie(req, res);
         res.json({ success: true, user: sanitizeUser(user), passwordNeedsReset: user.passwordNeedsReset || false });
       });
     } catch (error) {
@@ -460,6 +528,7 @@ export async function setupAuth(app: Express) {
           console.error('Session save error:', err);
           return res.status(500).json({ message: 'Session creation failed.' });
         }
+        setAuthHintCookie(req, res);
         res.status(201).json({ success: true, user: sanitizeUser(newUser) });
       });
     } catch (error) {
@@ -484,11 +553,16 @@ export async function setupAuth(app: Express) {
     return `${authPublicOrigin(req)}/api/auth/google/callback`;
   }
 
-  function establishSession(req: Request, user: Awaited<ReturnType<typeof storage.getUser>>) {
+  function establishSession(
+    req: Request,
+    res: Response,
+    user: Awaited<ReturnType<typeof storage.getUser>>,
+  ) {
     if (!user) return;
     (req as any).session.userId = user.id;
     (req as any).session.user = sanitizeUser(user);
     (req as any).user = user;
+    setAuthHintCookie(req, res);
   }
 
   app.get('/api/auth/google/status', (_req, res) => {
@@ -629,7 +703,7 @@ export async function setupAuth(app: Express) {
         console.error("Failed to pin active specialty on Google login:", specialtyErr);
       }
 
-      establishSession(req, user);
+      establishSession(req, res, user);
       (req as any).session.save((err: Error | null) => {
         if (err) {
           console.error('Google OAuth session save error:', err);
@@ -643,13 +717,39 @@ export async function setupAuth(app: Express) {
     }
   });
 
+  /**
+   * Cookie/host diagnostics for the two custom domains. Reports cookie *names* and
+   * booleans only — never session contents or user data.
+   */
+  app.get('/api/auth/session-debug', (req, res) => {
+    const cookieNames = requestCookieHeader(req)
+      .split(';')
+      .map((part) => part.trim().split('=')[0])
+      .filter(Boolean);
+    const host = requestHostname(req);
+    res.json({
+      host,
+      hostHeader: req.headers.host ?? null,
+      forwardedHost: req.headers['x-forwarded-host'] ?? null,
+      forwardedProto: req.headers['x-forwarded-proto'] ?? null,
+      reqSecure: req.secure,
+      specialty: getSpecialtyForHost(host),
+      cookieNames,
+      hasSessionCookie: cookieNames.includes(SESSION_COOKIE_NAME),
+      hasLegacyCookie: cookieNames.includes(LEGACY_SESSION_COOKIE_NAME),
+      signedIn: Boolean((req as any).session?.userId),
+    });
+  });
+
   // Logout route
   app.post('/api/auth/logout', (req, res) => {
     (req as any).session.destroy((err: any) => {
       if (err) {
         return res.status(500).json({ message: 'Logout failed.' });
       }
-      res.clearCookie('connect.sid');
+      res.clearCookie(SESSION_COOKIE_NAME, { path: '/', sameSite: 'lax', secure: req.secure });
+      res.clearCookie(LEGACY_SESSION_COOKIE_NAME, { path: '/', sameSite: 'lax', secure: req.secure });
+      clearAuthHintCookie(req, res);
       res.json({ success: true });
     });
   });
@@ -721,18 +821,23 @@ export async function setupAuth(app: Express) {
 
       await storage.setActiveSpecialty(consumed.userId, consumed.targetSpecialtyId);
 
-      const session = (req as any).session;
       await new Promise<void>((resolve, reject) => {
-        session.regenerate((err: Error | null) => {
+        (req as any).session.regenerate((err: Error | null) => {
           if (err) {
             reject(err);
             return;
           }
-          session.userId = user.id;
-          session.user = sanitizeUser(user);
-          session.save((saveErr: Error | null) => (saveErr ? reject(saveErr) : resolve()));
+          // regenerate() swaps in a brand-new session under a new id, so the identity
+          // must be written to req.session here — a reference captured earlier points
+          // at the destroyed session and would leave the new cookie signed in to nothing.
+          const fresh = (req as any).session;
+          fresh.userId = user.id;
+          fresh.user = sanitizeUser(user);
+          fresh.save((saveErr: Error | null) => (saveErr ? reject(saveErr) : resolve()));
         });
       });
+
+      setAuthHintCookie(req, res);
 
       if (consumed.continueExternalUrl) {
         return res.redirect(302, consumed.continueExternalUrl);
