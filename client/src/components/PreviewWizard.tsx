@@ -39,15 +39,15 @@ export function PreviewWizard({ open, onClose, onStart, specialtyOverride }: Pre
       icon: Target,
       content: (
         <div className="space-y-3">
-          <Card className="p-3 border-l-4 border-l-primary">
+          <Card className="rounded-xl p-3 border-l-4 border-l-primary">
             <p className="font-medium text-sm text-foreground">Multiple Choice Questions</p>
             <p className="text-xs text-muted-foreground mt-1">Answer questions to test your knowledge and identify weak areas.</p>
           </Card>
-          <Card className="p-3 border-l-4 border-l-chart-1">
+          <Card className="rounded-xl p-3 border-l-4 border-l-chart-1">
             <p className="font-medium text-sm text-foreground">Reference Materials</p>
             <p className="text-xs text-muted-foreground mt-1">Access detailed reference text alongside questions.</p>
           </Card>
-          <Card className="p-3 border-l-4 border-l-chart-2">
+          <Card className="rounded-xl p-3 border-l-4 border-l-chart-2">
             <p className="font-medium text-sm text-foreground">Progress Tracking</p>
             <p className="text-xs text-muted-foreground mt-1">Monitor your performance and focus on improvements with spaced repetition, bookmarking, and personlized reviews.</p>
           </Card>
@@ -61,7 +61,7 @@ export function PreviewWizard({ open, onClose, onStart, specialtyOverride }: Pre
       content: (
         <div className="space-y-3">
           <div className="flex gap-3">
-            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
               <span className="text-sm font-bold text-primary">✓</span>
             </div>
             <div>
@@ -70,7 +70,7 @@ export function PreviewWizard({ open, onClose, onStart, specialtyOverride }: Pre
             </div>
           </div>
           <div className="flex gap-3">
-            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
               <span className="text-sm font-bold text-primary">✓</span>
             </div>
             <div>
@@ -79,7 +79,7 @@ export function PreviewWizard({ open, onClose, onStart, specialtyOverride }: Pre
             </div>
           </div>
           <div className="flex gap-3">
-            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
               <span className="text-sm font-bold text-primary">✓</span>
             </div>
             <div>
@@ -96,11 +96,11 @@ export function PreviewWizard({ open, onClose, onStart, specialtyOverride }: Pre
       icon: Lock,
       content: (
         <div className="space-y-4">
-          <Card className="p-4 bg-primary/5 border-primary/20">
+          <Card className="rounded-xl p-4 bg-primary/5 border-primary/20">
             <p className="text-sm text-foreground font-medium">20 Sample Questions</p>
             <p className="text-xs text-muted-foreground mt-2">Experience the full platform with this curated set of questions from all topics.</p>
           </Card>
-          <Card className="p-4 bg-accent/5 border-accent/20">
+          <Card className="rounded-xl p-4 bg-accent/5 border-accent/20">
             <p className="text-sm text-foreground font-medium">Sign Up For Full Access</p>
             <p className="text-xs text-muted-foreground mt-2">
               {isOrtho
@@ -133,16 +133,16 @@ export function PreviewWizard({ open, onClose, onStart, specialtyOverride }: Pre
 
         <div className="flex gap-3">
           {step > 0 && (
-            <Button variant="outline" onClick={() => setStep(step - 1)} className="flex-1">
+            <Button variant="outline" onClick={() => setStep(step - 1)} className="flex-1 rounded-xl">
               Back
             </Button>
           )}
           {step < steps.length - 1 ? (
-            <Button onClick={() => setStep(step + 1)} className="flex-1">
+            <Button onClick={() => setStep(step + 1)} className="flex-1 rounded-xl">
               Next <ChevronRight className="ml-2 w-4 h-4" />
             </Button>
           ) : (
-            <Button onClick={onStart} className="flex-1">
+            <Button onClick={onStart} className="flex-1 rounded-xl">
               Start Preview Test
             </Button>
           )}

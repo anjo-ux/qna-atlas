@@ -5,6 +5,7 @@ import { SubscriptionPlans } from '@/components/SubscriptionPlans';
 import { useAuth } from '@/hooks/useAuth';
 import { useState } from 'react';
 import { SubscriptionTransactionHistoryDialog } from '@/components/SubscriptionTransactionHistoryDialog';
+import { ThemeSwitcher } from '@/components/ui/theme-switcher';
 import { useTheme } from '@/hooks/useTheme';
 import { useSpecialty } from '@/hooks/useSpecialty';
 import { SpecialtySwitcher } from '@/components/SpecialtySwitcher';
@@ -27,7 +28,7 @@ export type SubscriptionPageProps = {
 export default function SubscriptionPage({ onSubscriptionUnlocked }: SubscriptionPageProps) {
   const [, setLocation] = useLocation();
   const { logout } = useAuth();
-  const { theme } = useTheme();
+  const { resolvedTheme } = useTheme();
   const { specialty } = useSpecialty();
   const [transactionHistoryOpen, setTransactionHistoryOpen] = useState(false);
 
@@ -60,7 +61,7 @@ export default function SubscriptionPage({ onSubscriptionUnlocked }: Subscriptio
               </Button>
               <div className="flex items-center gap-3 min-w-0 px-4 py-1.5 rounded-xl">
                 <div className="logo-glass flex items-center justify-center p-1.5 flex-shrink-0 ring-1 ring-black/5 dark:ring-white/10">
-                  <img src={theme === 'dark' ? atlasLogoLight : atlasLogo} alt="Atlas Logo" className="h-7 w-7 sm:h-8 sm:w-8 object-contain" />
+                  <img src={resolvedTheme === 'dark' ? atlasLogoLight : atlasLogo} alt="Atlas Logo" className="h-7 w-7 sm:h-8 sm:w-8 object-contain" />
                 </div>
                 <div className="hidden sm:flex flex-col min-w-0">
                   <span className="text-base sm:text-lg font-bold tracking-tight gradient-text leading-tight truncate">
@@ -73,6 +74,7 @@ export default function SubscriptionPage({ onSubscriptionUnlocked }: Subscriptio
               </div>
             </div>
             <div className="flex-1" />
+            <ThemeSwitcher />
             <SpecialtySwitcher className="flex-shrink-0" />
             <Button
               onClick={() => setTransactionHistoryOpen(true)}

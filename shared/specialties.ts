@@ -72,8 +72,8 @@ export const SPECIALTIES: Record<SpecialtyId, SpecialtyConfig> = {
     hosts: ["prs-atlas.com", "www.prs-atlas.com"],
     canonicalOrigin: "https://prs-atlas.com",
     legalEntity: "PRS Atlas, LLC",
-    contactEmail: "hello@prs-atlas.com",
-    supportEmail: "support@prsatlas.com",
+    contactEmail: "support@prs-atlas.com",
+    supportEmail: "support@prs-atlas.com",
     instagramUrl: "https://www.instagram.com/prs_atlas?igsh=bDk1dmtld2Uzdnpt",
     contentIdPrefix: "",
     marketing: {
@@ -117,8 +117,8 @@ export const SPECIALTIES: Record<SpecialtyId, SpecialtyConfig> = {
     hosts: ["ortho-atlas.com", "www.ortho-atlas.com"],
     canonicalOrigin: "https://ortho-atlas.com",
     legalEntity: "PRS Atlas, LLC",
-    contactEmail: "hello@ortho-atlas.com",
-    supportEmail: "support@prsatlas.com",
+    contactEmail: "support@ortho-atlas.com",
+    supportEmail: "support@ortho-atlas.com",
     instagramUrl: "https://www.instagram.com/prs_atlas?igsh=bDk1dmtld2Uzdnpt",
     contentIdPrefix: "ortho-",
     /** Placeholder copy until the Ortho question bank and final branding land. */

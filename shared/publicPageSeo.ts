@@ -63,12 +63,12 @@ const PRS_PAGE_SEO: Record<string, PublicPageSeo> = {
   "/contact": {
     title: "Contact Atlas Review | Support, Billing & Partnerships",
     description:
-      "How to reach Atlas Review: email hello@prs-atlas.com for accounts, billing, and feedback—support for trainees, programs, and institutional access questions.",
+      "How to reach Atlas Review: email support@prs-atlas.com for accounts, billing, and feedback—support for trainees, programs, and institutional access questions.",
     keywords:
-      "Atlas Review contact, plastic surgery app support, hello@prs-atlas.com, billing help Atlas Review, institutional access contact",
+      "Atlas Review contact, plastic surgery app support, support@prs-atlas.com, billing help Atlas Review, institutional access contact",
     ogTitle: "Contact Atlas Review | Help & Billing",
     ogDescription:
-      "Get account help, billing answers, or partnership inquiries—reach our team at hello@prs-atlas.com.",
+      "Get account help, billing answers, or partnership inquiries—reach our team at support@prs-atlas.com.",
   },
   "/pricing": {
     title: "Atlas Review Pricing | Plastic Surgery Board Prep Plans",
@@ -91,19 +91,19 @@ const PRS_PAGE_SEO: Record<string, PublicPageSeo> = {
       "Interactive oral board-style practice for plastic surgery—streaming sessions, feedback, and history alongside your Q&A bank.",
   },
   "/terms": {
-    title: "Terms of Use | Atlas Review (PRS Atlas, LLC)",
+    title: "Terms | Atlas Review (PRS Atlas, LLC)",
     description:
-      "Terms of Use for Atlas Review at prs-atlas.com: subscriptions, accounts, acceptable use, intellectual property, limitation of liability, and governing law for PRS Atlas, LLC.",
+      "Terms of Use for Atlas Review at prs-atlas.com and ortho-atlas.com: subscriptions, accounts, acceptable use, intellectual property, limitation of liability, and governing law for PRS Atlas, LLC.",
     keywords:
       "Atlas Review terms of use, PRS Atlas terms, plastic surgery app legal, subscription terms Atlas Review",
-    ogTitle: "Terms of Use | Atlas Review",
+    ogTitle: "Terms | Atlas Review",
     ogDescription:
-      "Terms governing use of Atlas Review and prs-atlas.com, including subscriptions and acceptable use.",
+      "Terms governing use of Atlas Review at prs-atlas.com and ortho-atlas.com, including subscriptions and acceptable use.",
   },
   "/privacy": {
     title: "Privacy Policy | Atlas Review | PRS Atlas, LLC",
     description:
-      "Privacy Policy for Atlas Review: what data we collect, how we use it, sharing, retention, California privacy rights, and contacting support@prsatlas.com or via prs-atlas.com.",
+      "Privacy Policy for Atlas Review: what data we collect, how we use it, sharing, retention, California privacy rights, and contacting support@prs-atlas.com or via prs-atlas.com and ortho-atlas.com.",
     keywords:
       "Atlas Review privacy policy, PRS Atlas privacy, California privacy rights, medical education app privacy",
     ogTitle: "Privacy Policy | Atlas Review",
@@ -156,12 +156,12 @@ const ORTHO_PAGE_SEO: Record<string, PublicPageSeo> = {
   "/contact": {
     title: "Contact Ortho Atlas | Support, Billing & Partnerships",
     description:
-      "How to reach Ortho Atlas: email hello@ortho-atlas.com for accounts, billing, and feedback—support for trainees, programs, and institutional access questions.",
+      "How to reach Ortho Atlas: email support@ortho-atlas.com for accounts, billing, and feedback—support for trainees, programs, and institutional access questions.",
     keywords:
-      "Ortho Atlas contact, orthopaedic app support, hello@ortho-atlas.com, billing help Ortho Atlas, institutional access contact",
+      "Ortho Atlas contact, orthopaedic app support, support@ortho-atlas.com, billing help Ortho Atlas, institutional access contact",
     ogTitle: "Contact Ortho Atlas | Help & Billing",
     ogDescription:
-      "Get account help, billing answers, or partnership inquiries—reach our team at hello@ortho-atlas.com.",
+      "Get account help, billing answers, or partnership inquiries—reach our team at support@ortho-atlas.com.",
   },
   "/pricing": {
     title: "Ortho Atlas Pricing | Orthopaedic Board Prep Plans",
@@ -174,19 +174,19 @@ const ORTHO_PAGE_SEO: Record<string, PublicPageSeo> = {
       "Flexible pricing for orthopaedic board prep—monthly, 6-month, and annual access with the full feature set.",
   },
   "/terms": {
-    title: "Terms of Use | Ortho Atlas (PRS Atlas, LLC)",
+    title: "Terms | Ortho Atlas (PRS Atlas, LLC)",
     description:
-      "Terms of Use for Ortho Atlas at ortho-atlas.com: subscriptions, accounts, acceptable use, intellectual property, limitation of liability, and governing law for PRS Atlas, LLC.",
+      "Terms of Use for Ortho Atlas at ortho-atlas.com and prs-atlas.com: subscriptions, accounts, acceptable use, intellectual property, limitation of liability, and governing law for PRS Atlas, LLC.",
     keywords:
       "Ortho Atlas terms of use, orthopaedic app legal, subscription terms Ortho Atlas",
-    ogTitle: "Terms of Use | Ortho Atlas",
+    ogTitle: "Terms | Ortho Atlas",
     ogDescription:
-      "Terms governing use of Ortho Atlas and ortho-atlas.com, including subscriptions and acceptable use.",
+      "Terms governing use of Ortho Atlas at ortho-atlas.com and prs-atlas.com, including subscriptions and acceptable use.",
   },
   "/privacy": {
     title: "Privacy Policy | Ortho Atlas | PRS Atlas, LLC",
     description:
-      "Privacy Policy for Ortho Atlas: what data we collect, how we use it, sharing, retention, California privacy rights, and contacting support@prsatlas.com or via ortho-atlas.com.",
+      "Privacy Policy for Ortho Atlas: what data we collect, how we use it, sharing, retention, California privacy rights, and contacting support@ortho-atlas.com or via ortho-atlas.com and prs-atlas.com.",
     keywords:
       "Ortho Atlas privacy policy, orthopaedic app privacy, California privacy rights, medical education app privacy",
     ogTitle: "Privacy Policy | Ortho Atlas",

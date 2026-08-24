@@ -5,7 +5,7 @@ import { Label } from '@/components/ui/label';
 import { ArrowLeft, Mail, CreditCard, BookOpen, TrendingUp, Target, Save, ChevronRight, ChevronLeft, Check, ChevronsUpDown, Award, ExternalLink, Lock } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { ThemeToggle } from '@/components/ThemeToggle';
+import { ThemeSwitcher } from '@/components/ui/theme-switcher';
 import { QuestionBreakdownCharts } from '@/components/QuestionBreakdownCharts';
 import { SubscriptionManager } from '@/components/SubscriptionManager';
 import { MobileSubscriptionWidget } from '@/components/MobileSubscriptionWidget';
@@ -243,7 +243,7 @@ export function Settings({ onBack, subscription }: SettingsProps) {
             <h1 className="truncate text-2xl font-bold text-foreground sm:text-3xl">Settings</h1>
           </div>
           <div className="flex shrink-0 items-center">
-            <ThemeToggle />
+            <ThemeSwitcher />
           </div>
         </div>
       </div>

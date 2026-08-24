@@ -8,7 +8,6 @@ import { useTestSessions } from '@/hooks/useTestSessions';
 import { useAuth } from '@/hooks/useAuth';
 import { useSpecialty } from '@/hooks/useSpecialty';
 import { TestHistory } from '@/components/TestHistory';
-import { ThemeToggle } from '@/components/ThemeToggle';
 import { Section } from '@/types/question';
 import { cn } from '@/lib/utils';
 import { BookOpen, Trophy, X, BarChart3, Crosshair, ChevronRight, RotateCcw, Lightbulb, Zap, LogOut, User, Settings, Eye, Smile, Sparkles, Heart, Rocket, Flame, Crown, Coffee, Moon, Sun, Star, Target, CheckCircle2, AlertCircle } from 'lucide-react';
@@ -197,7 +196,6 @@ export function HomePage({ sections, onNavigate, onReviewIncorrect, onStartTest,
           </p>
         </div>
         <div className="flex items-center gap-1 sm:gap-2 md:gap-3 flex-shrink-0">
-          <ThemeToggle />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button

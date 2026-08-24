@@ -54,7 +54,7 @@ export function LandingHomeSurface({ children, className }: LandingHomeSurfacePr
     <div
       ref={rootRef}
       className={cn(
-        "relative flex flex-col [--landing-glow-x:50%] [--landing-glow-y:22%]",
+        "relative flex min-w-0 flex-col overflow-x-hidden [--landing-glow-x:50%] [--landing-glow-y:22%]",
         className,
       )}
     >

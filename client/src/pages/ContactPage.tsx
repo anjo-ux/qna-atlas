@@ -20,7 +20,7 @@ export default function ContactPage() {
               We Are Here To Help
             </p>
             <h1 className="mb-4 text-4xl font-bold leading-snug tracking-tight gradient-text sm:text-5xl">
-              Contact Us
+              Contact
             </h1>
             <p className="mx-auto max-w-2xl text-lg leading-relaxed text-muted-foreground sm:mx-0">
               Whether you are onboarding your first study block or troubleshooting access, start
@@ -126,7 +126,7 @@ export default function ContactPage() {
           <p className="text-center text-sm text-muted-foreground sm:text-left">
             Learn more about our product philosophy on the{" "}
             <Link href="/about" className="font-medium text-primary hover:underline">
-              About Us
+              About
             </Link>{" "}
             page.
           </p>

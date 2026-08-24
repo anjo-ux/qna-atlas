@@ -34,7 +34,7 @@ export const users = pgTable("users", {
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
   avatarIcon: varchar("avatar_icon").default('smile'),
-  themePreference: varchar("theme_preference").default('light'), // 'light' or 'dark'
+  themePreference: varchar("theme_preference").default('light'), // 'system', 'light', or 'dark'
   institutionalAffiliation: varchar("institutional_affiliation"), // Profile only: user's registered/display affiliation (settings, signup)
   /** Signup-only; internal analytics. Not returned on SanitizedUser. */
   trainingLevel: varchar("training_level"),

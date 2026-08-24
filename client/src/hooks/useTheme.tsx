@@ -1,27 +1,57 @@
 import { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { useAuth } from './useAuth';
 
-type Theme = 'light' | 'dark';
+export type ThemePreference = 'system' | 'light' | 'dark';
+export type ResolvedTheme = 'light' | 'dark';
 
 interface ThemeContextType {
-  theme: Theme;
-  setTheme: (theme: Theme) => void;
+  theme: ThemePreference;
+  resolvedTheme: ResolvedTheme;
+  setTheme: (theme: ThemePreference) => void;
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
+function parseTheme(value: unknown): ThemePreference | null {
+  if (value === 'system' || value === 'light' || value === 'dark') return value;
+  return null;
+}
+
+function readStoredTheme(): ThemePreference {
+  if (typeof window === 'undefined') return 'system';
+  return parseTheme(localStorage.getItem('theme')) ?? 'system';
+}
+
+function resolveTheme(preference: ThemePreference): ResolvedTheme {
+  if (preference === 'system') {
+    if (typeof window === 'undefined') return 'light';
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  }
+  return preference;
+}
+
+function applyResolvedTheme(resolved: ResolvedTheme) {
+  const isDark = resolved === 'dark';
+  const html = document.documentElement;
+  const body = document.body;
+  const root = document.getElementById('root');
+  html.classList.toggle('dark', isDark);
+  body.classList.toggle('dark', isDark);
+  if (root) root.classList.toggle('dark', isDark);
+}
+
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const { user, isAuthenticated } = useAuth();
-  const [theme, setThemeState] = useState<Theme>('light');
+  const [theme, setThemeState] = useState<ThemePreference>(readStoredTheme);
+  const [resolvedTheme, setResolvedTheme] = useState<ResolvedTheme>(() => resolveTheme(readStoredTheme()));
   const [themeLoaded, setThemeLoaded] = useState(false);
 
-  // Load theme from database when user logs in
   useEffect(() => {
     if (isAuthenticated && user) {
       fetch('/api/theme')
         .then(res => res.json())
         .then(data => {
-          const loadedTheme = (data.theme === 'light' || data.theme === 'dark') ? data.theme : 'light';
+          const loadedTheme = parseTheme(data.theme) ?? readStoredTheme();
           setThemeState(loadedTheme);
           setThemeLoaded(true);
         })
@@ -29,35 +59,35 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
           setThemeLoaded(true);
         });
     } else {
-      // For unauthenticated users, default to light mode
-      setThemeState('light');
+      setThemeState(readStoredTheme());
       setThemeLoaded(true);
     }
   }, [isAuthenticated, user]);
 
-  // Apply theme to DOM
   useEffect(() => {
     if (!themeLoaded) return;
 
-    const html = document.documentElement;
-    const body = document.body;
-    const root = document.getElementById('root');
-    
-    if (theme === 'dark') {
-      html.classList.add('dark');
-      body.classList.add('dark');
-      if (root) root.classList.add('dark');
-    } else {
-      html.classList.remove('dark');
-      body.classList.remove('dark');
-      if (root) root.classList.remove('dark');
-    }
+    const apply = () => {
+      const resolved = resolveTheme(theme);
+      setResolvedTheme(resolved);
+      applyResolvedTheme(resolved);
+      localStorage.setItem('theme', theme);
+    };
+
+    apply();
+
+    if (theme !== 'system') return;
+
+    const media = window.matchMedia('(prefers-color-scheme: dark)');
+    const onChange = () => apply();
+    media.addEventListener('change', onChange);
+    return () => media.removeEventListener('change', onChange);
   }, [theme, themeLoaded]);
 
-  const setTheme = useCallback((newTheme: Theme) => {
+  const setTheme = useCallback((newTheme: ThemePreference) => {
     setThemeState(newTheme);
-    
-    // Sync to database if authenticated
+    localStorage.setItem('theme', newTheme);
+
     if (isAuthenticated) {
       fetch('/api/theme', {
         method: 'POST',
@@ -68,7 +98,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   }, [isAuthenticated]);
 
   return (
-    <ThemeContext.Provider value={{ theme, setTheme }}>
+    <ThemeContext.Provider value={{ theme, resolvedTheme, setTheme }}>
       {children}
     </ThemeContext.Provider>
   );

@@ -23,6 +23,7 @@ import { cn } from '@/lib/utils';
 import ReactMarkdown from 'react-markdown';
 import { toast } from 'sonner';
 import { normalizeAnswerExplanationForDisplay } from '@shared/questionFormat';
+import { ThemeSwitcher } from '@/components/ui/theme-switcher';
 
 interface SpacedRepetitionProps {
   onBack: () => void;
@@ -238,11 +239,14 @@ export function SpacedRepetitionPage({ onBack }: SpacedRepetitionProps) {
               </h1>
             </div>
           </div>
-          <div className="shrink-0 text-right">
+          <div className="flex shrink-0 items-center gap-3">
+            <ThemeSwitcher />
+            <div className="text-right">
             <p className="text-xs text-muted-foreground sm:text-sm">Remaining Questions</p>
             <p className="text-xl font-bold text-primary sm:text-2xl">
               {sections.length > 0 ? filtered.length : incorrectIds.size}
             </p>
+            </div>
           </div>
         </div>
         <Input

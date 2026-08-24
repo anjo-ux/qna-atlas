@@ -259,10 +259,12 @@ export function AtlasWayTestModeDemo({ compact = false }: AtlasWayTestModeDemoPr
       role="region"
       aria-label="Interactive demonstration of Atlas Review test mode user interface"
     >
-      <div className="flex items-center justify-between gap-2 border-b border-primary/20 bg-primary/10 px-3 py-2 sm:px-4">
-        <div className="flex items-center gap-2 text-xs font-medium text-primary sm:text-sm">
-          <MonitorSmartphone className="h-4 w-4 shrink-0" aria-hidden />
-          <span>Sample Test UI · Illustrative Only. Not Your Personal Session Or Score</span>
+      <div className="flex min-w-0 items-start justify-between gap-2 border-b border-primary/20 bg-primary/10 px-2 py-2 sm:items-center sm:px-4">
+        <div className="flex min-w-0 items-start gap-2 text-xs font-medium text-primary sm:items-center sm:text-sm">
+          <MonitorSmartphone className="mt-0.5 h-4 w-4 shrink-0 sm:mt-0" aria-hidden />
+          <span className="min-w-0 text-pretty leading-snug">
+            Sample Test UI · Illustrative Only. Not Your Personal Session Or Score
+          </span>
         </div>
         <div
           className="hidden items-center gap-1.5 rounded-full border border-border/80 bg-background/90 px-2.5 py-1 font-mono text-xs tabular-nums text-muted-foreground sm:flex"
@@ -277,19 +279,19 @@ export function AtlasWayTestModeDemo({ compact = false }: AtlasWayTestModeDemoPr
         className={cn(
           "flex flex-col md:flex-row",
           compact
-            ? "min-h-[min(17rem,42vh)] md:min-h-[300px]"
+            ? "min-h-0 md:min-h-[300px]"
             : "min-h-[min(28rem,70vh)] md:min-h-[420px]",
         )}
       >
         {/* Question navigator mirrors Test Mode sidebar */}
         <aside className="flex w-full flex-shrink-0 flex-col border-b border-border bg-muted/30 md:w-36 md:border-b-0 md:border-r">
-          <div className="border-b border-border p-3">
+          <div className="border-b border-border p-2 sm:p-3">
             <h3 className="text-sm font-semibold text-foreground">Questions</h3>
             <p className="mt-1 text-xs text-muted-foreground">
               {answeredCount} / {demoQuestions.length} Answered (Demo)
             </p>
           </div>
-          <div className="grid grid-cols-5 gap-1.5 p-2 md:grid-cols-2">
+          <div className="grid min-w-0 grid-cols-5 gap-1.5 p-2 md:grid-cols-2">
             {demoQuestions.map((item, i) => {
               const st = statusFor(item, perQuestion[i]);
               const isCurrent = i === index;
@@ -332,11 +334,11 @@ export function AtlasWayTestModeDemo({ compact = false }: AtlasWayTestModeDemoPr
 
         {/* Main column */}
         <div className="flex min-w-0 flex-1 flex-col">
-          <div className="flex-shrink-0 border-b border-border bg-accent/5 px-3 py-3 md:px-4">
+          <div className="flex-shrink-0 border-b border-border bg-accent/5 px-2 py-2 sm:px-3 md:px-4 md:py-3">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div className="min-w-0">
-                <h3 className="truncate text-lg font-bold md:text-xl">Test Mode</h3>
-                <p className="text-xs text-muted-foreground md:text-sm">
+                <h3 className="text-base font-bold leading-tight md:text-xl">Test Mode</h3>
+                <p className="text-pretty break-words text-xs text-muted-foreground md:text-sm">
                   Question {index + 1} / {demoQuestions.length} · {q.topic}
                 </p>
               </div>
@@ -362,9 +364,9 @@ export function AtlasWayTestModeDemo({ compact = false }: AtlasWayTestModeDemoPr
             </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto p-3 md:p-6">
-            <Card className="border-border/80 p-4 shadow-sm md:p-6">
-              <p className="mb-6 text-sm leading-relaxed text-foreground md:text-base">{q.stem}</p>
+          <div className="flex-1 overflow-y-auto p-2 sm:p-3 md:p-6">
+            <Card className="min-w-0 border-border/80 p-3 shadow-sm sm:p-4 md:p-6">
+              <p className="mb-4 break-words text-sm leading-relaxed text-foreground md:mb-6 md:text-base">{q.stem}</p>
 
               <RadioGroup
                 value={pq.selected ?? ""}
@@ -399,7 +401,7 @@ export function AtlasWayTestModeDemo({ compact = false }: AtlasWayTestModeDemoPr
                           id={`atlas-demo-${q.id}-${choice.letter}`}
                           className="mt-1"
                         />
-                        <span className="text-sm leading-relaxed text-foreground md:text-base">
+                        <span className="min-w-0 flex-1 text-pretty text-sm leading-relaxed text-foreground md:text-base">
                           <span className="font-semibold tabular-nums">{choice.letter}.</span>{" "}
                           {choice.text}
                         </span>
@@ -435,15 +437,14 @@ export function AtlasWayTestModeDemo({ compact = false }: AtlasWayTestModeDemoPr
             </Card>
           </div>
 
-          <div className="flex-shrink-0 border-t border-border bg-accent/5 px-3 py-3 md:px-4">
+          <div className="flex-shrink-0 border-t border-border bg-accent/5 px-2 py-2 sm:px-3 md:px-4 md:py-3">
             <div className="flex items-center justify-between gap-2">
               <Button type="button" variant="outline" size="sm" className="gap-1" onClick={goPrev} disabled={index === 0}>
                 <ChevronLeft className="h-4 w-4" />
                 <span className="hidden sm:inline">Previous</span>
               </Button>
-              <span className="text-center text-xs text-muted-foreground sm:text-sm">
-                {hostSpecialty.marketing.mockExamLabel} Mock Exam Interface · Timed Sessions ·
-                Question Navigator
+              <span className="min-w-0 flex-1 px-1 text-center text-[11px] leading-snug text-muted-foreground sm:text-sm">
+                {hostSpecialty.marketing.mockExamLabel} Mock Exam Interface
               </span>
               <Button
                 type="button"

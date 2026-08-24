@@ -9,7 +9,6 @@ import {
   Lightbulb,
   MessageSquareText,
   Route,
-  Sparkles,
 } from "lucide-react";
 import { AtlasWayTestModeDemo } from "@/components/marketing/AtlasWayTestModeDemo";
 import { useHostSpecialty } from "@/hooks/useSpecialty";
@@ -36,7 +35,7 @@ const SHARED_PILLARS: PillarConfig[] = [
     description:
       "The Foundation. Comprehensive Coverage, Clear Organization, And Explanations That Teach, Not Just Confirm.",
     Icon: BookMarked,
-    BulletIcon: Sparkles,
+    BulletIcon: Lightbulb,
     bullets: [
       "Topics grouped the way the specialty is learned and tested, so you always know where you are in the map.",
       "Rich answer discussions to connect principles, pitfalls, and decision forks.",
@@ -158,10 +157,25 @@ export default function AtlasWay() {
             aria-label="Three pillars of the Atlas Way. The highlighted pillar rotates automatically."
           >
             <div
-              className="absolute left-4 top-7 hidden h-px w-[calc(100%-2rem)] bg-gradient-to-r from-primary/40 via-secondary/50 to-primary/40 md:block"
+              className="pointer-events-none absolute inset-x-0 top-0 z-0 hidden h-14 md:block"
               aria-hidden
-            />
-            <div className="grid gap-8 md:grid-cols-3 md:gap-6">
+            >
+              <div className="absolute left-[calc((100%-3rem)/6)] right-[calc((100%-3rem)/6)] top-1/2 h-0.5 -translate-y-1/2 overflow-visible rounded-full bg-primary/20">
+                <div
+                  className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-primary via-secondary to-primary transition-[width] duration-700 ease-in-out motion-reduce:transition-none"
+                  style={{
+                    width: `${pillars.length > 1 ? (activePillar / (pillars.length - 1)) * 100 : 0}%`,
+                  }}
+                />
+                <div
+                  className="absolute top-1/2 h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary shadow-[0_0_10px_hsl(var(--primary)/0.8)] transition-[left] duration-700 ease-in-out motion-reduce:transition-none"
+                  style={{
+                    left: `${pillars.length > 1 ? (activePillar / (pillars.length - 1)) * 100 : 0}%`,
+                  }}
+                />
+              </div>
+            </div>
+            <div className="relative z-10 grid gap-8 md:grid-cols-3 md:gap-6">
               {pillars.map((pillar, index) => {
                 const isActive = activePillar === index;
                 const Icon = pillar.Icon;
@@ -176,18 +190,18 @@ export default function AtlasWay() {
                     onClick={() => setActivePillar(index)}
                     onKeyDown={(e) => onPillarKeyDown(index, e)}
                     className={cn(
-                      "relative flex cursor-pointer flex-col rounded-2xl p-1 pb-2 outline-none transition-all duration-300 md:p-0 md:pb-0",
+                      "relative flex cursor-pointer flex-col rounded-2xl outline-none transition-all duration-300",
                       "focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background",
                       isActive
-                        ? "scale-[1.01] bg-primary/[0.06] shadow-lg ring-2 ring-primary/45 ring-offset-2 ring-offset-background md:scale-[1.02]"
-                        : "opacity-[0.92] hover:opacity-100 hover:ring-1 hover:ring-primary/15",
+                        ? "scale-[1.01] md:scale-[1.02]"
+                        : "opacity-[0.92] hover:opacity-100",
                     )}
                   >
-                    <div className="mb-4 flex justify-center">
+                    <div className="relative z-10 mb-[-1.75rem] flex justify-center">
                       <div
                         className={cn(
                           "flex h-14 w-14 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-lg ring-4 ring-background transition-transform duration-300",
-                          isActive && "scale-105 ring-primary/30 ring-offset-2 ring-offset-background",
+                          isActive && "scale-105",
                         )}
                       >
                         <span className="text-xl font-bold">{pillar.step}</span>
@@ -196,9 +210,11 @@ export default function AtlasWay() {
                     <Card
                       variant="glass"
                       className={cn(
-                        "flex-1",
+                        "flex-1 pt-10",
                         pillar.cardClass,
-                        isActive && "border-primary/35 shadow-md",
+                        isActive
+                          ? "border-primary/35 shadow-lg ring-2 ring-primary/40"
+                          : "hover:ring-1 hover:ring-primary/15",
                       )}
                     >
                       <CardHeader>

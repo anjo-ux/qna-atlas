@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useSections } from '@/hooks/useSections';
 import { useTheme } from '@/hooks/useTheme';
 import { useSpecialty } from '@/hooks/useSpecialty';
+import { ThemeSwitcher } from '@/components/ui/theme-switcher';
 import { SpecialtySwitcher } from '@/components/SpecialtySwitcher';
 import atlasLogo from '@assets/atlas_1764093111680.png';
 import atlasLogoLight from '@assets/logo_light_1774918799268.png';
@@ -49,7 +50,7 @@ type TestModeState = { mode: 'new' } | { mode: 'resume'; sessionId: string };
 
 export default function Index() {
   const [, setLocation] = useLocation();
-  const { theme } = useTheme();
+  const { resolvedTheme } = useTheme();
   const { specialty, activeSpecialty, isSwitching } = useSpecialty();
   const isOrthoBank = activeSpecialty === "ortho";
   const { sections, isLoading: sectionsLoading } = useSections();
@@ -595,7 +596,7 @@ export default function Index() {
                 <div className="flex items-center gap-3 min-w-0 px-4 py-1.5 rounded-xl">
                   <div className="logo-glass flex items-center justify-center p-1.5 flex-shrink-0 ring-1 ring-black/5 dark:ring-white/10">
                     <img 
-                      src={theme === 'dark' ? atlasLogoLight : atlasLogo} 
+                      src={resolvedTheme === 'dark' ? atlasLogoLight : atlasLogo} 
                       alt="Atlas Logo" 
                       className="h-7 w-7 sm:h-8 sm:w-8 object-contain"
                     />
@@ -616,6 +617,7 @@ export default function Index() {
 
               {/* Right Section */}
               <div className="flex items-center gap-2 flex-wrap justify-end">
+                <ThemeSwitcher />
                 <SpecialtySwitcher className="hidden sm:inline-flex flex-shrink-0" />
 
                 {/* Settings Button */}

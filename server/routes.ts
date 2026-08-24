@@ -907,7 +907,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       const { theme } = req.body;
       
-      if (!theme || (theme !== 'light' && theme !== 'dark')) {
+      if (!theme || (theme !== 'light' && theme !== 'dark' && theme !== 'system')) {
         return res.status(400).json({ message: "Invalid theme." });
       }
       

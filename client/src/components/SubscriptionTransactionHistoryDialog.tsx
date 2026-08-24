@@ -79,7 +79,7 @@ export function SubscriptionTransactionHistoryDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg max-h-[85vh] flex flex-col gap-0 p-0 overflow-hidden sm:rounded-lg">
+      <DialogContent className="max-w-lg max-h-[85vh] flex flex-col gap-0 p-0 overflow-hidden rounded-xl">
         <DialogHeader className="px-6 pt-6 pb-2 text-left">
           <DialogTitle className="flex items-center gap-2">
             <Receipt className="h-5 w-5" />

@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input';
 import { ChevronLeft, Send, Loader2, Plus, Trash2, Menu, X, Check } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useSpecialty } from '@/hooks/useSpecialty';
+import { ThemeSwitcher } from '@/components/ui/theme-switcher';
 import { Card } from '@/components/ui/card';
 import {
   OralBoardAssistantContent,
@@ -624,6 +625,7 @@ Hinting: ${sessionSetup.hinting}`;
               </p>
             </div>
           </div>
+          <ThemeSwitcher />
         </div>
 
         <div className="relative flex-1 flex flex-col min-h-0">

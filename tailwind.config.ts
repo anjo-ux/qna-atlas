@@ -74,6 +74,9 @@ export default {
           "4": "hsl(var(--chart-4))",
           "5": "hsl(var(--chart-5))",
         },
+        "gray-700": "var(--ds-gray-700)",
+        "gray-1000": "var(--ds-gray-1000)",
+        shadow: "var(--ds-shadow)",
         green: {
           50: '#f0fdf4',
           100: '#dcfce7',

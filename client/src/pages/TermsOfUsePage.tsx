@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { MarketingShell } from "@/components/marketing/MarketingShell";
 import { usePageSeo } from "@/lib/usePageSeo";
+import { LegalServiceSiteLinks } from "@/components/marketing/LegalServiceSiteLinks";
 import { useHostSpecialty } from "@/hooks/useSpecialty";
 import { Link } from "wouter";
 
@@ -28,8 +29,7 @@ function Section({
 export default function TermsOfUsePage() {
   usePageSeo("/terms");
   /** Legal entity + contact differ per domain, so the terms shown match the site you bought on. */
-  const { canonicalOrigin: SITE_URL, legalEntity: LEGAL_ENTITY, contactEmail: CONTACT_EMAIL } =
-    useHostSpecialty();
+  const { legalEntity: LEGAL_ENTITY, contactEmail: CONTACT_EMAIL } = useHostSpecialty();
 
   return (
     <MarketingShell>
@@ -38,23 +38,15 @@ export default function TermsOfUsePage() {
           <header className="mb-10 space-y-3 border-b border-border/60 pb-8">
             <p className="text-sm font-medium tracking-tight text-muted-foreground">{LEGAL_ENTITY}</p>
             <h1 className="text-4xl font-bold leading-snug tracking-tight gradient-text sm:text-5xl">
-              Terms Of Use
+              Terms
             </h1>
             <p className="text-sm text-muted-foreground">Last modified: April 16, 2026</p>
             <p className="pt-2 text-base leading-relaxed text-muted-foreground">
               This user agreement (&quot;Agreement&quot;) is a contract between you and {LEGAL_ENTITY} and applies
               to your subscription to and use of products and services available through{" "}
-              <a
-                href={SITE_URL}
-                className="font-medium text-primary underline-offset-4 hover:underline"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {SITE_URL}
-              </a>{" "}
-              (collectively, the &quot;Services&quot;). Purchase or use of the Services indicates that you agree to
-              these Terms of Use. If you do not agree or do not intend to abide by them, please do not purchase or
-              use {SITE_NAME}.
+              <LegalServiceSiteLinks /> (collectively, the &quot;Services&quot;). Purchase or use of the Services
+              indicates that you agree to these Terms of Use. If you do not agree or do not intend to abide by them,
+              please do not purchase or use {SITE_NAME}.
             </p>
           </header>
 
@@ -69,7 +61,7 @@ export default function TermsOfUsePage() {
             </p>
             <h3 className="text-xl font-semibold tracking-tight text-foreground">Changes To This Agreement</h3>
             <p>
-              We may amend this Agreement at any time by posting the amended terms on the site. Except as stated
+              We may amend this Agreement at any time by posting the amended terms on our sites. Except as stated
               below, amended terms shall be effective thirty (30) days after they are initially posted. Upcoming
               changes may also be summarized on this page.
             </p>

@@ -10,6 +10,7 @@ import { Section } from '@/types/question';
 import { useQuestionStats } from '@/hooks/useQuestionStats';
 import { cn } from '@/lib/utils';
 import { queryClient } from '@/lib/queryClient';
+import { ThemeSwitcher } from '@/components/ui/theme-switcher';
 
 interface BookmarksProps {
   onBack: () => void;
@@ -118,6 +119,7 @@ export function BookmarksPage({ onBack }: BookmarksProps) {
               </p>
             </div>
           </div>
+          <ThemeSwitcher />
         </div>
       </div>
 

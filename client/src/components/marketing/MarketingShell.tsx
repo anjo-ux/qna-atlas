@@ -4,6 +4,7 @@ import { Instagram } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SalePromoBanner } from "@/components/SalePromoBanner";
 import { SpecialtySubheaderDropdown } from "@/components/SpecialtySubheaderDropdown";
+import { ThemeSwitcher } from "@/components/ui/theme-switcher";
 import { useTheme } from "@/hooks/useTheme";
 import { useAuth } from "@/hooks/useAuth";
 import { useHostSpecialty } from "@/hooks/useSpecialty";
@@ -38,13 +39,16 @@ type MarketingShellProps = {
   children: ReactNode;
   /** When false, hides the sale promo banner (optional for future use). */
   showPromoBanner?: boolean;
+  /** Hide the default glass nav (landing uses the transforming hero header instead). */
+  hideHeader?: boolean;
 };
 
 export function MarketingShell({
   children,
   showPromoBanner = false,
+  hideHeader = false,
 }: MarketingShellProps) {
-  const { theme } = useTheme();
+  const { resolvedTheme } = useTheme();
   const [pathname] = useLocation();
   const { isAuthenticated, isLoading } = useAuth();
   /** Marketing surfaces follow the domain, not the logged-in q-bank. */
@@ -63,6 +67,7 @@ export function MarketingShell({
         "lg:h-full lg:overflow-hidden",
       )}
     >
+      {hideHeader && !showPromoBanner ? null : (
       <div
         className={cn(
           "flex w-full flex-shrink-0 flex-col",
@@ -71,6 +76,7 @@ export function MarketingShell({
         )}
       >
         {showPromoBanner ? <SalePromoBanner claimAction="signup" /> : null}
+        {hideHeader ? null : (
         <header className="glass-nav w-full flex-shrink-0 rounded-b-2xl border-b border-border/40">
           <div className="container mx-auto px-4 py-2.5 sm:px-6 lg:px-8">
             <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
@@ -82,7 +88,7 @@ export function MarketingShell({
                     aria-label={`${specialty.productName} home`}
                   >
                     <img
-                      src={theme === "dark" ? atlasLogoLight : atlasLogo}
+                      src={resolvedTheme === "dark" ? atlasLogoLight : atlasLogo}
                       alt={`Atlas Review, ${specialty.specialtyName.toLowerCase()} study platform`}
                       className="h-7 w-7 object-contain sm:h-8 sm:w-8"
                     />
@@ -98,6 +104,7 @@ export function MarketingShell({
                   </div>
                 </div>
                 <div className="flex shrink-0 items-center gap-1.5 sm:hidden">
+                  <ThemeSwitcher />
                   {isLoading ? (
                     <div className="h-9 w-24 animate-pulse rounded-md bg-muted" />
                   ) : isAuthenticated ? (
@@ -149,6 +156,7 @@ export function MarketingShell({
                 })}
               </nav>
               <div className="hidden shrink-0 items-center gap-1.5 sm:flex">
+                <ThemeSwitcher />
                 {isLoading ? (
                   <div className="h-9 w-40 animate-pulse rounded-md bg-muted" />
                 ) : isAuthenticated ? (
@@ -178,7 +186,9 @@ export function MarketingShell({
             </div>
           </div>
         </header>
+        )}
       </div>
+      )}
       <div
         className={cn(
           "min-h-0 flex-1 overflow-x-hidden",

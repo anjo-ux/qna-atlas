@@ -1,3 +1,4 @@
+import type { SVGProps } from "react";
 import { MarketingShell } from "@/components/marketing/MarketingShell";
 import { OralBoardSetupInteractiveDemo } from "@/components/marketing/OralBoardSetupInteractiveDemo";
 import { usePageSeo } from "@/lib/usePageSeo";
@@ -8,7 +9,6 @@ import {
   Mic2,
   SlidersHorizontal,
   History,
-  Sparkles,
   BookOpen,
   ShieldCheck,
   ChevronRight,
@@ -16,6 +16,28 @@ import {
 import { ORAL_BOARDS_MARKETING_FAQ } from "@shared/marketingFaqs";
 import { useHostSpecialty } from "@/hooks/useSpecialty";
 import { Link } from "wouter";
+
+/** Speech bubble + mic — reads as conversational oral practice, not a decoration. */
+function OralBoardsGlanceIcon({ className, ...props }: SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.75"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden
+      {...props}
+    >
+      <path d="M4.5 4.5h11A2.5 2.5 0 0 1 18 7v5.5a2.5 2.5 0 0 1-2.5 2.5H10l-3.5 3v-3H7A2.5 2.5 0 0 1 4.5 12.5V7A2.5 2.5 0 0 1 7 4.5Z" />
+      <path d="M8 8.25h6.5M8 11h4" />
+      <rect x="16.25" y="12.5" width="3.5" height="5" rx="1.75" />
+      <path d="M18 17.5v1.75M16.25 19.25h3.5" />
+    </svg>
+  );
+}
 
 const SESSION_CONTROLS = [
   {
@@ -66,7 +88,7 @@ export default function OralBoardsCoachPage() {
               Interactive Oral Exam Preparation
             </p>
             <h1 className="text-4xl font-bold leading-snug tracking-tight gradient-text sm:text-5xl">
-              Oral Boards Coach · The Power Of Interactive Oral Prep
+              Oral Boards Coach · Powerful Interactive Oral Prep
             </h1>
             <p className="text-lg leading-relaxed text-muted-foreground">
               The{" "}
@@ -261,7 +283,7 @@ export default function OralBoardsCoachPage() {
 
           <section className="rounded-2xl border border-primary/20 bg-primary/5 p-6 text-center" aria-label="Summary">
             <div className="mx-auto flex max-w-2xl flex-col items-center gap-3">
-              <Sparkles className="h-8 w-8 text-primary" aria-hidden />
+              <OralBoardsGlanceIcon className="h-8 w-8 text-primary" />
               <p className="text-sm font-medium tracking-tight text-muted-foreground">
                 At A Glance
               </p>

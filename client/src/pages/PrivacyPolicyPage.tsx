@@ -1,13 +1,11 @@
 import type { ReactNode } from "react";
 import { MarketingShell } from "@/components/marketing/MarketingShell";
 import { usePageSeo } from "@/lib/usePageSeo";
+import { LegalServiceSiteLinks } from "@/components/marketing/LegalServiceSiteLinks";
 import { useHostSpecialty } from "@/hooks/useSpecialty";
 import { Link } from "wouter";
 
 const SITE_NAME = "Atlas Review";
-const SUPPORT_EMAIL = "support@prsatlas.com";
-const mailto = (subject: string) =>
-  `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(subject)}`;
 
 function Section({
   id,
@@ -30,7 +28,9 @@ function Section({
 
 export default function PrivacyPolicyPage() {
   usePageSeo("/privacy");
-  const { canonicalOrigin: SITE_URL, legalEntity: LEGAL_ENTITY } = useHostSpecialty();
+  const { legalEntity: LEGAL_ENTITY, supportEmail: SUPPORT_EMAIL } = useHostSpecialty();
+  const mailto = (subject: string) =>
+    `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(subject)}`;
 
   return (
     <MarketingShell>
@@ -43,16 +43,8 @@ export default function PrivacyPolicyPage() {
             </h1>
             <p className="text-sm text-muted-foreground">Updated on April 16, 2026</p>
             <p className="pt-2 text-base leading-relaxed text-muted-foreground">
-              {LEGAL_ENTITY} respects the privacy of people who use our website (
-              <a
-                href={SITE_URL}
-                className="font-medium text-primary underline-offset-4 hover:underline"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {SITE_URL}
-              </a>
-              ) and related {SITE_NAME} services (collectively, the &quot;Service&quot;). This privacy statement
+              {LEGAL_ENTITY} respects the privacy of people who use our websites (
+              <LegalServiceSiteLinks />) and related {SITE_NAME} services (collectively, the &quot;Service&quot;). This privacy statement
               (&quot;Policy&quot;) describes our current information practices. If we change this Policy, we will post
               the updated version on this page and revise the date above. For rules governing use of the Service, see
               our{" "}

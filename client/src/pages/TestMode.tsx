@@ -9,6 +9,7 @@ import { Switch } from '@/components/ui/switch';
 import { QuestionCard } from '@/components/QuestionCard';
 import { TestHistory } from '@/components/TestHistory';
 import { TestModeWizard } from '@/components/TestModeWizard';
+import { ThemeSwitcher } from '@/components/ui/theme-switcher';
 import { DetailedTestResults } from '@/components/DetailedTestResults';
 import { ArrowLeft, ChevronDown, ChevronUp, ChevronRight, ChevronLeft, ChevronRight as ChevronRightIcon, Check, X, Circle, ChevronDown as ChevronDownIcon, Flag, Info } from 'lucide-react';
 import { useQuestionStats, QuestionResponse } from '@/hooks/useQuestionStats';
@@ -713,11 +714,14 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
         />
         <div className="flex-1 flex flex-col overflow-auto">
         <div className="p-6 border-b border-border">
-          <div className="flex items-center gap-3 mb-4">
+          <div className="flex items-center justify-between gap-3 mb-4">
+            <div className="flex items-center gap-3">
             <Button variant="ghost" size="icon" onClick={onBack}>
               <ArrowLeft className="h-5 w-5" />
             </Button>
             <h1 className="text-3xl font-bold text-foreground">Create Test</h1>
+            </div>
+            <ThemeSwitcher />
           </div>
         </div>
 

@@ -111,6 +111,7 @@ function OralBoardSimulatorRoute() {
 function isPublicPathWithoutAuthGate(p: string): boolean {
   const n = normalizeAppPath(p);
   return (
+    n === "/" ||
     n === "/login" ||
     n === "/signup" ||
     n === "/reset-password" ||

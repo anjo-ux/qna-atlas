@@ -458,6 +458,175 @@ export async function setupAuth(app: Express) {
     }
   });
 
+  const googleClientId = process.env.GOOGLE_CLIENT_ID?.trim();
+  const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET?.trim();
+  const googleOAuthEnabled = Boolean(googleClientId && googleClientSecret);
+
+  function authPublicOrigin(req: Request): string {
+    const fromHost = getCanonicalOriginForHost(requestHostname(req));
+    if (fromHost) return fromHost.replace(/\/$/, '');
+    const proto =
+      req.headers['x-forwarded-proto'] === 'https' || req.secure ? 'https' : 'http';
+    return `${proto}://${requestHostname(req)}`;
+  }
+
+  function googleCallbackUrl(req: Request): string {
+    return `${authPublicOrigin(req)}/api/auth/google/callback`;
+  }
+
+  function establishSession(req: Request, user: Awaited<ReturnType<typeof storage.getUser>>) {
+    if (!user) return;
+    (req as any).session.userId = user.id;
+    (req as any).session.user = sanitizeUser(user);
+    (req as any).user = user;
+  }
+
+  app.get('/api/auth/google/status', (_req, res) => {
+    res.json({ enabled: googleOAuthEnabled });
+  });
+
+  app.get('/api/auth/google', authRateLimiter, (req, res) => {
+    if (!googleOAuthEnabled || !googleClientId) {
+      return res.redirect('/login?oauth=unavailable');
+    }
+
+    const state = randomBytes(24).toString('hex');
+    const requestedSpecialty = req.query.specialty;
+    (req as any).session.googleOAuthState = state;
+    (req as any).session.googleSignupSpecialty = isSpecialtyId(requestedSpecialty)
+      ? requestedSpecialty
+      : getSpecialtyForHost(requestHostname(req));
+
+    const params = new URLSearchParams({
+      client_id: googleClientId,
+      redirect_uri: googleCallbackUrl(req),
+      response_type: 'code',
+      scope: 'openid email profile',
+      state,
+      prompt: 'select_account',
+    });
+
+    (req as any).session.save((err: Error | null) => {
+      if (err) {
+        console.error('Google OAuth session save error:', err);
+        return res.redirect('/login?oauth=error');
+      }
+      res.redirect(`https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`);
+    });
+  });
+
+  app.get('/api/auth/google/callback', authRateLimiter, async (req, res) => {
+    const fail = (reason: string) => res.redirect(`/login?oauth=${encodeURIComponent(reason)}`);
+
+    try {
+      if (!googleOAuthEnabled || !googleClientId || !googleClientSecret) {
+        return fail('unavailable');
+      }
+
+      const queryError = typeof req.query.error === 'string' ? req.query.error : '';
+      if (queryError) {
+        return fail(queryError === 'access_denied' ? 'denied' : 'error');
+      }
+
+      const code = typeof req.query.code === 'string' ? req.query.code : '';
+      const state = typeof req.query.state === 'string' ? req.query.state : '';
+      const expectedState = (req as any).session?.googleOAuthState as string | undefined;
+      delete (req as any).session.googleOAuthState;
+
+      if (!code || !state || !expectedState || state !== expectedState) {
+        return fail('invalid');
+      }
+
+      const tokenRes = await fetch('https://oauth2.googleapis.com/token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({
+          code,
+          client_id: googleClientId,
+          client_secret: googleClientSecret,
+          redirect_uri: googleCallbackUrl(req),
+          grant_type: 'authorization_code',
+        }),
+      });
+
+      if (!tokenRes.ok) {
+        console.error('Google token exchange failed:', tokenRes.status);
+        return fail('error');
+      }
+
+      const tokenJson = (await tokenRes.json()) as { access_token?: string };
+      if (!tokenJson.access_token) {
+        return fail('error');
+      }
+
+      const profileRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+        headers: { Authorization: `Bearer ${tokenJson.access_token}` },
+      });
+      if (!profileRes.ok) {
+        return fail('error');
+      }
+
+      const profile = (await profileRes.json()) as {
+        email?: string;
+        email_verified?: boolean | string;
+        given_name?: string;
+        family_name?: string;
+        name?: string;
+      };
+
+      const email = profile.email?.trim().toLowerCase();
+      const verified = profile.email_verified === true || profile.email_verified === 'true';
+      if (!email || !verified) {
+        return fail('unverified');
+      }
+
+      let user = await storage.getUserByEmail(email);
+      const signupSpecialtyId: SpecialtyId = isSpecialtyId((req as any).session?.googleSignupSpecialty)
+        ? (req as any).session.googleSignupSpecialty
+        : getSpecialtyForHost(requestHostname(req));
+      delete (req as any).session.googleSignupSpecialty;
+
+      if (!user) {
+        const nameParts = (profile.name || '').trim().split(/\s+/);
+        const firstName = (profile.given_name || nameParts[0] || 'Student').slice(0, 100);
+        const lastName = (profile.family_name || nameParts.slice(1).join(' ') || 'Google').slice(0, 100);
+
+        user = await storage.upsertUser({
+          email,
+          firstName,
+          lastName,
+          subscriptionStatus: 'expired',
+          trialEndsAt: null,
+          signupSpecialtyId,
+          activeSpecialtyId: signupSpecialtyId,
+        });
+
+        await storage.updateSpecialtyEntitlement(user.id, signupSpecialtyId, {
+          subscriptionStatus: 'expired',
+          trialEndsAt: null,
+        });
+      }
+
+      try {
+        await storage.addLoginConnection(user.id, 'google');
+      } catch (connErr) {
+        console.error('Failed to record Google login connection:', connErr);
+      }
+
+      establishSession(req, user);
+      (req as any).session.save((err: Error | null) => {
+        if (err) {
+          console.error('Google OAuth session save error:', err);
+          return fail('error');
+        }
+        res.redirect('/');
+      });
+    } catch (error) {
+      console.error('Google OAuth callback error:', error);
+      return fail('error');
+    }
+  });
+
   // Logout route
   app.post('/api/auth/logout', (req, res) => {
     (req as any).session.destroy((err: any) => {
@@ -565,7 +734,7 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
   }
 
   // Verify user still exists
-  const currentUser = await storage.getUser(session.userId);
+  const currentUser = await storage.getUser(session.userId || session.userId);
   if (!currentUser) {
     return res.status(401).json({ message: 'Unauthorized.' });
   }

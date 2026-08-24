@@ -1,3 +1,4 @@
+import type { SVGProps } from "react";
 import { MarketingShell } from "@/components/marketing/MarketingShell";
 import { InstitutionalPricingCallout } from "@/components/marketing/InstitutionalPricingCallout";
 import { usePageSeo } from "@/lib/usePageSeo";
@@ -6,9 +7,34 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/hooks/useAuth";
 import { FALLBACK_PLANS, getPlanDisplay } from "@/data/subscriptionPlanDisplay";
-import { Check, Building2, GraduationCap, Sparkles } from "lucide-react";
+import { Check, Building2, GraduationCap } from "lucide-react";
 import { Link } from "wouter";
 import { useHostSpecialty } from "@/hooks/useSpecialty";
+
+/** Checklist card — reads as included features, not a decorative sparkle. */
+function SubscriptionIncludesIcon({ className, ...props }: SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.75"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden
+      {...props}
+    >
+      <rect x="3.5" y="2.75" width="17" height="18.5" rx="2.25" />
+      <path d="m7 8.35 1.15 1.2 2.35-2.55" />
+      <path d="M13 8.75h4" />
+      <path d="m7 12.6 1.15 1.2 2.35-2.55" />
+      <path d="M13 13h4" />
+      <path d="m7 16.85 1.15 1.2 2.35-2.55" />
+      <path d="M13 17.25h3" />
+    </svg>
+  );
+}
 
 export default function PricingPage() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -162,7 +188,7 @@ export default function PricingPage() {
           <section className="mx-auto mt-16 max-w-4xl" aria-labelledby="included-heading">
             <div className="mb-8 text-center">
               <h2 id="included-heading" className="mb-2 flex items-center justify-center gap-2 text-2xl font-semibold sm:text-3xl">
-                <Sparkles className="h-8 w-8 text-primary" aria-hidden />
+                <SubscriptionIncludesIcon className="h-8 w-8 text-primary" />
                 What Your Subscription Includes
               </h2>
               <p className="text-muted-foreground">

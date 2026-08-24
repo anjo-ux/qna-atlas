@@ -65,7 +65,7 @@ export function ReportQuestionDialog({
           // Mobile: iOS-style frosted sheet — large radius, liquid glass, no harsh border
           'max-sm:max-h-[min(88vh,720px)] max-sm:overflow-hidden max-sm:gap-0 max-sm:p-0 max-sm:pb-2',
           /* Avoid 100vw here for same scrollbar gutter / subpixel edge lines */
-          'max-sm:w-[calc(100%-1.5rem)] max-sm:max-w-lg max-sm:rounded-[1.375rem]',
+          'max-sm:w-[calc(100%-1.5rem)] max-sm:max-w-lg max-sm:rounded-xl',
           'max-sm:border max-sm:border-white/25 max-sm:shadow-2xl max-sm:shadow-black/25',
           'max-sm:bg-background/55 max-sm:dark:bg-background/45',
           'max-sm:backdrop-blur-2xl max-sm:backdrop-saturate-150',
@@ -108,7 +108,7 @@ export function ReportQuestionDialog({
                 rows={4}
                 className={cn(
                   'resize-none',
-                  'max-sm:min-h-[7.5rem] max-sm:rounded-2xl max-sm:border-white/20 max-sm:bg-background/40 max-sm:dark:bg-black/25',
+                  'max-sm:min-h-[7.5rem] max-sm:rounded-xl max-sm:border-white/20 max-sm:bg-background/40 max-sm:dark:bg-black/25',
                   'max-sm:backdrop-blur-sm max-sm:text-[0.9375rem] max-sm:leading-relaxed',
                   'focus-visible:max-sm:ring-primary/40'
                 )}
@@ -135,7 +135,7 @@ export function ReportQuestionDialog({
           {/* Mobile: iOS action-sheet style actions */}
           <div
             className={cn(
-              'mt-1 flex flex-col overflow-hidden rounded-2xl sm:hidden',
+              'mt-1 flex flex-col overflow-hidden rounded-xl sm:hidden',
               'border border-white/20 bg-black/[0.06] dark:border-white/10 dark:bg-white/[0.06]',
               'mx-5 mb-3'
             )}

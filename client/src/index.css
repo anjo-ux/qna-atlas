@@ -175,6 +175,10 @@ html, body {
     --chart-3: 142 76% 55%;
     --chart-4: 200 80% 52%;
     --chart-5: 180 100% 48%;
+
+    --ds-gray-700: hsla(0, 0%, 56%, 1);
+    --ds-gray-1000: hsla(0, 0%, 9%, 1);
+    --ds-shadow: rgba(0, 0, 0, 0.08);
   }
 
   .dark {
@@ -221,6 +225,10 @@ html, body {
     --highlight-green: 142 76% 73%;
     --highlight-blue: 199 89% 78%;
     --highlight-pink: 330 81% 85%;
+
+    --ds-gray-700: hsla(0, 0%, 56%, 1);
+    --ds-gray-1000: hsla(0, 0%, 93%, 1);
+    --ds-shadow: rgba(255, 255, 255, 0.145);
     
     --nav-gradient-start: 210 75% 65%;
     --nav-gradient-end: 200 80% 70%;

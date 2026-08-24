@@ -111,7 +111,7 @@ function PreviewTree({
       </div>
       <div
         className={cn(
-          "h-64 overflow-y-auto overflow-x-hidden overscroll-y-contain sm:h-72",
+          "h-52 overflow-y-auto overflow-x-hidden overscroll-y-contain sm:h-72",
           "max-lg:[-ms-overflow-style:none] max-lg:[scrollbar-width:none] max-lg:[&::-webkit-scrollbar]:hidden",
         )}
       >
@@ -120,7 +120,7 @@ function PreviewTree({
             <div key={section.title} className="space-y-1.5">
               <div className="flex items-center gap-2 px-1">
                 <ChevronDown className="h-3.5 w-3.5 shrink-0 text-foreground" aria-hidden />
-                <h4 className="truncate text-xs font-semibold uppercase tracking-wide text-foreground">
+                <h4 className="min-w-0 text-pretty text-xs font-semibold uppercase leading-snug tracking-wide text-foreground">
                   {section.title}
                 </h4>
               </div>
@@ -134,7 +134,7 @@ function PreviewTree({
                     disabled
                     className="h-auto w-full justify-between gap-2 py-1.5 text-left font-normal text-muted-foreground opacity-100"
                   >
-                    <span className="truncate text-xs">{sub.title}</span>
+                    <span className="min-w-0 text-pretty text-xs leading-snug">{sub.title}</span>
                     <span className="shrink-0 tabular-nums text-[11px] opacity-70">{sub.count}</span>
                   </Button>
                 ))}

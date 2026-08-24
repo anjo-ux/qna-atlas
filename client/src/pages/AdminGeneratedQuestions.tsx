@@ -3,7 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Check, X, Sparkles } from "lucide-react";
+import { Check, X, FilePlus2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { normalizeAnswerExplanationForDisplay } from "@shared/questionFormat";
 
@@ -229,7 +229,7 @@ export default function AdminGeneratedQuestions() {
               <span className="animate-pulse">Generating…</span>
             ) : (
               <>
-                <Sparkles className="w-4 h-4 mr-2" />
+                <FilePlus2 className="w-4 h-4 mr-2" />
                 Generate More Questions
               </>
             )}

@@ -144,21 +144,64 @@ app.use((req, res, next) => {
     process.exit(1);
   }
 
+  function listenOnce(port: number): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const onError = (err: NodeJS.ErrnoException) => {
+        server.off("listening", onListening);
+        reject(err);
+      };
+      const onListening = () => {
+        server.off("error", onError);
+        onServerListening(port);
+        resolve();
+      };
+      server.once("error", onError);
+      server.once("listening", onListening);
+      server.listen(port, "0.0.0.0");
+    });
+  }
+
   /**
    * Replit / Render / Fly only expose the port in PORT. If 5000 is busy we must not bind to 5001+ —
    * that looks "running" locally but is unreachable from the web.
+   *
+   * The Start application workflow used to `process.exit(1)` on EADDRINUSE, which shows
+   * "Your Start application artifact encountered an error" even when another instance
+   * is already serving the app on PORT.
    */
   if (hasHostedPort) {
-    server.listen(desiredPort, "0.0.0.0", () => onServerListening(desiredPort));
-    server.once("error", (err: NodeJS.ErrnoException) => {
-      if (err.code === "EADDRINUSE") {
-        log(
-          `Port ${desiredPort} (PORT) is already in use. Only PORT is exposed on this host — stop duplicate dev servers or workflows, then restart.`
-        );
-        process.exit(1);
+    let bound = false;
+    for (let attempt = 0; attempt < 15 && !bound; attempt++) {
+      try {
+        await listenOnce(desiredPort);
+        bound = true;
+      } catch (err) {
+        const code = (err as NodeJS.ErrnoException).code;
+        if (code !== "EADDRINUSE") throw err;
+        log(`Port ${desiredPort} in use, retrying (${attempt + 1}/15)...`);
+        await new Promise((r) => setTimeout(r, 400));
       }
-      throw err;
-    });
+    }
+    if (!bound) {
+      try {
+        const res = await fetch(`http://127.0.0.1:${desiredPort}/`, {
+          method: "GET",
+          signal: AbortSignal.timeout(2000),
+        });
+        if (res.ok) {
+          log(
+            `Port ${desiredPort} already has a healthy server (HTTP ${res.status}). Keeping this process alive so the Start workflow does not fail.`
+          );
+          await new Promise(() => {});
+        }
+      } catch {
+        // fall through to exit
+      }
+      log(
+        `Port ${desiredPort} (PORT) is already in use. Only PORT is exposed on this host — stop duplicate dev servers or workflows, then restart.`
+      );
+      process.exit(1);
+    }
   } else {
     const maxAttempts = 10;
     function tryListen(port: number, attempt: number) {

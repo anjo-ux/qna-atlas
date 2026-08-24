@@ -2,34 +2,27 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Moon, Sun, Home, Lock } from 'lucide-react';
+import { Home, Lock } from 'lucide-react';
 import atlasLogo from '@assets/atlas_1764093111680.png';
 import atlasLogoLight from '@assets/logo_light_1774918799268.png';
 import { toast } from 'sonner';
 import { SpecialtySubheaderDropdown } from '@/components/SpecialtySubheaderDropdown';
+import { ThemeSwitcher } from '@/components/ui/theme-switcher';
 import { useHostSpecialty } from '@/hooks/useSpecialty';
+import { useTheme } from '@/hooks/useTheme';
 
 export default function ResetPassword() {
   const [token, setToken] = useState<string | null>(null);
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [isDark, setIsDark] = useState(false);
   const specialty = useHostSpecialty();
+  const { resolvedTheme } = useTheme();
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     setToken(params.get('token'));
   }, []);
-
-  const toggleTheme = () => {
-    setIsDark(!isDark);
-    if (!isDark) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -74,7 +67,7 @@ export default function ResetPassword() {
   };
 
   return (
-    <div className={`flex flex-col h-full ${isDark ? 'dark' : ''}`}>
+    <div className="flex flex-col h-full">
       <div className="flex flex-col h-full bg-gradient-to-br from-blue-50 via-cyan-50 to-purple-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
         <header className="glass-nav w-full static flex-shrink-0 rounded-b-2xl sm:sticky sm:top-0 sm:z-50">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-3 pb-2">
@@ -86,7 +79,7 @@ export default function ResetPassword() {
                   className="logo-glass flex items-center justify-center p-1.5 flex-shrink-0 ring-1 ring-black/5 dark:ring-white/10 cursor-pointer outline-none focus-visible:ring-0 hover:opacity-90"
                   aria-label={`${specialty.productName} home`}
                 >
-                  <img src={isDark ? atlasLogoLight : atlasLogo} alt="Atlas Logo" className="h-7 w-7 sm:h-8 sm:w-8 object-contain" />
+                  <img src={resolvedTheme === 'dark' ? atlasLogoLight : atlasLogo} alt="Atlas Logo" className="h-7 w-7 sm:h-8 sm:w-8 object-contain" />
                 </button>
                 <div className="hidden sm:flex flex-col min-w-0">
                   <button
@@ -100,9 +93,7 @@ export default function ResetPassword() {
                 </div>
               </div>
               <div className="flex items-center gap-2 flex-shrink-0">
-                <button type="button" onClick={toggleTheme} className="p-2 hover-elevate rounded-md" title="Toggle theme">
-                  {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-                </button>
+                <ThemeSwitcher />
                 <button
                   type="button"
                   onClick={() => (window.location.href = '/')}

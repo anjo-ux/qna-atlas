@@ -91,13 +91,13 @@ export function OralBoardSetupInteractiveDemo({ embedded = false }: OralBoardSet
                   type="button"
                   onClick={() => setActiveId(s.id)}
                   className={cn(
-                    "flex min-w-[10rem] shrink-0 rounded-md px-3 py-2.5 text-left text-sm transition-colors lg:min-w-0",
+                    "flex min-w-[7.5rem] max-w-[85vw] shrink-0 rounded-md px-3 py-2.5 text-left text-sm transition-colors sm:min-w-[10rem] lg:min-w-0 lg:max-w-none",
                     activeId === s.id
                       ? "bg-primary/15 text-primary"
                       : "text-muted-foreground hover:bg-accent/50"
                   )}
                 >
-                  <span className="block truncate">{s.title}</span>
+                  <span className="block text-pretty leading-snug">{s.title}</span>
                 </button>
               ))}
             </div>
@@ -111,7 +111,7 @@ export function OralBoardSetupInteractiveDemo({ embedded = false }: OralBoardSet
                   <p className="text-xs font-medium tracking-wide text-muted-foreground">
                     Oral Boards Coach
                   </p>
-                  <p className="truncate text-sm font-semibold text-foreground">
+                  <p className="text-pretty text-sm font-semibold leading-snug text-foreground">
                     {MOCK_SESSIONS.find((s) => s.id === activeId)?.title ?? "Untitled Session"}
                   </p>
                 </div>

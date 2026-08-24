@@ -19,14 +19,13 @@ export function InstitutionalPricingCallout({ className }: InstitutionalPricingC
     <section
       aria-labelledby="institutional-pricing-heading"
       className={cn(
-        "relative overflow-hidden rounded-2xl border border-primary/25 bg-gradient-to-br from-primary/[0.12] via-background/90 to-secondary/[0.08] p-6 shadow-md ring-1 ring-black/[0.05] dark:from-primary/[0.16] dark:to-secondary/[0.12] dark:ring-white/[0.07]",
-        "motion-safe:before:pointer-events-none motion-safe:before:absolute motion-safe:before:inset-0 motion-safe:before:bg-[radial-gradient(420px_circle_at_18%_0%,hsl(var(--primary)/0.22),transparent_55%)] motion-safe:before:opacity-90",
+        "relative overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-sm",
         className,
       )}
     >
       <div className="relative flex flex-col gap-5 sm:flex-row sm:items-start sm:gap-6">
         <div
-          className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-lg shadow-primary/25"
+          className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground"
           aria-hidden
         >
           <GraduationCap className="h-7 w-7" />
@@ -56,7 +55,7 @@ export function InstitutionalPricingCallout({ className }: InstitutionalPricingC
             provide access to all of your residents and fellows.
           </p>
           <div className="flex flex-wrap gap-2 pt-1">
-            <Button size="lg" className="glow-primary transition-glow" asChild>
+            <Button size="lg" asChild>
               <a href={`mailto:${contactEmail}?subject=Institutional%20pricing%20inquiry`}>
                 <Mail className="mr-2 h-4 w-4 shrink-0" aria-hidden />
                 Email Us
@@ -65,7 +64,7 @@ export function InstitutionalPricingCallout({ className }: InstitutionalPricingC
             <Button
               size="lg"
               variant="outline"
-              className="border-primary/30 bg-background/60 backdrop-blur-sm"
+              className="border-border bg-card"
               asChild
             >
               <a href={specialty.instagramUrl} target="_blank" rel="noopener noreferrer">

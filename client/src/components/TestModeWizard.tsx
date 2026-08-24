@@ -141,11 +141,11 @@ export function TestModeWizard({ open, onClose, onContinue }: TestModeWizardProp
 
         <div className="flex gap-3">
           {step > 0 && (
-            <Button variant="outline" onClick={() => setStep(step - 1)} className="flex-1">
+            <Button variant="outline" onClick={() => setStep(step - 1)} className="flex-1 rounded-xl">
               Back
             </Button>
           )}
-          <Button onClick={handleNext} className="flex-1">
+          <Button onClick={handleNext} className="flex-1 rounded-xl">
             {step < steps.length - 1 ? (
               <>
                 Next <ChevronRight className="ml-2 w-4 h-4" />
