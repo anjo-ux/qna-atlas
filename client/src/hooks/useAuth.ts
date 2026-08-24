@@ -18,8 +18,16 @@ export function useAuth() {
 
   const logoutMutation = useMutation({
     mutationFn: async () => {
-      await fetch('/api/auth/logout', { method: 'POST' });
+      const res = await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
+      const data = (await res.json().catch(() => ({}))) as { continueLogoutUrl?: string };
       queryClient.clear();
+      if (
+        typeof data.continueLogoutUrl === 'string' &&
+        /^https:\/\/(www\.)?(prs-atlas|ortho-atlas)\.com\/api\/auth\/logout\?/.test(data.continueLogoutUrl)
+      ) {
+        window.location.href = data.continueLogoutUrl;
+        return;
+      }
       window.location.href = '/';
     },
     onSuccess: () => {

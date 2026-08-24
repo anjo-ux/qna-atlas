@@ -8,7 +8,9 @@ import connectPg from 'connect-pg-simple';
 import { isAllowedTrainingLevel } from "@shared/trainingLevels";
 import {
   DEFAULT_SPECIALTY_ID,
+  SPECIALTY_LIST,
   getSpecialty,
+  isKnownSpecialtyHost,
   isSpecialtyId,
   type SpecialtyId,
 } from "@shared/specialties";
@@ -20,7 +22,7 @@ import {
   sessionCookieDomainForHost,
 } from './seoPublic';
 import { sanitizeUser } from './authUtils';
-import { pool } from './db';
+import { pool, normalizeDatabaseUrl } from './db';
 
 const SALT_ROUNDS = 12; // Strong password hashing
 const SESSION_TTL = 7 * 24 * 60 * 60 * 1000; // 7 days
@@ -37,6 +39,35 @@ const AUTH_HINT_COOKIE_NAME = 'atlas.auth';
 
 function requestCookieHeader(req: Request): string {
   return typeof req.headers.cookie === 'string' ? req.headers.cookie : '';
+}
+
+function normalizeLoginEmail(raw: unknown): string {
+  if (typeof raw !== 'string') return '';
+  return raw
+    .normalize('NFKC')
+    .replace(/[\u200B-\u200D\uFEFF]/g, '')
+    .trim()
+    .toLowerCase();
+}
+
+function allowedAppOrigin(url: string): string | null {
+  try {
+    const parsed = new URL(url);
+    const match = SPECIALTY_LIST.find((s) => {
+      const origin = new URL(`${s.canonicalOrigin}/`);
+      return parsed.protocol === origin.protocol && parsed.hostname === origin.hostname;
+    });
+    if (!match) return null;
+    return `${match.canonicalOrigin}/`;
+  } catch {
+    return null;
+  }
+}
+
+function clearSessionCookies(req: Request, res: Response): void {
+  res.clearCookie(SESSION_COOKIE_NAME, { path: '/', sameSite: 'lax', secure: req.secure });
+  res.clearCookie(LEGACY_SESSION_COOKIE_NAME, { path: '/', sameSite: 'lax', secure: req.secure });
+  clearAuthHintCookie(req, res);
 }
 
 function requestHasCookie(req: Request, name: string): boolean {
@@ -62,7 +93,7 @@ function getSessionSecret(): string {
 export function getSession() {
   const pgStore = connectPg(session);
   const sessionStore = new pgStore({
-    conString: process.env.DATABASE_URL,
+    conString: normalizeDatabaseUrl(process.env.DATABASE_URL ?? ''),
     createTableIfMissing: false,
     ttl: SESSION_TTL / 1000, // convert to seconds
     tableName: 'sessions',
@@ -328,29 +359,56 @@ export async function setupAuth(app: Express) {
     }
   });
 
-  // Login route
+  function prefersBrowserRedirect(req: Request): boolean {
+    const ct = String(req.headers['content-type'] || '');
+    return ct.includes('application/x-www-form-urlencoded') || ct.includes('multipart/form-data');
+  }
+
+  function rejectLogin(
+    req: Request,
+    res: Response,
+    status: number,
+    message: string,
+    detail: Record<string, unknown>,
+  ) {
+    console.warn('[auth/login] rejected', { host: requestHostname(req), status, ...detail });
+    if (prefersBrowserRedirect(req)) {
+      return res.redirect(303, '/login?error=invalid');
+    }
+    return res.status(status).json({ message });
+  }
   app.post('/api/auth/login', authRateLimiter, async (req, res) => {
     try {
-      const { email, password } = req.body;
+      const email = normalizeLoginEmail(req.body?.email);
+      const password = typeof req.body?.password === 'string' ? req.body.password : '';
 
       if (!email || !password) {
-        return res.status(400).json({ message: 'Email and password required to login.' });
-      }
-      if (typeof email !== 'string' || typeof password !== 'string') {
-        return res.status(400).json({ message: 'Email and password required to login.' });
+        return rejectLogin(req, res, 400, 'Email and password required to login.', {
+          reason: 'missing_fields',
+          passwordLength: password.length,
+        });
       }
       if (password.length > 128) {
-        return res.status(400).json({ message: 'Invalid email or password entered.' });
+        return rejectLogin(req, res, 400, 'Invalid email or password entered.', {
+          reason: 'password_too_long',
+          passwordLength: password.length,
+        });
       }
 
       const user = await storage.getUserByEmail(email);
       if (!user || !user.passwordHash) {
-        return res.status(401).json({ message: 'Invalid email or password entered.' });
+        return rejectLogin(req, res, 401, 'Invalid email or password entered.', {
+          reason: !user ? 'no_user' : 'no_hash',
+          passwordLength: password.length,
+        });
       }
 
       const isPasswordValid = await verifyPassword(password, user.passwordHash);
       if (!isPasswordValid) {
-        return res.status(401).json({ message: 'Invalid email or password entered.' });
+        return rejectLogin(req, res, 401, 'Invalid email or password entered.', {
+          reason: 'bad_password',
+          passwordLength: password.length,
+        });
       }
 
       try {
@@ -367,10 +425,16 @@ export async function setupAuth(app: Express) {
           (req as any).session.save((err: any) => (err ? reject(err) : resolve()));
         });
         setAuthHintCookie(req, res);
+        if (prefersBrowserRedirect(req)) {
+          return res.redirect(303, '/login?needReset=1');
+        }
         return res.json({ success: true, user: sanitizeUser(user), passwordNeedsReset: true });
       }
 
       const continueUrl = await mintSameOriginLoginContinue(req, user.id);
+      if (prefersBrowserRedirect(req)) {
+        return res.redirect(303, continueUrl);
+      }
       return res.json({
         success: true,
         user: sanitizeUser(user),
@@ -379,6 +443,9 @@ export async function setupAuth(app: Express) {
       });
     } catch (error) {
       console.error('Login Error:', error);
+      if (prefersBrowserRedirect(req)) {
+        return res.redirect(303, '/login?error=invalid');
+      }
       res.status(500).json({ message: 'Login Failed.' });
     }
   });
@@ -801,16 +868,34 @@ export async function setupAuth(app: Express) {
     });
   });
 
-  // Logout route
-  app.post('/api/auth/logout', (req, res) => {
+  const destroyAndClear = (req: Request, res: Response, then: () => void) => {
     (req as any).session.destroy((err: any) => {
       if (err) {
         return res.status(500).json({ message: 'Logout failed.' });
       }
-      res.clearCookie(SESSION_COOKIE_NAME, { path: '/', sameSite: 'lax', secure: req.secure });
-      res.clearCookie(LEGACY_SESSION_COOKIE_NAME, { path: '/', sameSite: 'lax', secure: req.secure });
-      clearAuthHintCookie(req, res);
-      res.json({ success: true });
+      clearSessionCookies(req, res);
+      then();
+    });
+  };
+
+  // GET: used for the other specialty domain so one logout signs out of both hosts.
+  app.get('/api/auth/logout', (req, res) => {
+    const nextRaw = typeof req.query.next === 'string' ? req.query.next : '';
+    const next = allowedAppOrigin(nextRaw) ?? '/';
+    destroyAndClear(req, res, () => res.redirect(302, next));
+  });
+
+  app.post('/api/auth/logout', (req, res) => {
+    const host = requestHostname(req);
+    const here = getCanonicalOriginForHost(host) || '';
+    const hereSpecialty = getSpecialtyForHost(host);
+    const other = SPECIALTY_LIST.find((s) => s.id !== hereSpecialty);
+    destroyAndClear(req, res, () => {
+      const continueLogoutUrl =
+        isKnownSpecialtyHost(host) && other
+          ? `${other.canonicalOrigin}/api/auth/logout?next=${encodeURIComponent(`${here}/`)}`
+          : null;
+      res.json({ success: true, continueLogoutUrl });
     });
   });
 

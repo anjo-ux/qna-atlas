@@ -420,9 +420,11 @@ export function canonicalHostRedirect(req: Request, res: Response, next: NextFun
     return;
   }
 
+  // Prefer the proxy header. A *missing* X-Forwarded-Proto means an internal probe
+  // (Replit healthcheck hits the container directly) — do not treat that as plain HTTP
+  // or we 301 to https:// and the checker reports failure (often as status 500).
   const forwardedProto = (req.headers["x-forwarded-proto"] as string)?.split(",")[0]?.trim().toLowerCase();
-  const isTls =
-    forwardedProto === "https" || (req.socket as { encrypted?: boolean }).encrypted === true;
+  const socketEncrypted = (req.socket as { encrypted?: boolean }).encrypted === true;
 
   const pathWithQuery = req.originalUrl || "/";
 
@@ -431,7 +433,7 @@ export function canonicalHostRedirect(req: Request, res: Response, next: NextFun
     return;
   }
 
-  if (needHttps && !isTls && host === canonicalHost) {
+  if (needHttps && host === canonicalHost && forwardedProto === "http" && !socketEncrypted) {
     redirect301(res, buildRedirectUrl(pathWithQuery, canonical));
     return;
   }

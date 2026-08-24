@@ -182,66 +182,67 @@ html, body {
   }
 
   .dark {
-    --background: 210 30% 5%;
-    --foreground: 210 20% 95%;
+    --background: 210 28% 7%;
+    --foreground: 210 18% 93%;
 
-    --card: 210 25% 12%;
-    --card-foreground: 210 20% 95%;
+    --card: 210 24% 11%;
+    --card-foreground: 210 18% 93%;
 
-    --popover: 210 25% 12%;
-    --popover-foreground: 210 20% 95%;
+    --popover: 210 24% 11%;
+    --popover-foreground: 210 18% 93%;
 
-    --primary: 210 75% 65%;
+    /* Brand blue, deep enough that white labels stay readable on hover */
+    --primary: 210 72% 48%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 200 80% 70%;
-    --secondary-foreground: 210 30% 15%;
+    --secondary: 200 45% 48%;
+    --secondary-foreground: 210 28% 10%;
 
-    --muted: 210 25% 18%;
-    --muted-foreground: 210 15% 70%;
+    --muted: 210 18% 16%;
+    --muted-foreground: 210 12% 68%;
 
-    --accent: 180 100% 45%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 180 42% 38%;
+    --accent-foreground: 180 25% 96%;
 
-    --destructive: 0 84% 65%;
+    --destructive: 0 62% 48%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 210 25% 18%;
-    --input: 210 25% 18%;
-    --ring: 210 75% 65%;
+    --border: 210 16% 20%;
+    --input: 210 16% 20%;
+    --ring: 210 70% 50%;
     
     --shadow-card: 0 2px 8px -2px hsl(0 0% 0% / 0.5);
     --shadow-elevated: 0 4px 12px -2px hsl(0 0% 0% / 0.6);
-    --sidebar-background: 210 25% 8%;
-    --sidebar-foreground: 210 20% 90%;
-    --sidebar-primary: 210 75% 65%;
+    --sidebar-background: 210 26% 8%;
+    --sidebar-foreground: 210 16% 90%;
+    --sidebar-primary: 210 72% 48%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 180 100% 50%;
-    --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 210 20% 15%;
-    --sidebar-ring: 180 100% 70%;
+    --sidebar-accent: 200 28% 16%;
+    --sidebar-accent-foreground: 210 18% 92%;
+    --sidebar-border: 210 16% 16%;
+    --sidebar-ring: 180 40% 46%;
     
-    --highlight-yellow: 48 100% 67%;
-    --highlight-green: 142 76% 73%;
-    --highlight-blue: 199 89% 78%;
-    --highlight-pink: 330 81% 85%;
+    --highlight-yellow: 48 80% 52%;
+    --highlight-green: 142 50% 42%;
+    --highlight-blue: 199 55% 48%;
+    --highlight-pink: 330 45% 55%;
 
-    --ds-gray-700: hsla(0, 0%, 56%, 1);
-    --ds-gray-1000: hsla(0, 0%, 93%, 1);
-    --ds-shadow: rgba(255, 255, 255, 0.145);
+    --ds-gray-700: hsla(210, 10%, 62%, 1);
+    --ds-gray-1000: hsla(210, 16%, 93%, 1);
+    --ds-shadow: rgba(0, 0, 0, 0.45);
     
-    --nav-gradient-start: 210 75% 65%;
-    --nav-gradient-end: 200 80% 70%;
-    --nav-hover-gradient-start: 210 75% 70%;
-    --nav-hover-gradient-end: 200 80% 75%;
+    --nav-gradient-start: 210 72% 46%;
+    --nav-gradient-end: 200 48% 40%;
+    --nav-hover-gradient-start: 210 72% 40%;
+    --nav-hover-gradient-end: 200 48% 34%;
     
-    --success: 142 76% 55%;
+    --success: 142 48% 42%;
     --success-foreground: 0 0% 100%;
-    --chart-1: 210 75% 65%;
-    --chart-2: 180 100% 70%;
-    --chart-3: 142 76% 60%;
-    --chart-4: 200 80% 70%;
-    --chart-5: 180 100% 65%;
+    --chart-1: 210 72% 52%;
+    --chart-2: 180 42% 46%;
+    --chart-3: 142 48% 46%;
+    --chart-4: 200 48% 48%;
+    --chart-5: 180 38% 42%;
   }
 
   /**
@@ -272,25 +273,28 @@ html, body {
 
   [data-specialty="ortho"].dark,
   [data-specialty="ortho"] .dark {
-    --primary: 162 55% 55%;
-    --secondary: 155 45% 62%;
-    --accent: 30 85% 58%;
-    --ring: 162 55% 55%;
+    --primary: 168 42% 38%;
+    --secondary: 158 32% 42%;
+    --accent: 28 48% 48%;
+    --ring: 168 42% 40%;
+    --secondary-foreground: 158 25% 10%;
+    --accent-foreground: 32 30% 12%;
 
-    --sidebar-primary: 162 55% 55%;
-    --sidebar-accent: 155 45% 55%;
-    --sidebar-ring: 30 85% 62%;
+    --sidebar-primary: 168 42% 38%;
+    --sidebar-accent: 158 24% 16%;
+    --sidebar-accent-foreground: 158 18% 92%;
+    --sidebar-ring: 28 48% 46%;
 
-    --nav-gradient-start: 162 55% 50%;
-    --nav-gradient-end: 155 45% 58%;
-    --nav-hover-gradient-start: 162 55% 56%;
-    --nav-hover-gradient-end: 155 45% 64%;
+    --nav-gradient-start: 168 42% 36%;
+    --nav-gradient-end: 158 32% 32%;
+    --nav-hover-gradient-start: 168 42% 30%;
+    --nav-hover-gradient-end: 158 32% 26%;
 
-    --chart-1: 162 55% 58%;
-    --chart-2: 155 45% 64%;
-    --chart-3: 30 85% 60%;
-    --chart-4: 190 45% 60%;
-    --chart-5: 45 65% 58%;
+    --chart-1: 168 42% 44%;
+    --chart-2: 158 32% 48%;
+    --chart-3: 28 48% 48%;
+    --chart-4: 190 32% 46%;
+    --chart-5: 45 40% 48%;
   }
 }
 
@@ -606,8 +610,16 @@ html, body {
     box-shadow: 0 0 20px hsl(var(--primary) / 0.25), 0 0 40px hsl(var(--primary) / 0.12);
   }
 
+  .dark .hover\:glow-primary:hover {
+    box-shadow: 0 0 14px hsl(var(--primary) / 0.18), 0 0 28px hsl(var(--primary) / 0.08);
+  }
+
   .hover\:glow-accent:hover {
     box-shadow: 0 0 20px hsl(var(--accent) / 0.25), 0 0 40px hsl(var(--accent) / 0.12);
+  }
+
+  .dark .hover\:glow-accent:hover {
+    box-shadow: 0 0 12px hsl(var(--accent) / 0.16), 0 0 24px hsl(var(--accent) / 0.07);
   }
 
   /* Progress Bar */
@@ -633,6 +645,10 @@ html, body {
   .hover-elevate:hover {
     transform: translateY(-2px);
     box-shadow: 0 8px 24px hsl(var(--primary) / 0.15);
+  }
+
+  .dark .hover-elevate:hover {
+    box-shadow: 0 8px 20px hsl(0 0% 0% / 0.35);
   }
 
   /* Active Elevation */

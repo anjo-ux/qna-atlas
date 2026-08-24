@@ -4,6 +4,12 @@ import { setupVite, serveStatic, log } from "./vite";
 import { canonicalHostRedirect } from "./seoPublic";
 
 const app = express();
+
+/** Lightweight liveness probe — registered before redirects/session so deploy healthchecks stay cheap. */
+app.get("/health", (_req, res) => {
+  res.status(200).json({ ok: true });
+});
+
 app.use(canonicalHostRedirect);
 // Limit body size to mitigate DoS via large payloads
 const BODY_LIMIT = '100kb';
@@ -76,9 +82,10 @@ app.use((req, res, next) => {
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
     const message = err.message || "Internal Server Error.";
-
-    res.status(status).json({ message });
-    throw err;
+    console.error("Request error:", err);
+    if (!res.headersSent) {
+      res.status(status).json({ message });
+    }
   });
 
   if (app.get("env") === "development") {

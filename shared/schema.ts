@@ -71,7 +71,9 @@ export const users = pgTable("users", {
   tester: boolean("tester"), // True if user has beta access to Question Auth Platform (Atlas Trainer); set by admins; null/undefined treated as false
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
-});
+}, (table) => [
+  uniqueIndex("uidx_users_email_lower").on(sql`lower(${table.email})`),
+]);
 
 // Login connections table - tracks which OAuth providers user has connected
 export const loginConnections = pgTable("login_connections", {

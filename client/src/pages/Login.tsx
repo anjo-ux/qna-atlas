@@ -95,6 +95,13 @@ export default function Login() {
     const params = new URLSearchParams(window.location.search);
     const oauth = params.get('oauth');
     const handoff = params.get('handoff');
+    const loginError = params.get('error');
+    if (loginError === 'invalid') {
+      toast.error('Invalid email or password entered.');
+      params.delete('error');
+      const next = `${window.location.pathname}${params.toString() ? `?${params}` : ''}`;
+      window.history.replaceState({}, '', next);
+    }
     if (handoff) {
       const handoffMessages: Record<string, string> = {
         expired: 'That sign-in link expired. Please log in on this site.',
@@ -157,6 +164,7 @@ export default function Login() {
     setIsLoading(true);
 
     try {
+      const form = e.currentTarget as HTMLFormElement;
       const endpoint = isSignUp ? '/api/auth/register' : '/api/auth/login';
       const payload = isSignUp
         ? {
@@ -169,7 +177,15 @@ export default function Login() {
             trainingLevel,
             specialtyId,
           }
-        : { email: email.trim().toLowerCase(), password };
+        : {
+            // Read the live DOM so browser autofill (common on the second domain) is
+            // what gets sent, not a stale React state value that looks filled.
+            email: String(new FormData(form).get('email') || '')
+              .normalize('NFKC')
+              .trim()
+              .toLowerCase(),
+            password: String(new FormData(form).get('password') || ''),
+          };
 
       const response = await fetch(endpoint, {
         method: 'POST',
@@ -373,7 +389,14 @@ export default function Login() {
                 </>
               )}
 
-              <form onSubmit={handleSubmit} className="space-y-5">
+              <form
+                method="post"
+                action={isSignUp ? '/api/auth/register' : '/api/auth/login'}
+                encType="application/x-www-form-urlencoded"
+                acceptCharset="UTF-8"
+                onSubmit={isSignUp ? handleSubmit : undefined}
+                className="space-y-5"
+              >
                 {isSignUp && (
                   <div className="grid grid-cols-2 gap-3">
                     <div>
@@ -419,15 +442,18 @@ export default function Login() {
                   </label>
                   <Input
                     id="email"
+                    name="email"
                     type="email"
-                    autoComplete="email"
+                    autoComplete={isSignUp ? 'email' : 'username'}
                     placeholder="Enter Email Address"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    {...(isSignUp
+                      ? { value: email, onChange: (e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value) }
+                      : { defaultValue: '' })}
                     disabled={isLoading}
                     required
                     data-testid="input-email"
                     className={fieldClass}
+                    key={isSignUp ? 'signup-email' : 'signin-email'}
                   />
                 </div>
 
@@ -438,15 +464,18 @@ export default function Login() {
                   <div className="relative">
                     <Input
                       id="password"
+                      name="password"
                       type={isPasswordVisible ? 'text' : 'password'}
                       autoComplete={isSignUp ? 'new-password' : 'current-password'}
                       placeholder="Enter Your Password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
+                      {...(isSignUp
+                        ? { value: password, onChange: (e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value) }
+                        : { defaultValue: '' })}
                       disabled={isLoading}
                       required
                       data-testid="input-password"
                       className={cn(fieldClass, 'pr-10')}
+                      key={isSignUp ? 'signup-password' : 'signin-password'}
                     />
                     <button
                       type="button"

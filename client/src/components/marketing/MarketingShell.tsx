@@ -124,7 +124,7 @@ export function MarketingShell({
                       <Button
                         size="sm"
                         onClick={handleLogin}
-                        className="h-9 rounded-full bg-primary/90 px-4 font-medium shadow-none hover:bg-primary"
+                        className="h-9 rounded-full bg-primary/90 px-4 font-medium text-primary-foreground shadow-none hover:bg-primary/80"
                       >
                         Sign In
                       </Button>
@@ -176,7 +176,7 @@ export function MarketingShell({
                     <Button
                       size="sm"
                       onClick={handleLogin}
-                      className="h-9 rounded-full bg-primary/90 px-4 font-medium shadow-none hover:bg-primary"
+                      className="h-9 rounded-full bg-primary/90 px-4 font-medium text-primary-foreground shadow-none hover:bg-primary/80"
                     >
                       Sign In
                     </Button>
