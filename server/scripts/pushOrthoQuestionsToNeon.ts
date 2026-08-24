@@ -1,12 +1,13 @@
 /**
- * Push all Ortho specialty questions (+ sections/subsections) from local Helium
- * to production Neon.
+ * Push all Ortho specialty questions (+ sections/subsections) from the workspace
+ * database to another database.
  *
- * Source: DATABASE_URL (helium)
- * Target: NEON_DATABASE_URL (default) or IMPORT_DATABASE_URL
+ * Source: DATABASE_URL (the workspace copy)
+ * Target: must be stated explicitly — see importDbTarget.ts. For the live site this is
+ *         the deployment's own DATABASE_URL (Deployments > Secrets), NOT NEON_DATABASE_URL.
  *
- *   npm run push:ortho-to-neon
- *   DRY_RUN=1 npm run push:ortho-to-neon
+ *   DRY_RUN=1 IMPORT_DATABASE_URL="postgresql://..." npm run push:ortho
+ *   IMPORT_DATABASE_URL="postgresql://..." npm run push:ortho
  */
 import pg from "pg";
 import * as fs from "fs";
@@ -61,7 +62,7 @@ async function main() {
   if (sourceHost === targetHost) {
     throw new Error(
       `Refusing to push: source and target are the same host (${sourceHost}). ` +
-        `Ensure DATABASE_URL is Helium and NEON_DATABASE_URL is set.`
+        `DATABASE_URL is the source; point IMPORT_DATABASE_URL at a different database.`
     );
   }
 

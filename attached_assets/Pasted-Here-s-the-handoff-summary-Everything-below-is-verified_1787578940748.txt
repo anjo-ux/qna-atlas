@@ -1,0 +1,80 @@
+Here's the handoff summary. Everything below is verified against the running system unless marked otherwise.
+
+# Database & script audit
+
+## 1. Architecture: one database, not one per specialty
+
+`server/db.ts` opens a single pool from `DATABASE_URL`, and it's the only DB connection in the app. There is no `ORTHO_DATABASE_URL` anywhere in the codebase.
+
+Both question banks live in the **same** database:
+- Content is separated by `sections.specialty_id` and the `ortho-` id prefix
+- `users`, `user_specialty_subscriptions`, and `sessions` are shared tables
+
+**Do not split PRS and Ortho into two databases.** One account must resolve on both domains, and entitlements are per-specialty *rows*, not per-database. Splitting them would break cross-domain login, q-bank switching, and subscriptions.
+
+## 2. The three databases that actually exist
+
+| | host / fingerprint | users | newest user | PRS questions | Ortho content | role |
+|---|---|---|---|---|---|---|
+| **helium** | `helium` / `cac77afa64` | 48 | 2026-08-07 | 2,926 | 9 sections, 2,676 q | workspace dev DB (`DATABASE_URL`) |
+| **neon** | `ep-gentle-dawn-ah1emcw8...neon.tech` / `227b504224` | 46 | 2026-04-22 | 2,926 | 9 sections, 2,676 q | legacy copy (`NEON_DATABASE_URL`) |
+| **live prod** | unknown from workspace | real accounts | — | more than both | **none** | what the deployment reads |
+
+How the live database was identified as a distinct third one: running the app's own `getSectionsMeta` against helium and neon returns identical results (`anatomy=313`, `skin-lesions=329`, 9 ortho sections). The live site returns `anatomy=315`, `skin-lesions=330`, **0 ortho sections**. Since `/api/auth/session-debug` (new code) is live, the deployed build is current, so the difference is the database, not the code.
+
+**There is no empty database to clean up.** All three hold real data. The live one is missing only the Ortho rows.
+
+## 3. The pointing problem (root cause of the empty Ortho bank)
+
+`server/scripts/importDbTarget.ts` used to read:
+
+> `Default: NEON_DATABASE_URL (production).`
+
+Neon is **not** what the deployment reads. So `npm run push:ortho-to-neon` ran, reported success, and wrote all 2,676 Ortho questions into Neon — a database the live site never queries. Neon holds a complete, correct Ortho bank that has never been visible to users. That is the entire reason `ortho-atlas.com` shows zero questions; it is not an auth problem.
+
+Supporting evidence that it isn't auth: `/api/sections/meta` has no `isAuthenticated` middleware, and fetched anonymously it returns full PRS content but `[]` for Ortho on both domains, even with `?specialtyId=ortho` forced. Production's login endpoint on Ortho returns a correct `401 {"message":"Invalid email or password entered."}` for bad credentials.
+
+## 4. Scripts: only 3 of 20 can target a database other than the workspace
+
+**Can choose a target** (via `importDbTarget.ts`):
+`importDbTarget.ts`, `importManualPrsQuestions.ts`, `pushOrthoQuestionsToNeon.ts`
+
+**Hard-wired to whatever `DATABASE_URL` is** — i.e. the dev database, with no way to reach production:
+`applyQuestionFlags`, `approveGeneratedQuestions`, `auditQuestionEncoding`, `cleanupQuestions`, `clearGeneratedQuestions`, `fillEmptyOrthoSubsections`, `generateOrthoQuestionsFromTopics`, `hideSeeImageChoiceQuestions`, `importQuestionsFromExcel`, `importValidatedOrthoQuestions`, `rephraseQuestions`, `rescreenOrthoLiveQuestions`, `resetAllSubscriptionData`, `setTesterByEmail`, `summarizeQuestionReports`, `validateOrthoQuestions`, `verifyQuestionFormat`
+
+This is why content work accumulates in dev and needs a manual push step. Worth routing them all through one explicit target resolver.
+
+## 5. Cleanup list
+
+**Safe to remove:**
+- `server/replitAuth.ts` — dead code, imported nowhere, and it opens a second session store on `DATABASE_URL`
+- `tmp-neon-read.ts`, `tmp-neon-sections.ts`, `tmp-ortho-diag.ts` — debug scripts committed into the repo by a publish; already deleted in the working tree, so they drop out on the next commit
+- `push:ortho-to-neon` npm alias, once nothing references it (misleading name; `push:ortho` added)
+
+**Retire only after the Ortho push to prod is verified:** the Neon database. It's a April-era copy with 46 users. Confirm nothing else reads it before deleting.
+
+**Never delete:** the live production database. It holds the real accounts and subscriptions.
+
+**Rename for clarity:** `NEON_DATABASE_URL` → something like `LEGACY_NEON_DATABASE_URL`, so no future script or human reads it as "production".
+
+## 6. Already fixed in the working tree (don't redo)
+
+- `importDbTarget.ts` now **requires** an explicit target and throws with an actionable message rather than defaulting to Neon. Accepts `IMPORT_DATABASE_URL`, `IMPORT_DB=local`, or `IMPORT_DB=neon`; rejects anything else. Verified all three paths.
+- Doc comments in `pushOrthoQuestionsToNeon.ts` and `importManualPrsQuestions.ts` no longer call Neon "production"; `push:ortho` script name added.
+- `/api/auth/session-debug` now reports a `database` block (host hash + Ortho/PRS row counts) so any environment can identify its own database without exposing the connection string.
+- Earlier in this session: session cookie renamed to `atlas.sid` with legacy `connect.sid` cleanup, the `session.regenerate` bug in the cross-domain handoff (it was handing over an empty session), and `checkout.stripe.com` added to the Stripe continue-URL allowlist.
+
+## 7. The one action that fixes the live site
+
+Push Ortho content into the **deployment's** database:
+
+```bash
+DRY_RUN=1 IMPORT_DATABASE_URL="<deployment DATABASE_URL>" npm run push:ortho
+IMPORT_DATABASE_URL="<deployment DATABASE_URL>" npm run push:ortho
+```
+
+The script refuses to run if source and target hosts match, and the schema statements it applies first (`drizzle/0016_multi_specialty.sql`) are purely additive — `ADD COLUMN IF NOT EXISTS`, `CREATE INDEX IF NOT EXISTS`, `CREATE TABLE IF NOT EXISTS`, and a backfill ending in `ON CONFLICT DO NOTHING`. Note `DRY_RUN=1` still applies those schema guards; it only skips the row writes.
+
+Verify with `https://ortho-atlas.com/api/sections/meta` returning 9 sections, and `https://ortho-atlas.com/api/auth/session-debug` showing non-zero `ortho_questions`.
+
+One caveat on the secret: you set `IMPORT_DATABASE_URL`, but my shell inherited its environment before that and still can't see it (`NEON_DATABASE_URL` is visible, the new one isn't), and Replit doesn't expose secrets as a readable file. A workspace restart would fix it if you'd rather I run the push than the Replit agent.

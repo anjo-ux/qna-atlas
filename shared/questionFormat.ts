@@ -66,10 +66,10 @@ export function extractQuestionStem(questionText: string): string {
 const SEE_IMAGE_IN_CHOICE_RE = /see\s+image/i;
 
 /**
- * Returns each MCQ option's visible text (same parsing as extractChoices).
+ * Parsed MCQ options with letters (same parsing as extractChoices).
  * Empty if choices could not be parsed.
  */
-function choiceTextsFromQuestion(questionText: string): string[] {
+export function extractMcqChoices(questionText: string): { letter: string; text: string }[] {
   const lines = questionText.split("\n");
   let choicesOnSeparateLines = false;
   for (const line of lines) {
@@ -79,17 +79,17 @@ function choiceTextsFromQuestion(questionText: string): string[] {
       break;
     }
   }
-  const texts: string[] = [];
+  const choices: { letter: string; text: string }[] = [];
   if (choicesOnSeparateLines) {
     for (const line of lines) {
       const m = line.match(CHOICE_LINE_REGEX);
       if (m) {
         const letter = toChoiceLetter(m[1] || m[3] || "");
         const text = (m[2] || m[4] || "").trim();
-        if (letter && text && /^[A-F]$/.test(letter)) texts.push(text);
+        if (letter && text && /^[A-F]$/.test(letter)) choices.push({ letter, text });
       }
     }
-    return texts;
+    return choices;
   }
   const questionMarkers = ["?", ":", "."];
   let lastMarkerIndex = -1;
@@ -107,9 +107,13 @@ function choiceTextsFromQuestion(questionText: string): string[] {
     const startIndex = choiceMatches[i].index! + choiceMatches[i][0].length;
     const endIndex = i < choiceMatches.length - 1 ? choiceMatches[i + 1].index! : afterMarker.length;
     const text = afterMarker.substring(startIndex, endIndex).trim();
-    if (text) texts.push(text);
+    if (text) choices.push({ letter, text });
   }
-  return texts;
+  return choices;
+}
+
+function choiceTextsFromQuestion(questionText: string): string[] {
+  return extractMcqChoices(questionText).map((c) => c.text);
 }
 
 /**
@@ -150,7 +154,7 @@ export function normalizeAnswerExplanationForDisplay(answer: string): string {
   return a;
 }
 
-function extractCorrectAnswer(answer: string): string | null {
+export function extractCorrectAnswer(answer: string): string | null {
   const phraseMatch = answer.match(
     /(?:correct answer is|answer is|correct response is|response is)\s*(?:option\s+)?([A-F])/i
   );

@@ -21,6 +21,7 @@
     "validate:ortho-questions": "tsx server/scripts/validateOrthoQuestions.ts",
     "rescreen:ortho-live": "tsx server/scripts/rescreenOrthoLiveQuestions.ts",
     "apply:question-flags": "tsx server/scripts/applyQuestionFlags.ts",
+    "push:ortho": "tsx server/scripts/pushOrthoQuestionsToNeon.ts",
     "push:ortho-to-neon": "tsx server/scripts/pushOrthoQuestionsToNeon.ts",
     "generate:questions": "tsx server/jobs/questionGenerationJob.ts",
     "verify:questions": "tsx server/scripts/verifyQuestionFormat.ts",

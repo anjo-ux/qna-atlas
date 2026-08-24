@@ -9,6 +9,8 @@ import {
   validateQuestionFormat,
   contentRulesForGenerated,
   extractQuestionStem,
+  extractMcqChoices,
+  extractCorrectAnswer,
   questionMcqChoicesReferenceSeeImage,
 } from "@shared/questionFormat";
 import { subsectionOrder, subsectionTitles } from "@shared/questionImport";
@@ -18,6 +20,7 @@ import {
   SPECIALTY_LIST,
   getSpecialty,
   isKnownSpecialtyHost,
+  isOrthoContentId,
   isSpecialtyId,
   type SpecialtyId,
 } from "@shared/specialties";
@@ -681,12 +684,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
           );
         }
       }
+      const reported = await storage.getQuestionForReport(trimmedQuestionId);
+      const choices = reported ? extractMcqChoices(reported.question) : [];
+      const correctLetter = reported ? extractCorrectAnswer(reported.answer) : null;
+      const correctChoice = correctLetter
+        ? choices.find((c) => c.letter === correctLetter)
+        : undefined;
+      const correctAnswer = correctLetter
+        ? correctChoice
+          ? `${correctLetter}) ${correctChoice.text}`
+          : correctLetter
+        : null;
       await notifyQuestionReportSlack({
         questionId: trimmedQuestionId,
         message: trimmedMessage,
         userEmail,
         reportCount,
         autoHidden,
+        databaseLabel: reported
+          ? reported.specialtyId === "ortho"
+            ? "Ortho database"
+            : "PRS database"
+          : isOrthoContentId(trimmedQuestionId)
+            ? "Ortho database"
+            : undefined,
+        stem: reported ? extractQuestionStem(reported.question) : null,
+        choices,
+        correctAnswer,
       });
       res.json({ message: 'Report sent.' });
     } catch (error) {

@@ -20,6 +20,7 @@ import {
   sessionCookieDomainForHost,
 } from './seoPublic';
 import { sanitizeUser } from './authUtils';
+import { pool } from './db';
 
 const SALT_ROUNDS = 12; // Strong password hashing
 const SESSION_TTL = 7 * 24 * 60 * 60 * 1000; // 7 days
@@ -85,6 +86,31 @@ export function getSession() {
       // Host-only on purpose: each specialty domain owns its own session.
     },
   });
+}
+
+/**
+ * Identifies which content database this process is attached to, without exposing the
+ * connection string. `fingerprint` is a hash of the host so environments can be compared.
+ */
+async function describeContentDatabase(): Promise<Record<string, unknown>> {
+  let fingerprint = 'unknown';
+  try {
+    const dbHost = new URL(process.env.DATABASE_URL ?? '').hostname;
+    fingerprint = createHash('sha256').update(dbHost).digest('hex').slice(0, 10);
+  } catch {
+    /* leave as unknown */
+  }
+  try {
+    const { rows } = await pool.query(`
+      SELECT
+        (SELECT count(*)::int FROM sections  WHERE id LIKE 'ortho-%') AS ortho_sections,
+        (SELECT count(*)::int FROM questions WHERE id LIKE 'ortho-%') AS ortho_questions,
+        (SELECT count(*)::int FROM sections  WHERE id NOT LIKE 'ortho-%') AS prs_sections
+    `);
+    return { fingerprint, ...rows[0] };
+  } catch (error) {
+    return { fingerprint, error: (error as Error).message.slice(0, 120) };
+  }
 }
 
 /** Marks the browser as signed in so the SPA does not render Landing before auth resolves. */
@@ -730,13 +756,14 @@ export async function setupAuth(app: Express) {
    * Cookie/host diagnostics for the two custom domains. Reports cookie *names* and
    * booleans only — never session contents or user data.
    */
-  app.get('/api/auth/session-debug', (req, res) => {
+  app.get('/api/auth/session-debug', async (req, res) => {
     const cookieNames = requestCookieHeader(req)
       .split(';')
       .map((part) => part.trim().split('=')[0])
       .filter(Boolean);
     const host = requestHostname(req);
     res.json({
+      database: await describeContentDatabase(),
       host,
       hostHeader: req.headers.host ?? null,
       forwardedHost: req.headers['x-forwarded-host'] ?? null,

@@ -73,6 +73,8 @@ export default function Login() {
   const [isSubmitHovered, setIsSubmitHovered] = useState(false);
   const [googleEnabled, setGoogleEnabled] = useState(true);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const trainingLevelTriggerRef = useRef<HTMLButtonElement>(null);
+  const [trainingLevelError, setTrainingLevelError] = useState(false);
   const marketingSpecialty = useHostSpecialty();
   const { resolvedTheme } = useTheme();
   const panelSpecialtyId = isSignUp ? specialtyId : marketingSpecialty.id;
@@ -144,9 +146,13 @@ export default function Login() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isSignUp && !trainingLevel) {
+      setTrainingLevelError(true);
       toast.error('Please select your training level.');
+      trainingLevelTriggerRef.current?.focus();
+      trainingLevelTriggerRef.current?.scrollIntoView({ block: 'center', behavior: 'smooth' });
       return;
     }
+    setTrainingLevelError(false);
 
     setIsLoading(true);
 
@@ -504,13 +510,21 @@ export default function Login() {
                       </label>
                       <Select
                         value={trainingLevel || undefined}
-                        onValueChange={setTrainingLevel}
+                        onValueChange={(value) => {
+                          setTrainingLevel(value);
+                          setTrainingLevelError(false);
+                        }}
                         disabled={isLoading}
-                        required
                       >
                         <SelectTrigger
                           id="training-level"
-                          className={cn('w-full', fieldClass)}
+                          ref={trainingLevelTriggerRef}
+                          aria-invalid={trainingLevelError || undefined}
+                          className={cn(
+                            'w-full',
+                            fieldClass,
+                            trainingLevelError && 'border-destructive ring-2 ring-destructive/30',
+                          )}
                           data-testid="select-training-level"
                         >
                           <SelectValue placeholder="Select Training Level" />
@@ -523,6 +537,11 @@ export default function Login() {
                           ))}
                         </SelectContent>
                       </Select>
+                      {trainingLevelError ? (
+                        <p className="mt-1 text-sm text-destructive" role="alert">
+                          Please select a training level.
+                        </p>
+                      ) : null}
                     </div>
 
                     <div>
@@ -638,6 +657,7 @@ export default function Login() {
                       setLastName('');
                       setInstitution('');
                       setTrainingLevel('');
+                      setTrainingLevelError(false);
                       scrollContainerRef.current?.scrollTo({ top: 0 });
                       setLocation(nextSignUp ? '/signup' : '/login');
                     }}

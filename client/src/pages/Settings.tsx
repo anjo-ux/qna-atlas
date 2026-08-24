@@ -2,7 +2,8 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ArrowLeft, Mail, CreditCard, BookOpen, TrendingUp, Target, Save, ChevronRight, ChevronLeft, Check, ChevronsUpDown, Award, ExternalLink, Lock } from 'lucide-react';
+import { ArrowLeft, Mail, CreditCard, BookOpen, TrendingUp, Target, Save, ChevronRight, ChevronLeft, Check, ChevronsUpDown, Award, ExternalLink, Lock, LifeBuoy } from 'lucide-react';
+import { Link } from 'wouter';
 import { useAuth } from '@/hooks/useAuth';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ThemeSwitcher } from '@/components/ui/theme-switcher';
@@ -242,8 +243,14 @@ export function Settings({ onBack, subscription }: SettingsProps) {
             </Button>
             <h1 className="truncate text-2xl font-bold text-foreground sm:text-3xl">Settings</h1>
           </div>
-          <div className="flex shrink-0 items-center">
+          <div className="flex shrink-0 items-center gap-2">
             <ThemeSwitcher />
+            <Button asChild variant="outline" className="gap-2" data-testid="button-settings-support">
+              <Link href="/contact">
+                <LifeBuoy className="h-4 w-4" />
+                Support
+              </Link>
+            </Button>
           </div>
         </div>
       </div>

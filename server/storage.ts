@@ -56,6 +56,7 @@ import {
   SPECIALTY_IDS,
   contentIdMatchesSpecialty,
   getSpecialty,
+  isOrthoContentId,
   type SpecialtyId,
 } from "@shared/specialties";
 import { db, pool } from "./db";
@@ -350,6 +351,12 @@ export interface IStorage {
   getPreviewQuestions(specialtyId?: SpecialtyId, count?: number): Promise<SectionQuestionDto[]>;
 
   // Question reports
+  getQuestionForReport(id: string): Promise<{
+    question: string;
+    answer: string;
+    subsectionId: string;
+    specialtyId: SpecialtyId;
+  } | undefined>;
   createQuestionReport(report: InsertQuestionReport): Promise<QuestionReport>;
   getAllQuestionReports(): Promise<QuestionReport[]>;
   countQuestionReportsForQuestion(questionId: string): Promise<number>;
@@ -1358,6 +1365,37 @@ export class DatabaseStorage implements IStorage {
   async getQuestion(id: string) {
     const [row] = await db.select().from(questions).where(eq(questions.id, id));
     return row;
+  }
+
+  async getQuestionForReport(id: string): Promise<{
+    question: string;
+    answer: string;
+    subsectionId: string;
+    specialtyId: SpecialtyId;
+  } | undefined> {
+    const [row] = await db
+      .select({
+        question: questions.question,
+        answer: questions.answer,
+        subsectionId: questions.subsectionId,
+        specialtyId: sections.specialtyId,
+        sectionId: sections.id,
+      })
+      .from(questions)
+      .innerJoin(subsections, eq(questions.subsectionId, subsections.id))
+      .innerJoin(sections, eq(subsections.sectionId, sections.id))
+      .where(eq(questions.id, id));
+    if (!row) return undefined;
+    const specialtyId: SpecialtyId =
+      row.specialtyId === "ortho" || isOrthoContentId(row.sectionId) || isOrthoContentId(row.subsectionId)
+        ? "ortho"
+        : "prs";
+    return {
+      question: row.question,
+      answer: row.answer,
+      subsectionId: row.subsectionId,
+      specialtyId,
+    };
   }
 
   async getDraftGeneratedQuestions(): Promise<{ id: string; question: string; answer: string; subsectionId: string; createdAt: Date }[]> {

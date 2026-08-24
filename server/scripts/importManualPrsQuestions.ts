@@ -2,13 +2,12 @@
  * Import a curated PRS question batch from server/data/prsManualBatchRaw.txt
  * into the live question bank with subsection tags from section headers.
  *
- * Defaults to production Neon (NEON_DATABASE_URL).
+ * The target database must be stated explicitly (see importDbTarget.ts).
  *
  * Usage:
- *   npm run import:prs-manual
- *   npm run import:prs-manual -- --dry-run
- *   IMPORT_DB=local npm run import:prs-manual          # Replit helium
+ *   IMPORT_DATABASE_URL=postgresql://... npm run import:prs-manual -- --dry-run
  *   IMPORT_DATABASE_URL=postgresql://... npm run import:prs-manual
+ *   IMPORT_DB=local npm run import:prs-manual          # workspace database
  */
 import * as fs from "fs";
 import * as path from "path";

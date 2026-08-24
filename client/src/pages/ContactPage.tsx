@@ -46,11 +46,11 @@ export default function ContactPage() {
     <MarketingShell>
       <main className="flex min-w-0 flex-col">
         <div className="container mx-auto max-w-3xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
-          <header className="mb-10 text-center sm:text-left">
-            <p className="mb-2 text-sm font-medium tracking-tight text-muted-foreground">
+          <header className="mb-10 space-y-5 text-center sm:text-left">
+            <p className="text-sm font-medium tracking-tight text-muted-foreground">
               We Are Here To Help
             </p>
-            <h1 className="mb-4 text-4xl font-bold leading-snug tracking-tight gradient-text sm:text-5xl">
+            <h1 className="text-4xl font-bold leading-snug tracking-tight gradient-text sm:text-5xl">
               Contact
             </h1>
             <p className="mx-auto max-w-2xl text-lg leading-relaxed text-muted-foreground sm:mx-0">
@@ -62,9 +62,9 @@ export default function ContactPage() {
 
           <Card className="mb-8 border-primary/25 bg-primary/5">
             <CardHeader>
-              <CardTitle className="text-xl">Send a Message</CardTitle>
+              <CardTitle className="text-xl">Send Message</CardTitle>
               <CardDescription>
-                This reaches the {brandName} support inbox and our team channel.
+                This reaches our support inbox and you will receive a response within two business days.
               </CardDescription>
             </CardHeader>
             <CardContent>

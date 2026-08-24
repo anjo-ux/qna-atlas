@@ -62,25 +62,49 @@ export async function postSlackNotification(
   }
 }
 
+function clipForSlack(text: string, max: number): string {
+  const t = text.trim();
+  if (t.length <= max) return t;
+  return `${t.slice(0, max - 1)}…`;
+}
+
 export async function notifyQuestionReportSlack(params: {
   questionId: string;
   message: string;
   userEmail?: string | null;
   reportCount: number;
   autoHidden: boolean;
+  databaseLabel?: string | null;
+  stem?: string | null;
+  choices?: { letter: string; text: string }[];
+  correctAnswer?: string | null;
 }): Promise<boolean> {
   const reporter = params.userEmail?.trim()
     ? slackEscape(params.userEmail.trim())
     : "(anonymous / not signed in)";
   const lines = [
     `*Question reported* \`${slackEscape(params.questionId)}\``,
+    `Database: ${slackEscape(params.databaseLabel?.trim() || "Unknown")}`,
     `Reporter: ${reporter}`,
     `Total reports for this question: ${params.reportCount}${
       params.autoHidden ? " — auto-hidden" : ""
     }`,
-    "",
-    slackEscape(params.message.slice(0, 2000)),
   ];
+  if (params.stem?.trim()) {
+    lines.push("", "*Stem*", slackEscape(clipForSlack(params.stem, 1500)));
+  }
+  if (params.choices && params.choices.length > 0) {
+    lines.push("", "*Answer choices*");
+    for (const c of params.choices) {
+      lines.push(
+        slackEscape(`${c.letter}) ${clipForSlack(c.text, 400)}`)
+      );
+    }
+  }
+  if (params.correctAnswer?.trim()) {
+    lines.push("", `*Correct answer:* ${slackEscape(clipForSlack(params.correctAnswer, 500))}`);
+  }
+  lines.push("", slackEscape(params.message.slice(0, 2000)));
   return postSlackNotification("question-report", lines.join("\n"));
 }
 
