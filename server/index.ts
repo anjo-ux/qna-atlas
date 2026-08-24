@@ -89,6 +89,12 @@ app.use((req, res, next) => {
 
   function onServerListening(port: number) {
     log(`Server running on port ${port}`);
+
+    // Production has its own database, so a specialty added later starts out empty there.
+    import("./content/contentBootstrap")
+      .then(({ runContentBootstrap }) => runContentBootstrap(log))
+      .catch((e) => log(`[contentBootstrap] error: ${e}`));
+
     const sgKey = process.env.SENDGRID_API_KEY;
     const sgFrom = process.env.SENDGRID_FROM_EMAIL;
     log(`SendGrid: SENDGRID_API_KEY=${sgKey ? "set" : "NOT SET"}, SENDGRID_FROM_EMAIL=${sgFrom ? "set" : "not set"}`);
@@ -142,6 +148,34 @@ app.use((req, res, next) => {
         run(); // run once after startup
         setInterval(run, genIntervalMs);
         log(`[questionGenerationJob] scheduled every ${genIntervalMs}ms`);
+      });
+    }
+
+    const feedbackEnabled = process.env.FEEDBACK_AGENT_ENABLED === "true";
+    if (feedbackEnabled) {
+      import("./jobs/feedbackLearningJob").then(({ runFeedbackLearningJob, feedbackAgentTickMs }) => {
+        const tick = feedbackAgentTickMs();
+        const tickRun = () => {
+          runFeedbackLearningJob()
+            .then((r) => {
+              if (r.skippedPeriod) return;
+              log(
+                `[feedbackLearningJob] revised=${r.revised} needsManual=${r.needsManual} skipped=${r.skipped} digest=${r.digestPosted}`
+              );
+            })
+            .catch((e) => log(`[feedbackLearningJob] error: ${e}`));
+        };
+        if (process.env.FEEDBACK_AGENT_RUN_ON_START === "true") {
+          runFeedbackLearningJob({ force: true })
+            .then((r) =>
+              log(
+                `[feedbackLearningJob] startup revised=${r.revised} needsManual=${r.needsManual} skipped=${r.skipped}`
+              )
+            )
+            .catch((e) => log(`[feedbackLearningJob] startup error: ${e}`));
+        }
+        setInterval(tickRun, tick);
+        log(`[feedbackLearningJob] tick every ${tick}ms (weekly watermark)`);
       });
     }
   }

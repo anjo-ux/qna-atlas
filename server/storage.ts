@@ -14,6 +14,9 @@ import {
   institutionalCodes,
   userInstitutionalCodeRedemptions,
   questionReports,
+  contactMessages,
+  questionRevisions,
+  agentJobRuns,
   oralBoardSessions,
   oralBoardMessages,
   sections,
@@ -44,6 +47,11 @@ import {
   type InsertSubscriptionTransaction,
   type QuestionReport,
   type InsertQuestionReport,
+  type ContactMessage,
+  type InsertContactMessage,
+  type QuestionRevision,
+  type InsertQuestionRevision,
+  type AgentJobRun,
   type OralBoardSession,
   type OralBoardMessage,
 } from "@shared/schema";
@@ -60,7 +68,7 @@ import {
   type SpecialtyId,
 } from "@shared/specialties";
 import { db, pool } from "./db";
-import { eq, and, or, asc, desc, lte, sql, count, inArray, like, notLike } from "drizzle-orm";
+import { eq, and, or, asc, desc, lte, gte, sql, count, inArray, like, notLike } from "drizzle-orm";
 import {
   SOCIALMEDIA_INSTITUTIONAL_CODE,
 } from "./institutionalAccess";
@@ -73,6 +81,7 @@ let userInstitutionalRedemptionsTableDone = false;
 let multiSpecialtyMigrationDone = false;
 let questionsFlaggedColumnDone = false;
 let testSessionsSpecialtyColumnDone = false;
+let feedbackAgentTablesDone = false;
 
 function sectionsMatchSpecialty(specialtyId: SpecialtyId) {
   const id = getSpecialty(specialtyId).id;
@@ -371,6 +380,22 @@ export interface IStorage {
    * Clears content-audit flag. Restores visible=true unless the question is reported.
    */
   unflagQuestion(questionId: string): Promise<boolean>;
+  createContactMessage(msg: InsertContactMessage): Promise<ContactMessage>;
+  getContactMessagesSince(since: Date): Promise<ContactMessage[]>;
+  getQuestionReportsSince(since: Date): Promise<QuestionReport[]>;
+  getMissRatesSince(since: Date): Promise<
+    { questionId: string; subsectionId: string; answered: number; incorrect: number }[]
+  >;
+  getLatestRevisionTimes(questionIds: string[]): Promise<Map<string, Date>>;
+  createQuestionRevision(row: InsertQuestionRevision): Promise<QuestionRevision>;
+  startAgentJobRun(jobName: string): Promise<AgentJobRun>;
+  finishAgentJobRun(
+    id: string,
+    status: "success" | "error",
+    stats: Record<string, unknown>
+  ): Promise<void>;
+  getLastSuccessfulAgentJobRun(jobName: string): Promise<AgentJobRun | undefined>;
+  ensureFeedbackAgentTables(): Promise<void>;
 
   // Oral board simulator (persisted sessions + messages)
   createOralBoardSession(userId: string, openaiThreadId: string): Promise<OralBoardSession>;
@@ -1206,7 +1231,10 @@ export class DatabaseStorage implements IStorage {
     const [row] = await db.select().from(questions).where(eq(questions.id, questionId));
     if (!row) return false;
     const tags = (Array.isArray(row.tags) ? row.tags : []).filter(
-      (t) => t !== "content-flagged" && t !== "validation-flagged"
+      (t) =>
+        t !== "content-flagged" &&
+        t !== "validation-flagged" &&
+        t !== "needs-manual-revision"
     );
     // Restore visibility unless report-volume hide still applies
     const visible = row.reported ? false : true;
@@ -1216,6 +1244,169 @@ export class DatabaseStorage implements IStorage {
       .where(eq(questions.id, questionId))
       .returning({ id: questions.id });
     return !!updated;
+  }
+
+  async createContactMessage(msg: InsertContactMessage): Promise<ContactMessage> {
+    await this.ensureFeedbackAgentTables();
+    const [row] = await db.insert(contactMessages).values(msg).returning();
+    if (!row) throw new Error("Failed to store contact message");
+    return row;
+  }
+
+  async getContactMessagesSince(since: Date): Promise<ContactMessage[]> {
+    await this.ensureFeedbackAgentTables();
+    return db
+      .select()
+      .from(contactMessages)
+      .where(gte(contactMessages.createdAt, since))
+      .orderBy(desc(contactMessages.createdAt));
+  }
+
+  async getQuestionReportsSince(since: Date): Promise<QuestionReport[]> {
+    return db
+      .select()
+      .from(questionReports)
+      .where(gte(questionReports.createdAt, since))
+      .orderBy(desc(questionReports.createdAt));
+  }
+
+  async getMissRatesSince(since: Date): Promise<
+    { questionId: string; subsectionId: string; answered: number; incorrect: number }[]
+  > {
+    const rows = await db
+      .select({
+        questionId: questionResponses.questionId,
+        subsectionId: questionResponses.subsectionId,
+        answered: count(),
+        incorrect: sql<number>`sum(case when ${questionResponses.isCorrect} then 0 else 1 end)::int`,
+      })
+      .from(questionResponses)
+      .where(gte(questionResponses.answeredAt, since))
+      .groupBy(questionResponses.questionId, questionResponses.subsectionId);
+    return rows.map((r) => ({
+      questionId: r.questionId,
+      subsectionId: r.subsectionId,
+      answered: Number(r.answered),
+      incorrect: Number(r.incorrect ?? 0),
+    }));
+  }
+
+  async getLatestRevisionTimes(questionIds: string[]): Promise<Map<string, Date>> {
+    await this.ensureFeedbackAgentTables();
+    const out = new Map<string, Date>();
+    if (questionIds.length === 0) return out;
+    const rows = await db
+      .select({
+        questionId: questionRevisions.questionId,
+        createdAt: questionRevisions.createdAt,
+      })
+      .from(questionRevisions)
+      .where(inArray(questionRevisions.questionId, questionIds));
+    for (const r of rows) {
+      const prev = out.get(r.questionId);
+      if (!prev || r.createdAt > prev) out.set(r.questionId, r.createdAt);
+    }
+    return out;
+  }
+
+  async createQuestionRevision(row: InsertQuestionRevision): Promise<QuestionRevision> {
+    await this.ensureFeedbackAgentTables();
+    const [created] = await db.insert(questionRevisions).values(row).returning();
+    if (!created) throw new Error("Failed to store question revision");
+    return created;
+  }
+
+  async startAgentJobRun(jobName: string): Promise<AgentJobRun> {
+    await this.ensureFeedbackAgentTables();
+    const [row] = await db
+      .insert(agentJobRuns)
+      .values({ jobName, status: "running", stats: {} })
+      .returning();
+    if (!row) throw new Error("Failed to start agent job run");
+    return row;
+  }
+
+  async finishAgentJobRun(
+    id: string,
+    status: "success" | "error",
+    stats: Record<string, unknown>
+  ): Promise<void> {
+    await this.ensureFeedbackAgentTables();
+    await db
+      .update(agentJobRuns)
+      .set({ status, stats, finishedAt: new Date() })
+      .where(eq(agentJobRuns.id, id));
+  }
+
+  async getLastSuccessfulAgentJobRun(jobName: string): Promise<AgentJobRun | undefined> {
+    await this.ensureFeedbackAgentTables();
+    const [row] = await db
+      .select()
+      .from(agentJobRuns)
+      .where(and(eq(agentJobRuns.jobName, jobName), eq(agentJobRuns.status, "success")))
+      .orderBy(desc(agentJobRuns.finishedAt))
+      .limit(1);
+    return row;
+  }
+
+  async ensureFeedbackAgentTables(): Promise<void> {
+    if (feedbackAgentTablesDone) return;
+    feedbackAgentTablesDone = true;
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS "contact_messages" (
+        "id" varchar PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+        "name" varchar(200) NOT NULL,
+        "email" varchar(320) NOT NULL,
+        "subject" varchar(200) NOT NULL,
+        "message" text NOT NULL,
+        "specialty_id" varchar(32) NOT NULL DEFAULT 'prs',
+        "created_at" timestamp DEFAULT now() NOT NULL
+      )
+    `);
+    await pool.query(
+      `CREATE INDEX IF NOT EXISTS "idx_contact_messages_created_at" ON "contact_messages" ("created_at")`
+    );
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS "question_revisions" (
+        "id" varchar PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+        "question_id" varchar(128) NOT NULL,
+        "action" varchar(32) NOT NULL,
+        "previous_question" text,
+        "previous_answer" text,
+        "new_question" text,
+        "new_answer" text,
+        "source" varchar(64) NOT NULL DEFAULT 'feedback_agent',
+        "rationale" text,
+        "report_ids" jsonb DEFAULT '[]'::jsonb NOT NULL,
+        "run_id" varchar,
+        "created_at" timestamp DEFAULT now() NOT NULL
+      )
+    `);
+    await pool.query(
+      `CREATE INDEX IF NOT EXISTS "idx_question_revisions_question_id" ON "question_revisions" ("question_id")`
+    );
+    await pool.query(
+      `CREATE INDEX IF NOT EXISTS "idx_question_revisions_created_at" ON "question_revisions" ("created_at")`
+    );
+    await pool.query(
+      `CREATE INDEX IF NOT EXISTS "idx_question_revisions_run_id" ON "question_revisions" ("run_id")`
+    );
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS "agent_job_runs" (
+        "id" varchar PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+        "job_name" varchar(64) NOT NULL,
+        "started_at" timestamp DEFAULT now() NOT NULL,
+        "finished_at" timestamp,
+        "status" varchar(20) NOT NULL DEFAULT 'running',
+        "stats" jsonb DEFAULT '{}'::jsonb NOT NULL
+      )
+    `);
+    await pool.query(
+      `CREATE INDEX IF NOT EXISTS "idx_agent_job_runs_job_name" ON "agent_job_runs" ("job_name")`
+    );
+    await pool.query(
+      `CREATE INDEX IF NOT EXISTS "idx_agent_job_runs_started_at" ON "agent_job_runs" ("started_at")`
+    );
   }
 
   async createOralBoardSession(userId: string, openaiThreadId: string): Promise<OralBoardSession> {
@@ -1706,6 +1897,7 @@ export class DatabaseStorage implements IStorage {
     await this.ensureInstitutionalAccessRedemptionConsistencyMigration();
     await this.ensureMultiSpecialtyMigration();
     await this.ensureAuthHandoffTables();
+    await this.ensureFeedbackAgentTables();
   }
 
   private async ensureAuthHandoffTables(): Promise<void> {

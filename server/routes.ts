@@ -1,5 +1,6 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
+import { timingSafeEqual } from "crypto";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated, supportFormRateLimiter } from "./customAuth";
 import { sanitizeUser } from "./authUtils";
@@ -323,6 +324,24 @@ function requireImportApiKey(req: any): boolean {
   return bearer === QUESTION_IMPORT_API_KEY || headerKey === QUESTION_IMPORT_API_KEY;
 }
 
+function secretsEqual(provided: string, expected: string): boolean {
+  const a = Buffer.from(provided);
+  const b = Buffer.from(expected);
+  if (a.length !== b.length) return false;
+  return timingSafeEqual(a, b);
+}
+
+function requireFeedbackAgentSecret(req: any): boolean {
+  const expected = process.env.FEEDBACK_AGENT_SECRET?.trim();
+  if (!expected) return false;
+  const auth = req.headers.authorization;
+  const bearer = auth?.startsWith("Bearer ") ? auth.slice(7) : "";
+  const header = typeof req.headers["x-feedback-agent-secret"] === "string"
+    ? req.headers["x-feedback-agent-secret"]
+    : "";
+  return secretsEqual(bearer, expected) || secretsEqual(header, expected);
+}
+
 export async function registerRoutes(app: Express): Promise<Server> {
   // Set up authentication middleware
   await setupAuth(app);
@@ -589,11 +608,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Update question visibility / content-audit flag (requires auth OR valid admin code)
+  // Update question visibility / content-audit flag. Admin only: hiding, flagging and
+  // unflagging change what every learner sees, so being signed in is not sufficient.
   app.patch('/api/questions/:id', async (req: any, res) => {
-    const hasAuth = req.session?.userId;
-    const hasCode = requireAdminCode(req);
-    if (!hasAuth && !hasCode) {
+    if (!requireAdminCode(req)) {
       return res.status(401).json({ message: "Unauthorized." });
     }
     try {
@@ -766,11 +784,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
+      try {
+        await storage.createContactMessage({
+          name: trimmedName,
+          email: trimmedEmail,
+          subject: trimmedSubject,
+          message: trimmedMessage,
+          specialtyId: specialty.id,
+        });
+      } catch (persistErr) {
+        console.error("Failed to persist contact message:", persistErr);
+      }
+
       res.json({ message: 'Message sent.' });
     } catch (error) {
       console.error('Error sending support form:', error);
       res.status(500).json({ message: 'Failed to send message. Please try again later.' });
     }
+  });
+
+  app.post("/api/internal/feedback-agent", async (req: any, res) => {
+    if (!requireFeedbackAgentSecret(req)) {
+      return res.status(404).json({ message: "Not found." });
+    }
+    res.status(202).json({ message: "Feedback agent started." });
+    import("./jobs/feedbackLearningJob")
+      .then(({ runFeedbackLearningJob }) => runFeedbackLearningJob({ force: true }))
+      .then((r) => console.log("[feedbackLearningJob] http trigger", r))
+      .catch((e) => console.error("[feedbackLearningJob] http trigger error:", e));
   });
 
   // Auth routes

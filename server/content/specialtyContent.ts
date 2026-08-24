@@ -1,0 +1,327 @@
+/**
+ * Dev → production content promotion.
+ *
+ * Production runs on its own database and the workspace holds no credentials for it,
+ * so content travels in the repo instead of over a direct connection: the exporter
+ * writes a specialty's sections/subsections/questions to a JSON file that ships with
+ * the deploy, and the importer loads that file into whichever database the process is
+ * connected to.
+ */
+import * as fs from "fs";
+import * as path from "path";
+import { createHash } from "crypto";
+import type { Pool, PoolClient } from "pg";
+import { type SpecialtyId } from "@shared/specialties";
+
+/**
+ * Accepts a checked-out client as well as a pool: advisory locks are session-scoped, so
+ * the caller holding one must run its statements on that same connection.
+ */
+export type Queryable = Pool | PoolClient;
+
+export const CONTENT_FILE_FORMAT = 2;
+
+export type ContentSection = {
+  id: string;
+  specialtyId: SpecialtyId;
+  title: string;
+  sortOrder: number;
+};
+
+export type ContentSubsection = {
+  id: string;
+  sectionId: string;
+  title: string;
+  sortOrder: number;
+};
+
+export type ContentQuestion = {
+  id: string;
+  subsectionId: string;
+  question: string;
+  answer: string;
+  tags: string[];
+  source: string;
+  visible: boolean;
+  reported: boolean;
+  flagged: boolean;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type SpecialtyContentFile = {
+  formatVersion: number;
+  specialtyId: SpecialtyId;
+  exportedAt: string;
+  /** sha256 of the source database host, so an export can be traced back to its origin. */
+  sourceFingerprint: string;
+  /** sha256 of the content itself. Lets a deploy skip work when nothing changed. */
+  contentHash: string;
+  counts: { sections: number; subsections: number; questions: number };
+  sections: ContentSection[];
+  subsections: ContentSubsection[];
+  questions: ContentQuestion[];
+};
+
+export function contentDir(): string {
+  return path.join(process.cwd(), "server", "data", "content");
+}
+
+export function contentFilePath(specialtyId: SpecialtyId): string {
+  return path.join(contentDir(), `${specialtyId}.content.json`);
+}
+
+/**
+ * Which sections belong to a specialty. Mirrors sectionsMatchSpecialty() in storage.ts,
+ * including the legacy `ortho-` id prefix that predates the specialty_id column.
+ */
+export function sectionSelectSql(specialtyId: SpecialtyId): string {
+  return specialtyId === "ortho"
+    ? "(specialty_id = 'ortho' OR id LIKE 'ortho-%')"
+    : "(specialty_id = 'prs' AND id NOT LIKE 'ortho-%')";
+}
+
+/**
+ * Presence test that works on databases predating the specialty_id column, so it is safe
+ * to run before the schema guards. Id prefixes alone decide the specialty here.
+ */
+export function contentPresenceSql(specialtyId: SpecialtyId): string {
+  return specialtyId === "ortho" ? "id LIKE 'ortho-%'" : "id NOT LIKE 'ortho-%'";
+}
+
+export function readSpecialtyContentFile(specialtyId: SpecialtyId): SpecialtyContentFile | null {
+  const file = contentFilePath(specialtyId);
+  if (!fs.existsSync(file)) return null;
+  const parsed = JSON.parse(fs.readFileSync(file, "utf8")) as SpecialtyContentFile;
+  if (parsed.formatVersion !== CONTENT_FILE_FORMAT) {
+    throw new Error(
+      `${path.basename(file)} is format ${parsed.formatVersion}, expected ${CONTENT_FILE_FORMAT}. Re-run the exporter.`
+    );
+  }
+  if (parsed.specialtyId !== specialtyId) {
+    throw new Error(`${path.basename(file)} declares specialty "${parsed.specialtyId}", expected "${specialtyId}".`);
+  }
+  return parsed;
+}
+
+/**
+ * Brings a target database up to the columns the content tables need. Older databases
+ * (production predates the multi-specialty work) lack specialty_id and flagged, and an
+ * insert naming them would fail. Idempotent.
+ */
+export async function applyContentSchemaGuards(target: Queryable): Promise<void> {
+  const migration = path.join(process.cwd(), "drizzle", "0016_multi_specialty.sql");
+  if (fs.existsSync(migration)) {
+    await target.query(fs.readFileSync(migration, "utf8"));
+  }
+  await target.query(`
+    ALTER TABLE questions ADD COLUMN IF NOT EXISTS flagged boolean DEFAULT false NOT NULL;
+    CREATE INDEX IF NOT EXISTS idx_questions_flagged ON questions (flagged);
+  `);
+  await target.query(`
+    CREATE TABLE IF NOT EXISTS content_promotions (
+      specialty_id varchar(32) PRIMARY KEY,
+      content_hash varchar(64) NOT NULL,
+      exported_at timestamp NOT NULL,
+      promoted_at timestamp NOT NULL DEFAULT now(),
+      inserted_questions integer NOT NULL DEFAULT 0
+    );
+  `);
+}
+
+/** Deterministic hash of the content, independent of when it was exported. */
+export function computeContentHash(parts: {
+  sections: ContentSection[];
+  subsections: ContentSubsection[];
+  questions: ContentQuestion[];
+}): string {
+  const hash = createHash("sha256");
+  for (const s of [...parts.sections].sort((a, b) => a.id.localeCompare(b.id))) {
+    hash.update(`S:${s.id}:${s.specialtyId}:${s.title}:${s.sortOrder}\n`);
+  }
+  for (const s of [...parts.subsections].sort((a, b) => a.id.localeCompare(b.id))) {
+    hash.update(`U:${s.id}:${s.sectionId}:${s.title}:${s.sortOrder}\n`);
+  }
+  for (const q of [...parts.questions].sort((a, b) => a.id.localeCompare(b.id))) {
+    hash.update(`Q:${q.id}:${q.subsectionId}:${q.question}:${q.answer}:${q.visible}:${q.flagged}\n`);
+  }
+  return hash.digest("hex");
+}
+
+/** Hash of the last content file promoted into this database, if any. */
+export async function readPromotedHash(target: Queryable, specialtyId: SpecialtyId): Promise<string | null> {
+  try {
+    const { rows } = await target.query<{ content_hash: string }>(
+      "SELECT content_hash FROM content_promotions WHERE specialty_id = $1",
+      [specialtyId]
+    );
+    return rows[0]?.content_hash ?? null;
+  } catch {
+    // Ledger table not created yet — treat as never promoted.
+    return null;
+  }
+}
+
+export async function recordPromotion(
+  target: Queryable,
+  specialtyId: SpecialtyId,
+  file: SpecialtyContentFile,
+  insertedQuestions: number
+): Promise<void> {
+  await target.query(
+    `INSERT INTO content_promotions (specialty_id, content_hash, exported_at, promoted_at, inserted_questions)
+     VALUES ($1, $2, $3, now(), $4)
+     ON CONFLICT (specialty_id) DO UPDATE SET
+       content_hash = EXCLUDED.content_hash,
+       exported_at = EXCLUDED.exported_at,
+       promoted_at = EXCLUDED.promoted_at,
+       inserted_questions = EXCLUDED.inserted_questions`,
+    [specialtyId, file.contentHash, file.exportedAt, insertedQuestions]
+  );
+}
+
+/**
+ * Production is the source of truth for question wording: the audit agent revises rows
+ * there, and admins flag and hide them. Promotion therefore adds questions the target has
+ * never seen and leaves every existing row alone. "upsert" overwrites instead, and is only
+ * for a deliberate, operator-driven restore.
+ */
+export type ImportMode = "insert-only" | "upsert";
+
+export type ImportCounts = {
+  sections: number;
+  subsections: number;
+  /** Questions actually written. Under insert-only this counts new rows only. */
+  questions: number;
+  /** Questions already present on the target and therefore left untouched. */
+  questionsSkipped: number;
+};
+
+/** Rows per multi-row insert. 11 columns x 100 rows stays far below the 65535 parameter cap. */
+const BATCH_SIZE = 100;
+
+function chunk<T>(items: T[], size: number): T[][] {
+  const out: T[][] = [];
+  for (let i = 0; i < items.length; i += size) out.push(items.slice(i, i + size));
+  return out;
+}
+
+/**
+ * Promotes a content file into `target`. Idempotent, and never deletes.
+ *
+ * Section and subsection rows are always updated — they are structural, and nothing
+ * edits them downstream. Question rows follow `mode`, which defaults to insert-only so a
+ * promotion cannot clobber revisions made on the target.
+ */
+export async function importSpecialtyContent(
+  target: Queryable,
+  file: SpecialtyContentFile,
+  options: {
+    mode?: ImportMode;
+    dryRun?: boolean;
+    onProgress?: (done: number, total: number) => void;
+  } = {}
+): Promise<ImportCounts> {
+  const { mode = "insert-only", dryRun = false, onProgress } = options;
+  const counts: ImportCounts = { sections: 0, subsections: 0, questions: 0, questionsSkipped: 0 };
+  if (dryRun) {
+    return {
+      sections: file.sections.length,
+      subsections: file.subsections.length,
+      questions: file.questions.length,
+      questionsSkipped: 0,
+    };
+  }
+
+  await applyContentSchemaGuards(target);
+
+  for (const s of file.sections) {
+    await target.query(
+      `INSERT INTO sections (id, specialty_id, title, sort_order)
+       VALUES ($1, $2, $3, $4)
+       ON CONFLICT (id) DO UPDATE SET
+         specialty_id = EXCLUDED.specialty_id,
+         title = EXCLUDED.title,
+         sort_order = EXCLUDED.sort_order`,
+      [s.id, s.specialtyId, s.title, s.sortOrder]
+    );
+    counts.sections++;
+  }
+
+  for (const s of file.subsections) {
+    await target.query(
+      `INSERT INTO subsections (id, section_id, title, sort_order)
+       VALUES ($1, $2, $3, $4)
+       ON CONFLICT (id) DO UPDATE SET
+         section_id = EXCLUDED.section_id,
+         title = EXCLUDED.title,
+         sort_order = EXCLUDED.sort_order`,
+      [s.id, s.sectionId, s.title, s.sortOrder]
+    );
+    counts.subsections++;
+  }
+
+  for (const batch of chunk(file.questions, BATCH_SIZE)) {
+    const values: unknown[] = [];
+    const tuples = batch.map((q, row) => {
+      const base = row * 11;
+      values.push(
+        q.id,
+        q.subsectionId,
+        q.question,
+        q.answer,
+        JSON.stringify(Array.isArray(q.tags) ? q.tags : []),
+        q.source,
+        q.visible,
+        q.reported,
+        q.flagged,
+        q.createdAt,
+        q.updatedAt
+      );
+      return `($${base + 1}, $${base + 2}, $${base + 3}, $${base + 4}, $${base + 5}::jsonb, $${base + 6}, $${base + 7}, $${base + 8}, $${base + 9}, $${base + 10}, $${base + 11})`;
+    });
+
+    const conflict =
+      mode === "upsert"
+        ? `DO UPDATE SET
+             subsection_id = EXCLUDED.subsection_id,
+             question = EXCLUDED.question,
+             answer = EXCLUDED.answer,
+             tags = EXCLUDED.tags,
+             source = EXCLUDED.source,
+             visible = EXCLUDED.visible,
+             reported = EXCLUDED.reported,
+             flagged = EXCLUDED.flagged,
+             updated_at = EXCLUDED.updated_at`
+        : "DO NOTHING";
+
+    const written = await target.query(
+      `INSERT INTO questions (
+         id, subsection_id, question, answer, tags, source,
+         visible, reported, flagged, created_at, updated_at
+       ) VALUES ${tuples.join(", ")}
+       ON CONFLICT (id) ${conflict}
+       RETURNING id`,
+      values
+    );
+    counts.questions += written.rowCount ?? 0;
+    counts.questionsSkipped += batch.length - (written.rowCount ?? 0);
+    onProgress?.(counts.questions + counts.questionsSkipped, file.questions.length);
+  }
+
+  return counts;
+}
+
+/** How much of a specialty's content the target already holds. */
+export async function countSpecialtyContent(
+  target: Queryable,
+  specialtyId: SpecialtyId
+): Promise<{ sections: number; questions: number }> {
+  const presence = contentPresenceSql(specialtyId);
+  const { rows } = await target.query<{ sections: number; questions: number }>(`
+    SELECT
+      (SELECT count(*)::int FROM sections  WHERE ${presence}) AS sections,
+      (SELECT count(*)::int FROM questions WHERE ${presence}) AS questions
+  `);
+  return rows[0] ?? { sections: 0, questions: 0 };
+}

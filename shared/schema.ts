@@ -453,6 +453,71 @@ export const questionReports = pgTable("question_reports", {
 export type QuestionReport = typeof questionReports.$inferSelect;
 export type InsertQuestionReport = typeof questionReports.$inferInsert;
 
+export const contactMessages = pgTable(
+  "contact_messages",
+  {
+    id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+    name: varchar("name", { length: 200 }).notNull(),
+    email: varchar("email", { length: 320 }).notNull(),
+    subject: varchar("subject", { length: 200 }).notNull(),
+    message: text("message").notNull(),
+    specialtyId: varchar("specialty_id", { length: 32 })
+      .$type<SpecialtyId>()
+      .notNull()
+      .default(DEFAULT_SPECIALTY_ID),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [index("idx_contact_messages_created_at").on(table.createdAt)]
+);
+
+export type ContactMessage = typeof contactMessages.$inferSelect;
+export type InsertContactMessage = typeof contactMessages.$inferInsert;
+
+export const questionRevisions = pgTable(
+  "question_revisions",
+  {
+    id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+    questionId: varchar("question_id", { length: 128 }).notNull(),
+    action: varchar("action", { length: 32 }).notNull(), // revise | needs_manual
+    previousQuestion: text("previous_question"),
+    previousAnswer: text("previous_answer"),
+    newQuestion: text("new_question"),
+    newAnswer: text("new_answer"),
+    source: varchar("source", { length: 64 }).notNull().default("feedback_agent"),
+    rationale: text("rationale"),
+    reportIds: jsonb("report_ids").$type<string[]>().default([]).notNull(),
+    runId: varchar("run_id"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [
+    index("idx_question_revisions_question_id").on(table.questionId),
+    index("idx_question_revisions_created_at").on(table.createdAt),
+    index("idx_question_revisions_run_id").on(table.runId),
+  ]
+);
+
+export type QuestionRevision = typeof questionRevisions.$inferSelect;
+export type InsertQuestionRevision = typeof questionRevisions.$inferInsert;
+
+export const agentJobRuns = pgTable(
+  "agent_job_runs",
+  {
+    id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+    jobName: varchar("job_name", { length: 64 }).notNull(),
+    startedAt: timestamp("started_at").defaultNow().notNull(),
+    finishedAt: timestamp("finished_at"),
+    status: varchar("status", { length: 20 }).notNull().default("running"),
+    stats: jsonb("stats").$type<Record<string, unknown>>().default({}).notNull(),
+  },
+  (table) => [
+    index("idx_agent_job_runs_job_name").on(table.jobName),
+    index("idx_agent_job_runs_started_at").on(table.startedAt),
+  ]
+);
+
+export type AgentJobRun = typeof agentJobRuns.$inferSelect;
+export type InsertAgentJobRun = typeof agentJobRuns.$inferInsert;
+
 /** Oral board simulator: one row per saved chat session (OpenAI thread + UI "Session N"). */
 export const oralBoardSessions = pgTable(
   "oral_board_sessions",
