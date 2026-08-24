@@ -1373,6 +1373,9 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
                   showTimedChrome ? 'max-md:shrink-0 md:flex-1 md:basis-0' : 'shrink-0'
                 )}
               >
+                <div className="hidden md:block">
+                  <ThemeSwitcher />
+                </div>
                 <Button 
                   size="icon"
                   variant="ghost"

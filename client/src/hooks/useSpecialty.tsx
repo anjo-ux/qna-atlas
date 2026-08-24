@@ -30,7 +30,7 @@ type SpecialtyContextResponse = {
 interface SpecialtyContextType {
   /** Specialty implied by the domain the user is on; drives marketing + signup default. */
   hostSpecialty: SpecialtyId;
-  /** Question bank currently in use (logged-in); falls back to host specialty when logged out. */
+  /** Question bank currently in use (logged-in); on production hosts this matches the domain. */
   activeSpecialty: SpecialtyId;
   specialty: SpecialtyConfig;
   available: readonly SpecialtyConfig[];
@@ -41,7 +41,6 @@ interface SpecialtyContextType {
 
 const SpecialtyContext = createContext<SpecialtyContextType | undefined>(undefined);
 
-/** Queries cleared on switch so the dashboard never keeps the previous bank's numbers. */
 const SPECIALTY_CONTENT_QUERY_PREFIXES = [
   "/api/sections",
   "/api/preview/questions",
@@ -88,10 +87,16 @@ function isMarketingPath(
 ): boolean {
   const path = normalizePath(pathname);
   if (MARKETING_PATHS.has(path)) return true;
-  // While auth resolves, keep the active/bootstrap specialty on `/` to avoid a theme flash.
   if (path === "/" && isAuthLoading) return false;
-  // Logged-out home is Landing; logged-in home is the q-bank.
   return path === "/" && !isAuthenticated;
+}
+
+function hostnameIsSpecialtyHost(): boolean {
+  return typeof window !== "undefined" && isKnownSpecialtyHost(window.location.hostname);
+}
+
+function currentApexHost(): string {
+  return typeof window === "undefined" ? "" : window.location.hostname.replace(/^www\./, "");
 }
 
 export function SpecialtyProvider({ children }: { children: React.ReactNode }) {
@@ -111,17 +116,16 @@ export function SpecialtyProvider({ children }: { children: React.ReactNode }) {
     ? data.hostSpecialty
     : hostSpecialtyFromShell;
 
-  // Server is authoritative once loaded: an Ortho subscriber on prs-atlas.com still gets Ortho.
+  // Production domains always show that host's bank. Preview/localhost can switch in place.
   useEffect(() => {
-    if (isSpecialtyId(data?.activeSpecialty)) setActiveSpecialty(data.activeSpecialty);
-  }, [data?.activeSpecialty]);
+    if (!isSpecialtyId(data?.activeSpecialty)) return;
+    if (hostnameIsSpecialtyHost()) {
+      setActiveSpecialty(hostSpecialty);
+      return;
+    }
+    setActiveSpecialty(data.activeSpecialty);
+  }, [data?.activeSpecialty, hostSpecialty]);
 
-  /**
-   * Theme source of truth:
-   * - Auth routes: Login owns the document specialty (signup picker preview).
-   * - Marketing: marketing specialty (host domain, or session override on preview).
-   * - App / subscribe: active question bank.
-   */
   useEffect(() => {
     if (isAuthPath(location)) return;
     const themeSpecialty = isMarketingPath(location, isAuthenticated, isAuthLoading)
@@ -136,51 +140,41 @@ export function SpecialtyProvider({ children }: { children: React.ReactNode }) {
 
   const switchMutation = useMutation({
     mutationFn: async (specialtyId: SpecialtyId) => {
+      const crossDomain =
+        hostnameIsSpecialtyHost() && getSpecialty(specialtyId).apexHost !== currentApexHost();
+
+      if (crossDomain) {
+        const handoff = await apiRequest("/api/auth/handoff", {
+          method: "POST",
+          body: JSON.stringify({
+            targetSpecialtyId: specialtyId,
+            nextPath: "/",
+          }),
+        });
+        const dest = handoff?.handoffUrl ?? handoff?.url;
+        if (typeof dest !== "string" || !dest) {
+          throw new Error("Cross-domain handoff did not return a destination.");
+        }
+        window.location.assign(dest);
+        return specialtyId;
+      }
+
       await apiRequest("/api/specialty/active", {
         method: "POST",
         body: JSON.stringify({ specialtyId }),
       });
       return specialtyId;
     },
-    onMutate: async (specialtyId) => {
+    onMutate: async () => {
       const previousSpecialty = activeSpecialty;
       setHandoffPending(true);
-      queryClient.removeQueries({
-        predicate: (query) => isSpecialtyContentQuery(query.queryKey),
-      });
-      // Theme flips immediately; activeSpecialty waits for the server so /api/sections
-      // does not briefly return the previous bank under the new specialty key.
-      if (!isAuthPath(location) && !isMarketingPath(location, isAuthenticated, isAuthLoading)) {
-        applySpecialtyToDocument(specialtyId);
-      }
       return { previousSpecialty };
     },
     onSuccess: async (_result, specialtyId) => {
-      // Production: switching banks navigates to that specialty's domain with a session handoff.
-      if (
-        typeof window !== "undefined" &&
-        isKnownSpecialtyHost(window.location.hostname) &&
-        getSpecialty(specialtyId).apexHost !== window.location.hostname.replace(/^www\./, "")
-      ) {
-        try {
-          const handoff = await apiRequest("/api/auth/handoff", {
-            method: "POST",
-            body: JSON.stringify({
-              targetSpecialtyId: specialtyId,
-              nextPath: "/",
-            }),
-          });
-          const dest = handoff?.handoffUrl ?? handoff?.url;
-          if (typeof dest === "string" && dest) {
-            window.location.assign(dest);
-            return;
-          }
-        } catch (error) {
-          console.error("Cross-domain handoff failed:", error);
-        }
+      if (hostnameIsSpecialtyHost() && getSpecialty(specialtyId).apexHost !== currentApexHost()) {
+        return;
       }
 
-      // Same-host (localhost / preview): stay put and refresh queries.
       queryClient.removeQueries({
         predicate: (query) => isSpecialtyContentQuery(query.queryKey),
       });
@@ -195,20 +189,18 @@ export function SpecialtyProvider({ children }: { children: React.ReactNode }) {
     onError: (_error, _specialtyId, context) => {
       setHandoffPending(false);
       const previous = context?.previousSpecialty;
-      if (isSpecialtyId(previous)) {
-        if (!isAuthPath(location) && !isMarketingPath(location, isAuthenticated, isAuthLoading)) {
-          applySpecialtyToDocument(previous);
-        }
+      if (isSpecialtyId(previous) && !isAuthPath(location) && !isMarketingPath(location, isAuthenticated, isAuthLoading)) {
+        applySpecialtyToDocument(previous);
       }
     },
   });
 
   const switchSpecialty = useCallback(
     (specialtyId: SpecialtyId) => {
-      if (specialtyId === activeSpecialty || switchMutation.isPending) return;
+      if (specialtyId === activeSpecialty || switchMutation.isPending || handoffPending) return;
       switchMutation.mutate(specialtyId);
     },
-    [activeSpecialty, switchMutation]
+    [activeSpecialty, switchMutation, handoffPending],
   );
 
   const lockedBySpecialty: Partial<Record<SpecialtyId, boolean>> = {};
@@ -241,10 +233,6 @@ export function useSpecialty(): SpecialtyContextType {
   return context;
 }
 
-/**
- * Specialty for marketing/auth surfaces. Follows the domain by default; on
- * preview hosts, `switchMarketingSpecialty` can override for the session.
- */
 export function useHostSpecialty(): SpecialtyConfig {
   const specialtyId = useSyncExternalStore(
     subscribeMarketingSpecialty,

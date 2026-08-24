@@ -126,6 +126,11 @@ function isPublicPathWithoutAuthGate(p: string): boolean {
   );
 }
 
+function hasSessionCookie(): boolean {
+  if (typeof document === "undefined") return false;
+  return document.cookie.split(";").some((part) => part.trim().startsWith("connect.sid="));
+}
+
 function Router() {
   const [location, setLocation] = useLocation();
   const { isAuthenticated, isLoading } = useAuth();
@@ -137,8 +142,10 @@ function Router() {
     (isAdminPath(pathname) || isAdminPath(location));
 
   const publicWhileAuthLoading = isPublicPathWithoutAuthGate(pathname);
+  const homeWaitingOnSession =
+    normalizeAppPath(pathname) === "/" && isLoading && hasSessionCookie();
 
-  if (!isAdminPage && isLoading && !publicWhileAuthLoading) {
+  if (!isAdminPage && isLoading && (!publicWhileAuthLoading || homeWaitingOnSession)) {
     return (
       <div className="flex h-full w-full min-h-0 items-center justify-center">
         <div className="text-center space-y-4">

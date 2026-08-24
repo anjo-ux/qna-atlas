@@ -17,6 +17,7 @@ import {
   DEFAULT_SPECIALTY_ID,
   SPECIALTY_LIST,
   getSpecialty,
+  isKnownSpecialtyHost,
   isSpecialtyId,
   type SpecialtyId,
 } from "@shared/specialties";
@@ -144,12 +145,18 @@ function requestOrigin(req: any): string | null {
 async function resolveRequestSpecialty(req: any): Promise<SpecialtyId> {
   const requested = req.body?.specialtyId ?? req.query?.specialtyId;
   if (isSpecialtyId(requested)) return requested;
+  const hostname = requestHostname(req);
+  // Production specialty hosts always serve that domain's bank so a leftover
+  // activeSpecialty from the other product cannot empty the dashboard.
+  if (isKnownSpecialtyHost(hostname)) {
+    return getSpecialtyForHost(hostname);
+  }
   const userId = req.session?.userId;
   if (userId) {
     const active = await storage.getActiveSpecialty(userId);
     if (active) return active;
   }
-  return getSpecialtyForHost(requestHostname(req));
+  return getSpecialtyForHost(hostname);
 }
 
 /**
@@ -503,7 +510,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      const activeSpecialty = await storage.getActiveSpecialty(userId);
+      let activeSpecialty = await storage.getActiveSpecialty(userId);
+      const hostname = requestHostname(req);
+      if (isKnownSpecialtyHost(hostname) && activeSpecialty !== hostSpecialty) {
+        activeSpecialty = await storage.setActiveSpecialty(userId, hostSpecialty);
+      }
       const entitlements = await Promise.all(
         SPECIALTY_LIST.map(async (s) => ({
           specialtyId: s.id,

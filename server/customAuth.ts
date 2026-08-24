@@ -13,7 +13,12 @@ import {
   type SpecialtyId,
 } from "@shared/specialties";
 import { storage } from './storage';
-import { getCanonicalOriginForHost, getSpecialtyForHost, requestHostname } from './seoPublic';
+import {
+  getCanonicalOriginForHost,
+  getSpecialtyForHost,
+  requestHostname,
+  sessionCookieDomainForHost,
+} from './seoPublic';
 import { sanitizeUser } from './authUtils';
 
 const SALT_ROUNDS = 12; // Strong password hashing
@@ -41,12 +46,15 @@ export function getSession() {
     store: sessionStore,
     resave: false,
     saveUninitialized: false,
+    proxy: true,
     cookie: {
-      httpOnly: true, // Prevent XSS attacks
-      secure: process.env.NODE_ENV === 'production', // HTTPS only in production
-      // Lax so cookies are sent on top-level returns from Stripe Checkout (Strict would drop them).
-      sameSite: 'lax',
+      httpOnly: true,
+      // Follow X-Forwarded-Proto. Hardcoded secure:true drops the cookie when a
+      // second custom domain (ortho-atlas.com) does not forward that header.
+      secure: "auto",
+      sameSite: "lax",
       maxAge: SESSION_TTL,
+      path: "/",
     },
   });
 }
@@ -173,6 +181,13 @@ const authRateLimiter = rateLimit({
 export async function setupAuth(app: Express) {
   app.set('trust proxy', 1);
   app.use(getSession());
+  app.use((req, _res, next) => {
+    const domain = sessionCookieDomainForHost(requestHostname(req));
+    if (domain && req.session?.cookie) {
+      req.session.cookie.domain = domain;
+    }
+    next();
+  });
 
   // Forgot password route
   app.post('/api/auth/forgot-password', authRateLimiter, async (req, res) => {
@@ -243,6 +258,13 @@ export async function setupAuth(app: Express) {
       const isPasswordValid = await verifyPassword(password, user.passwordHash);
       if (!isPasswordValid) {
         return res.status(401).json({ message: 'Invalid email or password entered.' });
+      }
+
+      try {
+        const loginHostSpecialty = getSpecialtyForHost(requestHostname(req));
+        await storage.setActiveSpecialty(user.id, loginHostSpecialty);
+      } catch (specialtyErr) {
+        console.error("Failed to pin active specialty on login:", specialtyErr);
       }
 
       // Create session (store only sanitized user; never persist passwordHash in session)
@@ -611,6 +633,12 @@ export async function setupAuth(app: Express) {
         await storage.addLoginConnection(user.id, 'google');
       } catch (connErr) {
         console.error('Failed to record Google login connection:', connErr);
+      }
+
+      try {
+        await storage.setActiveSpecialty(user.id, getSpecialtyForHost(requestHostname(req)));
+      } catch (specialtyErr) {
+        console.error("Failed to pin active specialty on Google login:", specialtyErr);
       }
 
       establishSession(req, user);

@@ -58,6 +58,16 @@ export function getCanonicalOrigin(): string {
   return getCanonicalOriginForHost(null);
 }
 
+/**
+ * Session `Domain` for a known specialty host. Apex and www must share the cookie —
+ * host-only cookies vanish on the www→apex 301, a common Ortho custom-domain failure.
+ */
+export function sessionCookieDomainForHost(rawHost?: string | null): string | undefined {
+  const host = normalizeHostname(rawHost);
+  if (!isKnownSpecialtyHost(host)) return undefined;
+  return `.${getSpecialty(specialtyFromHostname(host)).apexHost}`;
+}
+
 /** Specialty for a request host; unknown hosts use the env override's host, then the default. */
 export function getSpecialtyForHost(rawHost?: string | null): SpecialtyId {
   const host = normalizeHostname(rawHost);
