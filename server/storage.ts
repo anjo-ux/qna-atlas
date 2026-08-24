@@ -59,7 +59,7 @@ import {
   type SpecialtyId,
 } from "@shared/specialties";
 import { db, pool } from "./db";
-import { eq, and, asc, desc, lte, sql, count, inArray, like, notLike } from "drizzle-orm";
+import { eq, and, or, asc, desc, lte, sql, count, inArray, like, notLike } from "drizzle-orm";
 import {
   SOCIALMEDIA_INSTITUTIONAL_CODE,
 } from "./institutionalAccess";
@@ -73,6 +73,13 @@ let multiSpecialtyMigrationDone = false;
 let questionsFlaggedColumnDone = false;
 let testSessionsSpecialtyColumnDone = false;
 
+function sectionsMatchSpecialty(specialtyId: SpecialtyId) {
+  const id = getSpecialty(specialtyId).id;
+  if (id === "ortho") {
+    return or(eq(sections.specialtyId, "ortho"), like(sections.id, "ortho-%"));
+  }
+  return and(eq(sections.specialtyId, "prs"), notLike(sections.id, "ortho-%"));
+}
 function questionIdMatchesSpecialtySql(
   column: typeof questions.id | typeof spacedRepetitions.questionId | typeof bookmarks.questionId | typeof questionResponses.questionId,
   specialtyId: SpecialtyId,
@@ -1080,7 +1087,7 @@ export class DatabaseStorage implements IStorage {
     const sectionRows = await db
       .select()
       .from(sections)
-      .where(eq(sections.specialtyId, getSpecialty(specialtyId).id))
+      .where(sectionsMatchSpecialty(specialtyId))
       .orderBy(asc(sections.sortOrder));
     if (sectionRows.length === 0) return [];
     const subsectionRows = await db.select().from(subsections).orderBy(asc(subsections.sortOrder));

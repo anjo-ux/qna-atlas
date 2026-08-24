@@ -334,8 +334,23 @@ function buildSitemapXml(base: string, specialtyId: SpecialtyId): string {
 }
 
 export function requestHostname(req: Request): string {
-  const rawHost = (req.headers["x-forwarded-host"] as string) || req.headers.host || "";
-  return normalizeHostname(rawHost);
+  const headerHosts = (value: unknown): string[] =>
+    String(value ?? "")
+      .split(",")
+      .map((part) => normalizeHostname(part))
+      .filter(Boolean);
+
+  // Prefer `Host` when it is a known specialty domain. Replit often sets
+  // X-Forwarded-Host to the *primary* custom domain (prs-atlas.com) even when
+  // the browser is on ortho-atlas.com — using that value stamps the session
+  // cookie for the wrong site and login/handoff silently fail.
+  const fromHost = headerHosts(req.headers.host);
+  const fromForwarded = headerHosts(req.headers["x-forwarded-host"]);
+  const knownFromHost = fromHost.find((h) => isKnownSpecialtyHost(h));
+  if (knownFromHost) return knownFromHost;
+  const knownFromForwarded = fromForwarded.find((h) => isKnownSpecialtyHost(h));
+  if (knownFromForwarded) return knownFromForwarded;
+  return fromHost[0] || fromForwarded[0] || "";
 }
 
 /**

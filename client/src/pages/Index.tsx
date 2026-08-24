@@ -74,7 +74,14 @@ export default function Index() {
         credentials: 'include',
         cache: 'no-store',
       });
-      if (!res.ok) return { status: 'none', daysRemaining: 0, trialEndsAt: null, isLocked: false };
+      if (!res.ok) {
+        return {
+          status: "none",
+          daysRemaining: 0,
+          trialEndsAt: null,
+          isLocked: res.status === 401 || res.status === 403,
+        };
+      }
       return res.json();
     },
     staleTime: 0,

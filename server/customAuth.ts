@@ -13,12 +13,7 @@ import {
   type SpecialtyId,
 } from "@shared/specialties";
 import { storage } from './storage';
-import {
-  getCanonicalOriginForHost,
-  getSpecialtyForHost,
-  requestHostname,
-  sessionCookieDomainForHost,
-} from './seoPublic';
+import { getCanonicalOriginForHost, getSpecialtyForHost, requestHostname } from './seoPublic';
 import { sanitizeUser } from './authUtils';
 
 const SALT_ROUNDS = 12; // Strong password hashing
@@ -181,13 +176,6 @@ const authRateLimiter = rateLimit({
 export async function setupAuth(app: Express) {
   app.set('trust proxy', 1);
   app.use(getSession());
-  app.use((req, _res, next) => {
-    const domain = sessionCookieDomainForHost(requestHostname(req));
-    if (domain && req.session?.cookie) {
-      req.session.cookie.domain = domain;
-    }
-    next();
-  });
 
   // Forgot password route
   app.post('/api/auth/forgot-password', authRateLimiter, async (req, res) => {
@@ -734,11 +722,16 @@ export async function setupAuth(app: Express) {
       await storage.setActiveSpecialty(consumed.userId, consumed.targetSpecialtyId);
 
       const session = (req as any).session;
-      session.userId = user.id;
-      session.user = sanitizeUser(user);
-
       await new Promise<void>((resolve, reject) => {
-        session.save((err: Error | null) => (err ? reject(err) : resolve()));
+        session.regenerate((err: Error | null) => {
+          if (err) {
+            reject(err);
+            return;
+          }
+          session.userId = user.id;
+          session.user = sanitizeUser(user);
+          session.save((saveErr: Error | null) => (saveErr ? reject(saveErr) : resolve()));
+        });
       });
 
       if (consumed.continueExternalUrl) {

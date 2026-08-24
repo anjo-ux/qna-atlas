@@ -92,6 +92,18 @@ export default function Login() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const oauth = params.get('oauth');
+    const handoff = params.get('handoff');
+    if (handoff) {
+      const handoffMessages: Record<string, string> = {
+        expired: 'That sign-in link expired. Please log in on this site.',
+        invalid: 'That sign-in link was invalid. Please log in on this site.',
+        error: 'Could not finish switching sites. Please log in on this site.',
+      };
+      toast.error(handoffMessages[handoff] || 'Please log in on this site.');
+      params.delete('handoff');
+      const next = `${window.location.pathname}${params.toString() ? `?${params}` : ''}`;
+      window.history.replaceState({}, '', next);
+    }
     if (!oauth) return;
     const messages: Record<string, string> = {
       unavailable: 'Google sign-in is not configured on this server.',
