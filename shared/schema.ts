@@ -284,6 +284,19 @@ export const questions = pgTable("questions", {
   index("idx_questions_flagged").on(table.flagged),
 ]);
 
+/**
+ * Ledger of the last bundled q-bank export applied to this database.
+ * Created at runtime by content bootstrap; declared here so `drizzle-kit push`
+ * does not treat it as an unknown table and try to drop it.
+ */
+export const contentPromotions = pgTable("content_promotions", {
+  specialtyId: varchar("specialty_id", { length: 32 }).primaryKey().$type<SpecialtyId>(),
+  contentHash: varchar("content_hash", { length: 64 }).notNull(),
+  exportedAt: timestamp("exported_at").notNull(),
+  promotedAt: timestamp("promoted_at").defaultNow().notNull(),
+  insertedQuestions: integer("inserted_questions").notNull().default(0),
+});
+
 export type InsertSection = typeof sections.$inferInsert;
 export type SectionRow = typeof sections.$inferSelect;
 export type InsertSubsection = typeof subsections.$inferInsert;

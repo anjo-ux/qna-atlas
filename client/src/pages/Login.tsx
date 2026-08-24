@@ -196,7 +196,11 @@ export default function Login() {
       localStorage.removeItem('psite-question-responses');
       localStorage.removeItem('psite-highlights');
       localStorage.removeItem('psite-notes');
-      window.location.href = '/';
+      const continueUrl =
+        typeof data.continueUrl === 'string' && data.continueUrl.startsWith('/api/auth/handoff/consume')
+          ? data.continueUrl
+          : '/';
+      window.location.href = continueUrl;
     } catch (error) {
       toast.error('An error occurred, please try again.');
       console.error('Auth error:', error);

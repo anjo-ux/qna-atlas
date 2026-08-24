@@ -359,19 +359,23 @@ export async function setupAuth(app: Express) {
         console.error("Failed to pin active specialty on login:", specialtyErr);
       }
 
-      // Create session (store only sanitized user; never persist passwordHash in session)
-      (req as any).session.userId = user.id;
-      (req as any).session.user = sanitizeUser(user);
-      (req as any).user = user;
-
-      // Save session before responding
-      (req as any).session.save((err: any) => {
-        if (err) {
-          console.error('Session Save Error:', err);
-          return res.status(500).json({ message: 'Session Creation Failed.' });
-        }
+      if (user.passwordNeedsReset) {
+        (req as any).session.userId = user.id;
+        (req as any).session.user = sanitizeUser(user);
+        (req as any).user = user;
+        await new Promise<void>((resolve, reject) => {
+          (req as any).session.save((err: any) => (err ? reject(err) : resolve()));
+        });
         setAuthHintCookie(req, res);
-        res.json({ success: true, user: sanitizeUser(user), passwordNeedsReset: user.passwordNeedsReset || false });
+        return res.json({ success: true, user: sanitizeUser(user), passwordNeedsReset: true });
+      }
+
+      const continueUrl = await mintSameOriginLoginContinue(req, user.id);
+      return res.json({
+        success: true,
+        user: sanitizeUser(user),
+        passwordNeedsReset: false,
+        continueUrl,
       });
     } catch (error) {
       console.error('Login Error:', error);
@@ -555,20 +559,8 @@ export async function setupAuth(app: Express) {
         trialEndsAt: null,
       });
 
-      // Create session (store only sanitized user; never persist passwordHash in session)
-      (req as any).session.userId = newUser.id;
-      (req as any).session.user = sanitizeUser(newUser);
-      (req as any).user = newUser;
-
-      // Save session before responding
-      (req as any).session.save((err: any) => {
-        if (err) {
-          console.error('Session save error:', err);
-          return res.status(500).json({ message: 'Session creation failed.' });
-        }
-        setAuthHintCookie(req, res);
-        res.status(201).json({ success: true, user: sanitizeUser(newUser) });
-      });
+      const continueUrl = await mintSameOriginLoginContinue(req, newUser.id);
+      return res.status(201).json({ success: true, user: sanitizeUser(newUser), continueUrl });
     } catch (error: any) {
       if (error?.code === '23505') {
         return res.status(409).json({ message: 'Email already registered, please login instead.' });
@@ -592,6 +584,30 @@ export async function setupAuth(app: Express) {
 
   function googleCallbackUrl(req: Request): string {
     return `${authPublicOrigin(req)}/api/auth/google/callback`;
+  }
+
+  function sameOriginSessionContinueUrl(plainToken: string): string {
+    return `/api/auth/handoff/consume?token=${encodeURIComponent(plainToken)}`;
+  }
+
+/**
+ * Password login/register used to Set-Cookie on the JSON POST. Switching q-banks
+ * already worked because it sets the session on a top-level GET. On production,
+ * Replit's proxy for the second custom domain (ortho-atlas.com) can drop Set-Cookie
+ * on XHR/fetch responses, so the POST looks like a failed login. Finish the same
+ * way as a handoff: mint a one-time token and navigate to consume it.
+ */
+  async function mintSameOriginLoginContinue(
+    req: Request,
+    userId: string,
+    nextPath = '/',
+  ): Promise<string> {
+    const { plainToken } = await storage.createAuthHandoffToken({
+      userId,
+      targetSpecialtyId: getSpecialtyForHost(requestHostname(req)),
+      nextPath,
+    });
+    return sameOriginSessionContinueUrl(plainToken);
   }
 
   function establishSession(
