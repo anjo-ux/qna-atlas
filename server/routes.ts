@@ -540,7 +540,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let activeSpecialty = await storage.getActiveSpecialty(userId);
       const hostname = requestHostname(req);
       if (isKnownSpecialtyHost(hostname) && activeSpecialty !== hostSpecialty) {
-        activeSpecialty = await storage.setActiveSpecialty(userId, hostSpecialty);
+        // Stay on this host's q-bank in the response, but do not overwrite the
+        // stored selection here. A GET with a stale X-Forwarded-Host used to
+        // pin PRS right after an Ortho login.
+        activeSpecialty = hostSpecialty;
       }
       const entitlements = await Promise.all(
         SPECIALTY_LIST.map(async (s) => ({

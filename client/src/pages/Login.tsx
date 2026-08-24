@@ -160,7 +160,7 @@ export default function Login() {
       const endpoint = isSignUp ? '/api/auth/register' : '/api/auth/login';
       const payload = isSignUp
         ? {
-            email,
+            email: email.trim().toLowerCase(),
             password,
             confirmPassword,
             firstName,
@@ -169,7 +169,7 @@ export default function Login() {
             trainingLevel,
             specialtyId,
           }
-        : { email, password };
+        : { email: email.trim().toLowerCase(), password };
 
       const response = await fetch(endpoint, {
         method: 'POST',
@@ -213,7 +213,7 @@ export default function Login() {
       const response = await fetch('/api/auth/forgot-password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: forgotPasswordEmail }),
+        body: JSON.stringify({ email: forgotPasswordEmail.trim().toLowerCase() }),
       });
 
       const data = await response.json();

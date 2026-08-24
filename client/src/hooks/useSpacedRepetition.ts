@@ -1,5 +1,5 @@
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { queryClient, apiRequest } from '@/lib/queryClient';
+import { queryClient, apiRequest, withSpecialtyQuery } from '@/lib/queryClient';
 import { useSpecialty } from '@/hooks/useSpecialty';
 import type { SpacedRepetition } from '@shared/schema';
 
@@ -17,7 +17,7 @@ export function useSpacedRepetition() {
     enabled: !isSwitching,
     queryFn: async () => {
       try {
-        const res = await fetch('/api/spaced-repetition/due', { credentials: 'include' });
+        const res = await fetch(withSpecialtyQuery('/api/spaced-repetition/due', activeSpecialty), { credentials: 'include' });
         if (!res.ok) return { due: [], reviewedQuestionIds: [], incorrectQuestionIds: [] };
         const json = await res.json();
         return json;

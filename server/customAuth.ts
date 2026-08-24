@@ -336,6 +336,9 @@ export async function setupAuth(app: Express) {
       if (!email || !password) {
         return res.status(400).json({ message: 'Email and password required to login.' });
       }
+      if (typeof email !== 'string' || typeof password !== 'string') {
+        return res.status(400).json({ message: 'Email and password required to login.' });
+      }
       if (password.length > 128) {
         return res.status(400).json({ message: 'Invalid email or password entered.' });
       }
@@ -351,8 +354,7 @@ export async function setupAuth(app: Express) {
       }
 
       try {
-        const loginHostSpecialty = getSpecialtyForHost(requestHostname(req));
-        await storage.setActiveSpecialty(user.id, loginHostSpecialty);
+        await storage.setActiveSpecialty(user.id, getSpecialtyForHost(requestHostname(req)));
       } catch (specialtyErr) {
         console.error("Failed to pin active specialty on login:", specialtyErr);
       }
@@ -496,9 +498,10 @@ export async function setupAuth(app: Express) {
       const MAX_EMAIL = 255;
       const MAX_NAME = 100;
       const MAX_AFFILIATION = 255;
-      if (typeof email !== 'string' || email.length > MAX_EMAIL) {
+      if (typeof email !== 'string' || email.trim().length > MAX_EMAIL) {
         return res.status(400).json({ message: 'Invalid email.' });
       }
+      const normalizedEmail = email.trim().toLowerCase();
       if (typeof firstName !== 'string' || firstName.length > MAX_NAME || typeof lastName !== 'string' || lastName.length > MAX_NAME) {
         return res.status(400).json({ message: 'First and last name must be at most 100 characters each.' });
       }
@@ -520,12 +523,12 @@ export async function setupAuth(app: Express) {
 
       // Check email validity
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(email)) {
+      if (!emailRegex.test(normalizedEmail)) {
         return res.status(400).json({ message: 'Invalid email format, please try again.' });
       }
 
       // Check if email already exists
-      const existingUser = await storage.getUserByEmail(email);
+      const existingUser = await storage.getUserByEmail(normalizedEmail);
       if (existingUser) {
         return res.status(409).json({ message: 'Email already registered, please login instead.' });
       }
@@ -534,7 +537,7 @@ export async function setupAuth(app: Express) {
       const passwordHash = await hashPassword(password);
 
       const newUser = await storage.upsertUser({
-        email,
+        email: normalizedEmail,
         passwordHash,
         firstName,
         lastName,
@@ -566,7 +569,10 @@ export async function setupAuth(app: Express) {
         setAuthHintCookie(req, res);
         res.status(201).json({ success: true, user: sanitizeUser(newUser) });
       });
-    } catch (error) {
+    } catch (error: any) {
+      if (error?.code === '23505') {
+        return res.status(409).json({ message: 'Email already registered, please login instead.' });
+      }
       console.error('Register error:', error);
       res.status(500).json({ message: 'Registration failed.' });
     }
@@ -767,6 +773,8 @@ export async function setupAuth(app: Express) {
       host,
       hostHeader: req.headers.host ?? null,
       forwardedHost: req.headers['x-forwarded-host'] ?? null,
+      origin: req.headers.origin ?? null,
+      referer: req.headers.referer ?? null,
       forwardedProto: req.headers['x-forwarded-proto'] ?? null,
       reqSecure: req.secure,
       specialty: getSpecialtyForHost(host),

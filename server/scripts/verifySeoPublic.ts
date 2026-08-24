@@ -7,6 +7,7 @@ import {
   isMarketingIndexablePath,
   isNonIndexableAppPath,
   normalizePublicOrigin,
+  resolveRequestHostname,
   stripDefaultPortFromUrl,
 } from "../seoPublic";
 
@@ -54,6 +55,30 @@ assert.equal(getSpecialtyForHost("prs-atlas.com"), "prs");
 assert.equal(getSpecialtyForHost("ortho-atlas.com"), "ortho");
 assert.equal(getSpecialtyForHost("www.ortho-atlas.com"), "ortho");
 assert.equal(getCanonicalOriginForHost("ortho-atlas.com"), "https://ortho-atlas.com");
+
+assert.equal(
+  resolveRequestHostname({
+    host: "workspace.replit.dev",
+    "x-forwarded-host": "prs-atlas.com",
+    origin: "https://ortho-atlas.com",
+  }),
+  "ortho-atlas.com",
+);
+assert.equal(
+  resolveRequestHostname({
+    host: "ortho-atlas.com",
+    "x-forwarded-host": "prs-atlas.com",
+  }),
+  "ortho-atlas.com",
+);
+assert.equal(
+  resolveRequestHostname({
+    host: "workspace.replit.dev",
+    "x-forwarded-host": "prs-atlas.com",
+    referer: "https://ortho-atlas.com/login",
+  }),
+  "ortho-atlas.com",
+);
 
 const prsHome = injectSpaIndexHtml(shell, "/", "prs-atlas.com");
 assert.match(prsHome, /data-specialty="prs"/);

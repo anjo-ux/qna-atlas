@@ -43,6 +43,13 @@
       "when": 1776960000000,
       "tag": "0019_feedback_agent",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1777050000000,
+      "tag": "0020_users_email_lower_unique",
+      "breakpoints": true
     }
   ]
 }

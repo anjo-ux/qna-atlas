@@ -29,6 +29,8 @@ export type CandidateInput = {
   missRates: MissRateRow[];
   contactQuestionIds: string[];
   lastRevisionAtByQuestionId: Map<string, Date>;
+  /** Default MIN_REPORTS (2). Set to 1 to process every reported question. */
+  minReports?: number;
 };
 
 export type RankedCandidate = {
@@ -120,7 +122,8 @@ export function rankCandidates(input: CandidateInput): RankedCandidate[] {
     const reasons: string[] = [];
     let include = false;
 
-    if (reports.length >= MIN_REPORTS) {
+    const minReports = input.minReports ?? MIN_REPORTS;
+    if (reports.length >= minReports) {
       include = true;
       reasons.push(`${reports.length} reports`);
     }

@@ -8,9 +8,8 @@
  * a target is now a hard error instead of a silent misfire.
  *
  * Pick one:
- *   IMPORT_DATABASE_URL=postgresql://...   — explicit target (use the deployment's DATABASE_URL)
+ *   IMPORT_DATABASE_URL=postgresql://...   — explicit target
  *   IMPORT_DB=local                        — the workspace database (DATABASE_URL)
- *   IMPORT_DB=neon                         — the legacy Neon copy (NEON_DATABASE_URL)
  */
 export function applyImportDatabaseUrl(): { label: string; host: string } {
   const explicit = process.env.IMPORT_DATABASE_URL?.trim();
@@ -26,19 +25,20 @@ export function applyImportDatabaseUrl(): { label: string; host: string } {
     url = process.env.DATABASE_URL;
     label = "DATABASE_URL (IMPORT_DB=local)";
   } else if (mode === "neon") {
-    url = process.env.NEON_DATABASE_URL;
-    label = "NEON_DATABASE_URL (IMPORT_DB=neon)";
+    throw new Error(
+      "IMPORT_DB=neon is no longer supported. The Neon copy is not production and is not used by the app. " +
+        "Promote content with `npm run content:export` then publish, or set IMPORT_DATABASE_URL to a real target.",
+    );
   } else if (mode) {
     throw new Error(
-      `Unrecognized IMPORT_DB=${mode}. Use IMPORT_DB=local, IMPORT_DB=neon, or set IMPORT_DATABASE_URL.`,
+      `Unrecognized IMPORT_DB=${mode}. Use IMPORT_DB=local or set IMPORT_DATABASE_URL.`,
     );
   } else {
     throw new Error(
       "No import target specified. This script refuses to guess because writing to the " +
         "wrong database looks like success. Set one of:\n" +
-        "  IMPORT_DATABASE_URL=postgresql://...  (the deployment's DATABASE_URL — check Deployments > Secrets)\n" +
-        "  IMPORT_DB=local                       (the workspace database)\n" +
-        "  IMPORT_DB=neon                        (the legacy Neon copy)",
+        "  IMPORT_DATABASE_URL=postgresql://...  (an explicit target)\n" +
+        "  IMPORT_DB=local                       (the workspace database)",
     );
   }
 

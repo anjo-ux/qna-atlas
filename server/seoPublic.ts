@@ -333,24 +333,59 @@ function buildSitemapXml(base: string, specialtyId: SpecialtyId): string {
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>\n`;
 }
 
-export function requestHostname(req: Request): string {
-  const headerHosts = (value: unknown): string[] =>
-    String(value ?? "")
-      .split(",")
-      .map((part) => normalizeHostname(part))
-      .filter(Boolean);
+function hostsFromHeader(value: unknown): string[] {
+  return String(value ?? "")
+    .split(",")
+    .map((part) => normalizeHostname(part))
+    .filter(Boolean);
+}
 
-  // Prefer `Host` when it is a known specialty domain. Replit often sets
-  // X-Forwarded-Host to the *primary* custom domain (prs-atlas.com) even when
-  // the browser is on ortho-atlas.com — using that value stamps the session
-  // cookie for the wrong site and login/handoff silently fail.
-  const fromHost = headerHosts(req.headers.host);
-  const fromForwarded = headerHosts(req.headers["x-forwarded-host"]);
+function hostnameFromUrlHeader(value: unknown): string {
+  const raw = String(value ?? "").trim();
+  if (!raw) return "";
+  try {
+    const url = raw.includes("://") ? new URL(raw) : new URL(`https://${raw}`);
+    return normalizeHostname(url.host);
+  } catch {
+    return "";
+  }
+}
+
+/**
+ * Which specialty site this request is for.
+ *
+ * Prefer `Host`, then browser `Origin` / `Referer`. `X-Forwarded-Host` is last
+ * because Replit often sets it to the *primary* custom domain (prs-atlas.com)
+ * even when the user is on ortho-atlas.com — that used to pin login to the PRS
+ * q-bank and look like a redirect after signing in on Ortho.
+ */
+export function resolveRequestHostname(headers: {
+  host?: unknown;
+  "x-forwarded-host"?: unknown;
+  origin?: unknown;
+  referer?: unknown;
+}): string {
+  const fromHost = hostsFromHeader(headers.host);
+  const fromOrigin = hostnameFromUrlHeader(headers.origin);
+  const fromReferer = hostnameFromUrlHeader(headers.referer);
+  const fromForwarded = hostsFromHeader(headers["x-forwarded-host"]);
+
   const knownFromHost = fromHost.find((h) => isKnownSpecialtyHost(h));
   if (knownFromHost) return knownFromHost;
+  if (isKnownSpecialtyHost(fromOrigin)) return fromOrigin;
+  if (isKnownSpecialtyHost(fromReferer)) return fromReferer;
   const knownFromForwarded = fromForwarded.find((h) => isKnownSpecialtyHost(h));
   if (knownFromForwarded) return knownFromForwarded;
-  return fromHost[0] || fromForwarded[0] || "";
+  return fromHost[0] || fromOrigin || fromReferer || fromForwarded[0] || "";
+}
+
+export function requestHostname(req: Request): string {
+  return resolveRequestHostname({
+    host: req.headers.host,
+    "x-forwarded-host": req.headers["x-forwarded-host"],
+    origin: req.headers.origin,
+    referer: req.headers.referer,
+  });
 }
 
 /**

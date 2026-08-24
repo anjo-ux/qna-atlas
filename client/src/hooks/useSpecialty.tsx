@@ -16,6 +16,7 @@ import {
   getSpecialty,
   isKnownSpecialtyHost,
   isSpecialtyId,
+  specialtyFromHostname,
   type SpecialtyConfig,
   type SpecialtyId,
 } from "@shared/specialties";
@@ -112,18 +113,22 @@ export function SpecialtyProvider({ children }: { children: React.ReactNode }) {
     retry: false,
   });
 
-  const hostSpecialty = isSpecialtyId(data?.hostSpecialty)
-    ? data.hostSpecialty
-    : hostSpecialtyFromShell;
+  // The browser URL is the q-bank on production hosts. Do not trust API hostSpecialty
+  // when Replit's X-Forwarded-Host is still the primary PRS domain.
+  const hostSpecialty = hostnameIsSpecialtyHost()
+    ? specialtyFromHostname(window.location.hostname)
+    : isSpecialtyId(data?.hostSpecialty)
+      ? data.hostSpecialty
+      : hostSpecialtyFromShell;
 
-  // Production domains always show that host's bank. Preview/localhost can switch in place.
   useEffect(() => {
-    if (!isSpecialtyId(data?.activeSpecialty)) return;
     if (hostnameIsSpecialtyHost()) {
       setActiveSpecialty(hostSpecialty);
       return;
     }
-    setActiveSpecialty(data.activeSpecialty);
+    if (isSpecialtyId(data?.activeSpecialty)) {
+      setActiveSpecialty(data.activeSpecialty);
+    }
   }, [data?.activeSpecialty, hostSpecialty]);
 
   useEffect(() => {

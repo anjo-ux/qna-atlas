@@ -24,7 +24,6 @@
     "content:export": "tsx server/scripts/exportSpecialtyContent.ts",
     "content:import": "tsx server/scripts/importSpecialtyContent.ts",
     "push:ortho": "tsx server/scripts/pushOrthoQuestionsToNeon.ts",
-    "push:ortho-to-neon": "tsx server/scripts/pushOrthoQuestionsToNeon.ts",
     "generate:questions": "tsx server/jobs/questionGenerationJob.ts",
     "feedback-agent": "tsx server/jobs/feedbackLearningJob.ts",
     "test:feedback-agent": "tsx --test server/jobs/feedbackLearningLogic.test.ts",

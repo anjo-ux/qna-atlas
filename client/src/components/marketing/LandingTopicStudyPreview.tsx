@@ -1,8 +1,62 @@
+import { useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useHostSpecialty } from "@/hooks/useSpecialty";
+
+function wheelDeltaY(event: WheelEvent) {
+  if (event.deltaMode === 1) return event.deltaY * 16;
+  if (event.deltaMode === 2) return event.deltaY * window.innerHeight;
+  return event.deltaY;
+}
+
+function findScrollableAncestor(start: HTMLElement): HTMLElement | Window {
+  let node = start.parentElement;
+  while (node) {
+    const overflowY = getComputedStyle(node).overflowY;
+    const scrolls =
+      (overflowY === "auto" || overflowY === "scroll" || overflowY === "overlay") &&
+      node.scrollHeight > node.clientHeight + 1;
+    if (scrolls) return node;
+    node = node.parentElement;
+  }
+  return window;
+}
+
+/** When a nested scroller hits its edge, continue scrolling the page (or nearest ancestor). */
+function usePassWheelPastNestedScroll<T extends HTMLElement>() {
+  const ref = useRef<T | null>(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    const onWheel = (event: WheelEvent) => {
+      const delta = wheelDeltaY(event);
+      if (delta === 0) return;
+
+      const maxScroll = Math.max(0, el.scrollHeight - el.clientHeight);
+      const atTop = el.scrollTop <= 0;
+      const atBottom = el.scrollTop >= maxScroll - 1;
+      const trapped = maxScroll > 0 && ((delta < 0 && !atTop) || (delta > 0 && !atBottom));
+      if (trapped) return;
+
+      const ancestor = findScrollableAncestor(el);
+      event.preventDefault();
+      if (ancestor === window) {
+        window.scrollBy(0, delta);
+      } else {
+        ancestor.scrollTop += delta;
+      }
+    };
+
+    el.addEventListener("wheel", onWheel, { passive: false });
+    return () => el.removeEventListener("wheel", onWheel);
+  }, []);
+
+  return ref;
+}
 
 type PreviewSection = {
   title: string;
@@ -93,6 +147,7 @@ function PreviewTree({
   className?: string;
 }) {
   const totalSubs = previewSections.reduce((n, s) => n + s.subs.length, 0);
+  const listRef = usePassWheelPastNestedScroll<HTMLDivElement>();
 
   return (
     <div
@@ -110,8 +165,9 @@ function PreviewTree({
         </p>
       </div>
       <div
+        ref={listRef}
         className={cn(
-          "h-52 overflow-y-auto overflow-x-hidden overscroll-y-contain sm:h-72",
+          "h-52 overflow-y-auto overflow-x-hidden overscroll-y-auto sm:h-72",
           "max-lg:[-ms-overflow-style:none] max-lg:[scrollbar-width:none] max-lg:[&::-webkit-scrollbar]:hidden",
         )}
       >

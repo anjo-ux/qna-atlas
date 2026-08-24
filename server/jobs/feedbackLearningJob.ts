@@ -14,6 +14,7 @@ import {
   parseAgentDecision,
   rankCandidates,
   truncateForSlack,
+  MIN_REPORTS,
   type AgentDecision,
   type RankedCandidate,
 } from "./feedbackLearningLogic";
@@ -189,8 +190,9 @@ export async function runFeedbackLearningJob(opts: { force?: boolean } = {}): Pr
   }
 
   const run = await storage.startAgentJobRun(FEEDBACK_AGENT_JOB_NAME);
+  const allHistory = process.env.FEEDBACK_AGENT_ALL_HISTORY === "true";
   const period = feedbackAgentPeriodMs();
-  const since = new Date(Date.now() - period);
+  const since = allHistory ? new Date(0) : new Date(Date.now() - period);
   const errors: string[] = [];
 
   try {
@@ -221,6 +223,7 @@ export async function runFeedbackLearningJob(opts: { force?: boolean } = {}): Pr
       missRates,
       contactQuestionIds,
       lastRevisionAtByQuestionId: lastRev,
+      minReports: allHistory ? 1 : MIN_REPORTS,
     });
 
     const revised: { id: string; reason: string; before: string; after: string }[] = [];

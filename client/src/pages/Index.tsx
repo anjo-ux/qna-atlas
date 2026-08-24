@@ -42,7 +42,7 @@ import { useSpacedRepetition } from '@/hooks/useSpacedRepetition';
 import { useLocation } from 'wouter';
 import { toast } from 'sonner';
 import { useQuery } from '@tanstack/react-query';
-import { queryClient, apiRequest } from '@/lib/queryClient';
+import { queryClient, apiRequest, withSpecialtyQuery } from '@/lib/queryClient';
 
 type FilterMode = 'all' | 'incorrect' | 'unanswered';
 type ScreenMode = 'study' | 'test' | 'settings' | 'preview';
@@ -70,7 +70,7 @@ export default function Index() {
   const { data: subscription, isLoading: isCheckingSubscription, refetch: refetchSubscription } = useQuery({
     queryKey: ['/api/subscription', activeSpecialty],
     queryFn: async () => {
-      const res = await fetch('/api/subscription', {
+      const res = await fetch(withSpecialtyQuery('/api/subscription', activeSpecialty), {
         credentials: 'include',
         cache: 'no-store',
       });

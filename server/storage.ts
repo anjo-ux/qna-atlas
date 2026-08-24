@@ -82,6 +82,7 @@ let multiSpecialtyMigrationDone = false;
 let questionsFlaggedColumnDone = false;
 let testSessionsSpecialtyColumnDone = false;
 let feedbackAgentTablesDone = false;
+let usersEmailUniquenessDone = false;
 
 function sectionsMatchSpecialty(specialtyId: SpecialtyId) {
   const id = getSpecialty(specialtyId).id;
@@ -561,18 +562,30 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getUserByEmail(email: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.email, email));
-    return user;
+    await this.ensureUsersEmailUniqueness();
+    const normalized = email.trim().toLowerCase();
+    if (!normalized) return undefined;
+    const matches = await db
+      .select()
+      .from(users)
+      .where(sql`lower(${users.email}) = ${normalized}`);
+    if (matches.length === 0) return undefined;
+    if (matches.length === 1) return matches[0];
+    return matches.find((u) => Boolean(u.passwordHash)) ?? matches[0];
   }
 
   async upsertUser(userData: UpsertUser): Promise<User> {
+    await this.ensureUsersEmailUniqueness();
+    const values = userData.email
+      ? { ...userData, email: userData.email.trim().toLowerCase() }
+      : userData;
     const [user] = await db
       .insert(users)
-      .values(userData)
+      .values(values)
       .onConflictDoUpdate({
         target: users.id,
         set: {
-          ...userData,
+          ...values,
           updatedAt: new Date(),
         },
       })
@@ -1745,6 +1758,33 @@ export class DatabaseStorage implements IStorage {
     await pool.query(`
       ALTER TABLE "users" ADD COLUMN IF NOT EXISTS "subscription_canceled_at" timestamp
     `);
+  }
+
+  /**
+   * One account per email, regardless of domain or capitalization.
+   * Postgres UNIQUE(email) is case-sensitive, so Orr@x and orr@x could otherwise
+   * become two passwords. Lowercase existing rows that do not collide, then
+   * enforce uniqueness on lower(email).
+   */
+  private async ensureUsersEmailUniqueness(): Promise<void> {
+    if (usersEmailUniquenessDone) return;
+    usersEmailUniquenessDone = true;
+    await pool.query(`
+      UPDATE users AS u
+      SET email = lower(u.email)
+      WHERE u.email IS DISTINCT FROM lower(u.email)
+        AND NOT EXISTS (
+          SELECT 1 FROM users AS other
+          WHERE other.id <> u.id AND lower(other.email) = lower(u.email)
+        )
+    `);
+    try {
+      await pool.query(
+        `CREATE UNIQUE INDEX IF NOT EXISTS uidx_users_email_lower ON users (lower(email))`,
+      );
+    } catch (error) {
+      console.error("Could not add unique index on lower(users.email):", error);
+    }
   }
 
   /**

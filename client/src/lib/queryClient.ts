@@ -1,4 +1,12 @@
 import { QueryClient } from "@tanstack/react-query";
+import { isSpecialtyId } from "@shared/specialties";
+
+/** Append specialtyId when the query key's second part is a q-bank id. */
+export function withSpecialtyQuery(path: string, specialtyId?: unknown): string {
+  if (typeof path !== "string" || !isSpecialtyId(specialtyId)) return path;
+  const sep = path.includes("?") ? "&" : "?";
+  return `${path}${sep}specialtyId=${encodeURIComponent(specialtyId)}`;
+}
 
 async function throwError(response: Response) {
   let message = `Error: ${response.status}`;
@@ -59,7 +67,8 @@ export async function apiRequest(url: string, options?: RequestInit) {
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      queryFn: async ({ queryKey }) => fetcher(queryKey[0] as string),
+      queryFn: async ({ queryKey }) =>
+        fetcher(withSpecialtyQuery(queryKey[0] as string, queryKey[1])),
       staleTime: 1000 * 60 * 5,
       retry: false,
       refetchOnWindowFocus: false,
