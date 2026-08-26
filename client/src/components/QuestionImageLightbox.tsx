@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -19,6 +19,10 @@ type QuestionImageLightboxProps = {
   onOpenChange: (open: boolean) => void;
 };
 
+function clearTextSelection() {
+  window.getSelection()?.removeAllRanges();
+}
+
 export function QuestionImageLightbox({
   src,
   alt,
@@ -26,9 +30,16 @@ export function QuestionImageLightbox({
   onOpenChange,
 }: QuestionImageLightboxProps) {
   const [scale, setScale] = useState(MIN_SCALE);
+  const [pan, setPan] = useState({ x: 0, y: 0 });
+  const [dragging, setDragging] = useState(false);
+  const viewportRef = useRef<HTMLDivElement>(null);
+  const dragOrigin = useRef({ x: 0, y: 0, panX: 0, panY: 0 });
 
-  const resetZoom = useCallback(() => {
+  const resetView = useCallback(() => {
     setScale(MIN_SCALE);
+    setPan({ x: 0, y: 0 });
+    setDragging(false);
+    clearTextSelection();
   }, []);
 
   const zoomIn = useCallback(() => {
@@ -36,20 +47,62 @@ export function QuestionImageLightbox({
   }, []);
 
   const zoomOut = useCallback(() => {
-    setScale((s) => Math.max(MIN_SCALE, s - SCALE_STEP));
+    setScale((s) => {
+      const next = Math.max(MIN_SCALE, s - SCALE_STEP);
+      if (next <= MIN_SCALE) setPan({ x: 0, y: 0 });
+      return next;
+    });
   }, []);
 
+  useEffect(() => {
+    if (scale <= MIN_SCALE) {
+      setPan({ x: 0, y: 0 });
+    }
+  }, [scale]);
+
   const handleOpenChange = (next: boolean) => {
-    if (!next) resetZoom();
+    if (!next) resetView();
     onOpenChange(next);
+  };
+
+  const canPan = scale > MIN_SCALE;
+
+  const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!canPan || e.button !== 0) return;
+    e.preventDefault();
+    clearTextSelection();
+    dragOrigin.current = { x: e.clientX, y: e.clientY, panX: pan.x, panY: pan.y };
+    setDragging(true);
+    e.currentTarget.setPointerCapture(e.pointerId);
+  };
+
+  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!dragging) return;
+    e.preventDefault();
+    const dx = e.clientX - dragOrigin.current.x;
+    const dy = e.clientY - dragOrigin.current.y;
+    setPan({
+      x: dragOrigin.current.panX + dx,
+      y: dragOrigin.current.panY + dy,
+    });
+  };
+
+  const endDrag = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!dragging) return;
+    if (e.currentTarget.hasPointerCapture(e.pointerId)) {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+    }
+    setDragging(false);
+    clearTextSelection();
   };
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent
-        className="max-w-[min(96vw,1200px)] w-full h-[min(92vh,900px)] p-0 gap-0 overflow-hidden flex flex-col"
+        className="max-w-[min(96vw,1200px)] w-full h-[min(92vh,900px)] p-0 gap-0 overflow-hidden flex flex-col select-none"
         aria-describedby={undefined}
         hideCloseButton
+        onOpenAutoFocus={(e) => e.preventDefault()}
       >
         <DialogTitle className="sr-only">{alt}</DialogTitle>
         <div className="flex items-center justify-between gap-2 border-b px-3 py-2 shrink-0">
@@ -82,7 +135,7 @@ export function QuestionImageLightbox({
               variant="outline"
               size="icon"
               className="h-8 w-8"
-              onClick={resetZoom}
+              onClick={resetView}
               disabled={scale <= MIN_SCALE}
               aria-label="Reset zoom"
             >
@@ -100,17 +153,31 @@ export function QuestionImageLightbox({
             </Button>
           </div>
         </div>
-        <div className="flex-1 overflow-auto bg-muted/30 p-4">
-          <div className="min-w-full min-h-full flex items-center justify-center">
+        <div
+          ref={viewportRef}
+          className={cn(
+            'flex-1 overflow-hidden bg-muted/30 touch-none',
+            canPan && (dragging ? 'cursor-grabbing' : 'cursor-grab'),
+          )}
+          style={{ touchAction: canPan ? 'none' : 'auto' }}
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={endDrag}
+          onPointerCancel={endDrag}
+          onLostPointerCapture={() => setDragging(false)}
+        >
+          <div className="w-full h-full flex items-center justify-center p-4">
             <img
               src={src}
               alt={alt}
-              className={cn(
-                'max-w-none origin-center transition-transform duration-150',
-                scale > MIN_SCALE ? 'cursor-grab' : 'cursor-default'
-              )}
-              style={{ transform: `scale(${scale})` }}
               draggable={false}
+              onDragStart={(e) => e.preventDefault()}
+              className="max-w-full max-h-full select-none pointer-events-none"
+              style={{
+                transform: `translate(${pan.x}px, ${pan.y}px) scale(${scale})`,
+                transformOrigin: 'center center',
+                transition: dragging ? 'none' : 'transform 150ms ease',
+              }}
             />
           </div>
         </div>
