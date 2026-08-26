@@ -3,7 +3,7 @@
  *
  * 1. Drop the source file in server/data/question-images/
  * 2. Run:
- *    IMPORT_DB=local npm run attach:question-image -- "<questionId>" my-xray.jpg --alt "Lateral hand radiograph"
+ *    IMPORT_DB=local npm run attach:question-image -- '<questionId>' my-xray.jpg --alt "Lateral hand radiograph"
  *
  * Copies the file to client/public/question-images/ and sets questions.image_url.
  */
@@ -26,7 +26,10 @@ const ALLOWED_EXT = new Set([".jpg", ".jpeg", ".png", ".webp", ".gif"]);
 function usage(): never {
   console.error(`
 Usage:
-  IMPORT_DB=local npm run attach:question-image -- "<questionId>" <sourceFilename> [options]
+  IMPORT_DB=local npm run attach:question-image -- '<questionId>' <sourceFilename> [options]
+
+Use single quotes around the question id. These ids often contain $, *, or !;
+double quotes let the shell expand them (e.g. "$O" becomes empty).
 
 Options:
   --alt "description"   Alt text for accessibility (default: derived from filename)
@@ -35,7 +38,7 @@ Options:
   --dry-run             Preview without copying or updating the database
 
 Example:
-  IMPORT_DB=local npm run attach:question-image -- "(7ad=Wj*" treacher-collins.jpg --alt "Facial photograph" --unflag --visible
+  IMPORT_DB=local npm run attach:question-image -- '(7ad=Wj*' treacher-collins.jpg --alt "Facial photograph" --unflag --visible
 `);
   process.exit(1);
 }
@@ -103,7 +106,10 @@ async function main() {
 
   const question = await storage.getQuestion(questionId);
   if (!question) {
-    throw new Error(`Question not found: ${questionId}`);
+    const hint = /[$`!]/.test(questionId)
+      ? ""
+      : "\nIf the id contains $, *, or !, wrap it in single quotes so the shell does not expand it.";
+    throw new Error(`Question not found: ${questionId}${hint}`);
   }
 
   const sourcePath = path.join(STAGING_DIR, sourceFilename);

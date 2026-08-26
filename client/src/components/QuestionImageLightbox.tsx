@@ -49,6 +49,7 @@ export function QuestionImageLightbox({
       <DialogContent
         className="max-w-[min(96vw,1200px)] w-full h-[min(92vh,900px)] p-0 gap-0 overflow-hidden flex flex-col"
         aria-describedby={undefined}
+        hideCloseButton
       >
         <DialogTitle className="sr-only">{alt}</DialogTitle>
         <div className="flex items-center justify-between gap-2 border-b px-3 py-2 shrink-0">
