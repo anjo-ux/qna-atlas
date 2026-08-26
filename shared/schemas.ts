@@ -41,5 +41,7 @@ export const insertQuestionSchema = z.object({
   subsectionId: z.string().min(1),
   tags: z.array(z.string()).optional().default([]),
   source: z.enum(["imported", "generated"]).optional().default("generated"),
+  imageUrl: z.string().max(512).nullable().optional(),
+  imageAlt: z.string().max(256).nullable().optional(),
 });
 export type InsertQuestionInput = z.infer<typeof insertQuestionSchema>;

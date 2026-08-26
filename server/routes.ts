@@ -389,6 +389,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
     });
+
+    const { questionMediaUpload, publicQuestionImageUrl } = await import("./questionMediaUpload");
+    app.post(
+      "/api/admin/question-media",
+      questionMediaUpload.single("file"),
+      async (req: any, res) => {
+        if (!requireAdminCode(req)) {
+          return res.status(403).json({ message: "Invalid admin code." });
+        }
+        try {
+          if (!req.file) {
+            return res.status(400).json({ message: "Missing file upload." });
+          }
+          const url = publicQuestionImageUrl(req.file.filename);
+          res.status(201).json({ url, filename: req.file.filename });
+        } catch (error) {
+          console.error("Error uploading question media:", error);
+          res.status(500).json({
+            message: error instanceof Error ? error.message : "Upload failed.",
+          });
+        }
+      }
+    );
   }
 
   // Admin: set user tester status (beta access to Atlas Trainer). Requires X-Admin-Code.
@@ -619,7 +642,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
     try {
       const { id } = req.params;
-      const { visible, flagged } = req.body ?? {};
+      const { visible, flagged, imageUrl, imageAlt } = req.body ?? {};
+
+      if (imageUrl !== undefined || imageAlt !== undefined) {
+        if (imageUrl !== undefined && imageUrl !== null && typeof imageUrl !== "string") {
+          return res.status(400).json({ message: "imageUrl must be a string or null." });
+        }
+        if (imageAlt !== undefined && imageAlt !== null && typeof imageAlt !== "string") {
+          return res.status(400).json({ message: "imageAlt must be a string or null." });
+        }
+        const question = await storage.getQuestion(id);
+        if (!question) {
+          return res.status(404).json({ message: "Question not found." });
+        }
+        const nextUrl = imageUrl === undefined ? question.imageUrl ?? null : imageUrl;
+        const nextAlt = imageAlt === undefined ? question.imageAlt ?? null : imageAlt;
+        const ok = await storage.updateQuestionImage(id, nextUrl, nextAlt);
+        if (!ok) {
+          return res.status(500).json({ message: "Failed to update question image." });
+        }
+        return res.json({ id, imageUrl: nextUrl, imageAlt: nextAlt });
+      }
 
       if (typeof flagged === "boolean") {
         if (flagged) {
@@ -634,7 +677,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       if (typeof visible !== "boolean") {
-        return res.status(400).json({ message: "Body must include visible: boolean and/or flagged: boolean." });
+        return res.status(400).json({ message: "Body must include visible: boolean, flagged: boolean, and/or imageUrl/imageAlt." });
       }
       const question = await storage.getQuestion(id);
       if (!question) {
@@ -647,13 +690,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       if (
         visible &&
+        !question.imageUrl &&
         extractQuestionStem(question.question).toLowerCase().includes("radiographic")
       ) {
         return res.status(400).json({
           message: 'Cannot make this question visible: stem contains "radiographic".',
         });
       }
-      if (visible && questionMcqChoicesReferenceSeeImage(question.question)) {
+      if (visible && !question.imageUrl && questionMcqChoicesReferenceSeeImage(question.question)) {
         return res.status(400).json({
           message:
             'Cannot make this question visible: an answer choice references an image (e.g. "see image").',

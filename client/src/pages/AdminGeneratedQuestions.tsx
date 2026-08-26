@@ -3,9 +3,11 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Check, X, FilePlus2 } from "lucide-react";
+import { Check, X, FilePlus2, Upload } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { normalizeAnswerExplanationForDisplay } from "@shared/questionFormat";
+import { QuestionImage } from "@/components/QuestionImage";
+import { questionMarkdownExplanationComponents } from "@/components/markdownComponents";
 
 const ADMIN_CODE_KEY = "adminCode";
 
@@ -15,6 +17,8 @@ type DraftQuestion = {
   answer: string;
   subsectionId: string;
   createdAt: string;
+  imageUrl?: string | null;
+  imageAlt?: string | null;
 };
 
 function getStoredCode(): string | null {
@@ -115,6 +119,46 @@ export default function AdminGeneratedQuestions() {
 
   const handleReject = (id: string) => {
     setRejectedIds((prev) => new Set(prev).add(id));
+  };
+
+  const handleAttachImage = async (id: string, file: File) => {
+    if (!adminCode) return;
+    setActingId(id);
+    try {
+      const form = new FormData();
+      form.append("file", file);
+      const uploadRes = await fetch("/api/admin/question-media", {
+        method: "POST",
+        headers: { "X-Admin-Code": adminCode },
+        credentials: "include",
+        body: form,
+      });
+      if (!uploadRes.ok) {
+        const data = await uploadRes.json().catch(() => ({}));
+        setError(data?.message ?? "Image upload failed");
+        return;
+      }
+      const { url } = await uploadRes.json();
+      const alt = file.name.replace(/\.[^.]+$/, "").replace(/[-_]+/g, " ").trim() || "Clinical image";
+      const patchRes = await fetch(`/api/questions/${id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Admin-Code": adminCode,
+        },
+        credentials: "include",
+        body: JSON.stringify({ imageUrl: url, imageAlt: alt }),
+      });
+      if (!patchRes.ok) {
+        setError("Uploaded file but failed to attach to question");
+        return;
+      }
+      setDrafts((prev) =>
+        prev.map((q) => (q.id === id ? { ...q, imageUrl: url, imageAlt: alt } : q))
+      );
+    } finally {
+      setActingId(null);
+    }
   };
 
   const handleGenerateMore = async () => {
@@ -264,28 +308,52 @@ export default function AdminGeneratedQuestions() {
                     <div className="prose prose-sm dark:prose-invert max-w-none mb-3">
                       <p className="whitespace-pre-wrap">{q?.question ?? ""}</p>
                     </div>
+                    {q?.imageUrl && (
+                      <QuestionImage
+                        src={q.imageUrl}
+                        alt={q.imageAlt ?? "Clinical image"}
+                        className="mb-3"
+                      />
+                    )}
                     <details className="mt-2">
                       <summary className="text-sm font-medium cursor-pointer text-muted-foreground hover:text-foreground">
                         Answer & Explanation
                       </summary>
                       <div className="mt-2 pl-2 border-l-2 border-muted">
                         <div className="prose prose-sm dark:prose-invert max-w-none">
-                          <ReactMarkdown
-                            components={{
-                              p: ({ children, ...props }) => (
-                                <p className="whitespace-pre-wrap my-1" {...props}>
-                                  {children}
-                                </p>
-                              ),
-                            }}
-                          >
+                          <ReactMarkdown components={questionMarkdownExplanationComponents}>
                             {normalizeAnswerExplanationForDisplay(q?.answer ?? "")}
                           </ReactMarkdown>
                         </div>
                       </div>
                     </details>
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex flex-wrap gap-2 items-center">
+                    <label className="inline-flex">
+                      <input
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp,image/gif"
+                        className="sr-only"
+                        disabled={actingId !== null}
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) void handleAttachImage(q?.id ?? "", file);
+                          e.target.value = "";
+                        }}
+                      />
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        disabled={actingId !== null}
+                        asChild
+                      >
+                        <span>
+                          <Upload className="w-4 h-4 mr-1" />
+                          {q?.imageUrl ? "Replace image" : "Attach image"}
+                        </span>
+                      </Button>
+                    </label>
                     <Button
                       size="sm"
                       variant="default"

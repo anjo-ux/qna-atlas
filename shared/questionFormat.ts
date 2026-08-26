@@ -209,8 +209,15 @@ const GENERATED_DISALLOWED_KEYWORDS = ["picture", "pictured", "photo"];
 /**
  * Additional content rules for source === 'generated' questions.
  * Fails if the stem contains "radiographic", or the full text contains image-related keywords (picture, pictured, photo).
+ * Pass hasImage: true when an image is attached — keywords are allowed.
  */
-export function contentRulesForGenerated(questionText: string): { pass: boolean; reason?: string } {
+export function contentRulesForGenerated(
+  questionText: string,
+  options?: { hasImage?: boolean },
+): { pass: boolean; reason?: string } {
+  if (options?.hasImage) {
+    return { pass: true };
+  }
   const stem = extractQuestionStem(questionText).toLowerCase();
   if (stem.includes("radiographic")) {
     return { pass: false, reason: 'Generated question stem must not contain "radiographic".' };

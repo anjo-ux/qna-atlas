@@ -31,6 +31,10 @@ dist-ssr
 # Bun
 bun.lockb
 
+# Question image staging (drop zone — published copies live in client/public/question-images/)
+server/data/question-images/*
+!server/data/question-images/.gitkeep
+
 # Large Anki decks (extract topics instead of committing)
 *.apkg
 attached_assets/*.apkg

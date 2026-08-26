@@ -86,6 +86,7 @@ let subscriptionResetDone = false;
 let userInstitutionalRedemptionsTableDone = false;
 let multiSpecialtyMigrationDone = false;
 let questionsFlaggedColumnDone = false;
+let questionsImageColumnsDone = false;
 let testSessionsSpecialtyColumnDone = false;
 let feedbackAgentTablesDone = false;
 let usersEmailUniquenessDone = false;
@@ -140,6 +141,8 @@ export type SectionQuestionDto = {
   category: string;
   subcategory: string;
   tags: string[];
+  imageUrl?: string | null;
+  imageAlt?: string | null;
 };
 
 export type SectionDto = {
@@ -1143,6 +1146,7 @@ export class DatabaseStorage implements IStorage {
   async getSections(specialtyId: SpecialtyId = DEFAULT_SPECIALTY_ID): Promise<SectionDto[]> {
     await this.ensureMultiSpecialtyMigration();
     await this.ensureQuestionsFlaggedColumn();
+    await this.ensureQuestionsImageColumns();
     const sectionRows = await db
       .select()
       .from(sections)
@@ -1156,8 +1160,8 @@ export class DatabaseStorage implements IStorage {
       // Only include visible, unflagged questions (applies to every specialty bank)
       if (q.visible === false) continue;
       if (q.flagged === true) continue;
-      if (extractQuestionStem(q.question).toLowerCase().includes("radiographic")) continue;
-      if (questionMcqChoicesReferenceSeeImage(q.question)) continue;
+      if (!q.imageUrl && extractQuestionStem(q.question).toLowerCase().includes("radiographic")) continue;
+      if (!q.imageUrl && questionMcqChoicesReferenceSeeImage(q.question)) continue;
       const list = bySub.get(q.subsectionId) ?? [];
       list.push(q);
       bySub.set(q.subsectionId, list);
@@ -1179,6 +1183,8 @@ export class DatabaseStorage implements IStorage {
           category: sec.id,
           subcategory: sub.id,
           tags: q.tags ?? [],
+          imageUrl: q.imageUrl ?? null,
+          imageAlt: q.imageAlt ?? null,
         })),
       }));
       return { id: sec.id, title: sec.title, subsections: subs };
@@ -1697,6 +1703,20 @@ export class DatabaseStorage implements IStorage {
     return !!updated;
   }
 
+  async updateQuestionImage(
+    id: string,
+    imageUrl: string | null,
+    imageAlt: string | null,
+  ): Promise<boolean> {
+    await this.ensureQuestionsImageColumns();
+    const [updated] = await db
+      .update(questions)
+      .set({ imageUrl, imageAlt, updatedAt: new Date() })
+      .where(eq(questions.id, id))
+      .returning({ id: questions.id });
+    return !!updated;
+  }
+
   async getQuestion(id: string) {
     const [row] = await db.select().from(questions).where(eq(questions.id, id));
     return row;
@@ -1733,7 +1753,16 @@ export class DatabaseStorage implements IStorage {
     };
   }
 
-  async getDraftGeneratedQuestions(): Promise<{ id: string; question: string; answer: string; subsectionId: string; createdAt: Date }[]> {
+  async getDraftGeneratedQuestions(): Promise<{
+    id: string;
+    question: string;
+    answer: string;
+    subsectionId: string;
+    createdAt: Date;
+    imageUrl: string | null;
+    imageAlt: string | null;
+  }[]> {
+    await this.ensureQuestionsImageColumns();
     const rows = await db
       .select({
         id: questions.id,
@@ -1741,6 +1770,8 @@ export class DatabaseStorage implements IStorage {
         answer: questions.answer,
         subsectionId: questions.subsectionId,
         createdAt: questions.createdAt,
+        imageUrl: questions.imageUrl,
+        imageAlt: questions.imageAlt,
       })
       .from(questions)
       .where(and(eq(questions.source, "generated"), eq(questions.visible, false)))
@@ -2032,6 +2063,14 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
+  /** Question image columns (drizzle/0021_question_images.sql). Idempotent. */
+  private async ensureQuestionsImageColumns(): Promise<void> {
+    if (questionsImageColumnsDone) return;
+    questionsImageColumnsDone = true;
+    await pool.query(`ALTER TABLE "questions" ADD COLUMN IF NOT EXISTS "image_url" varchar(512)`);
+    await pool.query(`ALTER TABLE "questions" ADD COLUMN IF NOT EXISTS "image_alt" varchar(256)`);
+  }
+
   private async ensureTestSessionsSpecialtyColumn(): Promise<void> {
     if (testSessionsSpecialtyColumnDone) return;
     testSessionsSpecialtyColumnDone = true;
@@ -2062,6 +2101,7 @@ export class DatabaseStorage implements IStorage {
     await this.ensureInstitutionalCodesTable();
     await this.ensureInstitutionalUserAccessColumnsMigration();
     await this.ensureQuestionsFlaggedColumn();
+    await this.ensureQuestionsImageColumns();
     await this.ensureTestSessionsSpecialtyColumn();
     await this.ensureInstitutionalCodeRedeemedAtMigration();
     await this.ensureUserInstitutionalRedemptionsTable();

@@ -7,7 +7,7 @@
 import { db } from "../db";
 import { questions } from "@shared/schema";
 import { validateQuestionFormat } from "@shared/questionFormat";
-import { inArray, or, ilike } from "drizzle-orm";
+import { inArray, or, ilike, and, isNull } from "drizzle-orm";
 
 async function main() {
   const all = await db.select().from(questions);
@@ -29,16 +29,19 @@ async function main() {
     .update(questions)
     .set({ visible: false, updatedAt: new Date() })
     .where(
-      or(
-        ilike(questions.question, "%picture%"),
-        ilike(questions.question, "%pictured%"),
-        ilike(questions.question, "%photo%"),
-        ilike(questions.question, "%shown%"),
-        ilike(questions.question, "%attached%"),
-        ilike(questions.question, "%CT imaging%"),
-        ilike(questions.question, "%findings are shown%"),
-        ilike(questions.question, "%findings are demonstrated%"),
-        ilike(questions.question, "%a congenital face abnormality%")
+      and(
+        isNull(questions.imageUrl),
+        or(
+          ilike(questions.question, "%picture%"),
+          ilike(questions.question, "%pictured%"),
+          ilike(questions.question, "%photo%"),
+          ilike(questions.question, "%shown%"),
+          ilike(questions.question, "%attached%"),
+          ilike(questions.question, "%CT imaging%"),
+          ilike(questions.question, "%findings are shown%"),
+          ilike(questions.question, "%findings are demonstrated%"),
+          ilike(questions.question, "%a congenital face abnormality%")
+        )
       )
     )
     .returning({ id: questions.id });

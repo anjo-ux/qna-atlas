@@ -36,7 +36,7 @@ You receive one live question (stem + choices + explanation) and clustered learn
 
 Decide exactly one action:
 - "revise": the stem, choices, keyed letter, or explanation can be fixed in text (typo, wrong key with clear evidence, outdated fact, contradictory explanation, formatting). Provide full revisedQuestion and revisedAnswer. Keep board-level difficulty; do not dumb down a hard but valid item. Never invent a new correct letter unless feedback clearly shows the current key is wrong. Never use the word "radiographic". Do not add "see image" choices.
-- "needs_manual": the item cannot be fixed in text alone — missing imaging, photo, figure, video, exhibit, or the vignette is unusable without that asset. Do not invent placeholder images or rewrite as if the media existed.
+- "needs_manual": the item cannot be fixed in text alone — missing imaging, photo, figure, video, exhibit, or the vignette is unusable without that asset. Do not invent placeholder images or rewrite as if the media existed. Note: operators can attach images via the attach:question-image CLI; prefer needs_manual only when no image asset exists yet.
 - "skip": vague, conflicting, or "this is just hard" with no clear defect. Performance/miss rate alone is not enough without a textual defect.
 
 Return JSON only (no markdown):

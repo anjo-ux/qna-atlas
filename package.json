@@ -37,7 +37,8 @@
     "approve:questions": "tsx server/scripts/approveGeneratedQuestions.ts",
     "rephrase:questions": "tsx server/scripts/rephraseQuestions.ts",
     "summarize:reports": "tsx server/scripts/summarizeQuestionReports.ts",
-    "reset:subscription-data": "tsx server/scripts/resetAllSubscriptionData.ts"
+    "reset:subscription-data": "tsx server/scripts/resetAllSubscriptionData.ts",
+    "attach:question-image": "tsx server/scripts/attachQuestionImage.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.78.0",
@@ -96,6 +97,7 @@
     "lucide-react": "^0.462.0",
     "mammoth": "^1.11.0",
     "memoizee": "^0.4.17",
+    "multer": "^2.2.0",
     "next-themes": "^0.3.0",
     "openai": "^6.9.1",
     "openid-client": "^6.8.1",
@@ -123,6 +125,7 @@
     "@eslint/js": "^9.32.0",
     "@tailwindcss/typography": "^0.5.16",
     "@types/express": "^5.0.2",
+    "@types/multer": "^2.2.0",
     "@types/node": "^22.16.5",
     "@types/react": "^18.3.23",
     "@types/react-dom": "^18.3.7",

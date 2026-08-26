@@ -83,10 +83,12 @@ async function main() {
       visible: boolean;
       reported: boolean;
       flagged: boolean;
+      image_url: string | null;
+      image_alt: string | null;
       created_at: Date;
       updated_at: Date;
     }>(
-      `SELECT id, subsection_id, question, answer, tags, source, visible, reported, flagged, created_at, updated_at
+      `SELECT id, subsection_id, question, answer, tags, source, visible, reported, flagged, image_url, image_alt, created_at, updated_at
        FROM questions WHERE subsection_id = ANY($1::varchar[]) ORDER BY id`,
       [subsectionIds]
     );
@@ -122,6 +124,8 @@ async function main() {
       visible: r.visible,
       reported: r.reported,
       flagged: r.flagged,
+      imageUrl: r.image_url,
+      imageAlt: r.image_alt,
       createdAt: new Date(r.created_at).toISOString(),
       updatedAt: new Date(r.updated_at).toISOString(),
     }));

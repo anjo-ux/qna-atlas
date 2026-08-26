@@ -279,6 +279,9 @@ export const questions = pgTable("questions", {
    * until an admin clears the flag (unflag). Independent of `reported`.
    */
   flagged: boolean("flagged").notNull().default(false),
+  /** Public URL path to a clinical image shown after the question stem (e.g. /question-images/foo.webp). */
+  imageUrl: varchar("image_url", { length: 512 }),
+  imageAlt: varchar("image_alt", { length: 256 }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 }, (table) => [

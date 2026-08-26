@@ -24,6 +24,8 @@ import ReactMarkdown from 'react-markdown';
 import { toast } from 'sonner';
 import { normalizeAnswerExplanationForDisplay } from '@shared/questionFormat';
 import { ThemeSwitcher } from '@/components/ui/theme-switcher';
+import { QuestionImage } from '@/components/QuestionImage';
+import { questionMarkdownComponents, questionMarkdownInlineComponents, questionMarkdownExplanationComponents } from '@/components/markdownComponents';
 
 interface SpacedRepetitionProps {
   onBack: () => void;
@@ -315,13 +317,19 @@ export function SpacedRepetitionPage({ onBack }: SpacedRepetitionProps) {
                 <div className="text-lg font-semibold text-foreground mb-4">
                   <ReactMarkdown
                     skipHtml
-                    components={{
-                      p: ({ node, ...props }) => <p className="whitespace-pre-wrap mb-2" {...props} />,
-                    }}
+                    components={questionMarkdownComponents}
                   >
                     {parsed.text}
                   </ReactMarkdown>
                 </div>
+
+                {current.question.imageUrl && (
+                  <QuestionImage
+                    src={current.question.imageUrl}
+                    alt={current.question.imageAlt ?? 'Clinical image'}
+                    className="mb-4"
+                  />
+                )}
 
                 {hasChoices ? (
                   <div className="mt-4 w-full space-y-2.5">
@@ -401,9 +409,7 @@ export function SpacedRepetitionPage({ onBack }: SpacedRepetitionProps) {
                             >
                               <ReactMarkdown
                                 skipHtml
-                                components={{
-                                  p: ({ node, children, ...props }) => <span {...props}>{children}</span>,
-                                }}
+                                components={questionMarkdownInlineComponents}
                               >
                                 {choice.text}
                               </ReactMarkdown>
@@ -505,11 +511,7 @@ export function SpacedRepetitionPage({ onBack }: SpacedRepetitionProps) {
                         <div className="text-sm leading-relaxed text-muted-foreground">
                           <ReactMarkdown
                             skipHtml
-                            components={{
-                              p: ({ node, ...props }) => (
-                                <p className="whitespace-pre-wrap [&:not(:first-child)]:mt-2" {...props} />
-                              ),
-                            }}
+                            components={questionMarkdownExplanationComponents}
                           >
                             {normalizeAnswerExplanationForDisplay(current.question?.answer ?? '')}
                           </ReactMarkdown>

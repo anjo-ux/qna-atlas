@@ -19,7 +19,7 @@ import { type SpecialtyId } from "@shared/specialties";
  */
 export type Queryable = Pool | PoolClient;
 
-export const CONTENT_FILE_FORMAT = 2;
+export const CONTENT_FILE_FORMAT = 3;
 
 export type ContentSection = {
   id: string;
@@ -45,6 +45,8 @@ export type ContentQuestion = {
   visible: boolean;
   reported: boolean;
   flagged: boolean;
+  imageUrl?: string | null;
+  imageAlt?: string | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -119,6 +121,10 @@ export async function applyContentSchemaGuards(target: Queryable): Promise<void>
     CREATE INDEX IF NOT EXISTS idx_questions_flagged ON questions (flagged);
   `);
   await target.query(`
+    ALTER TABLE questions ADD COLUMN IF NOT EXISTS image_url varchar(512);
+    ALTER TABLE questions ADD COLUMN IF NOT EXISTS image_alt varchar(256);
+  `);
+  await target.query(`
     CREATE TABLE IF NOT EXISTS content_promotions (
       specialty_id varchar(32) PRIMARY KEY,
       content_hash varchar(64) NOT NULL,
@@ -143,7 +149,7 @@ export function computeContentHash(parts: {
     hash.update(`U:${s.id}:${s.sectionId}:${s.title}:${s.sortOrder}\n`);
   }
   for (const q of [...parts.questions].sort((a, b) => a.id.localeCompare(b.id))) {
-    hash.update(`Q:${q.id}:${q.subsectionId}:${q.question}:${q.answer}:${q.visible}:${q.flagged}\n`);
+    hash.update(`Q:${q.id}:${q.subsectionId}:${q.question}:${q.answer}:${q.visible}:${q.flagged}:${q.imageUrl ?? ""}:${q.imageAlt ?? ""}\n`);
   }
   return hash.digest("hex");
 }
@@ -197,7 +203,7 @@ export type ImportCounts = {
   questionsSkipped: number;
 };
 
-/** Rows per multi-row insert. 11 columns x 100 rows stays far below the 65535 parameter cap. */
+/** Rows per multi-row insert. 13 columns x 100 rows stays far below the 65535 parameter cap. */
 const BATCH_SIZE = 100;
 
 function chunk<T>(items: T[], size: number): T[][] {
@@ -264,7 +270,7 @@ export async function importSpecialtyContent(
   for (const batch of chunk(file.questions, BATCH_SIZE)) {
     const values: unknown[] = [];
     const tuples = batch.map((q, row) => {
-      const base = row * 11;
+      const base = row * 13;
       values.push(
         q.id,
         q.subsectionId,
@@ -275,10 +281,12 @@ export async function importSpecialtyContent(
         q.visible,
         q.reported,
         q.flagged,
+        q.imageUrl ?? null,
+        q.imageAlt ?? null,
         q.createdAt,
         q.updatedAt
       );
-      return `($${base + 1}, $${base + 2}, $${base + 3}, $${base + 4}, $${base + 5}::jsonb, $${base + 6}, $${base + 7}, $${base + 8}, $${base + 9}, $${base + 10}, $${base + 11})`;
+      return `($${base + 1}, $${base + 2}, $${base + 3}, $${base + 4}, $${base + 5}::jsonb, $${base + 6}, $${base + 7}, $${base + 8}, $${base + 9}, $${base + 10}, $${base + 11}, $${base + 12}, $${base + 13})`;
     });
 
     const conflict =
@@ -292,13 +300,19 @@ export async function importSpecialtyContent(
              visible = EXCLUDED.visible,
              reported = EXCLUDED.reported,
              flagged = EXCLUDED.flagged,
+             image_url = EXCLUDED.image_url,
+             image_alt = EXCLUDED.image_alt,
              updated_at = EXCLUDED.updated_at`
-        : "DO NOTHING";
+        : `DO UPDATE SET
+             image_url = EXCLUDED.image_url,
+             image_alt = EXCLUDED.image_alt,
+             updated_at = EXCLUDED.updated_at
+           WHERE EXCLUDED.image_url IS NOT NULL OR EXCLUDED.image_alt IS NOT NULL`;
 
     const written = await target.query(
       `INSERT INTO questions (
          id, subsection_id, question, answer, tags, source,
-         visible, reported, flagged, created_at, updated_at
+         visible, reported, flagged, image_url, image_alt, created_at, updated_at
        ) VALUES ${tuples.join(", ")}
        ON CONFLICT (id) ${conflict}
        RETURNING id`,

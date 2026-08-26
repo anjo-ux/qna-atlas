@@ -26,6 +26,12 @@ import { queryClient } from '@/lib/queryClient';
 import ReactMarkdown from 'react-markdown';
 import { ReportQuestionDialog } from '@/components/ReportQuestionDialog';
 import { normalizeAnswerExplanationForDisplay } from '@shared/questionFormat';
+import { QuestionImage } from '@/components/QuestionImage';
+import {
+  questionMarkdownComponents,
+  questionMarkdownInlineComponents,
+  questionMarkdownExplanationComponents,
+} from '@/components/markdownComponents';
 
 interface QuestionCardProps {
   question: Question;
@@ -432,13 +438,19 @@ export function QuestionCard({
             <div className="text-sm md:text-base leading-relaxed text-foreground mb-3 md:mb-4">
               <ReactMarkdown
                 skipHtml
-                components={{
-                  p: ({ node, ...props }) => <p className="whitespace-pre-wrap" {...props} />,
-                }}
+                components={questionMarkdownComponents}
               >
                 {parsed.text}
               </ReactMarkdown>
             </div>
+
+            {question.imageUrl && (
+              <QuestionImage
+                src={question.imageUrl}
+                alt={question.imageAlt ?? 'Clinical image'}
+                className="mb-4"
+              />
+            )}
             
             {parsed.choices.length > 0 && (
               <RadioGroup value={selectedAnswer || ''} onValueChange={handleAnswerChange} className="w-full">
@@ -510,9 +522,7 @@ export function QuestionCard({
                           >
                             <ReactMarkdown
                               skipHtml
-                              components={{
-                                p: ({ node, children, ...props }) => <span {...props}>{children}</span>,
-                              }}
+                              components={questionMarkdownInlineComponents}
                             >
                               {choice.text}
                             </ReactMarkdown>
@@ -621,11 +631,7 @@ export function QuestionCard({
                 <div className="text-sm leading-relaxed text-muted-foreground">
                   <ReactMarkdown
                     skipHtml
-                    components={{
-                      p: ({ node, ...props }) => (
-                        <p className="whitespace-pre-wrap [&:not(:first-child)]:mt-2" {...props} />
-                      ),
-                    }}
+                    components={questionMarkdownExplanationComponents}
                   >
                     {normalizeAnswerExplanationForDisplay(question.answer)}
                   </ReactMarkdown>

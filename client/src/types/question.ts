@@ -5,6 +5,8 @@ export interface Question {
   category: string;
   subcategory: string;
   tags: string[];
+  imageUrl?: string | null;
+  imageAlt?: string | null;
 }
 
 export interface Section {
