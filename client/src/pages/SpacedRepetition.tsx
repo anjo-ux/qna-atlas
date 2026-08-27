@@ -130,6 +130,17 @@ export function SpacedRepetitionPage({ onBack }: SpacedRepetitionProps) {
     setSelectedConfidence(null);
   }, [current?.question.id]);
 
+  // Keep index in range when the queue shrinks after a review is saved.
+  useEffect(() => {
+    if (filtered.length === 0) {
+      if (currentIndex !== 0) setCurrentIndex(0);
+      return;
+    }
+    if (currentIndex >= filtered.length) {
+      setCurrentIndex(filtered.length - 1);
+    }
+  }, [filtered.length, currentIndex]);
+
   useLayoutEffect(() => {
     if (scrollTopToRestoreRef.current == null) return;
     const y = scrollTopToRestoreRef.current;
@@ -177,6 +188,8 @@ export function SpacedRepetitionPage({ onBack }: SpacedRepetitionProps) {
   const commitReviewAndAdvance = async () => {
     if (!current || selectedConfidence === null || !answerChosenForCard) return;
 
+    const wasLastCard = currentIndex >= filtered.length - 1;
+
     try {
       if (hasChoices && selectedAnswer && correctAnswer) {
         recordResponse({
@@ -196,19 +209,16 @@ export function SpacedRepetitionPage({ onBack }: SpacedRepetitionProps) {
         selectedConfidence
       );
 
+      // Reviewed cards leave the due queue after update. Keep the same index so the
+      // next item slides into place — incrementing here skips a card or shows blank.
       setSelectedConfidence(null);
+      setFlipped(false);
+      setSelectedAnswer(null);
+      setShowOutcomeOnFront(false);
 
-      if (currentIndex < filtered.length - 1) {
-        setCurrentIndex(currentIndex + 1);
-        setFlipped(false);
-        setSelectedAnswer(null);
-        setShowOutcomeOnFront(false);
-      } else {
+      if (wasLastCard) {
         toast.success('Review complete!');
         setCurrentIndex(0);
-        setFlipped(false);
-        setSelectedAnswer(null);
-        setShowOutcomeOnFront(false);
       }
     } catch (error) {
       toast.error('Failed to save review.');
@@ -223,8 +233,8 @@ export function SpacedRepetitionPage({ onBack }: SpacedRepetitionProps) {
   return (
     <div className="flex h-full min-h-0 w-full flex-col overflow-hidden bg-gradient-to-br from-purple-400/20 via-lavender-300/20 to-pink-300/20">
       <div className="p-4 md:p-6 border-b border-border/40 backdrop-blur-sm shrink-0">
-        <div className="mb-4 flex flex-nowrap items-center justify-between gap-2 sm:gap-4">
-          <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
+        <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+          <div className="flex min-w-0 items-center gap-2 sm:gap-3">
             <Button
               variant="ghost"
               size="icon"
@@ -236,19 +246,19 @@ export function SpacedRepetitionPage({ onBack }: SpacedRepetitionProps) {
             </Button>
             <div className="flex min-w-0 items-center gap-1.5 sm:gap-2">
               <Lightbulb className="h-5 w-5 shrink-0 text-primary sm:h-6 sm:w-6" />
-              <h1 className="whitespace-nowrap text-base font-bold leading-tight text-foreground sm:text-lg md:text-2xl lg:text-3xl">
+              <h1 className="truncate text-base font-bold leading-tight text-foreground sm:text-lg md:text-2xl lg:text-3xl">
                 Spaced Repetition
               </h1>
             </div>
           </div>
-          <div className="grid shrink-0 grid-cols-[auto_auto] items-center gap-x-5 gap-y-0">
-            <div className="row-start-1">
-              <ThemeSwitcher />
+          <div className="flex items-center justify-between gap-4 sm:justify-end sm:gap-5">
+            <ThemeSwitcher />
+            <div className="text-right">
+              <p className="text-xs text-muted-foreground sm:text-sm">Remaining Questions</p>
+              <p className="text-xl font-bold text-primary sm:text-2xl">
+                {sections.length > 0 ? filtered.length : incorrectIds.size}
+              </p>
             </div>
-            <p className="row-start-1 text-right text-xs text-muted-foreground sm:text-sm">Remaining Questions</p>
-            <p className="col-start-2 row-start-2 text-right text-xl font-bold text-primary sm:text-2xl">
-              {sections.length > 0 ? filtered.length : incorrectIds.size}
-            </p>
           </div>
         </div>
         <Input

@@ -1,6 +1,40 @@
 import { emailIsConfigured, sendEmail } from "./email";
+import {
+  extractCorrectAnswer,
+  extractMcqChoices,
+  extractQuestionStem,
+} from "@shared/questionFormat";
+import type { SpecialtyId } from "@shared/specialties";
 
 export type SlackNotifyKind = "question-report" | "support-form";
+
+export function databaseLabelForSpecialty(specialtyId?: SpecialtyId | null): string {
+  if (specialtyId === "ortho") return "Ortho database";
+  if (specialtyId === "prs") return "PRS database";
+  return "Unknown";
+}
+
+/** Stem, choices, and keyed answer in the same shape Slack question-report messages use. */
+export function slackFieldsFromQuestion(questionText: string, answerText: string): {
+  stem: string | null;
+  choices: { letter: string; text: string }[];
+  correctAnswer: string | null;
+} {
+  const choices = extractMcqChoices(questionText);
+  const correctLetter = extractCorrectAnswer(answerText);
+  const correctChoice = correctLetter
+    ? choices.find((c) => c.letter === correctLetter)
+    : undefined;
+  return {
+    stem: extractQuestionStem(questionText) || null,
+    choices,
+    correctAnswer: correctLetter
+      ? correctChoice
+        ? `${correctLetter}) ${correctChoice.text}`
+        : correctLetter
+      : null,
+  };
+}
 
 function slackEscape(text: string): string {
   return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");

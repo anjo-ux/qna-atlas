@@ -107,7 +107,7 @@ export default function Index() {
   const [showPreviewWizard, setShowPreviewWizard] = useState(false);
   const [isMobileLayout, setIsMobileLayout] = useState(window.innerWidth < 1024);
   const { bookmarks } = useBookmarks();
-  const { incorrectCount } = useSpacedRepetition();
+  const { reviewableCount } = useSpacedRepetition();
   
   // Track question element refs (scoped to current subsection)
   const questionRefsMap = useRef<Map<string, HTMLDivElement>>(new Map());
@@ -671,9 +671,9 @@ export default function Index() {
                 >
                   <Lightbulb className="h-4 w-4" />
                   <span className="hidden md:inline">Review</span>
-                  {incorrectCount > 0 && (
+                  {reviewableCount > 0 && (
                     <span className="absolute -top-2 -right-2 bg-primary text-primary-foreground text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
-                      {incorrectCount > 99 ? '99+' : incorrectCount}
+                      {reviewableCount > 99 ? '99+' : reviewableCount}
                     </span>
                   )}
                 </Button>

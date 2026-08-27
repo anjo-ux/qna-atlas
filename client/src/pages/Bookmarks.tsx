@@ -99,27 +99,35 @@ export function BookmarksPage({ onBack }: BookmarksProps) {
     <div className="h-full w-full flex flex-col overflow-hidden">
       {/* Header */}
       <div className="border-b border-border bg-accent/5 p-4 flex-shrink-0">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+          <div className="flex min-w-0 items-center gap-2 sm:gap-3">
             <Button
               variant="ghost"
               size="icon"
               onClick={onBack}
               data-testid="button-back-bookmarks"
+              className="shrink-0"
             >
               <ArrowLeft className="h-5 w-5" />
             </Button>
-            <div>
-              <h1 className="text-2xl font-bold flex items-center gap-2">
-                <Bookmark className="h-6 w-6" />
+            <div className="flex min-w-0 items-center gap-1.5 sm:gap-2">
+              <Bookmark className="h-5 w-5 shrink-0 sm:h-6 sm:w-6" />
+              <h1 className="truncate text-base font-bold leading-tight sm:text-lg md:text-2xl">
                 Bookmarked Questions
               </h1>
-              <p className="text-sm text-muted-foreground mt-1">
-                {bookmarkedQuestions.length} Question{bookmarkedQuestions.length !== 1 ? 's' : ''}
+            </div>
+          </div>
+          <div className="flex items-center justify-between gap-4 sm:justify-end sm:gap-5">
+            <ThemeSwitcher />
+            <div className="text-right">
+              <p className="text-xs text-muted-foreground sm:text-sm">
+                {bookmarkedQuestions.length === 1 ? 'Question' : 'Questions'}
+              </p>
+              <p className="text-xl font-bold text-primary sm:text-2xl">
+                {bookmarkedQuestions.length}
               </p>
             </div>
           </div>
-          <ThemeSwitcher />
         </div>
       </div>
 

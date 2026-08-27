@@ -1,4 +1,5 @@
 import { useQuery, useMutation } from '@tanstack/react-query';
+import { useMemo } from 'react';
 import { queryClient, apiRequest, withSpecialtyQuery } from '@/lib/queryClient';
 import { useSpecialty } from '@/hooks/useSpecialty';
 import type { SpacedRepetition } from '@shared/schema';
@@ -32,6 +33,13 @@ export function useSpacedRepetition() {
   const reviewedQuestionIds = Array.isArray(data) ? [] : (data?.reviewedQuestionIds ?? []);
   const incorrectQuestionIds = Array.isArray(data) ? [] : (data?.incorrectQuestionIds ?? []);
 
+  /** Incorrect items that are due now or have never been reviewed in SR (matches review queue). */
+  const reviewableCount = useMemo(() => {
+    const dueIds = new Set(dueQuestions.map((d) => d.questionId));
+    const reviewedIds = new Set(reviewedQuestionIds);
+    return incorrectQuestionIds.filter((id) => dueIds.has(id) || !reviewedIds.has(id)).length;
+  }, [dueQuestions, reviewedQuestionIds, incorrectQuestionIds]);
+
   // Get SR data for a specific question
   const getSRData = async (questionId: string): Promise<SpacedRepetition> => {
     return await apiRequest(`/api/spaced-repetition/${questionId}`, { method: 'GET' });
@@ -50,8 +58,8 @@ export function useSpacedRepetition() {
         body: JSON.stringify(data),
       });
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/spaced-repetition/due'] });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['/api/spaced-repetition/due'] });
     },
   });
 
@@ -61,6 +69,7 @@ export function useSpacedRepetition() {
     incorrectQuestionIds,
     dueCount: dueQuestions.length,
     incorrectCount: incorrectQuestionIds.length,
+    reviewableCount,
     isLoading,
     getSRData,
     updateSR: (questionId: string, sectionId: string, subsectionId: string, quality: number) =>

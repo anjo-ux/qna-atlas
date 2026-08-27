@@ -37,6 +37,7 @@
     "approve:questions": "tsx server/scripts/approveGeneratedQuestions.ts",
     "rephrase:questions": "tsx server/scripts/rephraseQuestions.ts",
     "summarize:reports": "tsx server/scripts/summarizeQuestionReports.ts",
+    "backfill:flagged-slack": "tsx server/scripts/backfillFlaggedQuestionsToSlack.ts",
     "reset:subscription-data": "tsx server/scripts/resetAllSubscriptionData.ts",
     "attach:question-image": "tsx server/scripts/attachQuestionImage.ts"
   },

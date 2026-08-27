@@ -514,6 +514,15 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
       window.location.href = '/api/auth';
       return;
     }
+
+    const isTimedExam = Boolean(currentSession?.timerEnabled && !isPreview);
+
+    // Timed mock: after answers are submitted/revealed, Finish Test opens the score review page.
+    if (isTimedExam && isReviewMode) {
+      setTimedTestRemainingSeconds(null);
+      setTestState('results');
+      return;
+    }
     
     // Sync all test responses to the general question pool (overwrites existing answers)
     Object.values(responses).forEach(response => {
@@ -567,7 +576,16 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
       completeSession(currentSession.id);
     }
     setTimedTestRemainingSeconds(null);
-    setTestState('results');
+
+    // Timed mock: Submit Answers → question snapshot with right/wrong + reasoning.
+    // Untimed: Finish Test → score summary directly.
+    if (isTimedExam) {
+      setIsReviewMode(true);
+      setCurrentQuestionIndex(0);
+      setTestState('testing');
+    } else {
+      setTestState('results');
+    }
     } finally {
       finishTestInFlightRef.current = false;
     }
@@ -661,6 +679,10 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
     const response = responses[question.id];
     
     if (!response) return 'unanswered';
+    // Timed exams conceal correctness until submit/review
+    if (currentSession?.timerEnabled && !isPreview && !isReviewMode) {
+      return 'answered';
+    }
     return response.isCorrect ? 'correct' : 'incorrect';
   };
 
@@ -1218,6 +1240,8 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
         !isReviewMode &&
         !isPreview
     );
+    const isTimedExamTaking = Boolean(currentSession?.timerEnabled && !isPreview && !isReviewMode);
+    const isTimedExamSnapshot = Boolean(currentSession?.timerEnabled && !isPreview && isReviewMode);
 
     const renderTimedCountdown = (compact: boolean) => {
       if (!showTimedChrome) return null;
@@ -1300,6 +1324,7 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
                         "h-8 md:h-10 rounded flex items-center justify-center text-xs font-semibold transition-all w-full",
                         isCurrent && "ring-2 ring-primary ring-offset-1 md:ring-offset-2",
                         status === 'unanswered' && "bg-muted hover:bg-muted/80 text-muted-foreground",
+                        status === 'answered' && "bg-amber-100 text-amber-900 hover:bg-amber-200/90 dark:bg-amber-900/40 dark:text-amber-100 dark:hover:bg-amber-900/55",
                         status === 'correct' && "bg-green-500/20 text-green-700 dark:text-green-400 hover:bg-green-500/30",
                         status === 'incorrect' && "bg-red-500/20 text-red-700 dark:text-red-400 hover:bg-red-500/30"
                       )}
@@ -1318,18 +1343,33 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
           </div>
 
           <div className={cn("p-3 border-t border-border space-y-2 text-xs", isPreview && "pb-[3.75rem]")}>
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 rounded bg-green-500/20"></div>
-              <span className="text-muted-foreground">Correct</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 rounded bg-red-500/20"></div>
-              <span className="text-muted-foreground">Incorrect</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 rounded bg-muted"></div>
-              <span className="text-muted-foreground">Unanswered</span>
-            </div>
+            {isTimedExamTaking ? (
+              <>
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 rounded bg-amber-100 dark:bg-amber-900/40"></div>
+                  <span className="text-muted-foreground">Answered</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 rounded bg-muted"></div>
+                  <span className="text-muted-foreground">Unanswered</span>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 rounded bg-green-500/20"></div>
+                  <span className="text-muted-foreground">Correct</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 rounded bg-red-500/20"></div>
+                  <span className="text-muted-foreground">Incorrect</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 rounded bg-muted"></div>
+                  <span className="text-muted-foreground">Unanswered</span>
+                </div>
+              </>
+            )}
           </div>
         </div>
 
@@ -1342,38 +1382,26 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
               'p-3 md:p-4'
             )}
           >
-            <div
-              className={cn(
-                'flex w-full gap-2 md:gap-3',
-                showTimedChrome
-                  ? 'max-md:items-start max-md:justify-between md:items-center'
-                  : 'items-center justify-between'
-              )}
-            >
-              <div className={cn('min-w-0', showTimedChrome ? 'max-md:flex-1 md:flex-1 md:basis-0' : 'flex-1')}>
+            <div className="flex w-full items-center justify-between gap-2 md:gap-3">
+              <div className="min-w-0 flex-1">
                 <h1 className="text-xl md:text-2xl font-bold truncate">Test Mode</h1>
                 <p className="text-xs md:text-sm text-muted-foreground">
                   Question {currentQuestionIndex + 1} / {testQuestions.length}
                 </p>
               </div>
-              {showTimedChrome && (
-                <div
-                  role="timer"
-                  aria-live="polite"
-                  aria-atomic="true"
-                  aria-label={`Time remaining: ${formatCountdown(timedTestRemainingSeconds)}`}
-                  className="hidden shrink-0 px-1 text-center md:block"
-                >
-                  {renderTimedCountdown(false)}
-                </div>
-              )}
-              <div
-                className={cn(
-                  'flex min-w-0 items-center justify-end gap-1 md:gap-2',
-                  showTimedChrome ? 'max-md:shrink-0 md:flex-1 md:basis-0' : 'shrink-0'
+              <div className="flex shrink-0 items-center justify-end gap-1 md:gap-2">
+                {showTimedChrome && (
+                  <div
+                    role="timer"
+                    aria-live="polite"
+                    aria-atomic="true"
+                    aria-label={`Time remaining: ${formatCountdown(timedTestRemainingSeconds)}`}
+                    className="mr-1 hidden shrink-0 whitespace-nowrap px-1 text-right md:block"
+                  >
+                    {renderTimedCountdown(false)}
+                  </div>
                 )}
-              >
-                <div className="hidden md:block">
+                <div className="hidden shrink-0 md:block">
                   <ThemeSwitcher />
                 </div>
                 <Button 
@@ -1414,8 +1442,22 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
                   )}
                 </Button>
                 <Button data-testid="button-finish-test" onClick={handleFinishTest} variant="default" size="sm">
-                  <span className="hidden md:inline">Finish Test</span>
-                  <span className="md:hidden">Done</span>
+                  {isTimedExamTaking ? (
+                    <>
+                      <span className="hidden md:inline">Submit Answers</span>
+                      <span className="md:hidden">Submit</span>
+                    </>
+                  ) : isTimedExamSnapshot ? (
+                    <>
+                      <span className="hidden md:inline">Finish Test</span>
+                      <span className="md:hidden">Finish</span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="hidden md:inline">Finish Test</span>
+                      <span className="md:hidden">Done</span>
+                    </>
+                  )}
                 </Button>
               </div>
             </div>
@@ -1438,7 +1480,7 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
                 const { sectionId, subsectionId } = findSectionAndSubsectionForQuestion(currentQuestion.id);
                 return (
                   <QuestionCard
-                    key={`${currentQuestion.id}-${currentQuestionIndex}`}
+                    key={`${currentQuestion.id}-${currentQuestionIndex}-${isReviewMode ? 'review' : 'take'}`}
                     question={currentQuestion}
                     index={currentQuestionIndex}
                     sectionId={sectionId}
@@ -1446,6 +1488,7 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
                     savedResponse={responses[currentQuestion.id]}
                     onAnswerSubmit={handleAnswerSubmit}
                     isTestMode={true}
+                    concealResults={isTimedExamTaking}
                   />
                 );
               })()}

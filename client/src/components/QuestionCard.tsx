@@ -41,6 +41,8 @@ interface QuestionCardProps {
   savedResponse?: QuestionResponse;
   onAnswerSubmit: (questionId: string, selectedAnswer: string, correctAnswer: string, isCorrect: boolean) => void;
   isTestMode?: boolean;
+  /** Timed mock exams: confirm locks the choice without revealing correctness until exam submit/review. */
+  concealResults?: boolean;
   isReadOnly?: boolean;
   isFlagged?: boolean;
   onToggleFlag?: (questionId: string) => void;
@@ -59,6 +61,7 @@ export function QuestionCard({
   savedResponse,
   onAnswerSubmit,
   isTestMode = false,
+  concealResults = false,
   isReadOnly = false,
   isFlagged = false,
   onToggleFlag
@@ -66,7 +69,8 @@ export function QuestionCard({
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(
     savedResponse?.selectedAnswer?.trim().toUpperCase() || null
   );
-  const [showExplanation, setShowExplanation] = useState(!!savedResponse);
+  const [showExplanation, setShowExplanation] = useState(!!savedResponse && !concealResults);
+  const [answerConfirmed, setAnswerConfirmed] = useState(!!savedResponse);
   const [explanationExpanded, setExplanationExpanded] = useState(true);
   const [isEraserMode, setIsEraserMode] = useState(false);
   const [crossedOutChoices, setCrossedOutChoices] = useState<Set<string>>(new Set());
@@ -216,20 +220,25 @@ export function QuestionCard({
     if (savedResponse) {
       const normalized = savedResponse.selectedAnswer?.trim().toUpperCase();
       setSelectedAnswer(normalized || null);
-      setShowExplanation(true);
+      setAnswerConfirmed(true);
+      setShowExplanation(!concealResults);
       setExplanationExpanded(true);
     } else {
       setSelectedAnswer(null);
+      setAnswerConfirmed(false);
       setShowExplanation(false);
       setExplanationExpanded(true);
     }
-  }, [savedResponse, question.id]);
+  }, [savedResponse, question.id, concealResults]);
 
   const handleAnswerClick = () => {
-    if (selectedAnswer && !showExplanation && correctAnswer) {
+    if (selectedAnswer && !answerConfirmed && correctAnswer) {
       const correct = selectedAnswer === correctAnswer;
-      setShowExplanation(true);
-      setExplanationExpanded(true);
+      setAnswerConfirmed(true);
+      if (!concealResults) {
+        setShowExplanation(true);
+        setExplanationExpanded(true);
+      }
       onAnswerSubmit(question.id, selectedAnswer, correctAnswer, correct);
     }
   };
@@ -245,10 +254,17 @@ export function QuestionCard({
       newSet.delete(normalized);
       return newSet;
     });
-    // Also immediately submit if we're in test mode and have a saved response (user is changing their answer)
-    if (isTestMode && savedResponse) {
+    // Timed mock: after first confirm, switching choices immediately updates the saved answer
+    if (concealResults && answerConfirmed && correctAnswer) {
+      const correct = normalized === correctAnswer;
+      onAnswerSubmit(question.id, normalized, correctAnswer, correct);
+      return;
+    }
+    // In non-concealed test mode, changing a previously saved answer re-submits and reveals
+    if (isTestMode && savedResponse && !concealResults) {
       const correct = normalized === correctAnswer;
       onAnswerSubmit(question.id, normalized, correctAnswer || '', correct);
+      setAnswerConfirmed(true);
       setShowExplanation(true);
       setExplanationExpanded(true);
     }
@@ -465,7 +481,10 @@ export function QuestionCard({
 
                     const isSelectedPending = !showResult && selectedAnswer === choice.letter;
                     const isCrossedOut = crossedOutChoices.has(choice.letter);
-                    const canSelect = !showExplanation;
+                    const choicesLocked = answerConfirmed && !concealResults;
+                    const canSelect = !choicesLocked;
+                    const showConfirmedCheck =
+                      concealResults && answerConfirmed && !showExplanation && isThisChoice;
 
                     return (
                       <div
@@ -485,7 +504,7 @@ export function QuestionCard({
                         <RadioGroupItem
                           value={choice.letter}
                           id={`${question.id}-${choice.letter}`}
-                          disabled={showExplanation}
+                          disabled={choicesLocked}
                           className="sr-only"
                         />
                         <Label
@@ -527,6 +546,13 @@ export function QuestionCard({
                               {choice.text}
                             </ReactMarkdown>
                           </div>
+                          {showConfirmedCheck && (
+                            <Check
+                              className="h-5 w-5 shrink-0 text-primary"
+                              strokeWidth={2.5}
+                              aria-label="Selected answer"
+                            />
+                          )}
                           {showRedRow && (
                             <CircleX
                               className="h-5 w-5 shrink-0 text-red-500/90 dark:text-red-400/85"
@@ -549,14 +575,14 @@ export function QuestionCard({
               </RadioGroup>
             )}
             
-            {selectedAnswer && !showExplanation && (
+            {selectedAnswer && !answerConfirmed && (
               <Button
                 onClick={handleAnswerClick}
                 className="mt-4"
                 size="sm"
-                data-testid="button-show-answer"
+                data-testid={concealResults ? "button-confirm-answer" : "button-show-answer"}
               >
-                Show Answer
+                {concealResults ? "Confirm Answer" : "Show Answer"}
               </Button>
             )}
         </div>
