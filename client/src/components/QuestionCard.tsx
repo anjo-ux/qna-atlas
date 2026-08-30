@@ -13,7 +13,6 @@ import { useTextHighlight } from '@/hooks/useTextHighlight';
 import { QuestionResponse } from '@/hooks/useQuestionStats';
 import {
   AlertCircle,
-  Bookmark,
   Check,
   ChevronDown,
   ChevronUp,
@@ -22,9 +21,9 @@ import {
   Lightbulb,
   X,
 } from 'lucide-react';
-import { queryClient } from '@/lib/queryClient';
 import ReactMarkdown from 'react-markdown';
 import { ReportQuestionDialog } from '@/components/ReportQuestionDialog';
+import { BookmarkIconButton } from '@/components/ui/bookmark-icon-button';
 import { normalizeAnswerExplanationForDisplay } from '@shared/questionFormat';
 import { QuestionImage } from '@/components/QuestionImage';
 import {
@@ -381,39 +380,16 @@ export function QuestionCard({
               >
                 <AlertCircle className="h-5 w-5" />
               </Button>
-              <Button
-                size="icon"
-                variant="ghost"
-                onClick={() => {
-                  console.log('[QuestionCard] Bookmark button clicked for question:', {
-                    id: question.id,
-                    sectionId,
-                    subsectionId,
-                  });
-                  (async () => {
-                    try {
-                      console.log('[QuestionCard] Bookmark button handler: attempting to toggle bookmark');
-                      await toggleBookmark(question.id, sectionId, subsectionId);
-                      console.log('[QuestionCard] Bookmark toggle completed successfully');
-                      // Force a fresh fetch of bookmarks to ensure all views update
-                      console.log('[QuestionCard] Force refetching bookmarks...');
-                      await queryClient.refetchQueries({ queryKey: ['/api/bookmarks'] });
-                      console.log('[QuestionCard] Bookmarks refetch completed');
-                    } catch (error) {
-                      console.error('[QuestionCard] Bookmark toggle error:', error);
-                    }
-                  })();
-                }}
+              <BookmarkIconButton
+                isSaved={questionIsBookmarked}
                 disabled={isBookmarkPending}
                 data-testid={`button-bookmark-${question.id}`}
-                className={cn(
-                  "flex-shrink-0 transition-colors",
-                  questionIsBookmarked && "text-accent"
-                )}
                 title="Bookmark"
-              >
-                <Bookmark className={cn("h-5 w-5", questionIsBookmarked && "fill-accent")} />
-              </Button>
+                iconSize={20}
+                onClick={() => {
+                  void toggleBookmark(question.id, sectionId, subsectionId);
+                }}
+              />
             </div>
           </div>
           <div className="min-w-0 w-full">

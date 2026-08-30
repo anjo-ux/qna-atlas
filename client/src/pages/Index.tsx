@@ -25,7 +25,6 @@ import {
   Home,
   FileText,
   Settings,
-  Bookmark,
   Lightbulb,
   Mic,
   Menu,
@@ -33,6 +32,7 @@ import {
   PanelLeftOpen,
   PanelLeftClose,
 } from 'lucide-react';
+import { BookmarkAnimatedIcon } from '@/components/ui/bookmark-icon-button';
 import { Button } from '@/components/ui/button';
 import { useQuestionStats } from '@/hooks/useQuestionStats';
 import { useHighlights } from '@/hooks/useHighlights';
@@ -653,7 +653,7 @@ export default function Index() {
                   className="gap-2 relative"
                   data-testid="button-bookmarks"
                 >
-                  <Bookmark className="h-4 w-4" />
+                  <BookmarkAnimatedIcon isSaved={bookmarks.length > 0} size={16} />
                   <span className="hidden md:inline">Bookmarks</span>
                   {bookmarks.length > 0 && (
                     <span className="absolute -top-2 -right-2 bg-accent text-accent-foreground text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
