@@ -89,7 +89,7 @@ export function useTestSessions() {
       return response;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/test-sessions'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/test-sessions', activeSpecialty] });
     },
   });
 
@@ -128,7 +128,7 @@ export function useTestSessions() {
       return response;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/test-sessions'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/test-sessions', activeSpecialty] });
     },
   });
 
@@ -141,7 +141,7 @@ export function useTestSessions() {
       return response;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/test-sessions'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/test-sessions', activeSpecialty] });
     },
   });
 
@@ -155,7 +155,7 @@ export function useTestSessions() {
       return sessionId;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/test-sessions'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/test-sessions', activeSpecialty] });
     },
   });
 

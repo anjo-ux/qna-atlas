@@ -57,12 +57,15 @@ export function BookmarkAnimatedIcon({
       <AnimatePresence>
         {isSaved && (
           <motion.div
+            key="bookmark-burst"
             className="absolute inset-0 rounded-full"
             style={{
               background:
                 "radial-gradient(circle, hsl(var(--primary) / 0.4) 0%, hsl(var(--primary) / 0) 80%)",
             }}
-            {...burstAnimation}
+            initial={burstAnimation.initial}
+            animate={burstAnimation.animate}
+            transition={burstAnimation.transition}
           />
         )}
       </AnimatePresence>
@@ -75,7 +78,7 @@ export function BookmarkAnimatedIcon({
               const y = Math.sin(particle.angle) * particle.radius * 0.75;
               return (
                 <motion.div
-                  key={index}
+                  key={`bookmark-particle-${index}`}
                   className="absolute rounded-full bg-primary"
                   style={{
                     width: `${particle.width}px`,

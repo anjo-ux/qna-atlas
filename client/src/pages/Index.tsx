@@ -510,6 +510,13 @@ export default function Index() {
   }
 
   if (screenMode === 'test') {
+    if (sectionsLoading) {
+      return (
+        <div className="flex h-full min-h-0 w-full items-center justify-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary" />
+        </div>
+      );
+    }
     return (
       <div className="flex h-full min-h-0 w-full overflow-hidden">
         <TestMode 

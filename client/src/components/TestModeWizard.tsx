@@ -7,11 +7,12 @@ import { Card } from '@/components/ui/card';
 interface TestModeWizardProps {
   open: boolean;
   onClose: () => void;
-  onContinue: () => void;
+  onContinue: () => void | Promise<void>;
 }
 
 export function TestModeWizard({ open, onClose, onContinue }: TestModeWizardProps) {
   const [step, setStep] = useState(0);
+  const [isContinuing, setIsContinuing] = useState(false);
 
   const steps = [
     {
@@ -118,10 +119,17 @@ export function TestModeWizard({ open, onClose, onContinue }: TestModeWizardProp
     }
   };
 
-  const handleContinue = () => {
-    localStorage.setItem('testModeWizardShown', 'true');
-    onContinue();
-    onClose();
+  const handleContinue = async () => {
+    setIsContinuing(true);
+    try {
+      localStorage.setItem('testModeWizardShown', 'true');
+      await onContinue();
+      onClose();
+    } catch {
+      // Parent shows toast; keep wizard open so the user can retry.
+    } finally {
+      setIsContinuing(false);
+    }
   };
 
   return (
@@ -145,8 +153,14 @@ export function TestModeWizard({ open, onClose, onContinue }: TestModeWizardProp
               Back
             </Button>
           )}
-          <Button onClick={handleNext} className="flex-1 rounded-xl">
-            {step < steps.length - 1 ? (
+          <Button
+            onClick={() => (step < steps.length - 1 ? handleNext() : void handleContinue())}
+            className="flex-1 rounded-xl"
+            disabled={isContinuing}
+          >
+            {isContinuing ? (
+              'Starting…'
+            ) : step < steps.length - 1 ? (
               <>
                 Next <ChevronRight className="ml-2 w-4 h-4" />
               </>

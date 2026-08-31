@@ -19,6 +19,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { cn } from '@/lib/utils';
 import { queryClient } from '@/lib/queryClient';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { toast } from 'sonner';
 
 /** Allotted time per question on timed tests (1 minute 10 seconds). */
 const TEST_MODE_SECONDS_PER_QUESTION = 70;
@@ -72,6 +73,7 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
   const preferredQuestionCountRef = useRef(10);
   const [timerEnabledForNewTest, setTimerEnabledForNewTest] = useState(false);
   const [timedTestRemainingSeconds, setTimedTestRemainingSeconds] = useState<number | null>(null);
+  const [isStartingTest, setIsStartingTest] = useState(false);
   const timedTestRemainingRef = useRef<number | null>(null);
   timedTestRemainingRef.current = timedTestRemainingSeconds;
 
@@ -275,25 +277,21 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
     return questions;
   }, [sections, selectedSubsections, useAllQuestions, useBookmarkedOnly, useIncorrectOnly, bookmarks, getGlobalIncorrectIds, isPreview, previewQuestions, globalResponses, showUnansweredOnly, showUnansweredOnlyInSections]);
 
-  const handleStartTest = async () => {
+  const startTestSession = async () => {
     if (availableQuestions.length === 0) {
+      toast.error('No questions available for this test configuration.');
       return;
     }
 
-    // Check if user has seen test mode wizard
-    const hasSeenWizard = localStorage.getItem('testModeWizardShown');
-    if (!hasSeenWizard && !isPreview) {
-      setShowTestWizard(true);
-      return;
-    }
-
-    // Shuffle and select random questions
     const shuffled = [...availableQuestions].sort(() => Math.random() - 0.5);
     const selected = shuffled.slice(0, Math.min(questionCount, shuffled.length));
-    const questionCountForTimer = selected.length;
-    const timerTotalSeconds = questionCountForTimer * TEST_MODE_SECONDS_PER_QUESTION;
+    if (selected.length === 0) {
+      toast.error('Could not select any questions for this test.');
+      return;
+    }
 
-    // Create test session
+    const timerTotalSeconds = selected.length * TEST_MODE_SECONDS_PER_QUESTION;
+
     const session = await createSession(
       questionCount,
       Array.from(selectedSubsections),
@@ -307,6 +305,8 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
     setTestQuestions(selected);
     setCurrentQuestionIndex(0);
     setResponses({});
+    setFlaggedQuestions(new Set());
+    setIsReviewMode(false);
     setTimedTestRemainingSeconds(
       session.timerEnabled && session.timerRemainingSeconds != null
         ? session.timerRemainingSeconds
@@ -316,11 +316,39 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
     setTestState('testing');
   };
 
+  const handleStartTest = async () => {
+    if (availableQuestions.length === 0) {
+      return;
+    }
+
+    const hasSeenWizard = localStorage.getItem('testModeWizardShown');
+    if (!hasSeenWizard && !isPreview) {
+      setShowTestWizard(true);
+      return;
+    }
+
+    setIsStartingTest(true);
+    try {
+      await startTestSession();
+    } catch (error) {
+      console.error('Error starting test:', error);
+      toast.error(error instanceof Error ? error.message : 'Failed to start test.');
+    } finally {
+      setIsStartingTest(false);
+    }
+  };
+
   const handleResumeTest = (session: TestSession) => {
-    // Restore test state
+    if (!session.questions?.length) {
+      toast.error('This test has no saved questions. Please start a new test.');
+      return;
+    }
+
     setTestQuestions(session.questions);
-    setCurrentQuestionIndex(session.currentQuestionIndex);
-    setResponses(session.responses);
+    setCurrentQuestionIndex(
+      Math.min(session.currentQuestionIndex, session.questions.length - 1)
+    );
+    setResponses(session.responses ?? {});
     setCurrentSession(session);
     
     // Restore configuration
@@ -694,33 +722,16 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
   }, [responses]);
 
   const handleContinueFromWizard = async () => {
-    // Shuffle and select random questions
-    const shuffled = [...availableQuestions].sort(() => Math.random() - 0.5);
-    const selected = shuffled.slice(0, Math.min(questionCount, shuffled.length));
-    const questionCountForTimer = selected.length;
-    const timerTotalSeconds = questionCountForTimer * TEST_MODE_SECONDS_PER_QUESTION;
-
-    // Create test session
-    const session = await createSession(
-      questionCount,
-      Array.from(selectedSubsections),
-      useAllQuestions,
-      selected,
-      timerEnabledForNewTest && !isPreview
-        ? { enabled: true, totalSeconds: timerTotalSeconds }
-        : undefined
-    );
-
-    setTestQuestions(selected);
-    setCurrentQuestionIndex(0);
-    setResponses({});
-    setTimedTestRemainingSeconds(
-      session.timerEnabled && session.timerRemainingSeconds != null
-        ? session.timerRemainingSeconds
-        : null
-    );
-    setCurrentSession(session);
-    setTestState('testing');
+    setIsStartingTest(true);
+    try {
+      await startTestSession();
+    } catch (error) {
+      console.error('Error starting test from wizard:', error);
+      toast.error(error instanceof Error ? error.message : 'Failed to start test.');
+      throw error;
+    } finally {
+      setIsStartingTest(false);
+    }
   };
 
   if (testState === 'setup') {
@@ -1209,8 +1220,9 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
                     {/* Start Button */}
                     <Button
                       size="lg"
-                      onClick={handleStartTest}
+                      onClick={() => void handleStartTest()}
                       disabled={
+                        isStartingTest ||
                         hasError ||
                         (!useAllQuestions && !useBookmarkedOnly && !useIncorrectOnly && selectedSubsections.size === 0) ||
                         availableQuestions.length === 0
@@ -1218,7 +1230,9 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
                       className="w-full"
                       data-testid="button-start-test"
                     >
-                      Start Test ({Math.min(questionCount, availableQuestions.length)} Questions)
+                      {isStartingTest
+                        ? 'Starting Test…'
+                        : `Start Test (${Math.min(questionCount, availableQuestions.length)} Questions)`}
                     </Button>
                   </>
                 );
@@ -1234,6 +1248,29 @@ export function TestMode({ sections, onBack, resumeSessionId, previewQuestions, 
 
   if (testState === 'testing') {
     const currentQuestion = testQuestions[currentQuestionIndex];
+
+    if (!currentQuestion) {
+      return (
+        <div className="flex flex-1 flex-col items-center justify-center gap-4 p-6 text-center">
+          <p className="text-muted-foreground">
+            This test has no questions to display. Try starting a new test.
+          </p>
+          <Button
+            variant="outline"
+            onClick={() => {
+              setTestState('setup');
+              setCurrentSession(null);
+              setTestQuestions([]);
+              setResponses({});
+              setIsReviewMode(false);
+            }}
+          >
+            Back to Test Setup
+          </Button>
+        </div>
+      );
+    }
+
     const showTimedChrome = Boolean(
       currentSession?.timerEnabled &&
         timedTestRemainingSeconds != null &&
