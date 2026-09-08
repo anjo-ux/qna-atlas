@@ -33,7 +33,9 @@ assert.match(home, /content="index, follow"/);
 assert.match(home, /name="keywords"/);
 assert.match(home, /id="atlas-structured-data"/);
 assert.match(home, /href="https:\/\/prs-atlas\.com\/favicon-48\.png\?v=/);
-assert.match(home, /id="seo-crawler-nav"/);
+assert.match(home, /property="og:image" content="https:\/\/prs-atlas\.com\/og-image\.png"/);
+assert.match(home, /property="og:image:width" content="2400"/);
+assert.match(home, /name="twitter:card" content="summary_large_image"/);
 assert.match(home, /href="https:\/\/prs-atlas\.com\/pricing"/);
 assert.doesNotMatch(home, /"FAQPage"/);
 

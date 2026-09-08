@@ -5,7 +5,7 @@
  *   npm run verify:email you@example.com # also sends the branded reset email to that address
  */
 import { Resend } from 'resend';
-import { emailIsConfigured, fromAddress, renderPasswordResetEmail, sendEmail } from '../email';
+import { EMAIL_LOGO_PATH, emailIsConfigured, fromAddress, renderPasswordResetEmail, sendEmail } from '../email';
 
 async function main(): Promise<void> {
   const recipient = process.argv[2]?.trim();
@@ -51,7 +51,7 @@ async function main(): Promise<void> {
   const { subject, html, text } = renderPasswordResetEmail({
     productName: 'Atlas Review',
     resetUrl: 'https://prs-atlas.com/reset-password?token=verification-test-token',
-    logoUrl: 'https://prs-atlas.com/atlas-logo.png',
+    logoUrl: `https://prs-atlas.com${EMAIL_LOGO_PATH}`,
     loginUrl: 'https://prs-atlas.com/login',
     supportEmail: 'support@prs-atlas.com',
     expiresInMinutes: 60,

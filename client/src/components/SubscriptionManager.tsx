@@ -39,6 +39,7 @@ interface SubscriptionDetails {
   daysRemaining: number | null;
   transactionCount: number;
   planPrice?: number; // price in cents
+  grantKind?: 'trial' | 'institutional';
 }
 
 export function SubscriptionManager() {
@@ -79,6 +80,7 @@ export function SubscriptionManager() {
   };
 
   const isInstitutional = subscription?.status === 'institutional';
+  const isCodeTrial = isInstitutional && subscription?.grantKind === 'trial';
   const isTrial = subscription?.status === 'trial';
   const isActive = subscription?.status === 'active';
   const isCanceled = subscription?.status === 'canceled';
@@ -105,7 +107,9 @@ export function SubscriptionManager() {
           <p className="text-xs text-muted-foreground font-medium">Current Plan</p>
           {isInstitutional ? (
             <div className="mt-1">
-              <p className="font-semibold text-foreground">Institutional Access</p>
+              <p className="font-semibold text-foreground">
+                {isCodeTrial ? '30-Day Trial' : 'Institutional Access'}
+              </p>
               <p className="text-sm text-muted-foreground">
                 {institutionalDisplayName(subscription?.institutionalAffiliation ?? '')}
               </p>
@@ -160,7 +164,9 @@ export function SubscriptionManager() {
                     : isActive
                       ? `${subscription?.daysRemaining ?? 0} Subscription Days Remaining`
                       : isInstitutional
-                        ? `${subscription?.daysRemaining ?? 0} Days Remaining`
+                      ? isCodeTrial
+                        ? `${subscription?.daysRemaining ?? 0} Trial Days Remaining`
+                        : `${subscription?.daysRemaining ?? 0} Days Remaining`
                         : subscription?.status === 'expired'
                           ? 'Expired'
                           : `${subscription?.daysRemaining ?? 0} days`}
@@ -169,7 +175,7 @@ export function SubscriptionManager() {
             {(isTrial && subscription?.trialEndsAt) || ((isActive || isCanceled || isInstitutional) && subscription?.endsAt) ? (
               <div>
                 <p className="text-xs text-muted-foreground font-medium">
-                  {isTrial ? 'Trial Ends' : isInstitutional ? 'Access Ends' : isCanceled ? 'Subscription Ends' : 'Next Billing Date'}
+                  {isTrial ? 'Trial Ends' : isInstitutional ? (isCodeTrial ? 'Trial Ends' : 'Access Ends') : isCanceled ? 'Subscription Ends' : 'Next Billing Date'}
                 </p>
                 <p className="font-semibold text-foreground mt-1">
                   {isTrial && subscription?.trialEndsAt
@@ -214,20 +220,28 @@ export function SubscriptionManager() {
                 disabled={cancelSubscriptionMutation.isPending}
                 data-testid="button-cancel-subscription"
               >
-                {isInstitutional ? 'Remove Institutional Access' : 'Cancel Subscription'}
+                {isInstitutional ? (isCodeTrial ? 'End Trial Access' : 'Remove Institutional Access') : 'Cancel Subscription'}
               </Button>
               <AlertDialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
                 <AlertDialogContent>
                   <AlertDialogHeader>
                     <AlertDialogTitle>
-                      {isInstitutional ? 'Remove institutional access?' : 'Cancel subscription?'}
+                      {isInstitutional ? (isCodeTrial ? 'End trial access?' : 'Remove institutional access?') : 'Cancel subscription?'}
                     </AlertDialogTitle>
                     <AlertDialogDescription className="space-y-2">
                       {isInstitutional ? (
-                        <>
-                          Your institutional access will end immediately. You can subscribe for personal access or
-                          redeem a different institution code later; you cannot reuse a code you already redeemed.
-                        </>
+                        isCodeTrial ? (
+                          <>
+                            Your 30-day trial will end immediately. You can still start a 7-day free trial
+                            when you subscribe for the first time. You cannot reuse this trial code on this
+                            account.
+                          </>
+                        ) : (
+                          <>
+                            Your institutional access will end immediately. You can subscribe for personal access or
+                            redeem a different institution code later; you cannot reuse a code you already redeemed.
+                          </>
+                        )
                       ) : (
                         <>
                           This will end your subscription right away on Atlas and in Stripe. If you are in a free

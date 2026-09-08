@@ -23,6 +23,7 @@ import {
 import { sanitizeUser } from './authUtils';
 import { pool, normalizeDatabaseUrl } from './db';
 import {
+  EMAIL_LOGO_PATH,
   emailIsConfigured,
   emailProviderIsDown,
   renderPasswordResetEmail,
@@ -208,7 +209,7 @@ async function sendPasswordResetEmail(
   const { subject, html, text } = renderPasswordResetEmail({
     productName: specialty.productName,
     resetUrl,
-    logoUrl: `${base}/atlas-logo.png`,
+    logoUrl: `${base}${EMAIL_LOGO_PATH}`,
     loginUrl: `${base}/login`,
     supportEmail: specialty.supportEmail,
     expiresInMinutes: Math.max(1, Math.round(ttlMs / 60000)),

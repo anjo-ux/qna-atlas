@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="mark" x1="280" y1="760" x2="760" y2="240" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#14316C"/>
+      <stop offset="42%" stop-color="#1E5AA8"/>
+      <stop offset="72%" stop-color="#2B81BD"/>
+      <stop offset="100%" stop-color="#52BAEC"/>
+    </linearGradient>
+  </defs>
+  <!-- White disc fills more of the canvas than the site favicon -->
+  <circle cx="512" cy="512" r="470" fill="#FFFFFF"/>
+  <!-- Globe scaled up vs favicon (1.1 ’ 1.28) so the mark reads larger in the circle -->
+  <g transform="translate(512 500) scale(1.28) translate(-512 -500)">
+    <circle cx="512" cy="500" r="250" fill="none" stroke="url(#mark)" stroke-width="72"/>
+    <g stroke="url(#mark)" stroke-width="36" fill="none" stroke-linecap="round">
+      <circle cx="512" cy="500" r="168"/>
+      <path d="M512 332 C440 390 440 610 512 668"/>
+      <path d="M512 332 C584 390 584 610 512 668"/>
+      <path d="M344 500 H680"/>
+      <path d="M372 420 H652" stroke-width="28" opacity="0.9"/>
+      <path d="M372 580 H652" stroke-width="28" opacity="0.9"/>
+    </g>
+  </g>
+</svg>

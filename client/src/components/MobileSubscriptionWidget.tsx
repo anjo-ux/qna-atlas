@@ -38,7 +38,7 @@ interface SubscriptionDetails {
   trialEndsAt?: string;
   daysRemaining: number | null;
   transactionCount: number;
-  planPrice?: number;
+  grantKind?: 'trial' | 'institutional';
 }
 
 export function MobileSubscriptionWidget() {
@@ -79,6 +79,7 @@ export function MobileSubscriptionWidget() {
   };
 
   const isInstitutional = subscription?.status === 'institutional';
+  const isCodeTrial = isInstitutional && subscription?.grantKind === 'trial';
   const isTrial = subscription?.status === 'trial';
   const isActive = subscription?.status === 'active';
   const isCanceled = subscription?.status === 'canceled';
@@ -106,7 +107,7 @@ export function MobileSubscriptionWidget() {
             <p className="text-xs text-muted-foreground font-medium">Current Plan</p>
             {isInstitutional ? (
               <div className="mt-1 min-w-0">
-                <p className="font-semibold text-foreground">Institutional Access</p>
+                <p className="font-semibold text-foreground">{isCodeTrial ? '30-Day Trial' : 'Institutional Access'}</p>
                 <p className="text-sm text-muted-foreground truncate" title={institutionalDisplayName(subscription?.institutionalAffiliation ?? '')}>
                   {institutionalDisplayName(subscription?.institutionalAffiliation ?? '')}
                 </p>
@@ -243,7 +244,7 @@ export function MobileSubscriptionWidget() {
               )}
               {isInstitutional && subscription?.endsAt && (
                 <div className="flex justify-between text-xs">
-                  <span className="text-foreground">Access Ends</span>
+                  <span className="text-foreground">{isCodeTrial ? 'Trial Ends' : 'Access Ends'}</span>
                   <span className="text-muted-foreground">{formatDateMMDDYYYY(subscription.endsAt)}</span>
                 </div>
               )}
@@ -297,14 +298,22 @@ export function MobileSubscriptionWidget() {
                 <AlertDialogContent>
                   <AlertDialogHeader>
                     <AlertDialogTitle>
-                      {isInstitutional ? 'Remove institutional access?' : 'Cancel subscription?'}
+                      {isInstitutional ? (isCodeTrial ? 'End trial access?' : 'Remove institutional access?') : 'Cancel subscription?'}
                     </AlertDialogTitle>
                     <AlertDialogDescription className="space-y-2">
                       {isInstitutional ? (
-                        <>
-                          Your institutional access will end immediately. You can subscribe for personal access or
-                          redeem a different institution code later; you cannot reuse a code you already redeemed.
-                        </>
+                        isCodeTrial ? (
+                          <>
+                            Your 30-day trial will end immediately. You can still start a 7-day free trial
+                            when you subscribe for the first time. You cannot reuse this trial code on this
+                            account.
+                          </>
+                        ) : (
+                          <>
+                            Your institutional access will end immediately. You can subscribe for personal access or
+                            redeem a different institution code later; you cannot reuse a code you already redeemed.
+                          </>
+                        )
                       ) : (
                         <>
                           This ends your subscription immediately on Atlas and in Stripe. If you are in a free

@@ -125,8 +125,8 @@ export function SubscriptionPlans({ open = true, onOpenChange, asDialog = true, 
         body: JSON.stringify({ code: code.trim() }),
       });
     },
-    onSuccess: async () => {
-      toast.success('Access granted. Welcome!');
+    onSuccess: async (data: { grantKind?: string } | void) => {
+      toast.success(data?.grantKind === 'trial' ? '30-day trial started. Welcome!' : 'Access granted. Welcome!');
       await queryClient.refetchQueries({ queryKey: ['/api/subscription'] });
       await queryClient.refetchQueries({ queryKey: ['/api/subscription/details'] });
       await queryClient.refetchQueries({ queryKey: ['/api/auth/user'] });
@@ -335,8 +335,11 @@ export function SubscriptionPlans({ open = true, onOpenChange, asDialog = true, 
                       </p>
                     </>
                   ) : (
-                      <p className={cn('text-sm mt-1', contentMutedClass)}>
-                      Enter your institution code (provided by your program director or administrator) to unlock the platform.
+                    <p className={cn('text-sm mt-1', contentMutedClass)}>
+                      Enter your institution or trial code (provided by your program) to unlock the platform.
+                      Trial codes grant 30 days of access and can be used once per account. They do not replace
+                      the 7-day free trial when you first subscribe. Codes cannot be redeemed after they are
+                      deactivated or after 90 days from when they were created.
                     </p>
                   )}
                   <Input

@@ -126,15 +126,20 @@ function escapeHtml(value: string): string {
     .replace(/"/g, '&quot;');
 }
 
-const PAGE_BACKGROUND = '#f4f4f5';
-const CARD_BORDER = '#e4e4e7';
-const HEADING_COLOR = '#18181b';
+const PAGE_BACKGROUND = '#f7f7f5';
+const CARD_BACKGROUND = '#ffffff';
+const CARD_BORDER = '#e8e7e3';
+const HEADING_COLOR = '#171717';
 const BODY_COLOR = '#3f3f46';
-const MUTED_COLOR = '#71717a';
-const ACCENT_COLOR = '#1a3aa0';
-const BUTTON_COLOR = '#16257c';
+const MUTED_COLOR = '#73736e';
+const ACCENT_COLOR = '#1e5aa8';
+const BUTTON_COLOR = '#1e5aa8';
 const FONT_STACK =
   "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
+
+/** Circular mark used in branded mail. PNG (not SVG) so Outlook and Gmail render it. */
+export const EMAIL_LOGO_PATH = '/atlas-logo-circle.png';
+const EMAIL_LOGO_PX = 144;
 
 export type PasswordResetEmailContent = {
   subject: string;
@@ -170,44 +175,43 @@ export function renderPasswordResetEmail(params: {
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="color-scheme" content="light only" />
-    <title>Password Reset</title>
+    <title>Password reset</title>
   </head>
   <body style="margin:0; padding:0; background-color:${PAGE_BACKGROUND}; font-family:${FONT_STACK};">
     <div style="display:none; max-height:0; overflow:hidden; opacity:0;">Reset your ${safeProduct} password. This link expires in ${expiryLabel}.</div>
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:${PAGE_BACKGROUND};">
       <tr>
-        <td align="center" style="padding:32px 16px;">
-          <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="width:100%; max-width:600px;">
+        <td align="center" style="padding:48px 16px 40px 16px;">
+          <table role="presentation" width="560" cellpadding="0" cellspacing="0" border="0" style="width:100%; max-width:560px;">
             <tr>
-              <td align="center" style="padding:24px 24px 8px 24px;">
-                <img src="${safeLogoUrl}" width="96" height="96" alt="${safeProduct}" style="display:block; width:96px; height:96px; border:0; outline:none; text-decoration:none;" />
+              <td align="center" style="padding:8px 24px 0 24px;">
+                <img src="${safeLogoUrl}" width="${EMAIL_LOGO_PX}" height="${EMAIL_LOGO_PX}" alt="${safeProduct}" style="display:block; width:${EMAIL_LOGO_PX}px; height:${EMAIL_LOGO_PX}px; border:0; outline:none; text-decoration:none; border-radius:50%;" />
               </td>
             </tr>
             <tr>
-              <td align="center" style="padding:8px 24px 24px 24px; font-family:${FONT_STACK}; font-size:19px; font-weight:700; color:${HEADING_COLOR};">
-                The ${safeProduct}
+              <td align="center" style="padding:20px 24px 36px 24px; font-family:${FONT_STACK}; font-size:13px; font-weight:500; letter-spacing:0.32em; text-transform:uppercase; color:${HEADING_COLOR};">
+                ${safeProduct}
               </td>
             </tr>
             <tr>
               <td>
-                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#ffffff; border:1px solid ${CARD_BORDER};">
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:${CARD_BACKGROUND}; border:1px solid ${CARD_BORDER}; border-radius:16px;">
                   <tr>
-                    <td align="center" style="padding:36px 32px; border-bottom:1px solid ${CARD_BORDER}; font-family:${FONT_STACK}; font-size:34px; line-height:1.2; font-weight:600; color:${HEADING_COLOR};">
-                      Password Reset
+                    <td align="center" style="padding:40px 36px 8px 36px; font-family:${FONT_STACK}; font-size:26px; line-height:1.25; font-weight:600; letter-spacing:-0.02em; color:${HEADING_COLOR};">
+                      Password reset
                     </td>
                   </tr>
                   <tr>
-                    <td align="center" style="padding:32px; border-bottom:1px solid ${CARD_BORDER}; font-family:${FONT_STACK}; font-size:16px; line-height:1.6; color:${BODY_COLOR};">
-                      Please click the reset password button below to create a new password. If you did not submit this request, you can ignore this email.
-                      <div style="padding-top:24px; font-size:20px; font-weight:700; color:${ACCENT_COLOR};">Thank you!</div>
+                    <td align="center" style="padding:16px 36px 8px 36px; font-family:${FONT_STACK}; font-size:16px; line-height:1.65; color:${BODY_COLOR};">
+                      Click the button below to create a new password. If you did not request this, you can ignore this email.
                     </td>
                   </tr>
                   <tr>
-                    <td align="center" style="padding:32px;">
+                    <td align="center" style="padding:28px 36px 40px 36px;">
                       <table role="presentation" cellpadding="0" cellspacing="0" border="0">
                         <tr>
-                          <td align="center" bgcolor="${BUTTON_COLOR}" style="background-color:${BUTTON_COLOR};">
-                            <a href="${safeResetUrl}" style="display:inline-block; padding:16px 44px; font-family:${FONT_STACK}; font-size:16px; font-weight:600; color:#ffffff; text-decoration:none;">Reset Password</a>
+                          <td align="center" bgcolor="${BUTTON_COLOR}" style="background-color:${BUTTON_COLOR}; border-radius:8px;">
+                            <a href="${safeResetUrl}" style="display:inline-block; padding:14px 36px; font-family:${FONT_STACK}; font-size:15px; font-weight:600; letter-spacing:0.02em; color:#ffffff; text-decoration:none; border-radius:8px;">Reset password</a>
                           </td>
                         </tr>
                       </table>
@@ -217,7 +221,7 @@ export function renderPasswordResetEmail(params: {
               </td>
             </tr>
             <tr>
-              <td align="center" style="padding:24px 24px 8px 24px; font-family:${FONT_STACK}; font-size:13px; line-height:1.6; color:${MUTED_COLOR};">
+              <td align="center" style="padding:28px 28px 8px 28px; font-family:${FONT_STACK}; font-size:13px; line-height:1.65; color:${MUTED_COLOR};">
                 This link can only be used once and expires in ${expiryLabel}.
                 <br />
                 If the button does not work, paste this address into your browser:
@@ -226,7 +230,7 @@ export function renderPasswordResetEmail(params: {
               </td>
             </tr>
             <tr>
-              <td align="center" style="padding:8px 24px 24px 24px; font-family:${FONT_STACK}; font-size:13px; line-height:1.6; color:${MUTED_COLOR};">
+              <td align="center" style="padding:8px 28px 8px 28px; font-family:${FONT_STACK}; font-size:13px; line-height:1.65; color:${MUTED_COLOR};">
                 Need help? Contact <a href="mailto:${safeSupport}" style="color:${ACCENT_COLOR};">${safeSupport}</a>.
               </td>
             </tr>
@@ -238,7 +242,7 @@ export function renderPasswordResetEmail(params: {
 </html>`;
 
   const text = [
-    `The ${productName} — Password Reset`,
+    `${productName} — Password Reset`,
     '',
     'Please open the link below to create a new password. If you did not submit this request, you can ignore this email.',
     '',

@@ -404,6 +404,9 @@ export const userSpecialtySubscriptions = pgTable(
 export type UserSpecialtySubscription = typeof userSpecialtySubscriptions.$inferSelect;
 export type InsertUserSpecialtySubscription = typeof userSpecialtySubscriptions.$inferInsert;
 
+export const INSTITUTIONAL_CODE_TYPES = ["institutional", "trial"] as const;
+export type InstitutionalCodeType = (typeof INSTITUTIONAL_CODE_TYPES)[number];
+
 // Institutional access codes (code stored as bcrypt hash; never store plaintext)
 export const institutionalCodes = pgTable("institutional_codes", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -414,9 +417,19 @@ export const institutionalCodes = pgTable("institutional_codes", {
     .$type<SpecialtyId>()
     .notNull()
     .default(DEFAULT_SPECIALTY_ID),
-  /** When false, no new redemptions; existing users keep access until expiry / removal. */
+  /**
+   * `institutional`: 365-day program license.
+   * `trial`: 30-day trial from redemption; once per account; does not consume the 7-day Stripe intro trial.
+   */
+  codeType: varchar("code_type", { length: 32 })
+    .$type<InstitutionalCodeType>()
+    .notNull()
+    .default("institutional"),
+  /** When false, the code cannot be redeemed. Already-granted access is unchanged. */
   active: boolean("active").notNull().default(true),
   createdAt: timestamp("created_at").defaultNow(),
+  /** After this timestamp, the code cannot be redeemed. Null = no redemption time limit (legacy codes). */
+  redeemExpiresAt: timestamp("redeem_expires_at"),
 }, (table) => [
   index("idx_institutional_codes_code_hash").on(table.codeHash),
   index("idx_institutional_codes_active").on(table.active),

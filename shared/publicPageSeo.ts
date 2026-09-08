@@ -19,6 +19,15 @@ export type PublicPageSeo = {
   ogDescription?: string;
 };
 
+/** Shared Open Graph / Twitter large-image card (1200×630 @2x). */
+export const OG_IMAGE = {
+  pathname: "/og-image.png",
+  width: 2400,
+  height: 1260,
+  alt: "Atlas Review",
+  type: "image/png",
+} as const;
+
 const PRS_PAGE_SEO: Record<string, PublicPageSeo> = {
   "/": {
     title: "Plastic Surgery Board Prep & Q&A Bank | Atlas Review",

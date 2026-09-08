@@ -28,6 +28,8 @@ export type SubscriptionTransactionRow = {
   isInstitutionalGrant?: boolean;
   /** Current trial window row (7-day free trial) */
   isTrialPeriod?: boolean;
+  /** 30-day program trial code (distinct from the 7-day Stripe intro trial) */
+  isTrialCodeGrant?: boolean;
 };
 
 type Response = { transactions: SubscriptionTransactionRow[] };
@@ -185,7 +187,11 @@ export function SubscriptionTransactionHistoryDialog({
                       {t.isInstitutionalGrant ? (
                         <>
                           <p className={cn('font-semibold', canceled ? 'text-destructive' : 'text-foreground')}>
-                            {canceled ? 'Cancelled' : 'Institutional Access'}
+                            {canceled
+                              ? 'Cancelled'
+                              : t.isTrialCodeGrant
+                                ? '30-Day Trial'
+                                : 'Institutional Access'}
                           </p>
                           <p className="text-muted-foreground text-xs">{t.planName}</p>
                           <p className="text-xs text-muted-foreground">

@@ -76,7 +76,14 @@ import {
 import { db, pool } from "./db";
 import { eq, and, or, asc, desc, lte, gte, sql, count, inArray, like, notLike } from "drizzle-orm";
 import {
+  IOWA_TRIAL_CODE,
   SOCIALMEDIA_INSTITUTIONAL_CODE,
+  TRIAL_CODE_DURATION_DAYS,
+  isCodeRedeemWindowOpen,
+  normalizeInstitutionalCodeForLookup,
+  parseInstitutionalCodeType,
+  redeemExpiresAtFromCreatedAt,
+  type InstitutionalCodeType,
 } from "./institutionalAccess";
 
 const INSTITUTIONAL_CODE_SALT_ROUNDS = 10;
@@ -295,8 +302,15 @@ export interface IStorage {
   validateInstitutionalCode(plainCode: string): Promise<string | null>;
   /** Match plaintext to a code row; used for redeem (needs code id + specialty for per-code dedup). */
   resolveInstitutionalCode(plainCode: string): Promise<
-    | { type: "ok"; institutionName: string; codeId: string; specialtyId: SpecialtyId }
+    | {
+        type: "ok";
+        institutionName: string;
+        codeId: string;
+        specialtyId: SpecialtyId;
+        codeType: InstitutionalCodeType;
+      }
     | { type: "inactive" }
+    | { type: "redeem_expired" }
     | { type: "not_found" }
   >;
   getInstitutionalCodesAdmin(): Promise<
@@ -304,17 +318,22 @@ export interface IStorage {
       id: string;
       institutionName: string;
       specialtyId: SpecialtyId;
+      codeType: InstitutionalCodeType;
       active: boolean;
       createdAt: Date | null;
+      redeemExpiresAt: Date | null;
     }[]
   >;
   createInstitutionalCodeAdmin(
     plainCode: string,
     institutionName: string,
     specialtyId?: SpecialtyId,
-  ): Promise<{ id: string }>;
+    codeType?: InstitutionalCodeType,
+  ): Promise<{ id: string; redeemExpiresAt: Date }>;
   setInstitutionalCodeActiveAdmin(id: string, active: boolean): Promise<boolean>;
   hasUserRedeemedInstitutionalCode(userId: string, institutionalCodeId: string): Promise<boolean>;
+  /** True if this account has ever redeemed any trial-type code (any q-bank). */
+  hasUserRedeemedAnyTrialCode(userId: string): Promise<boolean>;
   recordInstitutionalCodeRedemption(
     userId: string,
     institutionalCodeId: string,
@@ -322,9 +341,18 @@ export interface IStorage {
   ): Promise<void>;
   /** True if this account has redeemed at least one institutional code for the q-bank. */
   userHasAnyInstitutionalRedemption(userId: string, specialtyId?: SpecialtyId): Promise<boolean>;
+  /** Most recent code redemption for this q-bank, used to distinguish trial vs institutional grants. */
+  getLatestInstitutionalCodeGrant(
+    userId: string,
+    specialtyId?: SpecialtyId,
+  ): Promise<{
+    codeType: InstitutionalCodeType;
+    institutionName: string;
+    redeemedAt: Date | null;
+  } | null>;
   /**
-   * If user has a code redemption row but no expiry (legacy), set 365 days from now.
-   * Idempotent when expiry already set. Does nothing when there are no redemptions.
+   * If user has a code redemption row but no expiry (legacy), set duration from the code type
+   * (30 days for trial, 365 days for institutional). Idempotent when expiry already set.
    */
   ensureInstitutionalAccessExpiryWhenMissing(
     userId: string,
@@ -2109,6 +2137,7 @@ export class DatabaseStorage implements IStorage {
     await this.ensureMultiSpecialtyMigration();
     await this.ensureAuthHandoffTables();
     await this.ensureFeedbackAgentTables();
+    await this.ensureInstitutionalCodesSeed();
   }
 
   private async ensureAuthHandoffTables(): Promise<void> {
@@ -2421,6 +2450,10 @@ export class DatabaseStorage implements IStorage {
     const user = await this.getUser(userId);
     if (!user) return false;
     const entitlement = await this.getSpecialtyEntitlement(userId, target);
+    /**
+     * Trial-code redemptions do not consume this flag and do not write subscription_transactions,
+     * so a 30-day trial code still leaves the 7-day Stripe intro trial available.
+     */
     if (entitlement.subscriptionTrialUsed) return false;
     const [row] = await db
       .select({ id: subscriptionTransactions.id })
@@ -2450,6 +2483,14 @@ export class DatabaseStorage implements IStorage {
     `);
     await pool.query(`
       ALTER TABLE "institutional_codes" ADD COLUMN IF NOT EXISTS "active" boolean NOT NULL DEFAULT true
+    `);
+    await pool.query(`
+      ALTER TABLE "institutional_codes"
+      ADD COLUMN IF NOT EXISTS "code_type" varchar(32) NOT NULL DEFAULT 'institutional'
+    `);
+    await pool.query(`
+      ALTER TABLE "institutional_codes"
+      ADD COLUMN IF NOT EXISTS "redeem_expires_at" timestamp
     `);
     await pool.query(`
       CREATE INDEX IF NOT EXISTS "idx_institutional_codes_code_hash" ON "institutional_codes" USING btree ("code_hash")
@@ -2567,23 +2608,60 @@ export class DatabaseStorage implements IStorage {
       SOCIALMEDIA_INSTITUTIONAL_CODE,
       "Social Media"
     );
+    await this.ensureBuiltinInstitutionalCode(
+      IOWA_TRIAL_CODE,
+      "University of Iowa",
+      { codeType: "trial" },
+    );
   }
 
-  /** Idempotent: inserts a built-in code when no row matches the plaintext (case-sensitive hash). */
+  /** Idempotent: inserts a built-in code when no row matches the plaintext; updates codeType when needed. */
   private async ensureBuiltinInstitutionalCode(
     plaintext: string,
-    institutionName: string
+    institutionName: string,
+    options?: { codeType?: InstitutionalCodeType; specialtyId?: SpecialtyId },
   ): Promise<void> {
+    const codeType = options?.codeType ?? "institutional";
+    const specialtyId = getSpecialty(options?.specialtyId ?? DEFAULT_SPECIALTY_ID).id;
+    const now = new Date();
     const rows = await db.select().from(institutionalCodes);
     for (const row of rows) {
       const match = await bcrypt.compare(plaintext, row.codeHash);
-      if (match) return;
+      if (match) {
+        const updates: {
+          codeType?: InstitutionalCodeType;
+          institutionName?: string;
+          redeemExpiresAt?: Date;
+        } = {};
+        if (parseInstitutionalCodeType(row.codeType) !== codeType) {
+          updates.codeType = codeType;
+        }
+        if (institutionName && row.institutionName !== institutionName) {
+          updates.institutionName = institutionName;
+        }
+        /** New built-in trial codes get a 90-day redemption window from creation. */
+        if (!row.redeemExpiresAt && (options?.codeType === "trial" || plaintext === IOWA_TRIAL_CODE)) {
+          updates.redeemExpiresAt = redeemExpiresAtFromCreatedAt(row.createdAt ?? now, now);
+        }
+        if (Object.keys(updates).length > 0) {
+          await db.update(institutionalCodes).set(updates).where(eq(institutionalCodes.id, row.id));
+        }
+        return;
+      }
     }
     const codeHash = await bcrypt.hash(plaintext, INSTITUTIONAL_CODE_SALT_ROUNDS);
+    const createdAt = now;
     await db.insert(institutionalCodes).values({
       codeHash,
       institutionName,
+      specialtyId,
+      codeType,
       active: true,
+      createdAt,
+      redeemExpiresAt:
+        options?.codeType === "trial" || plaintext === IOWA_TRIAL_CODE
+          ? redeemExpiresAtFromCreatedAt(createdAt, now)
+          : undefined,
     });
   }
 
@@ -2592,8 +2670,15 @@ export class DatabaseStorage implements IStorage {
   }
 
   async resolveInstitutionalCode(plainCode: string): Promise<
-    | { type: "ok"; institutionName: string; codeId: string; specialtyId: SpecialtyId }
+    | {
+        type: "ok";
+        institutionName: string;
+        codeId: string;
+        specialtyId: SpecialtyId;
+        codeType: InstitutionalCodeType;
+      }
     | { type: "inactive" }
+    | { type: "redeem_expired" }
     | { type: "not_found" }
   > {
     await this.ensureInstitutionalCodesSeed();
@@ -2604,11 +2689,13 @@ export class DatabaseStorage implements IStorage {
       const match = await bcrypt.compare(trimmed, row.codeHash);
       if (match) {
         if (row.active === false) return { type: "inactive" };
+        if (!isCodeRedeemWindowOpen(row.redeemExpiresAt)) return { type: "redeem_expired" };
         return {
           type: "ok",
           institutionName: row.institutionName,
           codeId: row.id,
           specialtyId: getSpecialty(row.specialtyId).id,
+          codeType: parseInstitutionalCodeType(row.codeType),
         };
       }
     }
@@ -2625,8 +2712,10 @@ export class DatabaseStorage implements IStorage {
       id: string;
       institutionName: string;
       specialtyId: SpecialtyId;
+      codeType: InstitutionalCodeType;
       active: boolean;
       createdAt: Date | null;
+      redeemExpiresAt: Date | null;
     }[]
   > {
     await this.ensureInstitutionalCodesSeed();
@@ -2635,8 +2724,10 @@ export class DatabaseStorage implements IStorage {
         id: institutionalCodes.id,
         institutionName: institutionalCodes.institutionName,
         specialtyId: institutionalCodes.specialtyId,
+        codeType: institutionalCodes.codeType,
         active: institutionalCodes.active,
         createdAt: institutionalCodes.createdAt,
+        redeemExpiresAt: institutionalCodes.redeemExpiresAt,
       })
       .from(institutionalCodes)
       .orderBy(desc(institutionalCodes.createdAt));
@@ -2644,8 +2735,10 @@ export class DatabaseStorage implements IStorage {
       id: r.id,
       institutionName: r.institutionName,
       specialtyId: getSpecialty(r.specialtyId).id,
+      codeType: parseInstitutionalCodeType(r.codeType),
       active: r.active !== false,
       createdAt: r.createdAt ?? null,
+      redeemExpiresAt: r.redeemExpiresAt ?? null,
     }));
   }
 
@@ -2653,20 +2746,23 @@ export class DatabaseStorage implements IStorage {
     plainCode: string,
     institutionName: string,
     specialtyId: SpecialtyId = DEFAULT_SPECIALTY_ID,
-  ): Promise<{ id: string }> {
+    codeType: InstitutionalCodeType = "institutional",
+  ): Promise<{ id: string; redeemExpiresAt: Date }> {
     await this.ensureInstitutionalCodesSeed();
-    const trimmed = plainCode.trim();
+    const trimmed = normalizeInstitutionalCodeForLookup(plainCode);
     const name = institutionName.trim();
     if (!trimmed || !name) {
       throw new Error("plainCode and institutionName are required");
     }
     /** Bcrypt salts differ per row — detect duplicate plaintext by comparing against existing hashes. */
     const duplicate = await this.resolveInstitutionalCode(trimmed);
-    if (duplicate.type === "ok" || duplicate.type === "inactive") {
+    if (duplicate.type !== "not_found") {
       const err = new Error("An institutional code with this exact value already exists.");
       (err as NodeJS.ErrnoException).code = "23505";
       throw err;
     }
+    const now = new Date();
+    const redeemExpiresAt = redeemExpiresAtFromCreatedAt(now, now);
     const codeHash = await bcrypt.hash(trimmed, INSTITUTIONAL_CODE_SALT_ROUNDS);
     const [inserted] = await db
       .insert(institutionalCodes)
@@ -2674,11 +2770,14 @@ export class DatabaseStorage implements IStorage {
         codeHash,
         institutionName: name,
         specialtyId: getSpecialty(specialtyId).id,
+        codeType: parseInstitutionalCodeType(codeType),
         active: true,
+        createdAt: now,
+        redeemExpiresAt,
       })
       .returning({ id: institutionalCodes.id });
     if (!inserted) throw new Error("Insert failed");
-    return { id: inserted.id };
+    return { id: inserted.id, redeemExpiresAt };
   }
 
   async setInstitutionalCodeActiveAdmin(id: string, active: boolean): Promise<boolean> {
@@ -2704,6 +2803,64 @@ export class DatabaseStorage implements IStorage {
       )
       .limit(1);
     return !!row;
+  }
+
+  async hasUserRedeemedAnyTrialCode(userId: string): Promise<boolean> {
+    await this.ensureUserInstitutionalRedemptionsTable();
+    await this.ensureInstitutionalCodesTable();
+    const [row] = await db
+      .select({ id: userInstitutionalCodeRedemptions.id })
+      .from(userInstitutionalCodeRedemptions)
+      .innerJoin(
+        institutionalCodes,
+        eq(userInstitutionalCodeRedemptions.institutionalCodeId, institutionalCodes.id),
+      )
+      .where(
+        and(
+          eq(userInstitutionalCodeRedemptions.userId, userId),
+          eq(institutionalCodes.codeType, "trial"),
+        ),
+      )
+      .limit(1);
+    return !!row;
+  }
+
+  async getLatestInstitutionalCodeGrant(
+    userId: string,
+    specialtyId: SpecialtyId = DEFAULT_SPECIALTY_ID,
+  ): Promise<{
+    codeType: InstitutionalCodeType;
+    institutionName: string;
+    redeemedAt: Date | null;
+  } | null> {
+    await this.ensureUserInstitutionalRedemptionsTable();
+    await this.ensureInstitutionalCodesTable();
+    await this.ensureMultiSpecialtyMigration();
+    const [row] = await db
+      .select({
+        codeType: institutionalCodes.codeType,
+        institutionName: institutionalCodes.institutionName,
+        redeemedAt: userInstitutionalCodeRedemptions.redeemedAt,
+      })
+      .from(userInstitutionalCodeRedemptions)
+      .innerJoin(
+        institutionalCodes,
+        eq(userInstitutionalCodeRedemptions.institutionalCodeId, institutionalCodes.id),
+      )
+      .where(
+        and(
+          eq(userInstitutionalCodeRedemptions.userId, userId),
+          eq(userInstitutionalCodeRedemptions.specialtyId, getSpecialty(specialtyId).id),
+        ),
+      )
+      .orderBy(desc(userInstitutionalCodeRedemptions.redeemedAt))
+      .limit(1);
+    if (!row) return null;
+    return {
+      codeType: parseInstitutionalCodeType(row.codeType),
+      institutionName: row.institutionName,
+      redeemedAt: row.redeemedAt ?? null,
+    };
   }
 
   async recordInstitutionalCodeRedemption(
@@ -2749,8 +2906,10 @@ export class DatabaseStorage implements IStorage {
     if (!hasRedemption) return;
     const entitlement = await this.getSpecialtyEntitlement(userId, target);
     if (entitlement.institutionalAccessExpiresAt) return;
+    const grant = await this.getLatestInstitutionalCodeGrant(userId, target);
+    const days = grant?.codeType === "trial" ? TRIAL_CODE_DURATION_DAYS : 365;
     const end = new Date();
-    end.setDate(end.getDate() + 365);
+    end.setDate(end.getDate() + days);
     await this.updateSpecialtyEntitlement(userId, target, { institutionalAccessExpiresAt: end });
   }
 

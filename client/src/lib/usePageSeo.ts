@@ -1,5 +1,5 @@
 import { useEffect, useSyncExternalStore } from "react";
-import { getPublicPageSeo } from "@shared/publicPageSeo";
+import { OG_IMAGE, getPublicPageSeo } from "@shared/publicPageSeo";
 import { getStructuredData } from "@shared/seoStructuredData";
 import { DEFAULT_SPECIALTY_ID, getSpecialty } from "@shared/specialties";
 import {
@@ -57,7 +57,7 @@ export function usePageSeo(marketingPath: string) {
     const ogDescription = meta.ogDescription ?? meta.description;
     const pathSeg = marketingPath === "/" ? "/" : marketingPath;
     const canonicalUrl = new URL(pathSeg, `${siteOrigin}/`).href;
-    const ogImage = `${siteOrigin}/atlas-logo.png`;
+    const ogImage = `${siteOrigin}${OG_IMAGE.pathname}`;
 
     document.title = meta.title;
     upsertMetaName("description", meta.description);
@@ -69,6 +69,10 @@ export function usePageSeo(marketingPath: string) {
     upsertMetaProperty("og:url", canonicalUrl);
     upsertMetaProperty("og:type", "website");
     upsertMetaProperty("og:image", ogImage);
+    upsertMetaProperty("og:image:width", String(OG_IMAGE.width));
+    upsertMetaProperty("og:image:height", String(OG_IMAGE.height));
+    upsertMetaProperty("og:image:type", OG_IMAGE.type);
+    upsertMetaProperty("og:image:alt", OG_IMAGE.alt);
     upsertMetaProperty("og:site_name", specialty.productName);
     upsertMetaProperty("og:locale", "en_US");
 
@@ -76,6 +80,7 @@ export function usePageSeo(marketingPath: string) {
     upsertMetaName("twitter:title", ogTitle);
     upsertMetaName("twitter:description", ogDescription);
     upsertMetaName("twitter:image", ogImage);
+    upsertMetaName("twitter:image:alt", OG_IMAGE.alt);
 
     upsertCanonical(canonicalUrl);
 

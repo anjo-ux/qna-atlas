@@ -25,9 +25,11 @@ import {
 } from "@shared/specialties";
 import { userHasAdminForeverAccess } from "./adminGrantedAccess";
 import {
+  accessDurationDaysForCodeType,
   institutionalAccessExpiresAtForRedemption,
   institutionalDaysRemaining,
   normalizeInstitutionalCodeForLookup,
+  parseInstitutionalCodeType,
 } from "./institutionalAccess";
 import { getSpecialtyForHost, requestHostname } from "./seoPublic";
 import {
@@ -195,6 +197,7 @@ type SubscriptionState = {
   isLocked: boolean;
   specialtyId: SpecialtyId;
   subscriptionType?: string;
+  grantKind?: "trial" | "institutional";
 };
 
 /**
@@ -288,15 +291,18 @@ async function computeSubscriptionState(
    * (e.g. leftover Stripe ids, edge cases in personal-access detection).
    */
   if (hasInstitutionalAccess && isLocked) {
+    const grant = await storage.getLatestInstitutionalCodeGrant(userId, specialtyId);
+    const isTrialGrant = grant?.codeType === "trial";
     return {
-      status: 'institutional',
+      status: "institutional",
       daysRemaining: institutionalExpiresAt
         ? institutionalDaysRemaining(institutionalExpiresAt)
         : null,
-      trialEndsAt: null,
+      trialEndsAt: isTrialGrant ? institutionalExpiresAt : null,
       isLocked: false,
       specialtyId,
-      subscriptionType: 'Institutional Access',
+      subscriptionType: isTrialGrant ? "30-Day Trial" : "Institutional Access",
+      grantKind: isTrialGrant ? "trial" : "institutional",
     };
   }
 
@@ -1950,14 +1956,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
           (t) => !!(t.stripePaymentIntentId?.trim() || t.stripeInvoiceId?.trim())
         ).length;
         const transactionCountForHistory = 1 + stripeBackedCount;
+        const grant = await storage.getLatestInstitutionalCodeGrant(userId, specialtyId);
+        const isTrialGrant = grant?.codeType === "trial";
         return res.json({
-          plan: 'institutional',
-          status: 'institutional',
-          institutionalAffiliation: user?.institutionalAccessAffiliation?.trim() ?? '',
+          plan: isTrialGrant ? "30-day-trial" : "institutional",
+          status: "institutional",
+          institutionalAffiliation: user?.institutionalAccessAffiliation?.trim() ?? "",
           endsAt: institutionalExpiresAt ? institutionalExpiresAt.toISOString() : undefined,
-          trialEndsAt: undefined,
+          trialEndsAt: isTrialGrant && institutionalExpiresAt ? institutionalExpiresAt.toISOString() : undefined,
           daysRemaining,
           transactionCount: transactionCountForHistory,
+          grantKind: isTrialGrant ? "trial" : "institutional",
         });
       }
 
@@ -2097,8 +2106,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
             canceledAt: t.canceledAt ? new Date(t.canceledAt).toISOString() : null,
             stripeReceiptOrInvoiceUrl,
             hasStripeIds,
-            isInstitutionalGrant: false as const,
-            isTrialPeriod: false as const,
+            isInstitutionalGrant: false,
+            isTrialPeriod: false,
+            isTrialCodeGrant: false,
           };
         })
       );
@@ -2140,17 +2150,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       if (hasInstitutionalRedemption) {
-        const aff = (user.institutionalAccessAffiliation ?? "").trim() || "Institutional Access";
+        const grant = await storage.getLatestInstitutionalCodeGrant(userId, specialtyId);
+        const isTrialGrant = grant?.codeType === "trial";
+        const durationDays = accessDurationDaysForCodeType(grant?.codeType ?? "institutional");
+        const aff =
+          (user.institutionalAccessAffiliation ?? "").trim() ||
+          (isTrialGrant ? "30-Day Trial" : "Institutional Access");
         const institutionalEndIso = instExp
           ? instExp.toISOString()
           : user.updatedAt
             ? new Date(user.updatedAt).toISOString()
             : null;
-        /** Codes default to +365 days from redeem; if canceled, end date is cancellation timestamp. */
+        const redeemedStartIso = grant?.redeemedAt ? new Date(grant.redeemedAt).toISOString() : null;
         const institutionalPeriodStartIso =
-          institutionalEndIso != null
-            ? new Date(new Date(institutionalEndIso).getTime() - 365 * 24 * 60 * 60 * 1000).toISOString()
-            : null;
+          redeemedStartIso ??
+          (institutionalEndIso != null
+            ? new Date(
+                new Date(institutionalEndIso).getTime() - durationDays * 24 * 60 * 60 * 1000,
+              ).toISOString()
+            : null);
         const institutionalCanceled =
           !institutionalActive &&
           (!!institutionalEndIso ? new Date(institutionalEndIso).getTime() <= now.getTime() : true);
@@ -2166,8 +2184,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           canceledAt: institutionalCanceled ? institutionalEndIso : null,
           stripeReceiptOrInvoiceUrl: null,
           hasStripeIds: false,
-          isInstitutionalGrant: true as const,
-          isTrialPeriod: false as const,
+          isInstitutionalGrant: true,
+          isTrialPeriod: false,
+          isTrialCodeGrant: isTrialGrant,
         });
       }
 
@@ -2258,6 +2277,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const hasRedemption = await storage.userHasAnyInstitutionalRedemption(userId, specialtyId);
       const institutionalActive = institutionalAccessPeriodActive(hasRedemption, user, now);
       if (institutionalActive || (await userIsInstitutionalPrimaryAccess(userId, user, now, specialtyId))) {
+        const grant = await storage.getLatestInstitutionalCodeGrant(userId, specialtyId);
+        const isTrialGrant = grant?.codeType === "trial";
         const trialEndsAt = user.trialEndsAt ? new Date(user.trialEndsAt) : null;
         const newStatus = trialEndsAt && trialEndsAt > now ? "trial" : "expired";
         await storage.updateSpecialtyEntitlement(userId, specialtyId, {
@@ -2267,8 +2288,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           subscriptionStatus: newStatus,
         });
         return res.json({
-          message:
-            "Institutional access removed. Subscribe for personal access, or redeem a different institution code if your program provides one.",
+          message: isTrialGrant
+            ? "Trial access ended. You can still start a 7-day free trial when you subscribe for the first time."
+            : "Institutional access removed. Subscribe for personal access, or redeem a different institution code if your program provides one.",
           removedInstitutional: true,
         });
       }
@@ -2292,6 +2314,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         user.institutionalAccessAffiliation?.trim() || user.institutionalAccessExpiresAt
       );
       if (hasRedemption || hasInstitutionalFields) {
+        const grant = await storage.getLatestInstitutionalCodeGrant(userId, specialtyId);
+        const isTrialGrant = grant?.codeType === "trial";
         const trialEndsAt = user.trialEndsAt ? new Date(user.trialEndsAt) : null;
         const newStatus = trialEndsAt && trialEndsAt > now ? "trial" : "expired";
         await storage.updateSpecialtyEntitlement(userId, specialtyId, {
@@ -2300,8 +2324,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           subscriptionStatus: newStatus,
         });
         return res.json({
-          message:
-            "Institutional access removed. Subscribe for personal access, or redeem a different institution code if your program provides one.",
+          message: isTrialGrant
+            ? "Trial access ended. You can still start a 7-day free trial when you subscribe for the first time."
+            : "Institutional access removed. Subscribe for personal access, or redeem a different institution code if your program provides one.",
           removedInstitutional: true,
         });
       }
@@ -2333,17 +2358,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       if (resolved.type === "inactive") {
         return res.status(400).json({
+          message: "This code has been deactivated and can no longer be redeemed.",
+        });
+      }
+      if (resolved.type === "redeem_expired") {
+        return res.status(400).json({
           message:
-            "This institution code is no longer active. If you already redeemed it, your access is unchanged. Ask your program for a new code or subscribe for personal access.",
+            "This code is past its 90-day redemption window and can no longer be redeemed. If you already redeemed it, your access is unchanged.",
         });
       }
       if (await storage.hasUserRedeemedInstitutionalCode(userId, resolved.codeId)) {
         return res.status(400).json({
           message:
-            "You have already redeemed this code on your account. Use a different code or subscribe for personal access.",
+            resolved.codeType === "trial"
+              ? "You have already redeemed this trial code on your account. Trial codes can only be used once per account."
+              : "You have already redeemed this code on your account. Use a different code or subscribe for personal access.",
         });
       }
-      const expiresAt = institutionalAccessExpiresAtForRedemption(lookupCode);
+      if (resolved.codeType === "trial" && (await storage.hasUserRedeemedAnyTrialCode(userId))) {
+        return res.status(400).json({
+          message:
+            "You have already redeemed a trial code on this account. Trial codes can only be used once per account. You can still start a 7-day free trial when you subscribe for the first time.",
+        });
+      }
+      const expiresAt = institutionalAccessExpiresAtForRedemption(lookupCode, resolved.codeType);
       /** A code unlocks exactly one q-bank, so redeeming also makes that bank the active one. */
       await storage.updateSpecialtyEntitlement(userId, resolved.specialtyId, {
         institutionalAccessAffiliation: resolved.institutionName,
@@ -2351,7 +2389,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
       await storage.recordInstitutionalCodeRedemption(userId, resolved.codeId, resolved.specialtyId);
       await storage.setActiveSpecialty(userId, resolved.specialtyId);
-      res.json({ message: "Access Granted!", specialtyId: resolved.specialtyId });
+      res.json({
+        message: resolved.codeType === "trial" ? "30-day trial started." : "Access Granted!",
+        specialtyId: resolved.specialtyId,
+        grantKind: resolved.codeType,
+      });
     } catch (error: any) {
       console.error("Error redeeming institutional code:", error);
       const message = process.env.NODE_ENV !== "production" && error?.message
@@ -2393,16 +2435,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (codeSpecialtyId != null && !isSpecialtyId(codeSpecialtyId)) {
         return res.status(400).json({ message: "specialtyId must be one of: prs, ortho." });
       }
+      const codeType = parseInstitutionalCodeType(req.body?.codeType);
       /** A code unlocks exactly one q-bank; omitting specialtyId keeps the historical PRS behavior. */
-      const { id } = await storage.createInstitutionalCodeAdmin(
+      const { id, redeemExpiresAt } = await storage.createInstitutionalCodeAdmin(
         plaintext,
         institutionName,
-        isSpecialtyId(codeSpecialtyId) ? codeSpecialtyId : DEFAULT_SPECIALTY_ID
+        isSpecialtyId(codeSpecialtyId) ? codeSpecialtyId : DEFAULT_SPECIALTY_ID,
+        codeType,
       );
       res.status(201).json({
         id,
+        codeType,
+        redeemExpiresAt: redeemExpiresAt.toISOString(),
         message:
-          "Code created and active. The plaintext code is not stored — copy it now for the institution. Anyone with the code can redeem while it stays active.",
+          codeType === "trial"
+            ? "Trial code created. It can be redeemed for 90 days from now. Each redemption grants 30 days of access (once per account) and does not use the 7-day Stripe intro trial. The plaintext code is not stored — copy it now."
+            : "Code created and active. It can be redeemed for 90 days from now. The plaintext code is not stored — copy it now for the institution.",
       });
     } catch (error: unknown) {
       const err = error as { code?: string; message?: string };
@@ -2434,8 +2482,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       res.json({
         message: active
-          ? "Code is active. New users can redeem it."
-          : "Code deactivated. New users cannot redeem it; existing subscribers keep access until it expires or they remove it.",
+          ? "Code is marked active. It can be redeemed only while it is active and within 90 days of creation."
+          : "Code deactivated. It can no longer be redeemed.",
       });
     } catch (error) {
       console.error("Error updating institutional code:", error);

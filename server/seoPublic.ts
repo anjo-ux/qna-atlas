@@ -1,6 +1,6 @@
 import type { Express, Request, Response, NextFunction } from "express";
 import type { PublicPageSeo } from "../shared/publicPageSeo";
-import { PUBLIC_PAGE_SEO_BY_SPECIALTY } from "../shared/publicPageSeo";
+import { OG_IMAGE, PUBLIC_PAGE_SEO_BY_SPECIALTY } from "../shared/publicPageSeo";
 import { getMarketingNavLinks } from "../shared/seoCrawlerNav";
 import { getStructuredData } from "../shared/seoStructuredData";
 import {
@@ -204,7 +204,7 @@ function injectMarketingHeadTags(
   const ogTitle = meta.ogTitle ?? meta.title;
   const ogDescription = meta.ogDescription ?? meta.description;
   const normOrigin = normalizePublicOrigin(origin);
-  const ogImage = `${normOrigin}/atlas-logo.png`;
+  const ogImage = `${normOrigin}${OG_IMAGE.pathname}`;
 
   let out = setMetaName(html, "keywords", meta.keywords);
   out = setMetaProperty(out, "og:title", ogTitle);
@@ -212,6 +212,10 @@ function injectMarketingHeadTags(
   out = setMetaProperty(out, "og:url", canonicalUrl);
   out = setMetaProperty(out, "og:type", "website");
   out = setMetaProperty(out, "og:image", ogImage);
+  out = setMetaProperty(out, "og:image:width", String(OG_IMAGE.width));
+  out = setMetaProperty(out, "og:image:height", String(OG_IMAGE.height));
+  out = setMetaProperty(out, "og:image:type", OG_IMAGE.type);
+  out = setMetaProperty(out, "og:image:alt", OG_IMAGE.alt);
   out = setMetaProperty(out, "og:site_name", getSpecialty(specialtyId).productName);
   out = setMetaProperty(out, "og:locale", "en_US");
 
@@ -219,6 +223,7 @@ function injectMarketingHeadTags(
   out = setMetaName(out, "twitter:title", ogTitle);
   out = setMetaName(out, "twitter:description", ogDescription);
   out = setMetaName(out, "twitter:image", ogImage);
+  out = setMetaName(out, "twitter:image:alt", OG_IMAGE.alt);
 
   const structured = getStructuredData(pathname, normOrigin, specialtyId);
   if (structured) {
