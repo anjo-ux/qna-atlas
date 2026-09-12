@@ -1,6 +1,7 @@
 import Stripe from "stripe";
 import { DEFAULT_SPECIALTY_ID, getSpecialty, type SpecialtyId } from "@shared/specialties";
 import { storage } from "./storage";
+import { notifyPlanPurchaseSlack, scheduleSlackNotify } from "./notifySupport";
 
 const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;
 const STRIPE_LIVE_SECRET_KEY = process.env.STRIPE_LIVE_SECRET_KEY;
@@ -259,6 +260,11 @@ export async function handleStripeWebhook(
     const invoiceIdFromSession =
       typeof invRaw === "string" ? invRaw : (invRaw as Stripe.Invoice | null | undefined)?.id ?? null;
 
+    const [buyer, previousEntitlement] = await Promise.all([
+      storage.getUser(userId),
+      storage.getSpecialtyEntitlement(userId, specialtyId),
+    ]);
+
     const subRef = session.subscription;
     const subId =
       typeof subRef === "string"
@@ -312,6 +318,22 @@ export async function handleStripeWebhook(
       specialtyId,
       sessionId: session.id,
     });
+
+    scheduleSlackNotify(() =>
+      notifyPlanPurchaseSlack({
+        email: buyer?.email,
+        firstName: buyer?.firstName,
+        lastName: buyer?.lastName,
+        specialtyId,
+        planName: plan.name,
+        previousPlanName: previousEntitlement.subscriptionPlan,
+        previousStatus: previousEntitlement.subscriptionStatus,
+        amountCents: transactionAmount,
+        durationMonths: plan.durationMonths,
+        source: "Stripe checkout",
+        idempotencyKey: paymentIntentId || invoiceIdFromSession || session.id,
+      })
+    );
   }
 
   /**
@@ -473,6 +495,11 @@ export async function fulfillFromCheckoutSession(sessionId: string, userId: stri
     const invoiceIdFromSession =
       typeof invRaw === "string" ? invRaw : invRaw && typeof invRaw === "object" && "id" in invRaw ? (invRaw as Stripe.Invoice).id : null;
 
+    const [buyer, previousEntitlement] = await Promise.all([
+      storage.getUser(userId),
+      storage.getSpecialtyEntitlement(userId, specialtyId),
+    ]);
+
     await storage.createSubscriptionTransaction({
       userId,
       specialtyId,
@@ -494,6 +521,25 @@ export async function fulfillFromCheckoutSession(sessionId: string, userId: stri
       subscriptionTrialUsed: true,
       ...(subId ? { stripeSubscriptionId: subId } : {}),
     });
+    const paymentIntentId =
+      typeof session.payment_intent === "string"
+        ? session.payment_intent
+        : session.payment_intent?.id ?? null;
+    scheduleSlackNotify(() =>
+      notifyPlanPurchaseSlack({
+        email: buyer?.email,
+        firstName: buyer?.firstName,
+        lastName: buyer?.lastName,
+        specialtyId,
+        planName: plan.name,
+        previousPlanName: previousEntitlement.subscriptionPlan,
+        previousStatus: previousEntitlement.subscriptionStatus,
+        amountCents: transactionAmount,
+        durationMonths: plan.durationMonths,
+        source: "Stripe checkout",
+        idempotencyKey: paymentIntentId || invoiceIdFromSession || sessionId,
+      })
+    );
     return { ok: true };
   } catch (err: any) {
     const msg = err?.message ?? String(err);

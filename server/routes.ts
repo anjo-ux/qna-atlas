@@ -34,8 +34,10 @@ import {
 import { getSpecialtyForHost, requestHostname } from "./seoPublic";
 import {
   databaseLabelForSpecialty,
+  notifyPlanPurchaseSlack,
   notifyQuestionReportSlack,
   notifySupportFormSlack,
+  scheduleSlackNotify,
   sendSupportContactEmail,
   slackFieldsFromQuestion,
 } from "./notifySupport";
@@ -856,6 +858,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       .then(({ runFeedbackLearningJob }) => runFeedbackLearningJob({ force: true }))
       .then((r) => console.log("[feedbackLearningJob] http trigger", r))
       .catch((e) => console.error("[feedbackLearningJob] http trigger error:", e));
+  });
+
+  app.post("/api/internal/too-easy-agent", async (req: any, res) => {
+    if (!requireFeedbackAgentSecret(req)) {
+      return res.status(404).json({ message: "Not found." });
+    }
+    res.status(202).json({ message: "Too-easy agent started." });
+    import("./jobs/tooEasyQuestionsJob")
+      .then(({ runTooEasyQuestionsJob }) => runTooEasyQuestionsJob({ force: true }))
+      .then((r) => console.log("[tooEasyQuestionsJob] http trigger", r))
+      .catch((e) => console.error("[tooEasyQuestionsJob] http trigger error:", e));
   });
 
   // Auth routes
@@ -2216,6 +2229,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Plan not found." });
       }
       const specialtyId = getSpecialty(plan.specialtyId).id;
+      const previousEntitlement = await storage.getSpecialtyEntitlement(userId, specialtyId);
 
       // Create transaction
       const startDate = new Date();
@@ -2241,6 +2255,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         subscriptionCanceledAt: null,
         subscriptionTrialUsed: true,
       });
+
+      scheduleSlackNotify(() =>
+        notifyPlanPurchaseSlack({
+          email: user?.email,
+          firstName: user?.firstName,
+          lastName: user?.lastName,
+          specialtyId,
+          planName: plan.name,
+          previousPlanName: previousEntitlement.subscriptionPlan,
+          previousStatus: previousEntitlement.subscriptionStatus,
+          amountCents: plan.priceUSD,
+          durationMonths: plan.durationMonths,
+          source: "In-app plan change",
+          idempotencyKey: `change:${userId}:${specialtyId}:${plan.id}:${startDate.toISOString()}`,
+        })
+      );
 
       res.json({ message: "Subscription updated successfully." });
     } catch (error) {

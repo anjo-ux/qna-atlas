@@ -77,7 +77,9 @@ import { db, pool } from "./db";
 import { eq, and, or, asc, desc, lte, gte, sql, count, inArray, like, notLike } from "drizzle-orm";
 import {
   IOWA_TRIAL_CODE,
+  NUMC_TRIAL_CODE,
   SOCIALMEDIA_INSTITUTIONAL_CODE,
+  TEMPLE_TRIAL_CODE,
   TRIAL_CODE_DURATION_DAYS,
   isCodeRedeemWindowOpen,
   normalizeInstitutionalCodeForLookup,
@@ -423,6 +425,23 @@ export interface IStorage {
   getQuestionReportsSince(since: Date): Promise<QuestionReport[]>;
   getMissRatesSince(since: Date): Promise<
     { questionId: string; subsectionId: string; answered: number; incorrect: number }[]
+  >;
+  /**
+   * Live questions with correct-rate ≥ `minCorrectRate` in the window,
+   * at least `minAnswers` responses. Includes unique user count.
+   */
+  getHighCorrectRateQuestionsSince(
+    since: Date,
+    minAnswers: number,
+    minCorrectRate?: number
+  ): Promise<
+    {
+      questionId: string;
+      subsectionId: string;
+      answered: number;
+      uniqueUsers: number;
+      incorrect: number;
+    }[]
   >;
   getLatestRevisionTimes(questionIds: string[]): Promise<Map<string, Date>>;
   createQuestionRevision(row: InsertQuestionRevision): Promise<QuestionRevision>;
@@ -1348,6 +1367,55 @@ export class DatabaseStorage implements IStorage {
       questionId: r.questionId,
       subsectionId: r.subsectionId,
       answered: Number(r.answered),
+      incorrect: Number(r.incorrect ?? 0),
+    }));
+  }
+
+  async getHighCorrectRateQuestionsSince(
+    since: Date,
+    minAnswers: number,
+    minCorrectRate = 0.9
+  ): Promise<
+    {
+      questionId: string;
+      subsectionId: string;
+      answered: number;
+      uniqueUsers: number;
+      incorrect: number;
+    }[]
+  > {
+    await this.ensureQuestionsFlaggedColumn();
+    const min = Math.max(1, Math.floor(minAnswers));
+    const rate = Math.min(1, Math.max(0, minCorrectRate));
+    const rows = await db
+      .select({
+        questionId: questionResponses.questionId,
+        subsectionId: questionResponses.subsectionId,
+        answered: count(),
+        uniqueUsers: sql<number>`count(distinct ${questionResponses.userId})::int`,
+        incorrect: sql<number>`sum(case when ${questionResponses.isCorrect} then 0 else 1 end)::int`,
+      })
+      .from(questionResponses)
+      .innerJoin(questions, eq(questions.id, questionResponses.questionId))
+      .where(
+        and(
+          gte(questionResponses.answeredAt, since),
+          eq(questions.visible, true),
+          eq(questions.flagged, false)
+        )
+      )
+      .groupBy(questionResponses.questionId, questionResponses.subsectionId)
+      .having(
+        and(
+          sql`count(*) >= ${min}`,
+          sql`(count(*) - sum(case when ${questionResponses.isCorrect} then 0 else 1 end))::float / nullif(count(*), 0) >= ${rate}`
+        )
+      );
+    return rows.map((r) => ({
+      questionId: r.questionId,
+      subsectionId: r.subsectionId,
+      answered: Number(r.answered),
+      uniqueUsers: Number(r.uniqueUsers ?? 0),
       incorrect: Number(r.incorrect ?? 0),
     }));
   }
@@ -2613,6 +2681,16 @@ export class DatabaseStorage implements IStorage {
       "University of Iowa",
       { codeType: "trial" },
     );
+    await this.ensureBuiltinInstitutionalCode(
+      TEMPLE_TRIAL_CODE,
+      "Temple University",
+      { codeType: "trial" },
+    );
+    await this.ensureBuiltinInstitutionalCode(
+      NUMC_TRIAL_CODE,
+      "Nassau University Medical Center",
+      { codeType: "trial" },
+    );
   }
 
   /** Idempotent: inserts a built-in code when no row matches the plaintext; updates codeType when needed. */
@@ -2639,8 +2717,8 @@ export class DatabaseStorage implements IStorage {
         if (institutionName && row.institutionName !== institutionName) {
           updates.institutionName = institutionName;
         }
-        /** New built-in trial codes get a 90-day redemption window from creation. */
-        if (!row.redeemExpiresAt && (options?.codeType === "trial" || plaintext === IOWA_TRIAL_CODE)) {
+        /** Built-in trial codes get a 90-day redemption window from creation. */
+        if (!row.redeemExpiresAt && options?.codeType === "trial") {
           updates.redeemExpiresAt = redeemExpiresAtFromCreatedAt(row.createdAt ?? now, now);
         }
         if (Object.keys(updates).length > 0) {
@@ -2659,7 +2737,7 @@ export class DatabaseStorage implements IStorage {
       active: true,
       createdAt,
       redeemExpiresAt:
-        options?.codeType === "trial" || plaintext === IOWA_TRIAL_CODE
+        options?.codeType === "trial"
           ? redeemExpiresAtFromCreatedAt(createdAt, now)
           : undefined,
     });

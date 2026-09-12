@@ -23,7 +23,7 @@ export type SubscriptionPageProps = {
 /**
  * Full-page subscription/upgrade page (like ChatGPT or Claude).
  * Shown when the user is logged in with no subscription or trial active.
- * Same 4 options (Monthly, 6-Month, 1-Year, Institutional), slider, and Stripe API.
+ * Same 4 options (Monthly, 6-Month, 1-Year, Institutional) and Stripe API.
  */
 export default function SubscriptionPage({ onSubscriptionUnlocked }: SubscriptionPageProps) {
   const [, setLocation] = useLocation();

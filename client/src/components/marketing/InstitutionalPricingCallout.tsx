@@ -19,7 +19,9 @@ export function InstitutionalPricingCallout({ className }: InstitutionalPricingC
     <section
       aria-labelledby="institutional-pricing-heading"
       className={cn(
-        "relative overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-sm",
+        "relative overflow-hidden rounded-lg border border-border bg-card p-6 shadow-sm",
+        "transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-md",
+        "motion-reduce:transition-none motion-reduce:hover:translate-y-0",
         className,
       )}
     >

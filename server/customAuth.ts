@@ -21,6 +21,7 @@ import {
   sessionCookieDomainForHost,
 } from './seoPublic';
 import { sanitizeUser } from './authUtils';
+import { notifyNewUserSlack, scheduleSlackNotify } from './notifySupport';
 import { pool, normalizeDatabaseUrl } from './db';
 import {
   EMAIL_LOGO_PATH,
@@ -610,6 +611,18 @@ export async function setupAuth(app: Express) {
         trialEndsAt: null,
       });
 
+      scheduleSlackNotify(() =>
+        notifyNewUserSlack({
+          email: normalizedEmail,
+          firstName,
+          lastName,
+          specialtyId: signupSpecialtyId,
+          trainingLevel,
+          institution: institutionalAffiliation || "",
+          source: "Email signup",
+        })
+      );
+
       const continueUrl = await mintSameOriginLoginContinue(req, newUser.id);
       return res.status(201).json({ success: true, user: sanitizeUser(newUser), continueUrl });
     } catch (error: any) {
@@ -797,6 +810,16 @@ export async function setupAuth(app: Express) {
           subscriptionStatus: 'expired',
           trialEndsAt: null,
         });
+
+        scheduleSlackNotify(() =>
+          notifyNewUserSlack({
+            email,
+            firstName,
+            lastName,
+            specialtyId: signupSpecialtyId,
+            source: "Google signup",
+          })
+        );
       }
 
       try {

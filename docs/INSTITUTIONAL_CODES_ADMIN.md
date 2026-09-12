@@ -6,7 +6,7 @@ All routes require header **`X-Admin-Code`** (same value as `ADMIN_CODE` in env;
 
 - **While `active: true` and within 90 days of creation**: any number of user accounts can redeem the same plaintext code (each account only once per code).
 - **`PATCH ... active: false`**: the code **cannot be redeemed**. Deactivation does not shorten access already granted to people who redeemed earlier.
-- **90-day redemption window**: new codes (including `IOWA-TRIAL`) cannot be redeemed after 90 days from creation. If someone redeems on day 89, they still get the full access period (30 days for trial codes, 365 days for institutional). Only the ability to redeem expires at 90 days.
+- **90-day redemption window**: new codes (including `IOWA-TRIAL`, `TEMPLE-TRIAL`, and `NUMC-TRIAL`) cannot be redeemed after 90 days from creation. If someone redeems on day 89, they still get the full access period (30 days for trial codes, 365 days for institutional). Only the ability to redeem expires at 90 days.
 - **Plaintext is never stored** — only a bcrypt hash. When you **create** a code, copy the plaintext immediately to send to the institution.
 
 ### Code types
@@ -14,7 +14,11 @@ All routes require header **`X-Admin-Code`** (same value as `ADMIN_CODE` in env;
 - **`institutional`** (default): 365 days of access from redemption.
 - **`trial`**: 30 days of access from redemption. Each account may redeem a trial code **once** (any trial code). Redeeming a trial code does **not** consume the 7-day Stripe intro trial when that account later subscribes for the first time.
 
-Built-in trial code: **`IOWA-TRIAL`** (University of Iowa). Lookup is case-insensitive. Its 90-day redemption window starts when the code row is created.
+Built-in trial codes (case-insensitive lookup; 90-day redemption window starts when the row is created):
+
+- **`IOWA-TRIAL`** (University of Iowa)
+- **`TEMPLE-TRIAL`** (Temple University)
+- **`NUMC-TRIAL`** (Nassau University Medical Center)
 
 ## API
 
@@ -53,6 +57,14 @@ curl -s -X POST -H "X-Admin-Code: $ADMIN" -H "Content-Type: application/json" \
 
 curl -s -X POST -H "X-Admin-Code: $ADMIN" -H "Content-Type: application/json" \
   -d '{"plaintextCode":"IOWA-TRIAL","institutionName":"University of Iowa","codeType":"trial"}' \
+  https://your-app.com/api/admin/institutional-codes
+
+curl -s -X POST -H "X-Admin-Code: $ADMIN" -H "Content-Type: application/json" \
+  -d '{"plaintextCode":"TEMPLE-TRIAL","institutionName":"Temple University","codeType":"trial"}' \
+  https://your-app.com/api/admin/institutional-codes
+
+curl -s -X POST -H "X-Admin-Code: $ADMIN" -H "Content-Type: application/json" \
+  -d '{"plaintextCode":"NUMC-TRIAL","institutionName":"Nassau University Medical Center","codeType":"trial"}' \
   https://your-app.com/api/admin/institutional-codes
 
 curl -s -X PATCH -H "X-Admin-Code: $ADMIN" -H "Content-Type: application/json" \

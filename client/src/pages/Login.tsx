@@ -479,7 +479,7 @@ export default function Login() {
                     />
                     <button
                       type="button"
-                      className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-700 dark:text-muted-foreground"
+                      className="absolute right-1 top-1/2 z-10 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-md text-gray-500 hover:text-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-0 dark:text-muted-foreground"
                       onClick={() => setIsPasswordVisible((v) => !v)}
                       aria-label={isPasswordVisible ? 'Hide password' : 'Show password'}
                     >

@@ -275,7 +275,7 @@ export function MobileSubscriptionWidget() {
                 {isTrialOrExpired ? 'Upgrade Plan' : 'Change Plan'}
               </Button>
             </DialogTrigger>
-            <DialogContent hideCloseButton className="max-w-lg w-[calc(100vw-2rem)] max-h-[90vh] p-0 gap-0 border-0 bg-transparent shadow-none overflow-y-auto overflow-x-hidden [&>button]:!hidden">
+            <DialogContent hideCloseButton className="max-w-5xl w-[calc(100vw-2rem)] max-h-[90vh] p-0 gap-0 border-0 bg-transparent shadow-none overflow-y-auto overflow-x-hidden [&>button]:!hidden">
               <SubscriptionPlans asDialog={false} open={isChangingPlan} onOpenChange={setIsChangingPlan} />
             </DialogContent>
           </Dialog>

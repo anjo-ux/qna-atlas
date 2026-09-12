@@ -4,9 +4,14 @@ import {
   extractMcqChoices,
   extractQuestionStem,
 } from "@shared/questionFormat";
-import type { SpecialtyId } from "@shared/specialties";
+import { getSpecialty, type SpecialtyId } from "@shared/specialties";
+import { classifyPlanEvent } from "./notifyGrowthLogic";
 
-export type SlackNotifyKind = "question-report" | "support-form";
+export type SlackNotifyKind =
+  | "question-report"
+  | "support-form"
+  | "user-signup"
+  | "plan-purchase";
 
 export function databaseLabelForSpecialty(specialtyId?: SpecialtyId | null): string {
   if (specialtyId === "ortho") return "Ortho database";
@@ -51,10 +56,14 @@ function isSlackIncomingWebhook(url: string): boolean {
 
 function webhookUrlFor(kind: SlackNotifyKind): string | undefined {
   const fallback = process.env.SLACK_WEBHOOK_URL?.trim();
-  const raw =
-    kind === "question-report"
-      ? process.env.SLACK_QUESTION_REPORTS_WEBHOOK_URL?.trim() || fallback
-      : process.env.SLACK_SUPPORT_WEBHOOK_URL?.trim() || fallback;
+  const growthFallback = process.env.SLACK_GROWTH_WEBHOOK_URL?.trim() || fallback;
+  const specific = {
+    "question-report": process.env.SLACK_QUESTION_REPORTS_WEBHOOK_URL?.trim(),
+    "support-form": process.env.SLACK_SUPPORT_WEBHOOK_URL?.trim(),
+    "user-signup": process.env.SLACK_SIGNUPS_WEBHOOK_URL?.trim() || growthFallback,
+    "plan-purchase": process.env.SLACK_PURCHASES_WEBHOOK_URL?.trim() || growthFallback,
+  }[kind];
+  const raw = specific || fallback;
   if (!raw) return undefined;
   if (!isSlackIncomingWebhook(raw)) {
     console.warn(`[Slack] Ignoring invalid webhook URL for ${kind} (expected https://hooks.slack.com/...)`);
@@ -196,4 +205,110 @@ export async function notifySupportFormSlack(params: {
     slackEscape(params.message.slice(0, 3000)),
   ];
   return postSlackNotification("support-form", lines.join("\n"));
+}
+
+const recentGrowthNotifyKeys = new Map<string, number>();
+const GROWTH_NOTIFY_TTL_MS = 6 * 60 * 60 * 1000;
+
+function claimGrowthNotifyKey(key: string | undefined): boolean {
+  const normalized = key?.trim();
+  if (!normalized) return true;
+  const now = Date.now();
+  for (const [existing, at] of recentGrowthNotifyKeys) {
+    if (now - at > GROWTH_NOTIFY_TTL_MS) recentGrowthNotifyKeys.delete(existing);
+  }
+  if (recentGrowthNotifyKeys.has(normalized)) return false;
+  recentGrowthNotifyKeys.set(normalized, now);
+  return true;
+}
+
+function displayName(firstName?: string | null, lastName?: string | null): string {
+  return [firstName, lastName].map((p) => p?.trim()).filter(Boolean).join(" ") || "Unknown name";
+}
+
+function formatUsdCents(cents: number): string {
+  const n = Number.isFinite(cents) ? cents : 0;
+  return `$${(n / 100).toFixed(2)}`;
+}
+
+/** Fire-and-forget Slack posts so auth/checkout never wait on Slack. */
+export function scheduleSlackNotify(task: () => Promise<unknown>): void {
+  void task().catch((error) => {
+    console.error("[Slack] Background notify failed:", error);
+  });
+}
+
+export async function notifyNewUserSlack(params: {
+  email: string;
+  firstName?: string | null;
+  lastName?: string | null;
+  specialtyId?: SpecialtyId | null;
+  trainingLevel?: string | null;
+  institution?: string | null;
+  source?: string | null;
+}): Promise<boolean> {
+  const specialty = params.specialtyId ? getSpecialty(params.specialtyId) : null;
+  const lines = [
+    `*New user registered* — ${slackEscape(displayName(params.firstName, params.lastName))}`,
+    `Email: ${slackEscape(params.email)}`,
+    `Specialty: ${slackEscape(specialty?.specialtyName || "Unknown")}`,
+  ];
+  if (params.trainingLevel?.trim()) {
+    lines.push(`Training level: ${slackEscape(params.trainingLevel.trim())}`);
+  }
+  if (params.institution?.trim()) {
+    lines.push(`Institution: ${slackEscape(params.institution.trim())}`);
+  }
+  if (params.source?.trim()) {
+    lines.push(`Source: ${slackEscape(params.source.trim())}`);
+  }
+  return postSlackNotification("user-signup", lines.join("\n"));
+}
+
+export async function notifyPlanPurchaseSlack(params: {
+  email?: string | null;
+  firstName?: string | null;
+  lastName?: string | null;
+  specialtyId: SpecialtyId;
+  planName: string;
+  previousPlanName?: string | null;
+  previousStatus?: string | null;
+  amountCents: number;
+  durationMonths?: number | null;
+  source?: string | null;
+  idempotencyKey?: string | null;
+}): Promise<boolean> {
+  const key =
+    params.idempotencyKey?.trim() ||
+    `${params.email || "unknown"}:${params.specialtyId}:${params.planName}:${params.amountCents}`;
+  if (!claimGrowthNotifyKey(key)) return false;
+
+  const kind = classifyPlanEvent(
+    params.previousPlanName,
+    params.previousStatus,
+    params.planName
+  );
+  const specialty = getSpecialty(params.specialtyId);
+  const who = `${displayName(params.firstName, params.lastName)}${
+    params.email?.trim() ? ` <${params.email.trim()}>` : ""
+  }`;
+  const headline =
+    kind === "upgraded"
+      ? `*Plan upgraded* — ${slackEscape(who)}`
+      : `*Plan purchased* — ${slackEscape(who)}`;
+  const lines = [
+    headline,
+    `Product: ${slackEscape(specialty.brandName)}`,
+    kind === "upgraded"
+      ? `Plan: ${slackEscape(params.previousPlanName || "unknown")} → ${slackEscape(params.planName)}`
+      : `Plan: ${slackEscape(params.planName)}`,
+    `Amount: ${formatUsdCents(params.amountCents)}`,
+  ];
+  if (params.durationMonths != null) {
+    lines.push(`Duration: ${params.durationMonths} month${params.durationMonths === 1 ? "" : "s"}`);
+  }
+  if (params.source?.trim()) {
+    lines.push(`Source: ${slackEscape(params.source.trim())}`);
+  }
+  return postSlackNotification("plan-purchase", lines.join("\n"));
 }

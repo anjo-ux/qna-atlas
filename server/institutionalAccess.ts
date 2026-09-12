@@ -5,8 +5,12 @@ export type { InstitutionalCodeType };
 /** Built-in institutional code: full platform access with no expiry (redeemed via existing UI). */
 export const SOCIALMEDIA_INSTITUTIONAL_CODE = "socialmedia";
 
-/** Built-in trial code: 30 days of access from redemption, once per account. */
+/** Built-in trial codes: 30 days of access from redemption, once per account. */
 export const IOWA_TRIAL_CODE = "IOWA-TRIAL";
+export const TEMPLE_TRIAL_CODE = "TEMPLE-TRIAL";
+export const NUMC_TRIAL_CODE = "NUMC-TRIAL";
+
+const BUILTIN_TRIAL_CODES = [IOWA_TRIAL_CODE, TEMPLE_TRIAL_CODE, NUMC_TRIAL_CODE] as const;
 
 export const INSTITUTIONAL_CODE_DURATION_DAYS = 365;
 export const TRIAL_CODE_DURATION_DAYS = 30;
@@ -32,14 +36,15 @@ export function isUnlimitedInstitutionalCode(plainCode: string): boolean {
   return plainCode.trim().toLowerCase() === SOCIALMEDIA_INSTITUTIONAL_CODE;
 }
 
-export function isIowaTrialCode(plainCode: string): boolean {
-  return plainCode.trim().toUpperCase() === IOWA_TRIAL_CODE;
+export function isBuiltinTrialCode(plainCode: string): boolean {
+  const normalized = plainCode.trim().toUpperCase();
+  return BUILTIN_TRIAL_CODES.includes(normalized as (typeof BUILTIN_TRIAL_CODES)[number]);
 }
 
 export function normalizeInstitutionalCodeForLookup(plainCode: string): string {
   const trimmed = plainCode.trim();
   if (isUnlimitedInstitutionalCode(trimmed)) return SOCIALMEDIA_INSTITUTIONAL_CODE;
-  if (isIowaTrialCode(trimmed)) return IOWA_TRIAL_CODE;
+  if (isBuiltinTrialCode(trimmed)) return trimmed.toUpperCase();
   return trimmed;
 }
 

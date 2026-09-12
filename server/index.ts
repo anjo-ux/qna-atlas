@@ -1,7 +1,31 @@
+import { existsSync, readFileSync } from "fs";
+import { resolve } from "path";
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { canonicalHostRedirect } from "./seoPublic";
+
+/** Load gitignored `.env` without overwriting Replit Secrets / existing process env. */
+function loadDotEnv() {
+  const envPath = resolve(process.cwd(), ".env");
+  if (!existsSync(envPath)) return;
+  for (const rawLine of readFileSync(envPath, "utf8").split("\n")) {
+    const line = rawLine.trim();
+    if (!line || line.startsWith("#")) continue;
+    const eq = line.indexOf("=");
+    if (eq <= 0) continue;
+    const key = line.slice(0, eq).trim();
+    let value = line.slice(eq + 1).trim();
+    if (
+      (value.startsWith('"') && value.endsWith('"')) ||
+      (value.startsWith("'") && value.endsWith("'"))
+    ) {
+      value = value.slice(1, -1);
+    }
+    if (process.env[key] === undefined) process.env[key] = value;
+  }
+}
+loadDotEnv();
 
 const app = express();
 
@@ -111,11 +135,14 @@ app.use((req, res, next) => {
     const slackWebhook =
       process.env.SLACK_WEBHOOK_URL ||
       process.env.SLACK_QUESTION_REPORTS_WEBHOOK_URL ||
-      process.env.SLACK_SUPPORT_WEBHOOK_URL;
+      process.env.SLACK_SUPPORT_WEBHOOK_URL ||
+      process.env.SLACK_GROWTH_WEBHOOK_URL ||
+      process.env.SLACK_SIGNUPS_WEBHOOK_URL ||
+      process.env.SLACK_PURCHASES_WEBHOOK_URL;
     log(`Slack incoming webhooks: ${slackWebhook ? "set" : "NOT SET"}`);
     if (!slackWebhook) {
       log(
-        "Question reports and contact form will not post to Slack. Add SLACK_WEBHOOK_URL (or SLACK_QUESTION_REPORTS_WEBHOOK_URL / SLACK_SUPPORT_WEBHOOK_URL) and restart."
+        "Question reports, contact form, signups, and purchases will not post to Slack. Add SLACK_WEBHOOK_URL (or SLACK_GROWTH_WEBHOOK_URL / channel-specific URLs) and restart."
       );
     }
     const stripeKey = process.env.STRIPE_SECRET_KEY;
@@ -183,6 +210,34 @@ app.use((req, res, next) => {
         }
         setInterval(tickRun, tick);
         log(`[feedbackLearningJob] tick every ${tick}ms (weekly watermark)`);
+      });
+    }
+
+    const tooEasyEnabled = process.env.TOO_EASY_AGENT_ENABLED === "true";
+    if (tooEasyEnabled) {
+      import("./jobs/tooEasyQuestionsJob").then(({ runTooEasyQuestionsJob, tooEasyAgentTickMs }) => {
+        const tick = tooEasyAgentTickMs();
+        const tickRun = () => {
+          runTooEasyQuestionsJob()
+            .then((r) => {
+              if (r.skippedPeriod) return;
+              log(
+                `[tooEasyQuestionsJob] findings=${r.findings} minAnswers=${r.minAnswers} digest=${r.digestPosted}`
+              );
+            })
+            .catch((e) => log(`[tooEasyQuestionsJob] error: ${e}`));
+        };
+        if (process.env.TOO_EASY_AGENT_RUN_ON_START === "true") {
+          runTooEasyQuestionsJob({ force: true })
+            .then((r) =>
+              log(
+                `[tooEasyQuestionsJob] startup findings=${r.findings} digest=${r.digestPosted}`
+              )
+            )
+            .catch((e) => log(`[tooEasyQuestionsJob] startup error: ${e}`));
+        }
+        setInterval(tickRun, tick);
+        log(`[tooEasyQuestionsJob] tick every ${tick}ms (weekly watermark)`);
       });
     }
   }

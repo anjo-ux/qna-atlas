@@ -4,12 +4,18 @@ import { InstitutionalPricingCallout } from "@/components/marketing/Institutiona
 import { usePageSeo } from "@/lib/usePageSeo";
 import { PRICING_MARKETING_FAQ } from "@shared/marketingFaqs";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/hooks/useAuth";
-import { FALLBACK_PLANS, getPlanDisplay } from "@/data/subscriptionPlanDisplay";
-import { Check, Building2, GraduationCap } from "lucide-react";
+import {
+  FALLBACK_PLANS,
+  getPlanDisplay,
+  getSubscriptionIncludedFeatures,
+} from "@/data/subscriptionPlanDisplay";
+import { PricingSection, type PricingCardData } from "@/components/ui/pricing-section";
+import { CircleCheck, Building2 } from "lucide-react";
 import { Link } from "wouter";
 import { useHostSpecialty } from "@/hooks/useSpecialty";
+import { Skeleton } from "@/components/ui/skeleton";
 
 /** Checklist card — reads as included features, not a decorative sparkle. */
 function SubscriptionIncludesIcon({ className, ...props }: SVGProps<SVGSVGElement>) {
@@ -42,19 +48,75 @@ export default function PricingPage() {
 
   usePageSeo("/pricing");
 
-  const includedFeatures = [
-    `Full ${specialty.specialtyName} Question Bank`,
-    "Detailed Explanations And Reference-Friendly Study Flows",
-    "Timed Mock Exams And Custom Test Builder",
-    "Spaced Repetition And Bookmarking Across Devices",
-    ...(specialty.id === "ortho"
-      ? []
-      : ["Oral Board-Style Coach For Verbal Practice"]),
-    "Progress Tracking By Section And Sub-Topic",
-  ];
+  const includedFeatures = getSubscriptionIncludedFeatures({
+    specialtyName: specialty.specialtyName,
+    includeOralCoach: specialty.id !== "ortho",
+  });
 
   const checkoutHref = isAuthenticated ? "/subscribe" : "/signup";
   const checkoutLabel = isAuthenticated ? "Go To Checkout" : "Create Account & Subscribe";
+
+  const paidPlanCards: PricingCardData[] = FALLBACK_PLANS.map((plan) => {
+    const d = getPlanDisplay(plan);
+    const featured = Boolean(d.sale || d.bestDeal || plan.name === "1-year");
+    return {
+      id: `pricing-${plan.name}`,
+      title: d.title,
+      featured,
+      featuredLabel: d.sale ? "Best Value" : d.bestDeal ? "Best Deal" : undefined,
+      pills: d.discount ? [d.discount] : undefined,
+      price: (
+        <div className="flex flex-col items-center gap-1">
+          {d.originalPrice ? (
+            <span className="text-lg font-normal text-muted-foreground line-through">{d.originalPrice}</span>
+          ) : null}
+          <span>{d.price}</span>
+        </div>
+      ),
+      description: (
+        <div className="space-y-1">
+          <p className="text-xs font-medium tracking-wide">{d.billing}</p>
+          <p>{d.description}</p>
+        </div>
+      ),
+      features: includedFeatures,
+      cta: isLoading ? (
+        <Skeleton className="h-9 w-full" />
+      ) : (
+        <Button asChild size="sm" className="w-full" variant={featured ? "default" : "secondary"}>
+          <Link href={checkoutHref}>{checkoutLabel}</Link>
+        </Button>
+      ),
+    };
+  });
+
+  const institutionalCard: PricingCardData = {
+    id: "pricing-institutional",
+    title: "Institutional",
+    price: (
+      <span className="inline-flex items-center gap-2 text-xl">
+        <Building2 className="h-5 w-5" aria-hidden />
+        Program-Provisioned Access
+      </span>
+    ),
+    description:
+      "Residency and fellowship programs can partner with Atlas Review so trainees activate access with a code, with no shared passwords and no guesswork.",
+    features: [
+      "Directors and coordinators can contact us to learn about cohort onboarding and institutional billing.",
+    ],
+    cta: isLoading ? (
+      <Skeleton className="h-9 w-full" />
+    ) : (
+      <>
+        <Button asChild size="sm" className="w-full" variant="secondary">
+          <Link href={checkoutHref}>Enter Code After Sign-In</Link>
+        </Button>
+        <Button asChild variant="link" className="h-auto p-0 text-sm text-muted-foreground">
+          <Link href="/contact">Ask About Partnerships</Link>
+        </Button>
+      </>
+    ),
+  };
 
   return (
     <MarketingShell>
@@ -77,105 +139,11 @@ export default function PricingPage() {
             </p>
           </header>
 
-          <div className="mx-auto grid max-w-6xl gap-6 md:grid-cols-2 lg:grid-cols-4">
-            {FALLBACK_PLANS.map((plan) => {
-              const d = getPlanDisplay(plan);
-              const isSale = Boolean(d.sale);
-              return (
-                <Card
-                  key={plan.name}
-                  variant="glass"
-                  className={
-                    isSale
-                      ? "relative flex flex-col border-2 border-rose-500/70 bg-gradient-to-b from-rose-500/10 to-transparent shadow-lg ring-2 ring-rose-400/20 dark:border-rose-400/50"
-                      : "flex flex-col border-primary/15 glow-primary transition-glow"
-                  }
-                >
-                  {isSale ? (
-                    <div className="absolute -top-3 left-1/2 z-10 -translate-x-1/2 whitespace-nowrap rounded-full bg-gradient-to-r from-rose-600 to-red-600 px-3 py-1 text-[10px] font-bold tracking-wider text-white shadow-md sm:text-xs">
-                      Best Value
-                    </div>
-                  ) : null}
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-lg gradient-text sm:text-xl">{d.title}</CardTitle>
-                    <CardDescription className="text-xs font-medium tracking-wide text-muted-foreground">
-                      {d.billing}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="flex-1 space-y-2">
-                    <div className="flex flex-wrap items-baseline gap-2">
-                      {d.originalPrice ? (
-                        <span className="text-lg text-muted-foreground line-through">{d.originalPrice}</span>
-                      ) : null}
-                      <span className="text-3xl font-bold tracking-tight text-foreground">{d.price}</span>
-                    </div>
-                    {d.discount ? (
-                      <p
-                        className={
-                          d.sale
-                            ? "text-sm font-semibold text-rose-700 dark:text-rose-300"
-                            : "text-sm font-semibold text-secondary"
-                        }
-                      >
-                        {d.discount}
-                      </p>
-                    ) : null}
-                    <p className="text-sm leading-relaxed text-muted-foreground">
-                      {plan.durationMonths === 1
-                        ? "Lowest Upfront Cost. Ideal When You Want Maximum Flexibility Between Rotations Or Exams."
-                        : plan.durationMonths === 6
-                          ? "Balanced Savings For A Dedicated Six-Month Study Arc. Popular For Structured Board Prep Blocks."
-                          : "Maximum Savings For The Surgeon Who Wants Atlas As A Year-Round Companion Through Peak Prep."}
-                    </p>
-                  </CardContent>
-                  <CardFooter className="pt-0">
-                    {isLoading ? (
-                      <div className="h-10 w-full animate-pulse rounded-md bg-muted" />
-                    ) : (
-                      <Button asChild className="w-full glow-primary transition-glow" variant={isSale ? "default" : "outline"}>
-                        <Link href={checkoutHref}>{checkoutLabel}</Link>
-                      </Button>
-                    )}
-                  </CardFooter>
-                </Card>
-              );
-            })}
-
-            <Card variant="glass" className="flex flex-col border-secondary/30 bg-secondary/5">
-              <CardHeader className="pb-2">
-                <div className="mb-1 flex items-center gap-2">
-                  <Building2 className="h-5 w-5 text-primary" aria-hidden />
-                  <CardTitle className="text-lg gradient-text sm:text-xl">Institutional</CardTitle>
-                </div>
-                <CardDescription className="text-xs font-medium tracking-wide text-muted-foreground">
-                  Program-Provisioned Access
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="flex-1 space-y-3 text-sm leading-relaxed text-muted-foreground">
-                <p>
-                  Residency and fellowship programs can partner with Atlas Review so trainees activate
-                  access with a code, with no shared passwords and no guesswork.
-                </p>
-                <p className="flex items-start gap-2">
-                  <GraduationCap className="mt-0.5 h-4 w-4 shrink-0 text-secondary" aria-hidden />
-                  Directors and coordinators can contact us to learn about cohort onboarding and
-                  institutional billing.
-                </p>
-              </CardContent>
-              <CardFooter className="flex flex-col gap-2 pt-0">
-                {isLoading ? (
-                  <div className="h-10 w-full animate-pulse rounded-md bg-muted" />
-                ) : (
-                  <Button asChild variant="secondary" className="w-full">
-                    <Link href={checkoutHref}>Enter Code After Sign-In</Link>
-                  </Button>
-                )}
-                <Button asChild variant="link" className="h-auto p-0 text-sm text-muted-foreground">
-                  <Link href="/contact">Ask About Partnerships</Link>
-                </Button>
-              </CardFooter>
-            </Card>
-          </div>
+          <PricingSection
+            className="py-0 md:py-0"
+            plans={[...paidPlanCards, institutionalCard]}
+            animate
+          />
 
           <p className="mx-auto mt-6 max-w-3xl text-center text-xs text-muted-foreground">
             Displayed prices reflect our current public rate card. Your checkout screen (Stripe) is
@@ -201,7 +169,7 @@ export default function PricingPage() {
               <CardContent className="grid gap-4 p-6 sm:grid-cols-2">
                 {includedFeatures.map((line) => (
                   <div key={line} className="flex gap-3 text-sm leading-relaxed text-muted-foreground">
-                    <Check className="mt-0.5 h-5 w-5 shrink-0 text-secondary" aria-hidden />
+                    <CircleCheck className="mt-0.5 h-5 w-5 shrink-0 text-primary" aria-hidden />
                     <span>{line}</span>
                   </div>
                 ))}
